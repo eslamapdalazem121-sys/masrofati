@@ -1,6 +1,82 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مصروفاتي</title>
+  
+  <!-- استدعاء مكتبات Firebase للربط بالإنترنت -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body { font-family: sans-serif; padding: 20px; text-align: center; background: #f4f7f6; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+    input, button { width: 90%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { background: #eee; margin: 5px 0; padding: 8px; border-radius: 4px; display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>تطبيق مصروفاتي 📱</h2>
+    <input type="text" id="title" placeholder="اسم المصروف (مثال: مواصلات)">
+    <input type="number" id="amount" placeholder="المبلغ">
+    <button onclick="addExpense()">حفظ على النت ☁️</button>
+
+    <h3>قائمة المصروفات:</h3>
+    <ul id="expensesList"></ul>
+  </div>
+
+  <script>
+    // إعدادات الربط مع قاعدة البيانات السحابية
+    const firebaseConfig = {
+      apiKey: "AIzaSyDemoKeyOnlyReplaceIfYouHaveOne",
+      authDomain: "masrofati-app.firebaseapp.com",
+      projectId: "masrofati-app",
+      storageBucket: "masrofati-app.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:demo"
+    };
+
+    // تهيئة Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // جلب البيانات فوراً من النت عند فتح التطبيق
+    db.collection("expenses").onSnapshot((snapshot) => {
+      const list = document.getElementById("expensesList");
+      list.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        list.innerHTML += `<li><span>${data.title}</span> <strong>${data.amount} ج.م</strong></li>`;
+      });
+    });
+
+    // إضافة مصروف جديد للنت
+    function addExpense() {
+      const title = document.getElementById("title").value;
+      const amount = document.getElementById("amount").value;
+
+      if (title && amount) {
+        db.collection("expenses").add({
+          title: title,
+          amount: parseFloat(amount),
+          date: new Date()
+        }).then(() => {
+          document.getElementById("title").value = "";
+          document.getElementById("amount").value = "";
+        });
+      }
+    }
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
