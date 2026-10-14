@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-14.0228">
+<meta name="app-version" content="2026-10-14.0821">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4243,6 +4243,60 @@ async function updateAppNow(){
 }
 // ===== TRANSFER END =====
 
+// ===== BRIDGE START (Claude ← → النسخة المثبّتة بضغطة واحدة) =====
+const INSTALLED_APP_DEFAULT = 'https://eslamapdalazem121-sys.github.io/masrofati/';
+function getInstalledAppUrl(){
+  try{ return localStorage.getItem('budget_installed_url') || INSTALLED_APP_DEFAULT; }catch(e){ return INSTALLED_APP_DEFAULT; }
+}
+function saveInstalledAppUrl(){
+  const input = document.getElementById('installedUrlInput');
+  if(!input) return;
+  const v = input.value.trim();
+  if(v && !/^https:\/\/\S+$/i.test(v)){ showToast('الرابط لازم يبدأ بـ https://', false); input.value = getInstalledAppUrl(); return; }
+  try{ if(v) localStorage.setItem('budget_installed_url', v); else localStorage.removeItem('budget_installed_url'); }catch(e){}
+  showToast('اتحفظ رابط النسخة المثبّتة', true);
+}
+// يبعت بياناتك جوه رابط (بعد علامة #) فالنسخة المثبّتة تقراه وتسألك تستبدل
+async function sendToInstalledApp(){
+  const code = await encodeTransferCode();
+  const base = getInstalledAppUrl().split('#')[0];
+  const url = base + '#import=' + encodeURIComponent(code);
+  let w = null;
+  try{ w = window.open(url, '_blank'); }catch(e){ w = null; }
+  if(w) return;
+  // المتصفح منع فتح النافذة: ننسخ الرابط الكامل وتفتحه إنت
+  let copied = false;
+  try{ await navigator.clipboard.writeText(url); copied = true; }catch(e){}
+  const area = document.getElementById('transferOut');
+  const note = document.getElementById('transferOutNote');
+  if(area){ area.value = url; area.style.display = 'block'; }
+  if(note) note.textContent = copied
+    ? 'ما قدرتش أفتح النسخة المثبّتة من هنا، فنسخت الرابط. الصقه في شريط عنوان كروم واضغط Go.'
+    : 'ما قدرتش أفتحها من هنا. انسخ الرابط اللي فوق (ضغطة مطوّلة ← تحديد الكل ← نسخ) والصقه في شريط عنوان كروم.';
+}
+// في النسخة المثبّتة: لو الصفحة اتفتحت برابط فيه #import=... نعرض معاينة ونسأل
+async function checkImportFromLink(){
+  const m = (location.hash || '').match(/^#import=(.+)$/);
+  if(!m) return;
+  let code = m[1];
+  try{ code = decodeURIComponent(code); }catch(e){}
+  try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  const res = await decodeTransferCode(code);
+  if(!res.ok){ showToast('البيانات اللي جاية من الرابط مش سليمة: ' + res.error, false); return; }
+  const mine = countExpensesInData(data);
+  openConfirm(
+    'وصلتك بيانات من نسخة Claude',
+    'الرابط فيه ' + toArabicDigits(res.entries) + ' مصروف. هيتم استبدال بياناتك الحالية (' + toArabicDigits(mine) + ' مصروف) بيها، وهنحفظ نسخة أمان الأول. تكمل؟',
+    async ()=>{
+      await runBackup({auto:false, force:true});
+      applyImportedData(res.data);
+      showToast('اتنقلت بياناتك من Claude ✅', true);
+    },
+    'استبدال'
+  );
+}
+// ===== BRIDGE END =====
+
 // ===== CLOUD START (حساب بالإيميل + مزامنة سحابية عبر Firebase) =====
 // التطبيق بيشتغل أوفلاين دايمًا من الجهاز؛ السحابة طبقة إضافية بتتحمّل لما يكون فيه نت.
 const FIREBASE_CONFIG = {"apiKey": "AIzaSyDl0dVhveN-6H3umRNcTtQ4PJDTa53Fa_w", "authDomain": "masrofati-fcc92.firebaseapp.com", "projectId": "masrofati-fcc92", "storageBucket": "masrofati-fcc92.firebasestorage.app", "messagingSenderId": "737593709536", "appId": "1:737593709536:web:d7d3b0e20bb21351a6d185"};
@@ -4899,6 +4953,8 @@ function closeBackupPage(){
 async function renderBackupPage(){
   const overlay = document.getElementById('backupOverlay');
   if(!overlay || !overlay.classList.contains('open')){ updateBackupSummary(); return; }
+  const urlBox = document.getElementById('installedUrlInput');
+  if(urlBox && !urlBox.value) urlBox.value = getInstalledAppUrl();
   const autoToggle = document.getElementById('bkAutoToggle');
   autoToggle.checked = !!backupCfg.auto;
   document.getElementById('bkAutoOptions').style.display = backupCfg.auto ? 'block' : 'none';
@@ -5467,6 +5523,7 @@ function startApp(){
   updateBackupSummary();
   initBackupScheduler();
   if(typeof window.__afterStart === 'function'){ try{ window.__afterStart(); }catch(e){} }
+  checkImportFromLink();
 }
 
 checkLockOnStartup();
