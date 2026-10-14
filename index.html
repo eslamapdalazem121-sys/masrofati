@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
+<meta name="app-version" content="2026-10-14.0228">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1038,6 +1039,14 @@ body{overflow-x:hidden;}
 .lock-panel-btn.danger{background:var(--expense); color:#fff;}
 .lock-panel-note{font-size:calc(11px * var(--fs,1)); color:var(--muted); line-height:1.7;}
 /* ===== LOCK RECOVERY UI END ===== */
+
+/* ===== TRANSFER UI START ===== */
+.transfer-area{width:100%; min-height:90px; border-radius:12px; border:1.5px solid var(--border); background:var(--card); color:var(--text); font-size:calc(11px * var(--fs,1)); padding:10px; font-family:monospace; direction:ltr; text-align:left; margin-top:10px; box-sizing:border-box;}
+/* ===== TRANSFER UI END ===== */
+/* ===== CLOUD UI START ===== */
+.cloud-gate{position:fixed; inset:0; z-index:450; background:var(--bg); display:none; align-items:center; justify-content:center; padding:24px; overflow-y:auto;}
+.cloud-gate-box{width:100%; max-width:340px; text-align:center;}
+/* ===== CLOUD UI END ===== */
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1168,7 +1177,7 @@ body{overflow-x:hidden;}
     <h3 id="confirmTitle">تأكيد الحذف</h3>
     <p id="confirmMsg">هل أنت متأكد؟</p>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeConfirm()">إلغاء</button>
+      <button class="btn-cancel" id="confirmCancelBtn" onclick="cancelConfirm()">إلغاء</button>
       <button class="btn-danger" id="confirmOkBtn" onclick="runConfirmedAction()">حذف</button>
     </div>
   </div>
@@ -1504,10 +1513,35 @@ body{overflow-x:hidden;}
         <input type="text" id="shortLinkPublic" class="lock-input" dir="ltr" placeholder="https://is.gd/اسمك" style="font-size:calc(12px * var(--fs,1)); text-align:left;" onchange="saveShortLink('public')">
       </div>
       <p id="publicShareNote" style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin:8px 0 0; line-height:1.6;">
-        بياناتك بتتحفظ على جهازك ده بس ومش بتتزامن مع أجهزة تانية. لو عايز تنقلها لجهاز تاني استخدم «تصدير كملف» ثم «استيراد نسخة».
+        بياناتك بتتحفظ على جهازك وبتشتغل بدون نت. لو سجّلت دخول من «الحساب والمزامنة» بتتزامن مع أجهزتك التانية، ولو عايز تنقل بياناتك من نسخة Claude استخدم «نقل البيانات» في صفحة 💾.
       </p>
     </div>
 <!--SHARE_PUBLIC_END-->
+<!--CLOUD_START-->
+    <div class="settings-section" id="cloudSection" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
+      <h4>☁️ الحساب والمزامنة بين الأجهزة</h4>
+      <p class="bk-note" id="cloudStatusLine" style="margin:0 0 10px;"></p>
+      <div id="cloudSignedOut">
+        <input type="email" id="cloudEmail" class="lock-input" dir="ltr" placeholder="الإيميل" autocomplete="email" autocapitalize="off" spellcheck="false" style="text-align:left;">
+        <input type="password" id="cloudPassword" class="lock-input" dir="ltr" placeholder="كلمة المرور (6 على الأقل)" autocomplete="current-password" style="text-align:left; margin-top:8px;">
+        <div class="backup-bar" style="margin:10px 0 0;">
+          <button type="button" class="btn-save bk-main-btn" onclick="cloudAuthAction('cloud','signin')">دخول</button>
+          <button type="button" class="drive-btn" style="margin:0;" onclick="cloudAuthAction('cloud','signup')">حساب جديد</button>
+        </div>
+        <button type="button" class="lock-link" onclick="cloudAuthAction('cloud','reset')">نسيت كلمة المرور؟</button>
+        <p id="cloudMsg" class="bk-note"></p>
+        <p id="cloudSdkHint" class="bk-note" style="display:none;">لو الأزرار مش بتشتغل: افتح التطبيق وإنت متصل بالنت مرة واحدة عشان يحمّل خدمة الحساب.</p>
+      </div>
+      <div id="cloudSignedIn" style="display:none;">
+        <p style="margin:0 0 8px; font-weight:700; color:var(--text);">داخل بحساب: <span id="cloudWho" dir="ltr"></span></p>
+        <div class="backup-bar" style="margin:0;">
+          <button type="button" class="btn-save bk-main-btn" onclick="cloudSyncNowClick()">🔄 زامن الآن</button>
+          <button type="button" class="drive-btn" style="margin:0;" onclick="cloudSignOut()">تسجيل الخروج</button>
+        </div>
+        <p class="bk-note">بياناتك بتتزامن لوحدها بين كل أجهزتك اللي داخلة بنفس الإيميل، وبتفضل على الجهاز وبتشتغل بدون نت. الأحدث هو اللي بيكسب، وبنحفظ نسخة أمان قبل أي استبدال.</p>
+      </div>
+    </div>
+<!--CLOUD_END-->
 <!--INSTALL_START-->
     <div class="settings-section" id="installSection" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
       <h4>📲 تثبيت التطبيق واختصار الشاشة الرئيسية</h4>
@@ -1517,6 +1551,8 @@ body{overflow-x:hidden;}
       <button type="button" class="drive-btn" id="installBtn" style="margin:0 0 8px;" onclick="installApp()">📲 تثبيت التطبيق / إضافة اختصار</button>
       <p id="installNote" style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin:0; line-height:1.7;"></p>
       <p id="offlineStatus" style="font-size:calc(12px * var(--fs,1)); font-weight:700; color:var(--text); margin:10px 0 0; line-height:1.7;"></p>
+      <p id="appVersionLine" style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin:8px 0 0; line-height:1.7;"></p>
+      <button type="button" class="drive-btn" id="updateAppBtn" style="display:none; margin:8px 0 0;" onclick="updateAppNow()">🔄 تحديث التطبيق الآن</button>
     </div>
 <!--INSTALL_END-->
     </div>
@@ -1536,6 +1572,24 @@ body{overflow-x:hidden;}
     <div class="settings-page-body">
       <div class="bk-status" id="bkStatus">جارٍ التحميل…</div>
       <button type="button" class="btn-save bk-main-btn" id="bkNowBtn" onclick="backupNow()">📦 خد نسخة احتياطية الآن</button>
+
+      <div class="settings-section" id="transferSection" style="margin-top:20px;">
+        <h4>🔗 نقل البيانات بين النسخ</h4>
+        <p class="bk-note" style="margin:0 0 10px;">لو عندك نسختين (نسخة Claude ونسخة بتشتغل بدون نت): انسخ بياناتك من واحدة والصقها في التانية. بتتم في ضغطتين من غير ملفات، وبتقدر تعملها في أي اتجاه وقت ما تحب.</p>
+        <button type="button" class="btn-save bk-main-btn" onclick="transferCopy()">📤 1) انسخ بياناتي (كود)</button>
+        <textarea id="transferOut" class="transfer-area" readonly style="display:none;" onclick="this.select()"></textarea>
+        <p id="transferOutNote" class="bk-note"></p>
+        <button type="button" class="drive-btn" style="margin:8px 0 0;" onclick="toggleTransferIn()">📥 2) حط بيانات من كود</button>
+        <div id="transferInPanel" style="display:none; margin-top:10px;">
+          <textarea id="transferIn" class="transfer-area" placeholder="الصق الكود هنا (ضغطة مطوّلة ثم لصق)" oninput="transferPreviewSoon()"></textarea>
+          <div class="backup-bar" style="margin:8px 0 0;">
+            <button type="button" class="backup-btn" onclick="transferPaste()">📋 لصق من الحافظة</button>
+            <button type="button" class="backup-btn" onclick="transferPreview()">👁️ معاينة</button>
+          </div>
+          <div id="transferPreview" class="bk-note"></div>
+          <button type="button" class="btn-save bk-main-btn" id="transferApplyBtn" style="display:none; margin-top:10px;" onclick="transferApply()">✅ استبدل بياناتي بالبيانات دي</button>
+        </div>
+      </div>
 
       <div class="settings-section" style="margin-top:20px;">
         <h4>⏱️ النسخ التلقائي</h4>
@@ -1590,6 +1644,22 @@ body{overflow-x:hidden;}
   </div>
 </div>
 
+<!--CLOUDGATE_START-->
+<div id="cloudGate" class="cloud-gate" style="display:none;">
+  <div class="cloud-gate-box">
+    <div style="font-size:calc(44px * var(--fs,1));">💰</div>
+    <h2 style="margin:6px 0 4px;">تسجيل الدخول</h2>
+    <div class="lock-sub" style="margin:0 0 14px;">مصروفاتي B — بياناتك تتزامن بين كل أجهزتك</div>
+    <input type="email" id="gateEmail" class="lock-input" dir="ltr" placeholder="الإيميل" autocomplete="email" autocapitalize="off" spellcheck="false" style="text-align:left;">
+    <input type="password" id="gatePassword" class="lock-input" dir="ltr" placeholder="كلمة المرور" autocomplete="current-password" style="text-align:left; margin-top:8px;">
+    <button type="button" class="btn-save bk-main-btn" style="margin-top:12px;" onclick="cloudAuthAction('gate','signin')">دخول</button>
+    <button type="button" class="drive-btn" style="margin:8px 0 0;" onclick="cloudAuthAction('gate','signup')">حساب جديد</button>
+    <button type="button" class="lock-link" onclick="cloudAuthAction('gate','reset')">نسيت كلمة المرور؟</button>
+    <p id="gateMsg" class="bk-note" style="text-align:center;"></p>
+    <button type="button" class="lock-link" onclick="cloudSkipLogin()">تخطي — استخدم التطبيق من غير حساب</button>
+  </div>
+</div>
+<!--CLOUDGATE_END-->
 <div class="toast" id="toast"></div>
 
 <div id="detail">
@@ -2084,6 +2154,8 @@ async function copyAppLink(which, msg){
 }
 let _scrollYBeforeSettings = 0;
 function openSettings(){
+  if(typeof updateCloudUI === 'function') updateCloudUI();
+  updateVersionUI();
   updateInstallUI();
   updateOfflineStatus();
   updateBackupSummary();
@@ -2301,6 +2373,7 @@ function save(){
   try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }
   catch(e){ console.error('save failed', e); }
   scheduleDbPush();
+  if(typeof window.__onDataSaved === 'function'){ try{ window.__onDataSaved(); }catch(e){} }
 }
 function fmt(n){ return (Number(n)||0).toLocaleString('ar-EG'); }
 
@@ -3317,8 +3390,11 @@ document.addEventListener('pointercancel', ()=>{
 });
 
 let _pendingConfirmAction = null;
-function openConfirm(title, msg, onConfirm, okLabel){
+let _pendingCancelAction = null;
+function openConfirm(title, msg, onConfirm, okLabel, cancelLabel, onCancel){
   document.getElementById('confirmOkBtn').textContent = okLabel || 'حذف';
+  document.getElementById('confirmCancelBtn').textContent = cancelLabel || 'إلغاء';
+  _pendingCancelAction = onCancel || null;
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmMsg').textContent = msg;
   _pendingConfirmAction = onConfirm;
@@ -3326,7 +3402,13 @@ function openConfirm(title, msg, onConfirm, okLabel){
 }
 function closeConfirm(){
   _pendingConfirmAction = null;
+  _pendingCancelAction = null;
   document.getElementById('confirmOverlay').classList.remove('open');
+}
+function cancelConfirm(){
+  const action = _pendingCancelAction;
+  closeConfirm();
+  if(action) action();
 }
 function runConfirmedAction(){
   const action = _pendingConfirmAction;
@@ -3952,8 +4034,9 @@ async function lockResetApp(){
     if(btn) btn.textContent = '⚠️ اضغط تاني للتأكيد — هيتمسح اللي على الجهاز ده';
     return;
   }
-  ['budget_data_v1','budget_settings_v1','budget_current_year','budget_backup_cfg_v1','budget_backups_local_v1','budget_short_links_v1','fonts_warm_v1']
+  ['budget_data_v1','budget_settings_v1','budget_current_year','budget_backup_cfg_v1','budget_backups_local_v1','budget_short_links_v1','fonts_warm_v1','budget_data_updated_at','budget_cloud_synced_at','budget_cloud_cfg_v1','budget_cloud_skip_login']
     .forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+  try{ indexedDB.deleteDatabase('firebaseLocalStorageDb'); }catch(e){} // يطلّع حساب السحابة كمان
   lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null};
   try{ await saveLockConfig(); }catch(e){} // بيرفع "القفل مقفول" لحسابك كمان عشان ما يرجعش لوحده
   location.reload();
@@ -3961,6 +4044,519 @@ async function lockResetApp(){
 window.addEventListener('online', updateLockOfflineHint);
 window.addEventListener('offline', updateLockOfflineHint);
 // ===== LOCK RECOVERY END =====
+
+// ===== TRANSFER START (نقل البيانات بين النسخ بكود) + UPDATE =====
+const TRANSFER_PREFIX = 'MSRB1';
+function bytesToB64(bytes){
+  let bin = '';
+  const CH = 0x8000;
+  for(let i = 0; i < bytes.length; i += CH) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+  return btoa(bin);
+}
+function b64ToBytes(b64){
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function pipeBytes(stream, bytes){
+  const w = stream.writable.getWriter();
+  w.write(bytes); w.close();
+  return new Uint8Array(await new Response(stream.readable).arrayBuffer());
+}
+// الكود = MSRB1 + (1 مضغوط | 0 عادي) + . + بصمة + . + البيانات base64
+async function encodeTransferCode(){
+  const payload = JSON.stringify({app:'masrofati-b', v:1, exportedAt:new Date().toISOString(), data});
+  const raw = new TextEncoder().encode(payload);
+  let mode = '0', body = raw;
+  if(typeof CompressionStream === 'function'){
+    try{ body = await pipeBytes(new CompressionStream('gzip'), raw); mode = '1'; }catch(e){ body = raw; mode = '0'; }
+  }
+  const b64 = bytesToB64(body);
+  return TRANSFER_PREFIX + mode + '.' + simpleHash(b64) + '.' + b64;
+}
+// بيقبل الكود حتى لو اتلصق جوه رسالة أو اتقسّم على سطور أو فيه كلام زيادة في الآخر
+async function decodeTransferCode(text){
+  const flat = String(text || '').replace(/\s+/g, '');
+  const at = flat.indexOf(TRANSFER_PREFIX);
+  if(at === -1) return {error:'ده مش كود نقل بيانات صحيح'};
+  const m = flat.slice(at).match(/^MSRB1([01])\.([0-9a-z]+)\.([A-Za-z0-9+\/=]+)/);
+  if(!m) return {error:'ده مش كود نقل بيانات صحيح'};
+  const mode = m[1], hash = m[2];
+  let b64 = m[3], good = null;
+  for(let cut = 0; cut <= 64 && b64.length - cut > 0; cut++){
+    const cand = b64.slice(0, b64.length - cut);
+    if(simpleHash(cand) === hash){ good = cand; break; }
+  }
+  if(good === null) return {error:'الكود ناقص أو اتقطع — انسخه كله تاني'};
+  try{
+    let bytes = b64ToBytes(good);
+    if(mode === '1'){
+      if(typeof DecompressionStream !== 'function') return {error:'متصفحك ما بيدعمش فك الضغط — جرّب من كروم حديث'};
+      bytes = await pipeBytes(new DecompressionStream('gzip'), bytes);
+    }
+    const obj = JSON.parse(new TextDecoder().decode(bytes));
+    if(!obj || typeof obj.data !== 'object' || obj.data === null) return {error:'الكود مفيهوش بيانات'};
+    const years = Object.keys(obj.data).filter(k => !isNaN(Number(k))).sort();
+    return {ok:true, data:obj.data, exportedAt:obj.exportedAt, entries:countExpensesInData(obj.data), years};
+  }catch(e){
+    return {error:'مش قادر أقرأ الكود ده'};
+  }
+}
+async function transferCopy(){
+  const code = await encodeTransferCode();
+  const n = countExpensesInData(data);
+  let copied = false;
+  try{ await navigator.clipboard.writeText(code); copied = true; }catch(e){}
+  const area = document.getElementById('transferOut');
+  const note = document.getElementById('transferOutNote');
+  area.value = code;
+  area.style.display = 'block';
+  if(copied){
+    note.textContent = 'تم النسخ ✅ (' + toArabicDigits(n) + ' مصروف). افتح النسخة التانية، وادوس «حط بيانات من كود» والصق.';
+    showToast('تم نسخ بياناتك ✅', true);
+  } else {
+    note.textContent = 'ما قدرتش أنسخ تلقائي. دوس على الكود اللي فوق ضغطة مطوّلة واختار «تحديد الكل» ثم «نسخ».';
+    area.focus(); area.select();
+  }
+}
+function toggleTransferIn(){
+  const panel = document.getElementById('transferInPanel');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  if(open) setTimeout(()=>{ const t = document.getElementById('transferIn'); if(t) t.focus(); }, 60);
+}
+let _transferPending = null;
+let _transferTimer = null;
+function transferPreviewSoon(){
+  clearTimeout(_transferTimer);
+  _transferTimer = setTimeout(transferPreview, 350);
+}
+async function transferPaste(){
+  try{
+    const txt = await navigator.clipboard.readText();
+    document.getElementById('transferIn').value = txt;
+    await transferPreview();
+  }catch(e){
+    showToast('المتصفح منع اللصق التلقائي — دوس ضغطة مطوّلة في الخانة واختار «لصق»', false);
+  }
+}
+async function transferPreview(){
+  const box = document.getElementById('transferPreview');
+  const btn = document.getElementById('transferApplyBtn');
+  _transferPending = null;
+  btn.style.display = 'none';
+  const text = document.getElementById('transferIn').value;
+  if(!text.trim()){ box.textContent = ''; return; }
+  const res = await decodeTransferCode(text);
+  if(!res.ok){ box.textContent = '⚠️ ' + res.error; return; }
+  _transferPending = res;
+  const mine = countExpensesInData(data);
+  box.innerHTML = '✅ الكود سليم: <b>' + toArabicDigits(res.entries) + ' مصروف</b>'
+    + (res.years.length ? ' — سنين: ' + res.years.map(toArabicDigits).join('، ') : '')
+    + (res.exportedAt ? '<br>اتنسخ: ' + formatBackupTime(Date.parse(res.exportedAt)) : '')
+    + '<br>اللي عندك دلوقتي: ' + toArabicDigits(mine) + ' مصروف'
+    + (mine > 0 ? ' (هنحفظ نسخة أمان منه قبل الاستبدال)' : '');
+  btn.style.display = 'block';
+}
+function transferApply(){
+  const res = _transferPending;
+  if(!res) return;
+  openConfirm(
+    'استبدال بياناتك',
+    'هيتم استبدال بياناتك الحالية (' + toArabicDigits(countExpensesInData(data)) + ' مصروف) ببيانات الكود (' + toArabicDigits(res.entries) + ' مصروف). هنحفظ نسخة أمان من بياناتك الحالية الأول.',
+    async ()=>{
+      await runBackup({auto:false, force:true});
+      applyImportedData(res.data);
+      _transferPending = null;
+      document.getElementById('transferIn').value = '';
+      document.getElementById('transferPreview').textContent = '';
+      document.getElementById('transferApplyBtn').style.display = 'none';
+      showToast('تم نقل البيانات ✅', true);
+      renderBackupPage();
+    },
+    'استبدال'
+  );
+}
+
+// ---- النسخة والتحديث (للتطبيق المثبّت من موقع) ----
+const APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || 'dev';
+let _latestVersion = null;
+function isInstalledWebApp(){
+  try{ return !isEmbedded() && !window.__IS_APK__ && /^https?:/.test(location.protocol) && ('caches' in window); }catch(e){ return false; }
+}
+function updateVersionUI(){
+  const line = document.getElementById('appVersionLine');
+  const btn = document.getElementById('updateAppBtn');
+  if(!line) return;
+  if(APP_VERSION === 'claude'){
+    line.textContent = 'النسخة: نسخة Claude (بتتحدّث لوحدها)';
+  } else {
+    line.textContent = 'النسخة: ' + APP_VERSION + (_latestVersion && _latestVersion !== APP_VERSION ? ' — 🔄 فيه نسخة أحدث (' + _latestVersion + ')' : '');
+  }
+  if(btn) btn.style.display = isInstalledWebApp() ? 'block' : 'none';
+}
+async function fetchLatestShell(){
+  const url = new URL('./', location.href).href;
+  const res = await fetch(url + '?_=' + Date.now(), {cache:'no-store'});
+  const html = await res.text();
+  if(!res.ok || html.indexOf('id="appRoot"') === -1) return null;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const meta = doc.querySelector('meta[name="app-version"]');
+  return {url, html, version: meta ? meta.content : null};
+}
+async function checkForNewVersion(){
+  if(!isInstalledWebApp() || !navigator.onLine) return;
+  try{
+    const r = await fetchLatestShell();
+    if(r && r.version && r.version !== APP_VERSION){
+      _latestVersion = r.version;
+      updateVersionUI();
+      showToast('🔄 فيه نسخة أحدث من التطبيق — افتح الإعدادات وادوس «تحديث التطبيق»', true);
+    }
+  }catch(e){}
+}
+async function updateAppNow(){
+  if(!navigator.onLine){ showToast('محتاج إنترنت عشان التطبيق يتحدّث', false); return; }
+  const btn = document.getElementById('updateAppBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'جارٍ التحديث…'; }
+  try{
+    const r = await fetchLatestShell();
+    if(!r) throw new Error('bad');
+    const keys = await caches.keys();
+    for(const k of keys){
+      if(k.indexOf('masrofati-b-v') === 0){
+        const c = await caches.open(k);
+        await c.put(r.url, new Response(r.html, {status:200, headers:{'content-type':'text/html; charset=utf-8'}}));
+      }
+    }
+    if(r.version && r.version !== APP_VERSION){
+      showToast('اتحمّلت النسخة الأحدث — بنعيد التشغيل…', true);
+      setTimeout(()=> location.reload(), 900);
+    } else {
+      showToast('أنت على آخر نسخة ✅', true);
+    }
+  }catch(e){
+    showToast('تعذّر التحديث دلوقتي، جرّب تاني', false);
+  }
+  if(btn){ btn.disabled = false; btn.textContent = '🔄 تحديث التطبيق الآن'; }
+}
+// ===== TRANSFER END =====
+
+// ===== CLOUD START (حساب بالإيميل + مزامنة سحابية عبر Firebase) =====
+// التطبيق بيشتغل أوفلاين دايمًا من الجهاز؛ السحابة طبقة إضافية بتتحمّل لما يكون فيه نت.
+const FIREBASE_CONFIG = {"apiKey": "AIzaSyDl0dVhveN-6H3umRNcTtQ4PJDTa53Fa_w", "authDomain": "masrofati-fcc92.firebaseapp.com", "projectId": "masrofati-fcc92", "storageBucket": "masrofati-fcc92.firebasestorage.app", "messagingSenderId": "737593709536", "appId": "1:737593709536:web:d7d3b0e20bb21351a6d185"};
+const FB_BASE = 'https://www.gstatic.com/firebasejs/10.12.0/';
+const CLOUD_KEYS = {updated:'budget_data_updated_at', synced:'budget_cloud_synced_at', skip:'budget_cloud_skip_login', lastOk:'budget_cloud_last_ok'};
+const cloud = {sdk:null, app:null, auth:null, db:null, user:null, authKnown:false, loading:null, unsub:null, pushTimer:null,
+               applying:false, busy:false, again:false, pendingChoice:null, lastError:''};
+function cloudNum(k){ try{ return Number(localStorage.getItem(k)) || 0; }catch(e){ return 0; } }
+function cloudSetKey(k, v){ try{ localStorage.setItem(k, String(v)); }catch(e){} }
+function cloudTimeout(p, ms, label){
+  return Promise.race([p, new Promise((_, rej)=> setTimeout(()=> rej(Object.assign(new Error(label || 'timeout'), {code:'app/timeout'})), ms))]);
+}
+function hasUserData(){
+  let n = 0;
+  Object.keys(data || {}).forEach(y=>{
+    const yr = data[y];
+    if(!yr || typeof yr !== 'object') return;
+    Object.keys(yr).forEach(m=>{
+      const mon = yr[m];
+      if(!mon || typeof mon !== 'object') return;
+      if(Number(mon.income) > 0) n++;
+      if((mon.incomeSources || []).length) n++;
+      if((mon.groups || []).length) n++;
+    });
+  });
+  return n > 0;
+}
+function cloudErrorMessage(e){
+  const code = (e && e.code) || '';
+  const map = {
+    'auth/invalid-email':'الإيميل مش مكتوب صح',
+    'auth/missing-email':'اكتب الإيميل',
+    'auth/missing-password':'اكتب كلمة المرور',
+    'auth/weak-password':'كلمة المرور ضعيفة — لازم 6 حروف أو أرقام على الأقل',
+    'auth/email-already-in-use':'الإيميل ده مسجّل قبل كده — ادوس «دخول»',
+    'auth/invalid-credential':'الإيميل أو كلمة المرور غلط',
+    'auth/wrong-password':'كلمة المرور غلط',
+    'auth/user-not-found':'مفيش حساب بالإيميل ده — ادوس «حساب جديد»',
+    'auth/too-many-requests':'محاولات كتير — استنى شوية وجرّب تاني',
+    'auth/user-disabled':'الحساب ده متوقّف',
+    'auth/network-request-failed':'مفيش إنترنت دلوقتي',
+    'auth/operation-not-allowed':'تسجيل الدخول بالإيميل مش مفعّل في Firebase (Authentication ← Sign-in method ← Email/Password)',
+    'auth/unauthorized-domain':'دومين الموقع مش مضاف في Firebase (Authentication ← Settings ← Authorized domains)',
+    'permission-denied':'قواعد الأمان في Firestore مش مسموحة — راجع خطوة الـ Rules',
+    'unavailable':'مفيش اتصال بالسحابة دلوقتي',
+    'not-found':'قاعدة بيانات Firestore لسه ما اتعملتش (Build ← Firestore Database ← Create database)',
+    'failed-precondition':'قاعدة بيانات Firestore لسه ما اتعملتش (Build ← Firestore Database ← Create database)',
+    'app/timeout':'النت بطيء — جرّب تاني'
+  };
+  return map[code] || (code ? ('مشكلة: ' + code) : 'حصلت مشكلة، جرّب تاني');
+}
+
+// ---- تحميل مكتبة Firebase عند الحاجة (من غير ما نعطّل التطبيق لو مفيش نت) ----
+function cloudLoadSdk(){
+  if(cloud.sdk) return Promise.resolve(cloud.sdk);
+  if(cloud.loading) return cloud.loading;
+  cloud.loading = (async ()=>{
+    const [appM, authM, fsM] = await cloudTimeout(Promise.all([
+      import(FB_BASE + 'firebase-app.js'),
+      import(FB_BASE + 'firebase-auth.js'),
+      import(FB_BASE + 'firebase-firestore.js')
+    ]), 20000, 'sdk-timeout');
+    const app = appM.initializeApp(FIREBASE_CONFIG);
+    cloud.app = app;
+    cloud.auth = authM.getAuth(app);
+    cloud.db = fsM.getFirestore(app);
+    cloud.sdk = {appM, authM, fsM};
+    return cloud.sdk;
+  })();
+  cloud.loading.then(()=>{ cloud.loading = null; }, ()=>{ cloud.loading = null; });
+  return cloud.loading;
+}
+function cloudRef(){
+  const {fsM} = cloud.sdk;
+  return fsM.doc(cloud.db, 'users', cloud.user.uid, 'data', 'main');
+}
+function cloudStatusText(){
+  if(!cloud.user) return '☁️ مش مسجّل دخول — من الإعدادات تقدر تتزامن';
+  if(!navigator.onLine) return '☁️ مفيش نت — تعديلاتك محفوظة وهتتزامن لما النت يرجع';
+  if(cloud.lastError) return '⚠️ ' + cloud.lastError;
+  return '☁️ متزامن ✅';
+}
+function cloudSetStatus(text, ok){
+  if(typeof setSyncStatus === 'function') setSyncStatus(text || cloudStatusText(), !!ok);
+}
+
+// ---- استبدال بيانات الجهاز ببيانات السحابة من غير ما تطلعك من الصفحة اللي فيها ----
+function cloudReplaceData(newData){
+  cloud.applying = true;
+  try{
+    data = newData;
+    ensureAllYears();
+    if(!data[currentYear]){
+      const ys = Object.keys(data).map(Number).filter(n=> !isNaN(n));
+      if(ys.length) setCurrentYear(Math.max(...ys));
+    }
+    try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }catch(e){}
+    renderMonths();
+    if(currentMonth !== null) renderDetail();
+  } finally { cloud.applying = false; }
+}
+async function cloudApplyRemote(remote){
+  const res = await decodeTransferCode(remote.blob);
+  if(!res.ok) throw Object.assign(new Error('bad-remote'), {code:'app/bad-remote'});
+  if(hasUserData()) await runBackup({auto:false, force:true}); // نسخة أمان من اللي على الجهاز قبل الاستبدال
+  cloudReplaceData(res.data);
+  const t = Number(remote.updatedAt) || Date.now();
+  cloudSetKey(CLOUD_KEYS.updated, t);
+  cloudSetKey(CLOUD_KEYS.synced, t);
+}
+async function cloudPush(){
+  const blob = await encodeTransferCode();
+  if(blob.length > 900000) throw Object.assign(new Error('too-big'), {code:'app/too-big'});
+  let t = cloudNum(CLOUD_KEYS.updated);
+  if(!t){ t = Date.now(); cloudSetKey(CLOUD_KEYS.updated, t); }
+  await cloudTimeout(cloud.sdk.fsM.setDoc(cloudRef(), {blob, updatedAt:t, device:cloudDeviceLabel(), schema:1}), 20000);
+  cloudSetKey(CLOUD_KEYS.synced, t);
+}
+function cloudDeviceLabel(){
+  const ua = navigator.userAgent || '';
+  return /Android/i.test(ua) ? 'android' : /iPhone|iPad/i.test(ua) ? 'ios' : /Windows|Macintosh|Linux/i.test(ua) ? 'computer' : 'other';
+}
+
+// ---- أول مرة: فيه بيانات على الجهاز وفي الحساب — المستخدم يختار ----
+function cloudAskFirstChoice(remote){
+  cloud.pendingChoice = remote;
+  const remoteRes = remote.__decoded;
+  const mine = countExpensesInData(data);
+  const theirs = remoteRes ? remoteRes.entries : '?';
+  openConfirm(
+    'فيه بيانات في حسابك',
+    'عندك بيانات على الجهاز ده (' + toArabicDigits(mine) + ' مصروف) وبيانات تانية محفوظة في حسابك (' + toArabicDigits(theirs) + ' مصروف). تستخدم أنهي واحدة؟ (الاتنين بيتحفظ منهم نسخة أمان)',
+    async ()=>{ // استخدم اللي في الحساب
+      cloud.pendingChoice = null;
+      try{ await cloudApplyRemote(remote); cloudSetStatus(null, true); showToast('اتحمّلت بيانات حسابك ✅', true); }
+      catch(e){ cloud.lastError = cloudErrorMessage(e); cloudSetStatus(null, false); }
+      updateCloudUI();
+    },
+    'استخدم اللي في الحساب',
+    'ارفع اللي على جهازي',
+    async ()=>{ // ارفع اللي على الجهاز مكان اللي في الحساب
+      cloud.pendingChoice = null;
+      try{ cloudSetKey(CLOUD_KEYS.updated, Date.now()); await cloudPush(); cloudSetStatus(null, true); showToast('اترفعت بيانات جهازك للحساب ✅', true); }
+      catch(e){ cloud.lastError = cloudErrorMessage(e); cloudSetStatus(null, false); }
+      updateCloudUI();
+    }
+  );
+}
+
+// ---- قلب المزامنة: الأحدث بيكسب، وبنحفظ نسخة أمان قبل أي استبدال ----
+async function cloudReconcile(remote){
+  const lt = cloudNum(CLOUD_KEYS.updated), st = cloudNum(CLOUD_KEYS.synced);
+  if(!remote){
+    if(hasUserData()) await cloudPush();
+    return 'pushed';
+  }
+  const rt = Number(remote.updatedAt) || 0;
+  if(rt === st && lt <= st) return 'same';
+  if(st === 0 && hasUserData()){
+    if(cloud.pendingChoice) return 'asked';
+    try{ remote.__decoded = await decodeTransferCode(remote.blob); }catch(e){}
+    cloudAskFirstChoice(remote);
+    return 'asked';
+  }
+  if(rt > lt && rt > st){ await cloudApplyRemote(remote); showToast('اتحدّثت بياناتك من حسابك ☁️', true); return 'pulled'; }
+  if(lt > rt){ await cloudPush(); return 'pushed'; }
+  return 'same';
+}
+async function cloudSync(reason){
+  if(!cloud.user || !cloud.sdk) return;
+  if(!navigator.onLine){ cloudSetStatus(null, false); return; }
+  if(cloud.busy){ cloud.again = true; return; }
+  cloud.busy = true;
+  try{
+    cloudSetStatus('🔄 بيتزامن…', false);
+    const snap = await cloudTimeout(cloud.sdk.fsM.getDoc(cloudRef()), 20000);
+    const remote = snap.exists() ? snap.data() : null;
+    const result = await cloudReconcile(remote);
+    cloud.lastError = '';
+    if(result !== 'asked'){ cloudSetKey(CLOUD_KEYS.lastOk, Date.now()); }
+    cloudSetStatus(null, result !== 'asked');
+  }catch(e){
+    cloud.lastError = cloudErrorMessage(e);
+    cloudSetStatus(null, false);
+  } finally {
+    cloud.busy = false;
+    updateCloudUI();
+    if(cloud.again){ cloud.again = false; cloudSchedulePush(); }
+  }
+}
+function cloudSchedulePush(){
+  if(!cloud.user) return;
+  clearTimeout(cloud.pushTimer);
+  cloud.pushTimer = setTimeout(()=> cloudSync('local'), 2500);
+}
+window.__onDataSaved = function(){
+  if(cloud.applying) return;
+  cloudSetKey(CLOUD_KEYS.updated, Date.now());
+  cloudSchedulePush();
+};
+function cloudStartListening(){
+  if(cloud.unsub || !cloud.user || !cloud.sdk) return;
+  try{
+    cloud.unsub = cloud.sdk.fsM.onSnapshot(cloudRef(), (snap)=>{
+      if(!snap.exists() || (snap.metadata && snap.metadata.hasPendingWrites)) return;
+      const remote = snap.data();
+      if((Number(remote.updatedAt) || 0) === cloudNum(CLOUD_KEYS.synced)) return; // صدى رفعنا إحنا
+      cloudSync('live');
+    }, ()=>{ /* أخطاء البث بتتعالج في المزامنة العادية */ });
+  }catch(e){}
+}
+function cloudStopListening(){
+  if(cloud.unsub){ try{ cloud.unsub(); }catch(e){} cloud.unsub = null; }
+}
+
+// ---- الحساب ----
+async function cloudInit(){
+  try{
+    await cloudLoadSdk();
+  }catch(e){
+    cloud.authKnown = true; // مفيش مكتبة (أوفلاين أول مرة) — التطبيق يكمل محليًا
+    updateCloudUI();
+    return;
+  }
+  if(cloud.authSubscribed) return;
+  cloud.authSubscribed = true;
+  cloud.sdk.authM.onAuthStateChanged(cloud.auth, (user)=>{
+    cloud.user = user || null;
+    cloud.authKnown = true;
+    if(user){ cloudStartListening(); cloudSync('login'); }
+    else { cloudStopListening(); cloudSetStatus(null, false); }
+    updateCloudUI();
+    cloudMaybeShowGate();
+  });
+}
+function cloudCreds(prefix){
+  return {
+    email: (document.getElementById(prefix + 'Email').value || '').trim(),
+    password: document.getElementById(prefix + 'Password').value || ''
+  };
+}
+function cloudSetMsg(prefix, text, good){
+  const el = document.getElementById(prefix + 'Msg');
+  if(!el) return;
+  el.textContent = text || '';
+  el.style.color = good ? 'var(--accent-dark)' : 'var(--expense)';
+}
+async function cloudAuthAction(prefix, kind){
+  const {email, password} = cloudCreds(prefix);
+  if(!email){ cloudSetMsg(prefix, 'اكتب الإيميل'); return; }
+  if(kind !== 'reset' && !password){ cloudSetMsg(prefix, 'اكتب كلمة المرور'); return; }
+  if(!navigator.onLine){ cloudSetMsg(prefix, 'محتاج إنترنت عشان تسجّل الدخول'); return; }
+  cloudSetMsg(prefix, 'ثواني…', true);
+  try{
+    const sdk = await cloudLoadSdk();
+    await cloudInit();
+    if(kind === 'signup') await cloudTimeout(sdk.authM.createUserWithEmailAndPassword(cloud.auth, email, password), 20000);
+    else if(kind === 'signin') await cloudTimeout(sdk.authM.signInWithEmailAndPassword(cloud.auth, email, password), 20000);
+    else if(kind === 'reset'){ await cloudTimeout(sdk.authM.sendPasswordResetEmail(cloud.auth, email), 20000); cloudSetMsg(prefix, 'بعتنالك رسالة على الإيميل لتغيير كلمة المرور ✅', true); return; }
+    cloudSetMsg(prefix, '');
+    document.getElementById(prefix + 'Password').value = '';
+    showToast(kind === 'signup' ? 'اتعمل الحساب وإنت داخل ✅' : 'تم تسجيل الدخول ✅', true);
+  }catch(e){
+    cloudSetMsg(prefix, cloudErrorMessage(e));
+  }
+}
+async function cloudSignOut(){
+  try{ cloudStopListening(); if(cloud.sdk) await cloud.sdk.authM.signOut(cloud.auth); }catch(e){}
+  cloud.user = null; cloud.lastError = '';
+  cloudSetKey(CLOUD_KEYS.synced, 0);
+  cloudSetStatus(null, false);
+  updateCloudUI();
+  showToast('خرجت من الحساب — بياناتك فضلت على الجهاز', true);
+}
+function cloudSyncNowClick(){ cloud.lastError = ''; cloudSync('manual'); }
+
+// ---- الواجهة ----
+function updateCloudUI(){
+  const outBox = document.getElementById('cloudSignedOut');
+  const inBox = document.getElementById('cloudSignedIn');
+  if(!outBox || !inBox) return;
+  outBox.style.display = cloud.user ? 'none' : 'block';
+  inBox.style.display = cloud.user ? 'block' : 'none';
+  const who = document.getElementById('cloudWho');
+  if(who) who.textContent = cloud.user ? (cloud.user.email || '') : '';
+  const st = document.getElementById('cloudStatusLine');
+  if(st){
+    const last = cloudNum(CLOUD_KEYS.lastOk);
+    st.textContent = cloudStatusText() + (last && cloud.user ? ' — آخر مزامنة: ' + formatBackupTime(last) : '');
+  }
+  const hint = document.getElementById('cloudSdkHint');
+  if(hint) hint.style.display = (!cloud.sdk && !cloud.user) ? 'block' : 'none';
+}
+function cloudMaybeShowGate(){
+  const gate = document.getElementById('cloudGate');
+  if(!gate) return;
+  let skipped = false;
+  try{ skipped = localStorage.getItem(CLOUD_KEYS.skip) === '1'; }catch(e){}
+  const show = cloud.authKnown && !cloud.user && !skipped && !!cloud.sdk && navigator.onLine;
+  gate.style.display = show ? 'flex' : 'none';
+  if(cloud.user) gate.style.display = 'none';
+}
+function cloudSkipLogin(){
+  cloudSetKey(CLOUD_KEYS.skip, 1);
+  document.getElementById('cloudGate').style.display = 'none';
+  showToast('تمام — تقدر تسجّل دخول في أي وقت من الإعدادات', true);
+}
+window.__afterStart = function(){
+  updateCloudUI();
+  cloudInit();
+  window.addEventListener('online', ()=>{ if(cloud.sdk && cloud.user) cloudSync('online'); else if(!cloud.sdk) cloudInit(); else cloudMaybeShowGate(); updateCloudUI(); });
+  window.addEventListener('offline', ()=>{ cloudSetStatus(null, false); updateCloudUI(); });
+};
+// ===== CLOUD END =====
 
 // ===== BACKUP SYSTEM START =====
 const BACKUP_KEEP = 10;          // عدد النسخ المحفوظة في الحساب
@@ -4870,6 +5466,7 @@ function startApp(){
   loadBackupCfg();
   updateBackupSummary();
   initBackupScheduler();
+  if(typeof window.__afterStart === 'function'){ try{ window.__afterStart(); }catch(e){} }
 }
 
 checkLockOnStartup();
@@ -4883,6 +5480,8 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
       .then(function(){
         if(typeof updateOfflineStatus === 'function') updateOfflineStatus();
         if(typeof warmFontCache === 'function') warmFontCache();
+        if(typeof updateVersionUI === 'function') updateVersionUI();
+        if(typeof checkForNewVersion === 'function') checkForNewVersion();
       })
       .catch(function(e){ console.warn('SW register failed', e); });
   });

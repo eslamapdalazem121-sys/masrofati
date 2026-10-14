@@ -2,10 +2,10 @@
 // الصفحة نفسها: بتفتح فورًا من الجهاز (حتى لو النت ضعيف أو واقع)، وفي الخلفية بتتحدّث لو فيه نت (التحديث بيظهر في الفتحة اللي بعدها).
 // باقي ملفات الموقع (أيقونات...): من التخزين أولًا.
 // خطوط جوجل: بتتخزن أول مرة وبعدها بتتفتح من التخزين (عشان الشكل يفضل زي ما هو بدون نت).
-const CACHE = 'masrofati-b-v5';
+const CACHE = 'masrofati-b-v7';
 const FONT_CACHE = 'masrofati-b-fonts-v1';
 const ASSETS = ['./', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-48.png'];
-const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'www.gstatic.com']; // الخطوط + مكتبة Firebase (بتتخزن عشان تشتغل بدون نت)
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -76,6 +76,8 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // فحص النسخة الجديدة (fetch بـ no-store من نفس الموقع) لازم يروح للشبكة مش للتخزين — لكن فتح الصفحة/الريفريش والخطوط بيتعاملوا دايمًا
+  if (url.origin === location.origin && req.mode !== 'navigate' && (req.cache === 'no-store' || req.cache === 'reload')) return;
 
   if (FONT_HOSTS.indexOf(url.hostname) !== -1) {
     event.respondWith(fontStrategy(event, req));
