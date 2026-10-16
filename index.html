@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-14.0821">
+<meta name="app-version" content="2026-10-15.1400">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1047,6 +1047,119 @@ body{overflow-x:hidden;}
 .cloud-gate{position:fixed; inset:0; z-index:450; background:var(--bg); display:none; align-items:center; justify-content:center; padding:24px; overflow-y:auto;}
 .cloud-gate-box{width:100%; max-width:340px; text-align:center;}
 /* ===== CLOUD UI END ===== */
+
+/* ===== ZAKAT START ===== */
+.zk-wrap{max-width:640px; margin:22px auto 16px; perspective:900px; --p:zk;}
+.zk-main,.zk-sq{border:0; cursor:pointer; font-family:inherit; text-shadow:0 1px 0 rgba(255,255,255,.5); transition:transform .15s, box-shadow .15s;}
+.zk-main{
+  width:100%; font-weight:800; font-size:calc(19px * var(--fs,1)); display:flex; align-items:center; justify-content:center; gap:12px;
+  padding:16px 18px; border-radius:20px; position:relative; overflow:hidden; color:var(--zk-t,#4a3000);
+  background:linear-gradient(145deg,var(--zk-l,#fff1b8) 0%,var(--zk-b,#f5c542) 28%,var(--zk-d,#d9a21b) 62%,var(--zk-h,#f0c64f) 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -4px 0 rgba(0,0,0,.18) inset, 0 10px 0 var(--zk-e,#a87400), 0 18px 28px rgba(0,0,0,.28);
+}
+.zk-main::after{content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:zkShine 4s infinite;}
+@keyframes zkShine{0%,60%{left:-60%}100%{left:130%}}
+.zk-main:active{transform:translateY(6px); box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -4px 0 rgba(0,0,0,.18) inset, 0 4px 0 var(--zk-e,#a87400), 0 8px 14px rgba(0,0,0,.28);}
+.zk-main .zk-ico{font-size:calc(30px * var(--fs,1)); filter:drop-shadow(0 3px 2px rgba(0,0,0,.3));}
+.zk-main .zk-arrow{font-size:14px; transition:transform .25s; margin-inline-start:auto;}
+.zk-wrap.open .zk-arrow{transform:rotate(180deg);}
+.zk-row{display:none; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:20px;}
+.zk-wrap.open .zk-row{display:grid; animation:zkPop .4s cubic-bezier(.2,.9,.3,1.2);}
+@keyframes zkPop{from{opacity:0; transform:translateY(-12px) rotateX(35deg)}to{opacity:1; transform:none}}
+.zk-sq{
+  aspect-ratio:1/1; padding:6px; border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center;
+  color:var(--zk-t,#4a3000);
+  background:linear-gradient(145deg,var(--zk-l,#fff1b8) 0%,var(--zk-b,#f5c542) 30%,var(--zk-d,#d9a21b) 65%,var(--zk-h,#f0c64f) 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -3px 0 rgba(0,0,0,.16) inset, 0 7px 0 var(--zk-e,#a87400), 0 12px 18px rgba(0,0,0,.25);
+}
+.zk-sq:active{transform:translateY(5px); box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -3px 0 rgba(0,0,0,.16) inset, 0 2px 0 var(--zk-e,#a87400), 0 4px 8px rgba(0,0,0,.25);}
+.zk-sq .zk-l{font-size:calc(12px * var(--fs,1)); font-weight:700;}
+.zk-sq .zk-v{font-size:calc(17px * var(--fs,1)); font-weight:800; direction:ltr;}
+.zk-sq .zk-i{font-size:calc(20px * var(--fs,1));}
+.zk-list{max-height:200px; overflow:auto; margin:6px 0 12px;}
+.zk-item{display:flex; align-items:center; gap:8px; padding:8px 4px; border-bottom:1px solid var(--border); font-size:calc(13px * var(--fs,1));}
+.zk-item b{flex:1;} .zk-item button{border:0; background:none; font-size:16px; cursor:pointer;}
+/* ===== ZAKAT END ===== */
+/* ===== GENERAL INCOME START ===== */
+.gi-wrap{margin:0 auto 16px;}
+.gi-wrap .zk-main{color:var(--gi-t,#04372a); padding:11px 18px;
+  background:linear-gradient(145deg,var(--gi-l,#c9f9e2) 0%,var(--gi-b,#4ade9f) 28%,var(--gi-d,#12b27a) 62%,var(--gi-h,#6ee7b7) 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -4px 0 rgba(0,0,0,.18) inset, 0 10px 0 var(--gi-e,#0a7a55), 0 18px 28px rgba(0,0,0,.28);}
+.gi-wrap .zk-main:active{box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -4px 0 rgba(0,0,0,.18) inset, 0 4px 0 var(--gi-e,#0a7a55), 0 8px 14px rgba(0,0,0,.28);}
+.gi-wrap .gi-edit{margin-inline-start:auto; font-size:20px; padding:6px 9px; border-radius:12px; background:rgba(255,255,255,.45);}
+.gi-wrap .zk-arrow{margin-inline-start:0;}
+.gi-wrap .zk-row{grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:20px;}
+.gi-wrap .zk-sq{aspect-ratio:auto; min-height:120px; cursor:default; color:var(--gi-t,#04372a);
+  background:linear-gradient(145deg,var(--gi-l,#c9f9e2) 0%,var(--gi-b,#4ade9f) 30%,var(--gi-d,#12b27a) 65%,var(--gi-h,#6ee7b7) 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -3px 0 rgba(0,0,0,.16) inset, 0 7px 0 var(--gi-e,#0a7a55), 0 12px 18px rgba(0,0,0,.25);}
+.gi-wrap .zk-sq.bad{color:var(--gd-t,#450a0a);
+  background:linear-gradient(145deg,var(--gd-l,#ffd6d6) 0%,var(--gd-b,#f87171) 30%,var(--gd-d,#dc2626) 65%,var(--gd-h,#fca5a5) 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -3px 0 rgba(0,0,0,.16) inset, 0 7px 0 var(--gd-e,#991b1b), 0 12px 18px rgba(0,0,0,.25);}
+.gi-wrap .zk-sq{position:relative; cursor:pointer;}
+.gi-wrap .gi-plus{pointer-events:auto; cursor:pointer; margin-inline-start:auto;}
+.gi-wrap .gi-plus::after{pointer-events:none;}
+.gi-col{display:flex; flex-direction:column; align-items:flex-start; line-height:1.3; min-width:0; text-align:start;}
+.gi-col small{font-size:.68em; opacity:.9; font-weight:700;}
+.gi-meter{display:block; width:100%; height:9px; border-radius:6px; background:rgba(0,0,0,.25); overflow:hidden;
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.45);}
+.gi-meter i{display:block; height:100%; width:0; border-radius:6px; transition:width .5s, background-color .3s;
+  background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 50%), var(--mc,#00e676);
+  box-shadow:0 0 6px var(--mc,#00e676);}
+.gi-col .gi-meter{width:140px; height:7px; margin-top:3px;}
+.gi-wrap .zk-sq .gi-meter{width:84%;}
+.gi-pct{font-size:calc(11px * var(--fs,1)); font-weight:800;}
+.gi-dest{display:flex; gap:8px; margin:6px 0 10px;}
+.gi-dest button{flex:1; padding:10px 6px; border-radius:12px; border:2px solid var(--border,#ccd); background:var(--card,#fff); color:var(--text,#222); font-family:inherit; font-weight:800; cursor:pointer;}
+.gi-dest button.active{border-color:#12b27a; background:rgba(18,178,122,.16);}
+.gi-sumrow{display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 10px; font-size:calc(12px * var(--fs,1)); font-weight:800;}
+.gi-sumrow span{flex:1; min-width:0; padding:8px; border-radius:12px; background:rgba(18,178,122,.12); text-align:center;}
+.gi-rows{max-height:210px; overflow:auto; margin:6px 0 10px;}
+.gi-row{display:flex; align-items:center; gap:8px; padding:8px 4px; border-bottom:1px solid var(--border,#dde); font-size:calc(13px * var(--fs,1));}
+.gi-row b{flex:1; min-width:0; overflow-wrap:anywhere;} .gi-row button{border:0; background:none; font-size:16px; cursor:pointer;}
+.gi-wrap .zk-sq .zk-v{font-size:calc(30px * var(--fs,1)); line-height:1.1;}
+.gi-wrap .zk-sq .zk-l{font-size:calc(12.5px * var(--fs,1));}
+#giAmt{font-size:calc(24px * var(--fs,1)); font-weight:900; opacity:1; line-height:1.1;}
+.zk-wrap:not(.gi-wrap) .zk-sq{position:relative;}
+.gi-row button{padding:2px 4px;}
+.stat-income.wide{flex-direction:row; align-items:center; justify-content:center; gap:14px; min-height:0; padding:14px 18px; border-radius:20px; position:relative;}
+.stat-income.wide .wcol{text-align:start; display:flex; flex-direction:column; min-width:0;}
+.stat-income.wide .val{font-size:calc(26px * var(--fs,1)); line-height:1.1;}
+.stat-income.wide .label{font-size:calc(15px * var(--fs,1)); margin-top:0;}
+#statusBanner{display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:104px; border-radius:16px;}
+#statusBanner .amt{font-size:calc(24px * var(--fs,1));}
+.zk-wrap:not(.gi-wrap) .zk-row{grid-auto-rows:1fr; align-items:stretch;}
+.zk-wrap:not(.gi-wrap) .zk-sq{aspect-ratio:auto; min-height:120px; height:100%; justify-content:center;}
+.zk-wrap:not(.gi-wrap) .zk-sq .zk-l{min-height:2.5em; display:flex; align-items:center; justify-content:center; line-height:1.25;}
+/* مصروفات + متبقي/عجز: نفس المستوى والخط */
+.stat-expense .icon{display:none;}
+.stat-expense, #statusBanner{min-height:104px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;}
+.stat-expense .label, #statusBanner .lbl{font-size:calc(15px * var(--fs,1)); font-weight:800; margin:0 0 4px; opacity:1; line-height:1.3;}
+.stat-expense .val, #statusBanner .amt{font-size:calc(32px * var(--fs,1)); font-weight:900; line-height:1.1; margin:0;}
+/* بطاقات الزكاة: أصغر */
+.zk-wrap:not(.gi-wrap) .zk-main{padding:9px 16px; font-size:calc(16px * var(--fs,1)); border-radius:16px; gap:10px;
+  box-shadow:0 1px 0 #fff8d6 inset, 0 -3px 0 rgba(120,76,0,.35) inset, 0 6px 0 #a87400, 0 11px 18px rgba(120,76,0,.3);}
+.zk-wrap:not(.gi-wrap) .zk-main:active{box-shadow:0 1px 0 #fff8d6 inset, 0 -3px 0 rgba(120,76,0,.35) inset, 0 2px 0 #a87400, 0 5px 9px rgba(120,76,0,.3);}
+.zk-wrap:not(.gi-wrap) .zk-main .zk-ico{font-size:calc(22px * var(--fs,1));}
+.zk-wrap:not(.gi-wrap) .zk-row{gap:9px; margin-top:14px;}
+.zk-wrap:not(.gi-wrap) .zk-sq{min-height:90px; padding:4px; gap:3px; border-radius:14px;
+  box-shadow:0 1px 0 #fff8d6 inset, 0 -2px 0 rgba(120,76,0,.3) inset, 0 5px 0 #a87400, 0 8px 12px rgba(120,76,0,.28);}
+.zk-wrap:not(.gi-wrap) .zk-sq:active{box-shadow:0 1px 0 #fff8d6 inset, 0 -2px 0 rgba(120,76,0,.3) inset, 0 1px 0 #a87400, 0 3px 6px rgba(120,76,0,.28);}
+.zk-wrap:not(.gi-wrap) .zk-sq .zk-i{font-size:calc(16px * var(--fs,1));}
+.zk-wrap:not(.gi-wrap) .zk-sq .zk-l{font-size:calc(10.5px * var(--fs,1)); min-height:2.5em;}
+.zk-wrap:not(.gi-wrap) .zk-sq .zk-v{font-size:calc(16px * var(--fs,1));}
+.zk-wrap:not(.gi-wrap) .zk-sq .plus-badge{transform:scale(.8); top:4px; right:4px;}
+.zk-wrap:not(.gi-wrap) .zk-plus{pointer-events:auto; cursor:pointer; margin-inline-start:auto;}
+.zk-wrap:not(.gi-wrap) .zk-plus::after{pointer-events:none;}
+.zk-wrap:not(.gi-wrap) .zk-main .zk-arrow{margin-inline-start:0;}
+.zk-wrap:not(.gi-wrap) .zk-sq .zk-v{font-size:calc(20px * var(--fs,1)); font-weight:900;}
+.zk-wrap .zk-arrow{display:none;}
+.gi-wrap .zk-main .gi-plus, .zk-wrap:not(.gi-wrap) .zk-main .zk-plus{margin-inline-start:auto;}
+/* ===== GENERAL INCOME END ===== */
+/* ===== MODAL SCROLL LOCK ===== */
+.modal-overlay{overscroll-behavior:contain;}
+.modal-box{overscroll-behavior:contain; -webkit-overflow-scrolling:touch;}
+body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1121,6 +1234,62 @@ body{overflow-x:hidden;}
         <span class="label">إجمالي العجز</span>
         <span class="val" id="grandDeficit">0</span>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="giOverlay">
+  <div class="modal-box">
+    <h3>💵 مصادر الدخل العام</h3>
+    <div class="gi-sumrow"><span>الإجمالي: <b id="giSrcTotal">0</b></span></div>
+    <div class="gi-rows" id="giSrcList"></div>
+    <div class="field"><label>اسم المصدر</label><input type="text" id="giSrcName" placeholder="مثال: راتب، إيجار"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="giSrcAmt" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeGI()">إغلاق</button>
+      <button class="btn-save" onclick="addGISource()">＋ إضافة</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="giOutOverlay">
+  <div class="modal-box">
+    <h3>🧾 صرف من الدخل العام</h3>
+    <div class="gi-sumrow"><span>الدخل العام: <b id="giOutInc">0</b></span><span>المنصرف: <b id="giOutTot">0</b></span></div>
+    <div class="gi-sumrow"><span>إلى المصروف المنزلي: <b id="giOutToInc">0</b></span><span>إلى زكاتي: <b id="giOutToZk">0</b></span></div>
+    <div class="gi-dest"><button type="button" id="giDestInc" class="active" onclick="setGIDest('income')">💰 المصروف المنزلي</button><button type="button" id="giDestZk" onclick="setGIDest('zakat')">🕌 زكاتي</button></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="giOutAmt" placeholder="0"></div>
+    <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="giOutNote" placeholder="مثال: مصاريف المنزل"></div>
+    <div class="gi-rows" id="giOutList"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeGIOut()">إغلاق</button>
+      <button class="btn-save" onclick="addGIOut()">＋ صرف</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="zkOverlay">
+  <div class="modal-box">
+    <h3 id="zkTitle">🕌 الزكاة</h3>
+    <div class="gi-sumrow"><span id="zkSumLbl">الإجمالي: <b id="zkSumVal">0</b></span></div>
+    <div class="gi-rows" id="zkList"></div>
+    <div class="field"><label id="zkNameLbl">الاسم</label><input type="text" id="zkNameIn" placeholder=""></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="zkAmtIn" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeZakat()">إغلاق</button>
+      <button class="btn-save" onclick="addZakatItem()">＋ إضافة</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="gxOverlay">
+  <div class="modal-box">
+    <h3 id="gxTitle">✏️ تعديل</h3>
+    <div class="field"><label id="gxNameLbl">الاسم</label><input type="text" id="gxName"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="gxAmt"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeGenEdit()">إلغاء</button>
+      <button class="btn-save" onclick="saveGenEdit()">حفظ</button>
     </div>
   </div>
 </div>
@@ -1229,7 +1398,7 @@ body{overflow-x:hidden;}
 
 <div class="modal-overlay" id="incomeSourcesOverlay">
   <div class="modal-box">
-    <h3>💰 مصادر الدخل الشهري</h3>
+    <h3>💰 مصادر المصروف المنزلي</h3>
 
     <div class="income-total-banner">
       <span>إجمالي الدخل</span>
@@ -1246,7 +1415,7 @@ body{overflow-x:hidden;}
       </div>
       <div class="check-row">
         <input type="checkbox" id="newIncomeSrcCounted" checked>
-        <label for="newIncomeSrcCounted" style="margin:0;">احتسب ضمن إجمالي الدخل الشهري</label>
+        <label for="newIncomeSrcCounted" style="margin:0;">احتسب ضمن إجمالي المصروف المنزلي</label>
       </div>
     </div>
 
@@ -1270,7 +1439,7 @@ body{overflow-x:hidden;}
     </div>
     <div class="check-row">
       <input type="checkbox" id="editIncomeSrcCounted">
-      <label for="editIncomeSrcCounted" style="margin:0;">احتسب ضمن إجمالي الدخل الشهري</label>
+      <label for="editIncomeSrcCounted" style="margin:0;">احتسب ضمن إجمالي المصروف المنزلي</label>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeEditIncomeSource()">إلغاء</button>
@@ -1422,7 +1591,7 @@ body{overflow-x:hidden;}
       <h4>ألوان البطاقات (كل بطاقة على حدا)</h4>
       <div class="color-pick-row">
         <input type="color" id="cc-income" onchange="previewCardColor('income', this.value)">
-        <span>الدخل الشهري (البطاقة)</span>
+        <span>المصروف المنزلي (البطاقة)</span>
       </div>
       <div class="color-pick-row">
         <input type="color" id="cc-iconIncome" onchange="previewCardColor('iconIncome', this.value)">
@@ -1451,6 +1620,18 @@ body{overflow-x:hidden;}
       <div class="color-pick-row">
         <input type="color" id="cc-annualDeficit" onchange="previewCardColor('annualDeficit', this.value)">
         <span>إجمالي العجز السنوي</span>
+      </div>
+      <div class="color-pick-row">
+        <input type="color" id="cc-genIncome" oninput="previewCardColor('genIncome', this.value)" onchange="previewCardColor('genIncome', this.value)">
+        <span>بطاقة الدخل العام الشهري</span>
+      </div>
+      <div class="color-pick-row">
+        <input type="color" id="cc-genDeficit" oninput="previewCardColor('genDeficit', this.value)" onchange="previewCardColor('genDeficit', this.value)">
+        <span>العجز من الدخل العام</span>
+      </div>
+      <div class="color-pick-row">
+        <input type="color" id="cc-zakat" oninput="previewCardColor('zakat', this.value)" onchange="previewCardColor('zakat', this.value)">
+        <span>بطاقة زكاتي</span>
       </div>
       <h4 style="margin-top:14px;">ألوان الأشهر (كل شهر على حدا)</h4>
       <div class="opt-row" id="monthColorGrid"></div>
@@ -1668,20 +1849,34 @@ body{overflow-x:hidden;}
     <strong id="mTitle"></strong>
   </div>
 
-  <div class="summary-grid">
-    <div class="stat stat-income" onclick="openIncomeSources()" style="cursor:pointer; grid-row:1; grid-column:1;">
-      <span class="plus-badge" aria-hidden="true">+</span>
-      <div class="icon">💰</div><div class="label">الدخل الشهري</div>
-      <div class="val" id="incomeTotalVal">0</div>
-      <div class="sub-excluded" id="incomeExcludedLine" style="display:none;"></div>
+  <div class="zk-wrap gi-wrap" id="giWrap">
+    <button type="button" class="zk-main" onclick="toggleGI()">
+      <span class="zk-ico">💵</span>
+      <span class="gi-col"><span>الدخل العام الشهري</span><small id="giAmt" style="direction:ltr;">0</small><span class="gi-meter"><i id="giMeterMain"></i></span><small id="giPctMain"></small></span>
+      <span class="plus-badge in-card gi-plus" onclick="event.stopPropagation(); openGI()" role="button" aria-label="إضافة مصدر دخل">+</span>
+      <span class="zk-arrow">▼</span>
+    </button>
+    <div class="zk-row">
+      <div class="zk-sq" onclick="openGIOut()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🧾</span><span class="zk-l">المنصرف العام الشهري</span><span class="zk-v" id="giSpent">0</span><span class="gi-meter"><i id="giMeterSpent"></i></span><span class="gi-pct" id="giPctSpent"></span></div>
+      <div class="zk-sq" id="giLeftSq" style="cursor:default;"><span class="zk-i" id="giLeftIco">✅</span><span class="zk-l" id="giLeftLbl">المتبقي</span><span class="zk-v" id="giLeft">0</span><span class="gi-meter"><i id="giMeterLeft"></i></span><span class="gi-pct" id="giPctLeft"></span></div>
     </div>
-    <div class="stat stat-expense" style="grid-row:1; grid-column:2;">
-      <div class="icon">🧾</div><div class="label">المصروفات</div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="stat stat-income wide" onclick="openIncomeSources()" style="cursor:pointer; grid-row:1; grid-column:1 / -1;">
+      <span class="plus-badge" aria-hidden="true">+</span>
+      <div class="icon">💰</div>
+      <div class="wcol"><div class="label">المصروف المنزلي</div>
+      <div class="val" id="incomeTotalVal">0</div>
+      <div class="sub-excluded" id="incomeExcludedLine" style="display:none;"></div></div>
+    </div>
+    <div class="stat stat-expense" style="grid-row:2; grid-column:1;">
+      <div class="icon">🧾</div><div class="label">🧾 المصروفات</div>
       <div class="val" id="totalExpense">0</div>
       <div class="sub-excluded" id="excludedBanner" style="display:none;"></div>
     </div>
-    <div class="mini-banner" id="statusBanner" style="grid-row:2; grid-column:1;"></div>
-    <div class="mini-banner muted" id="excludedStatusBanner" style="grid-row:2; grid-column:2;"></div>
+    <div class="mini-banner" id="statusBanner" style="grid-row:2; grid-column:2;"></div>
+    <div class="mini-banner muted" id="excludedStatusBanner" style="display:none;"></div>
   </div>
   <div class="progress" id="progressWrap"><div id="progressBar" style="width:0%"></div></div>
 
@@ -1728,6 +1923,14 @@ body{overflow-x:hidden;}
       <button type="button" class="report-mini-card" onclick="openYearlyReport()">
         <span class="icon">📆</span><span>سنوي</span>
       </button>
+    </div>
+  </div>
+  <div class="zk-wrap" id="zkWrap">
+    <button type="button" class="zk-main" onclick="toggleZakat()"><span class="zk-ico">🕌</span><span>زكاتي</span><span class="plus-badge in-card zk-plus" onclick="event.stopPropagation(); openZakatTotal()" role="button" aria-label="إضافة للزكاة">+</span><span class="zk-arrow">▼</span></button>
+    <div class="zk-row">
+      <button type="button" class="zk-sq" onclick="openZakatTotal()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">💰</span><span class="zk-l" id="zkTotLbl">زكاتي</span><span class="zk-v" id="zkTotal">0</span></button>
+      <button type="button" class="zk-sq" onclick="openZakatPaid()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🤲</span><span class="zk-l">منصرف الزكاة</span><span class="zk-v" id="zkPaid">0</span></button>
+      <button type="button" class="zk-sq" onclick="toggleZakatNote()"><span class="zk-i">⏳</span><span class="zk-l">باقي الزكاة</span><span class="zk-v" id="zkLeft">0</span></button>
     </div>
   </div>
 </div>
@@ -1845,6 +2048,7 @@ const FONT_SCALE_MIN = 0.85, FONT_SCALE_MAX = 1.5;
 const DEFAULT_CARD_COLORS = {
   income:'#e5f7ef', expense:'#e0e7ff', deficit:'#fdeaea', excluded:'#fff3d6',
   annualTotal:'#16a870', annualDeficit:'#ef4b4b',
+  zakat:'#f5c542', genIncome:'#12b27a', genDeficit:'#dc2626',
   iconIncome:'#ffffff', iconExpense:'#ffffff',
   months:['#E0E7FF','#FCE7F3','#D1FAE5','#FEF3C7','#DBEAFE','#FFEDD5','#EDE9FE','#CFFAFE','#FBCFE8','#E0F2FE','#FED7AA','#A7F3D0']
 };
@@ -1936,6 +2140,12 @@ function applySettings(s){
   root.style.setProperty('--c-annual-deficit', annualDeficitBg);
   root.style.setProperty('--c-annual-deficit2', shade(annualDeficitBg,-18));
 
+  [['zk','zakat'],['gi','genIncome'],['gd','genDeficit']].forEach(([pf,key])=>{
+    const b = shade(c[key], off);
+    root.style.setProperty('--'+pf+'-l', shade(b,60)); root.style.setProperty('--'+pf+'-b', b);
+    root.style.setProperty('--'+pf+'-d', shade(b,-22)); root.style.setProperty('--'+pf+'-h', shade(b,30));
+    root.style.setProperty('--'+pf+'-e', shade(b,-45)); root.style.setProperty('--'+pf+'-t', shade(b,-75));
+  });
   (c.months||[]).forEach((mc,idx)=> root.style.setProperty('--c-month-'+idx, shade(mc, off)));
 
   // تكبير/تصغير الخط والأيقونات فقط (من غير ما نكبّر الشاشة كلها)
@@ -1978,7 +2188,7 @@ function refreshSettingsUI(s){
   if(bLabel){ const off = Number(s.brightness)||0; bLabel.textContent = (off>0?'+':'') + off + '%'; }
 
   const c = Object.assign({}, DEFAULT_CARD_COLORS, s.colors||{});
-  ['income','expense','iconIncome','iconExpense','deficit','excluded','annualTotal','annualDeficit'].forEach(key=>{
+  ['income','expense','iconIncome','iconExpense','deficit','excluded','annualTotal','annualDeficit','zakat','genIncome','genDeficit'].forEach(key=>{
     const inp = document.getElementById('cc-'+key);
     if(inp) inp.value = c[key];
   });
@@ -2377,6 +2587,271 @@ function save(){
 }
 function fmt(n){ return (Number(n)||0).toLocaleString('ar-EG'); }
 
+// ===== GENERAL INCOME JS START =====
+function giRec(){
+  if(!data.genIncome || typeof data.genIncome !== 'object') data.genIncome = {};
+  let y = data.genIncome[currentYear];
+  if(typeof y === 'number'){ const n = y; y = {}; for(let i=0;i<12;i++) y[i] = {src: n>0 ? [{id:'lg'+i, name:'دخل عام', amount:n}] : [], out:[]}; data.genIncome[currentYear] = y; }
+  if(!y || typeof y !== 'object'){ y = {}; data.genIncome[currentYear] = y; }
+  let r = y[currentMonth];
+  if(typeof r === 'number'){ r = {src: r>0 ? [{id:'lg', name:'دخل عام', amount:r}] : [], out:[]}; }
+  if(!r || typeof r !== 'object') r = {src:[], out:[]};
+  if(!Array.isArray(r.src)) r.src = [];
+  if(!Array.isArray(r.out)) r.out = [];
+  y[currentMonth] = r;
+  return r;
+}
+const giSum = arr => arr.reduce((a,x)=> a + (Number(x.amount)||0), 0);
+function giMeter(id, pct, color){
+  const el = document.getElementById(id); if(!el) return;
+  el.style.width = Math.max(0, Math.min(100, pct)) + '%'; el.style.setProperty('--mc', color);
+}
+function giPctTxt(p){ return toArabicDigits(Math.round(p)) + '٪'; }
+function renderGI(){
+  const a = document.getElementById('giAmt'); if(!a || !data[currentYear] || currentMonth === null) return;
+  if(!document.documentElement.style.getPropertyValue('--gi-b')) applySettings(_draftSettings || settings);
+  const r = giRec(), inc = giSum(r.src), exp = giSum(r.out), left = inc - exp, bad = left < 0 && (inc > 0 || exp > 0);
+  a.textContent = fmt(inc);
+  document.getElementById('giSpent').textContent = fmt(exp);
+  document.getElementById('giLeftSq').classList.toggle('bad', bad);
+  document.getElementById('giLeftIco').textContent = bad ? '⚠️' : '✅';
+  document.getElementById('giLeftLbl').textContent = bad ? 'العجز' : 'المتبقي';
+  document.getElementById('giLeft').textContent = (inc > 0 || exp > 0) ? fmt(Math.abs(left)) : '—';
+  const sp = inc > 0 ? exp / inc * 100 : (exp > 0 ? 100 : 0);
+  const spCol = sp < 60 ? '#00e676' : (sp < 90 ? '#ffb300' : '#ff3d3d');
+  giMeter('giMeterMain', sp, spCol); giMeter('giMeterSpent', sp, spCol);
+  document.getElementById('giPctMain').textContent = inc > 0 ? 'صُرف ' + giPctTxt(sp) : '';
+  document.getElementById('giPctSpent').textContent = inc > 0 ? giPctTxt(sp) + ' من الدخل' : '';
+  let lp, lc, lt;
+  if(bad){ lp = inc > 0 ? Math.min(100, -left / inc * 100) : 100; lc = '#ff1744'; lt = inc > 0 ? giPctTxt(-left / inc * 100) + ' عجز' : ''; }
+  else { lp = inc > 0 ? left / inc * 100 : 0; lc = lp > 40 ? '#00e676' : (lp > 10 ? '#ffb300' : '#ff3d3d'); lt = inc > 0 ? giPctTxt(lp) + ' متبقي' : ''; }
+  giMeter('giMeterLeft', lp, lc);
+  document.getElementById('giPctLeft').textContent = lt;
+}
+function toggleGI(){ document.getElementById('giWrap').classList.toggle('open'); }
+
+// مصادر الدخل العام
+function renderGISources(){
+  const r = giRec(), box = document.getElementById('giSrcList');
+  document.getElementById('giSrcTotal').textContent = fmt(giSum(r.src));
+  box.innerHTML = r.src.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد مصادر دخل بعد</div>';
+  r.src.forEach(x=>{
+    const d = document.createElement('div'); d.className = 'gi-row';
+    d.innerHTML = '<span>💵</span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
+    d.children[1].textContent = x.name; d.children[2].textContent = fmt(x.amount);
+    d.children[3].onclick = ()=> openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a)=>{
+      x.name = n || x.name; x.amount = a; save(); renderGISources(); renderGI();
+    });
+    d.children[4].onclick = ()=> openConfirm('حذف مصدر الدخل', 'هل تريد حذف "' + x.name + '"؟', ()=>{
+      const rr = giRec(); rr.src = rr.src.filter(z=> z.id !== x.id); save(); renderGISources(); renderGI();
+    });
+    box.appendChild(d);
+  });
+}
+function openGI(){ renderGISources(); document.getElementById('giOverlay').classList.add('open'); }
+function closeGI(){ document.getElementById('giOverlay').classList.remove('open'); }
+function addGISource(){
+  const n = document.getElementById('giSrcName').value.trim(), amt = Number(document.getElementById('giSrcAmt').value) || 0;
+  if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
+  giRec().src.push({id: uid(), name: n, amount: amt});
+  document.getElementById('giSrcName').value = ''; document.getElementById('giSrcAmt').value = '';
+  save(); renderGISources(); renderGI(); showToast('تمت إضافة مصدر الدخل', true);
+}
+
+// الصرف من الدخل العام: إلى المصروف المنزلي أو زكاتي
+let _giDest = 'income';
+function setGIDest(d){
+  _giDest = d;
+  document.getElementById('giDestInc').classList.toggle('active', d === 'income');
+  document.getElementById('giDestZk').classList.toggle('active', d === 'zakat');
+}
+function renderGIOut(){
+  const r = giRec(), box = document.getElementById('giOutList'), inc = giSum(r.src), tot = giSum(r.out);
+  document.getElementById('giOutInc').textContent = fmt(inc);
+  document.getElementById('giOutTot').textContent = fmt(tot);
+  document.getElementById('giOutToInc').textContent = fmt(giSum(r.out.filter(x=> x.dest === 'income')));
+  document.getElementById('giOutToZk').textContent = fmt(giSum(r.out.filter(x=> x.dest === 'zakat')));
+  box.innerHTML = r.out.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف بعد</div>';
+  r.out.forEach(x=>{
+    const d = document.createElement('div'); d.className = 'gi-row';
+    d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
+    d.children[0].textContent = x.dest === 'zakat' ? '🕌' : '💰';
+    d.children[1].textContent = fmt(x.amount) + (x.note ? ' — ' + x.note : '');
+    d.children[2].textContent = x.date || '';
+    d.children[3].onclick = ()=> openGenEdit('✏️ تعديل الصرف', 'ملاحظة', x.note, x.amount, (n,a)=> editGIOut(x.id, n, a));
+    d.children[4].onclick = ()=> openConfirm('حذف عملية الصرف', 'سيتم التراجع عنها من ' + (x.dest === 'zakat' ? 'زكاتي' : 'المصروف المنزلي') + '. متأكد؟', ()=> deleteGIOut(x.id));
+    box.appendChild(d);
+  });
+}
+function openGIOut(){ renderGIOut(); document.getElementById('giOutOverlay').classList.add('open'); }
+function closeGIOut(){ document.getElementById('giOutOverlay').classList.remove('open'); }
+function giLabel(note){ return 'من الدخل العام' + (note ? ' — ' + note : ''); }
+function giAfter(){ save(); renderGIOut(); renderGI(); renderZakat(); if(typeof renderDetail === 'function') renderDetail(); }
+function addGIOut(){
+  const amt = Number(document.getElementById('giOutAmt').value) || 0, note = document.getElementById('giOutNote').value.trim();
+  if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
+  const rec = {id: uid(), dest: _giDest, amount: amt, note, date: new Date().toISOString().slice(0,10)};
+  if(_giDest === 'zakat'){ zkGet().adds.push({id: rec.id, name: giLabel(note), amount: amt, date: rec.date}); }
+  else { const mon = data[currentYear][currentMonth]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: rec.id, name: giLabel(note), amount: amt, counted: true}); }
+  giRec().out.push(rec);
+  document.getElementById('giOutAmt').value = ''; document.getElementById('giOutNote').value = '';
+  giAfter();
+  showToast('تم الصرف إلى ' + (_giDest === 'zakat' ? 'زكاتي' : 'المصروف المنزلي') + ' ✅', true);
+}
+function editGIOut(id, note, amt){
+  const rec = giRec().out.find(x=> x.id === id); if(!rec) return;
+  rec.note = note; rec.amount = amt;
+  const mon = data[currentYear][currentMonth];
+  const inc = (mon.incomeSources || []).find(x=> x.id === id); if(inc){ inc.name = giLabel(note); inc.amount = amt; }
+  const z = zkGet(), za = z.adds.find(x=> x.id === id); if(za){ za.name = giLabel(note); za.amount = amt; }
+  const zp = z.payments.find(x=> x.id === id); if(zp){ zp.note = giLabel(note); zp.amount = amt; }
+  giAfter();
+}
+function deleteGIOut(id){
+  const r = giRec(), mon = data[currentYear][currentMonth];
+  r.out = r.out.filter(x=> x.id !== id);
+  mon.incomeSources = (mon.incomeSources || []).filter(x=> x.id !== id);
+  const z = zkGet(); z.adds = z.adds.filter(x=> x.id !== id); z.payments = z.payments.filter(x=> x.id !== id);
+  giAfter();
+}
+// ===== GENERAL INCOME JS END =====
+// ===== MODAL SCROLL LOCK JS =====
+(function(){
+  let locked = false, savedY = 0;
+  function anyOpen(){ return !!document.querySelector('.modal-overlay.open'); }
+  function lock(){
+    if(locked || document.body.classList.contains('scroll-locked')) return; locked = true;
+    savedY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    document.body.style.top = (-savedY) + 'px';
+    document.body.classList.add('modal-locked');
+  }
+  function unlock(){
+    if(!locked) return; locked = false;
+    document.body.classList.remove('modal-locked');
+    document.body.style.top = '';
+    window.scrollTo(0, savedY);
+  }
+  function sync(){ anyOpen() ? lock() : unlock(); }
+  new MutationObserver(sync).observe(document.body, {attributes:true, attributeFilter:['class'], subtree:true});
+  // اللمس على الخلفية أو على محتوى مش بيتحرك ما يحرّكش الصفحة اللي تحتيه
+  function scrollableUp(el, overlay){
+    while(el && el !== overlay && el.nodeType === 1){
+      const cs = getComputedStyle(el);
+      if((cs.overflowY === 'auto' || cs.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
+      el = el.parentElement;
+    }
+    return false;
+  }
+  document.addEventListener('touchmove', function(e){
+    if(!locked) return;
+    const overlay = e.target.closest ? e.target.closest('.modal-overlay.open') : null;
+    if(!overlay || !scrollableUp(e.target, overlay)) e.preventDefault();
+  }, {passive:false});
+  document.addEventListener('wheel', function(e){
+    if(!locked) return;
+    const overlay = e.target.closest ? e.target.closest('.modal-overlay.open') : null;
+    if(!overlay || !scrollableUp(e.target, overlay)) e.preventDefault();
+  }, {passive:false});
+  sync();
+})();
+// ===== MODAL SCROLL LOCK JS END =====
+
+
+// ===== ZAKAT JS START =====
+function zkGet(){
+  if(!data.zakat || typeof data.zakat !== 'object') data.zakat = {};
+  const y = String(currentYear), m = (currentMonth === null || currentMonth === undefined) ? 0 : currentMonth;
+  let yr = data.zakat[y];
+  if(!yr || typeof yr !== 'object') yr = data.zakat[y] = {};
+  if('payments' in yr || 'total' in yr){ // بيانات قديمة على مستوى السنة -> الشهر الحالي
+    const leg = {total: Number(yr.total) || 0, payments: Array.isArray(yr.payments) ? yr.payments : []};
+    yr = data.zakat[y] = {};
+    yr[m] = {adds: leg.total > 0 ? [{id:'lgz', name:'إجمالي الزكاة', amount: leg.total}] : [], payments: leg.payments};
+  }
+  let z = yr[m]; if(!z || typeof z !== 'object') z = yr[m] = {};
+  if(!Array.isArray(z.adds)) z.adds = [];
+  if(!Array.isArray(z.payments)) z.payments = [];
+  if(Number(z.total) > 0) z.adds.unshift({id:'lgt' + m, name:'إجمالي الزكاة', amount: Number(z.total)});
+  delete z.total;
+  return z;
+}
+const zkSum = arr => arr.reduce((a,p)=> a + (Number(p.amount) || 0), 0);
+function renderZakat(){
+  const el = document.getElementById('zkTotal'); if(!el || currentMonth === null || !data[currentYear]) return;
+  if(!document.documentElement.style.getPropertyValue('--zk-b')) applySettings(_draftSettings || settings);
+  const z = zkGet(), tot = zkSum(z.adds), paid = zkSum(z.payments), left = tot - paid;
+  document.getElementById('zkTotLbl').textContent = 'زكاتي لشهر ' + MONTHS[currentMonth];
+  el.textContent = fmt(tot);
+  document.getElementById('zkPaid').textContent = fmt(paid);
+  document.getElementById('zkLeft').textContent = fmt(Math.max(left, 0));
+}
+function toggleZakat(){ document.getElementById('zkWrap').classList.toggle('open'); }
+function toggleZakatNote(){ const z = zkGet(); showToast('الباقي = الإجمالي − المنصرف (' + fmt(zkSum(z.adds) - zkSum(z.payments)) + ')', true); }
+let _zkMode = 'adds';
+function openZakatModal(mode){
+  _zkMode = mode;
+  const adds = mode === 'adds';
+  document.getElementById('zkTitle').textContent = adds ? '💰 زكاتي لشهر ' + MONTHS[currentMonth] : '🤲 منصرف الزكاة — ' + MONTHS[currentMonth];
+  document.getElementById('zkSumLbl').firstChild.textContent = adds ? 'الإجمالي: ' : 'المنصرف: ';
+  document.getElementById('zkNameLbl').textContent = adds ? 'الاسم (اختياري)' : 'ملاحظة (اختياري)';
+  document.getElementById('zkNameIn').value = ''; document.getElementById('zkAmtIn').value = '';
+  renderZakatList();
+  document.getElementById('zkOverlay').classList.add('open');
+}
+function openZakatTotal(){ openZakatModal('adds'); }
+function openZakatPaid(){ openZakatModal('payments'); }
+function renderZakatList(){
+  const z = zkGet(), arr = z[_zkMode], box = document.getElementById('zkList');
+  document.getElementById('zkSumVal').textContent = fmt(zkSum(arr));
+  box.innerHTML = arr.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد بنود بعد</div>';
+  arr.forEach(x=>{
+    const d = document.createElement('div'); d.className = 'gi-row';
+    d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
+    d.children[0].textContent = _zkMode === 'adds' ? '💰' : '🤲';
+    d.children[1].textContent = (_zkMode === 'adds' ? (x.name || 'زكاتي') : (x.note || 'دفعة'));
+    d.children[2].textContent = fmt(x.amount);
+    d.children[3].onclick = ()=> openGenEdit('✏️ تعديل', _zkMode === 'adds' ? 'الاسم' : 'ملاحظة', _zkMode === 'adds' ? x.name : x.note, x.amount, (n,a)=>{
+      if(_zkMode === 'adds') x.name = n || 'زكاتي'; else x.note = n; x.amount = a;
+      save(); renderZakatList(); renderZakat();
+    });
+    d.children[4].onclick = ()=> openConfirm('حذف البند', 'هل تريد حذف هذا البند؟', ()=>{
+      z[_zkMode] = z[_zkMode].filter(q=> q.id !== x.id); save(); renderZakatList(); renderZakat();
+    });
+    box.appendChild(d);
+  });
+}
+function addZakatItem(){
+  const amt = Number(document.getElementById('zkAmtIn').value) || 0, txt = document.getElementById('zkNameIn').value.trim();
+  if(amt <= 0){ showToast('اكتب المبلغ', false); return; }
+  const z = zkGet(), date = new Date().toISOString().slice(0,10);
+  if(_zkMode === 'adds') z.adds.push({id: uid(), name: txt || 'زكاتي', amount: amt, date});
+  else z.payments.push({id: uid(), amount: amt, note: txt, date});
+  document.getElementById('zkNameIn').value = ''; document.getElementById('zkAmtIn').value = '';
+  save(); renderZakatList(); renderZakat(); showToast('تم الحفظ ✅', true);
+}
+function closeZakat(){ document.getElementById('zkOverlay').classList.remove('open'); }
+
+// نافذة تعديل عامة (اسم + مبلغ)
+let _gxCb = null;
+function openGenEdit(title, nameLabel, name, amount, cb){
+  _gxCb = cb;
+  document.getElementById('gxTitle').textContent = title;
+  document.getElementById('gxNameLbl').textContent = nameLabel;
+  document.getElementById('gxName').value = name || '';
+  document.getElementById('gxAmt').value = amount || '';
+  document.getElementById('gxOverlay').classList.add('open');
+}
+function closeGenEdit(){ document.getElementById('gxOverlay').classList.remove('open'); _gxCb = null; }
+function saveGenEdit(){
+  const a = Number(document.getElementById('gxAmt').value) || 0;
+  if(a <= 0){ showToast('اكتب مبلغ صحيح', false); return; }
+  const cb = _gxCb, n = document.getElementById('gxName').value.trim();
+  closeGenEdit();
+  if(cb) cb(n, a);
+}
+// ===== ZAKAT JS END =====
+
+
 // ===== مزامنة حقيقية بين الأجهزة عبر حساب Claude (db + user) =====
 // localStorage يفضل شغال دايمًا كنسخة سريعة محلية، وده بيضيف مزامنة فوق كده
 let _dbDoc = null;
@@ -2556,6 +3031,7 @@ function renderMonths(){
   const deficit = grandDeficitAllMonths();
   setNumAnimated(document.getElementById('grandDeficit'), deficit);
   document.getElementById('deficitHeaderStat').style.display = deficit > 0 ? 'flex' : 'none';
+  renderZakat();
 }
 
 function showMonths(){
@@ -2581,6 +3057,8 @@ function openMonth(i){
 }
 
 function renderDetail(){
+  renderZakat();
+  renderGI();
   const i = currentMonth;
   const m = data[currentYear][i];
   const exp = monthExpenses(i);
@@ -2649,7 +3127,7 @@ function renderDetail(){
   const incomeExcludedForRemain = incomeExcludedTotal(m);
   const excludedRemain = incomeExcludedForRemain - excluded;
   const excludedStatusBanner = document.getElementById('excludedStatusBanner');
-  excludedStatusBanner.style.display = 'block';
+  excludedStatusBanner.style.display = 'none';
   if(excludedRemain < 0){
     excludedStatusBanner.className = 'mini-banner bad';
     excludedStatusBanner.innerHTML = `<span class="lbl">⚠️ عجز غير مضاف</span><span class="amt">${fmt(Math.abs(excludedRemain))}</span>`;
@@ -3145,7 +3623,7 @@ function openReport(kind){
   } else if(kind === 'monthly'){
     total = monthExpenses(currentMonth);
     title = '🗓️ تقرير ' + MONTHS[currentMonth] + ' ' + toArabicDigits(currentYear);
-    sub = 'الدخل الشهري: ' + fmt(totalIncome(mon));
+    sub = 'المصروف المنزلي: ' + fmt(totalIncome(mon));
   } else {
     total = grandTotalExpenses();
     title = '📆 تقرير سنة ' + toArabicDigits(currentYear);
@@ -3415,7 +3893,7 @@ function runConfirmedAction(){
   closeConfirm();
   if(action) action();
 }
-// ===== مصادر الدخل الشهري =====
+// ===== مصادر المصروف المنزلي =====
 function openIncomeSources(){
   renderIncomeSourcesList();
   document.getElementById('incomeSourcesOverlay').classList.add('open');
