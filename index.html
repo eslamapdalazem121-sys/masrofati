@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.2400">
+<meta name="app-version" content="2026-10-15.3000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1284,7 +1284,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="header-stat compact">
       <span class="icon">🧮</span>
       <div class="txt">
-        <span class="label">🧮 إجمالي المصروف المنزلي</span>
+        <span class="label">🧮 إجمالي المنصرف العام</span>
         <span class="val" id="grandTotal">0</span>
       </div>
     </div>
@@ -1798,7 +1798,6 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
         <button type="button" class="backup-btn" onclick="shareAppLink('public')">📤 مشاركة</button>
         <button type="button" class="backup-btn" onclick="copyAppLink('public')">📋 نسخ الرابط</button>
       </div>
-      <div class="share-grid" id="shareGridPublic"></div>
       <div class="field" style="margin-top:12px;">
         <label>رابط مختصر (اختياري) — اعمله من موقع اختصار روابط والصقه هنا</label>
         <input type="text" id="shortLinkPublic" class="lock-input" dir="ltr" placeholder="https://is.gd/اسمك" style="font-size:calc(12px * var(--fs,1)); text-align:left;" onchange="saveShortLink('public')">
@@ -2361,8 +2360,8 @@ function toggleColorsSection(){
   const body = document.getElementById('colorsSectionBody');
   setColorsSection(body.style.display === 'none');
 }
-const APP_LINK = 'https://claude.ai/artifact/8uv7qhPFSsSzTqqPJk3tpa';
-const PUBLIC_LINK = 'https://claude.ai/artifact/8uv7qhPFSsSzTqqPJk3tpa';
+const APP_LINK = 'https://eslamapdalazem121-sys.github.io/masrofati/';
+const PUBLIC_LINK = 'https://eslamapdalazem121-sys.github.io/masrofati/';
 const SHORT_LINKS_KEY = 'budget_short_links_v1';
 function readShortLinks(){
   try{
@@ -2401,21 +2400,7 @@ function linkFor(which){
   return which === 'public' ? PUBLIC_LINK : APP_LINK;
 }
 function msgFor(which){ return which === 'public' ? 'جرّب تطبيق مصروفاتي المنزلية:' : 'رابط تطبيق مصروفاتي المنزلية:'; }
-const SHARE_TARGETS = [
-  {key:'wa',   ic:'🟢', label:'واتساب',   url:(l,m)=> 'https://wa.me/?text=' + encodeURIComponent(m + ' ' + l)},
-  {key:'tg',   ic:'✈️', label:'تيليجرام', url:(l,m)=> 'https://t.me/share/url?url=' + encodeURIComponent(l) + '&text=' + encodeURIComponent(m)},
-  {key:'fb',   ic:'📘', label:'فيسبوك',   url:(l,m)=> 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(l)},
-  {key:'x',    ic:'✖️', label:'X',        url:(l,m)=> 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(m) + '&url=' + encodeURIComponent(l)},
-  {key:'mail', ic:'✉️', label:'جيميل',    url:(l,m)=> 'https://mail.google.com/mail/?view=cm&fs=1&su=' + encodeURIComponent('تطبيق مصروفاتي المنزلية') + '&body=' + encodeURIComponent(m + ' ' + l)}
-];
 function buildShareButtons(){
-  [['private','shareGrid'],['public','shareGridPublic']].forEach(([which, gridId])=>{
-    const grid = document.getElementById(gridId);
-    if(!grid) return;
-    grid.innerHTML = SHARE_TARGETS.map(t=>
-      `<button type="button" class="share-chip" onclick="openShareTarget('${t.key}','${which}')"><span class="ic">${t.ic}</span><span>${t.label}</span></button>`
-    ).join('');
-  });
   const privInput = document.getElementById('appLinkInput');
   if(privInput) privInput.value = linkFor('private');
   const pubInput = document.getElementById('publicLinkInput');
@@ -2427,37 +2412,44 @@ function buildShareButtons(){
   const pubSection = document.getElementById('publicShareSection');
   if(pubSection) pubSection.style.display = linkFor('public') ? 'block' : 'none';
 }
-function openShareTarget(key, which){
-  const t = SHARE_TARGETS.find(x=> x.key === key);
-  if(!t) return;
-  which = which || 'private';
-  const link = linkFor(which);
-  copyLinkSilently(link); // نسخة احتياطية في الحافظة عشان تلصقها لو التطبيق ما اتفتحش
-  let w = null;
-  try{ w = window.open(t.url(link, msgFor(which)), '_blank'); }catch(e){ w = null; }
-  if(w){
-    try{ w.opener = null; }catch(e){}
-    showToast('بنفتحلك ' + t.label + ' — لو الرسالة ما ظهرتش الصق الرابط (اتنسخ تلقائيًا)', true);
-    return;
-  }
-  // المتصفح منع فتح التطبيق من جوه الصفحة: الرابط اتنسخ، الصقه في التطبيق
-  copyAppLink(which, 'تعذّر فتح ' + t.label + ' من هنا — تم نسخ الرابط، الصقه في ' + t.label);
+function copyLinkSilently(link){
+  try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).catch(()=>{}); }catch(e){}
 }
+function isTopLevelWeb(){ try{ return window.top === window && /^https?:/.test(location.protocol); }catch(e){ return false; } }
 async function shareAppLink(which){
   which = which || 'private';
+  const link = linkFor(which), msg = msgFor(which);
+  copyLinkSilently(link); // نسخة احتياطية في الحافظة
+  // 1) قائمة مشاركة الجهاز (كل التطبيقات)
   try{
     if(navigator.share){
-      await navigator.share({ title:'مصروفاتي المنزلية', text: msgFor(which), url: linkFor(which) });
+      await navigator.share({ title:'مصروفاتي المنزلية', text: msg, url: link });
       return;
     }
   }catch(e){
     if(e && e.name === 'AbortError') return; // المستخدم لغى المشاركة
   }
-  // قائمة مشاركة الجهاز مش متاحة جوه الصفحة: نوجّهك لأزرار التطبيقات اللي تحت
-  const grid = document.getElementById(which === 'public' ? 'shareGridPublic' : 'shareGrid');
-  if(grid) grid.scrollIntoView({behavior:'smooth', block:'center'});
-  showToast('اختار التطبيق اللي عايز تبعت منه من الأزرار اللي تحت', true);
+  // 2) جوه Claude المتصفح بيمنع قائمة المشاركة: نفتح النسخة اللي على الإنترنت في كروم وهناك بتشتغل المشاركة
+  if(!isTopLevelWeb()){
+    try{
+      const w = window.open(link.split('#')[0] + '#share', '_blank');
+      if(w){ showToast('بنفتحلك التطبيق في المتصفح — دوس «مشاركة» هناك', true); return; }
+    }catch(e){}
+  }
+  // 3) آخر حل: نسخ الرابط
+  copyAppLink(which, 'تم نسخ الرابط — الصقه في أي تطبيق عايز تبعته منه');
 }
+function showShareHandoff(){
+  if(document.getElementById('shareHandoff')) return;
+  const o = document.createElement('div');
+  o.className = 'modal-overlay open'; o.id = 'shareHandoff';
+  o.innerHTML = '<div class="modal-box"><h3>📤 مشاركة التطبيق</h3><p style="text-align:center; font-size:14px; line-height:1.7;">دوس على الزرار علشان تفتح قايمة المشاركة وتبعت الرابط لأي تطبيق.</p><div class="modal-actions"><button class="btn-cancel" id="shHoCancel">إغلاق</button><button class="btn-save" id="shHoGo">📤 مشاركة</button></div></div>';
+  document.body.appendChild(o);
+  const close = ()=>{ o.remove(); try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} };
+  document.getElementById('shHoCancel').onclick = close;
+  document.getElementById('shHoGo').onclick = async ()=>{ await shareAppLink('public'); close(); };
+}
+if(location.hash === '#share'){ window.addEventListener('load', ()=> setTimeout(showShareHandoff, 700)); }
 async function copyAppLink(which, msg){
   which = which || 'private';
   const okMsg = (typeof msg === 'string' && msg) ? msg : 'تم نسخ الرابط';
@@ -2772,6 +2764,12 @@ function closeMsSummary(){ document.getElementById('msOverlay').classList.remove
 function toggleMonthsGrid(){
   const off = document.getElementById('yrMS').classList.toggle('off');
   document.getElementById('months').classList.toggle('months-off', off);
+}
+function giMonthOut(i){
+  const y = data.genIncome && data.genIncome[currentYear];
+  if(!y || typeof y !== 'object') return 0;
+  const r = y[i];
+  return (r && typeof r === 'object' && Array.isArray(r.out)) ? r.out.reduce((a,x)=> a + (Number(x.amount)||0), 0) : 0;
 }
 function toggleYr(){ document.getElementById('yrGI').classList.toggle('open'); }
 function openYrSummary(){
@@ -3230,10 +3228,10 @@ function renderMonths(){
     wrap.appendChild(div);
   });
   populateYearSelect();
-  let hhAll = 0, expAll = 0, genAll = 0;
-  MONTHS.forEach((_, i)=>{ hhAll += totalIncome(data[currentYear][i]); expAll += monthExpenses(i); genAll += giMonthTotal(i); });
-  const yrRem = genAll - hhAll; // الدخل العام السنوي − إجمالي المصروف المنزلي
-  setNumAnimated(document.getElementById('grandTotal'), hhAll);
+  let hhAll = 0, expAll = 0, genAll = 0, genOutAll = 0;
+  MONTHS.forEach((_, i)=>{ hhAll += totalIncome(data[currentYear][i]); expAll += monthExpenses(i); genAll += giMonthTotal(i); genOutAll += giMonthOut(i); });
+  const yrRem = genAll - genOutAll; // الدخل العام السنوي − إجمالي المنصرف العام
+  setNumAnimated(document.getElementById('grandTotal'), genOutAll);
   const yg = document.getElementById('yrGIAmt'); if(yg) yg.textContent = fmt(genAll);
   const rs = document.getElementById('deficitHeaderStat'), yrBad = yrRem < 0;
   rs.style.display = 'flex'; rs.classList.toggle('danger', yrBad);
