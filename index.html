@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.3000">
+<meta name="app-version" content="2026-10-15.3300">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1208,6 +1208,16 @@ body{overflow-x:hidden;}
 .months-off{display:none !important;}
 .zk-wrap.yr-ms .ms-plus{pointer-events:auto; cursor:pointer; margin-inline-start:auto;}
 .zk-wrap.yr-ms .ms-plus::after{pointer-events:none;}
+.year-switcher{max-width:264px; padding:9px 10px; gap:8px; border-radius:22px;
+  box-shadow:0 1px 0 rgba(255,255,255,.3) inset, 0 -4px 0 rgba(0,0,0,.2) inset, 0 8px 0 rgba(0,0,0,.22), 0 16px 24px rgba(0,0,0,.25);}
+.year-switcher .fy-label{font-size:calc(12px * var(--fs,1)); font-weight:800;}
+.year-switcher select{font-family:Arial, Helvetica, sans-serif; font-size:calc(30px * var(--fs,1)); font-weight:900; letter-spacing:2px; text-shadow:0 2px 0 rgba(0,0,0,.25); direction:ltr;}
+.year-switcher .icon{font-size:calc(26px * var(--fs,1));}
+.year-switcher .nav-btn{width:34px; height:34px; font-size:calc(22px * var(--fs,1)); font-weight:900; line-height:1; padding:0 0 3px;
+  background:linear-gradient(145deg,#ffffff 0%,#e4ece7 55%,#c3d2c9 100%); color:var(--accent-dark,#0b7a52); border:0;
+  box-shadow:0 1px 0 #fff inset, 0 -2px 0 rgba(0,0,0,.12) inset, 0 4px 0 rgba(0,0,0,.3), 0 8px 12px rgba(0,0,0,.25);}
+.year-switcher .nav-btn:active{transform:translateY(3px); box-shadow:0 1px 0 #fff inset, 0 -2px 0 rgba(0,0,0,.12) inset, 0 1px 0 rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.25);}
+.backup-fab{display:none !important;}
 /* ===== GENERAL INCOME END ===== */
 /* ===== MODAL SCROLL LOCK ===== */
 .modal-overlay{overscroll-behavior:contain;}
@@ -1621,6 +1631,14 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       </div>
     </div>
 
+
+    <div class="settings-section">
+      <h4>🔢 شكل الأرقام</h4>
+      <div class="opt-row" id="optDigits">
+        <button class="opt-chip" data-val="ar" onclick="previewSetting('digits','ar')">عربي ١٢٣</button>
+        <button class="opt-chip" data-val="en" onclick="previewSetting('digits','en')">English 123</button>
+      </div>
+    </div>
 
     <div class="settings-section">
       <h4>عمق البطاقات (3D)</h4>
@@ -2171,8 +2189,10 @@ function shade(hex, percent){
   b = Math.min(255,Math.max(0, Math.round(b + 2.55*percent)));
   return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
+var DIGITS_MODE = 'ar';
+function dateLocale(){ return DIGITS_MODE === 'en' ? 'ar-EG-u-nu-latn' : 'ar-EG'; }
 let settings = {
-  theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click',
+  digits:'ar', theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click',
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -2204,6 +2224,8 @@ const DEPTH_LEVELS = {
 };
 function applySettings(s){
   const root = document.documentElement;
+  const newMode = s.digits === 'en' ? 'en' : 'ar';
+  if(newMode !== DIGITS_MODE){ DIGITS_MODE = newMode; setTimeout(refreshDigitsView, 0); }
   soundCfg = soundCfgFromSettings(s);
   const depth = DEPTH_LEVELS[s.depth] || DEPTH_LEVELS.strong;
   root.style.setProperty('--thick', depth.thick + 'px');
@@ -2275,8 +2297,15 @@ function applySettings(s){
   if(bLabel) bLabel.textContent = (off>0?'+':'') + off + '%';
 }
 
+function refreshDigitsView(){
+  try{
+    document.querySelectorAll('[id]').forEach(el=>{ el._numTarget = undefined; el._numCur = undefined; });
+    if(typeof data === 'undefined' || !data || !data[currentYear]) return;
+    if(currentMonth === null || currentMonth === undefined) renderMonths(); else renderDetail();
+  }catch(e){}
+}
 function refreshSettingsUI(s){
-  ['theme','accent','font','depth','clickType'].forEach(key=>{
+  ['theme','accent','font','depth','digits','clickType'].forEach(key=>{
     const containerId = 'opt' + key.charAt(0).toUpperCase() + key.slice(1);
     const container = document.getElementById(containerId);
     if(!container) return;
@@ -2628,11 +2657,12 @@ function populateYearSelect(){
   if(!sel) return;
   const years = Object.keys(data).map(Number).filter(n=> !isNaN(n)).sort((a,b)=> b-a);
   if(!years.includes(currentYear)) years.unshift(currentYear);
-  sel.innerHTML = years.map(y=> `<option value="${y}" ${y===currentYear?'selected':''}>${toArabicDigits(y)}</option>`).join('')
+  sel.innerHTML = years.map(y=> `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`).join('')
     + `<option value="__new__">＋ سنة جديدة</option>`;
 }
 
 function toArabicDigits(n){
+  if(DIGITS_MODE === 'en') return String(n);
   return String(n).replace(/[0-9]/g, d=> '٠١٢٣٤٥٦٧٨٩'[d]);
 }
 
@@ -2687,7 +2717,7 @@ function save(){
   scheduleDbPush();
   if(typeof window.__onDataSaved === 'function'){ try{ window.__onDataSaved(); }catch(e){} }
 }
-function fmt(n){ return (Number(n)||0).toLocaleString('ar-EG'); }
+function fmt(n){ return (Number(n)||0).toLocaleString(DIGITS_MODE === 'en' ? 'en-US' : 'ar-EG'); }
 
 // ===== GENERAL INCOME JS START =====
 function giRec(){
@@ -2854,7 +2884,7 @@ function setGIDest(d){
 }
 function giDateTxt(d){
   if(!d) return 'بدون تاريخ';
-  try{ return new Date(d + 'T12:00:00').toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'}); }catch(e){ return d; }
+  try{ return new Date(d + 'T12:00:00').toLocaleDateString(dateLocale(), {weekday:'long', day:'numeric', month:'long'}); }catch(e){ return d; }
 }
 function renderGIOut(){
   const r = giRec(), box = document.getElementById('giOutList'), inc = giSum(r.src), tot = giSum(r.out);
@@ -3206,7 +3236,7 @@ function grandDeficitAllMonths(){
 }
 function formatDate(ts){
   if(!ts) return '';
-  return new Date(ts).toLocaleDateString('ar-EG', {day:'numeric', month:'short'});
+  return new Date(ts).toLocaleDateString(dateLocale(), {day:'numeric', month:'short'});
 }
 
 function renderMonths(){
@@ -3421,7 +3451,7 @@ function renderGroupEl(g, depth, indexInParent, siblingCount){
           lastDateKey = key;
           const dayHeader = document.createElement('div');
           dayHeader.className = 'day-header';
-          dayHeader.textContent = d.toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
+          dayHeader.textContent = d.toLocaleDateString(dateLocale(), {weekday:'long', day:'numeric', month:'long'});
           childrenList.appendChild(dayHeader);
         }
       }
@@ -3735,7 +3765,7 @@ function openDailyReport(){
   let chartHtml = '';
   for(let day=1; day<=daysInMonth; day++){
     const total = dayTotals[day-1];
-    const weekday = new Date(currentYear, currentMonth, day).toLocaleDateString('ar-EG', {weekday:'short'});
+    const weekday = new Date(currentYear, currentMonth, day).toLocaleDateString(dateLocale(), {weekday:'short'});
     const isToday = (currentYear===now.getFullYear() && currentMonth===now.getMonth() && day===now.getDate());
     gridHtml += `
       <div class="day-card${total>0?' has-spend':''}${isToday?' today':''}" onclick="openDayDetail(${day})">
@@ -3776,7 +3806,7 @@ function openDayDetail(day){
   });
 
   const dateObj = new Date(currentYear, currentMonth, day);
-  const weekdayFull = dateObj.toLocaleDateString('ar-EG', {weekday:'long'});
+  const weekdayFull = dateObj.toLocaleDateString(dateLocale(), {weekday:'long'});
   document.getElementById('dayDetailTitle').textContent = `📅 ${weekdayFull} — ${toArabicDigits(day)} ${MONTHS[currentMonth]} ${toArabicDigits(currentYear)}`;
 
   const total = dayExpenses.reduce((s,e)=> e.counted===false ? s : s + Number(e.amount||0), 0);
@@ -3828,7 +3858,7 @@ function openReport(kind){
       return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
     });
     total = todayExpenses.reduce((s,e)=> e.counted===false ? s : s + Number(e.amount||0), 0);
-    title = '📅 تقرير اليوم — ' + now.toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
+    title = '📅 تقرير اليوم — ' + now.toLocaleDateString(dateLocale(), {weekday:'long', day:'numeric', month:'long'});
     sub = toArabicDigits(todayExpenses.length) + ' عملية اليوم';
   } else if(kind === 'monthly'){
     total = monthExpenses(currentMonth);
@@ -5602,7 +5632,7 @@ async function deleteBackup(id, where){
 // ---- الواجهة ----
 function formatBackupTime(ts){
   if(!ts) return '—';
-  return new Date(ts).toLocaleString('ar-EG', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+  return new Date(ts).toLocaleString(dateLocale(), {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
 }
 function formatBytes(b){
   if(b < 1024) return toArabicDigits(b) + ' بايت';
