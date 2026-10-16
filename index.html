@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.1400">
+<meta name="app-version" content="2026-10-15.2400">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1155,6 +1155,59 @@ body{overflow-x:hidden;}
 .zk-wrap:not(.gi-wrap) .zk-sq .zk-v{font-size:calc(20px * var(--fs,1)); font-weight:900;}
 .zk-wrap .zk-arrow{display:none;}
 .gi-wrap .zk-main .gi-plus, .zk-wrap:not(.gi-wrap) .zk-main .zk-plus{margin-inline-start:auto;}
+/* خط وأرقام أوضح */
+.gi-row{font-size:calc(15px * var(--fs,1));}
+.gi-row b{font-weight:700;}
+.gi-row > span:nth-of-type(2){font-size:calc(17.5px * var(--fs,1)); font-weight:800;}
+.gi-sumrow{font-size:calc(13px * var(--fs,1));}
+.gi-sumrow b{font-size:calc(17px * var(--fs,1)); font-weight:800;}
+.date-sep{font-size:calc(12.5px * var(--fs,1)); font-weight:800; color:var(--muted); margin:10px 4px 4px;}
+.item-row.sep-done .item-date{display:none;}
+.day-header{font-size:calc(13.5px * var(--fs,1)); font-weight:800;}
+.group-head .gname{font-size:calc(16px * var(--fs,1)); font-weight:800;}
+.group-head .gtotal{font-size:calc(19px * var(--fs,1)); font-weight:800;}
+.item-row{font-size:calc(16px * var(--fs,1)); font-weight:700;}
+.item-row > span[style] > span:first-child{font-size:calc(17.5px * var(--fs,1)); font-weight:800;}
+.item-row .item-date{font-size:calc(11.5px * var(--fs,1));}
+.avg-spend-val{font-size:calc(22px * var(--fs,1)); font-weight:900;}
+.avg-spend-over{font-size:calc(13.5px * var(--fs,1));}
+.yr-gi{max-width:640px; margin:0 auto 18px;}
+.yr-gi .zk-main{cursor:default; padding:12px 18px; justify-content:flex-start; gap:14px;}
+.yr-gi .zk-main:active{transform:none;}
+.yr-amt{font-size:calc(26px * var(--fs,1)); font-weight:900; line-height:1.15; direction:ltr; text-align:start;}
+.yr-gi .zk-main{cursor:pointer;}
+.yr-gi .zk-main .gi-plus{margin-inline-start:auto;}
+.header-stats-row{display:none;}
+.yr-gi.open + .header-stats-row{display:flex; animation:zkPop .4s cubic-bezier(.2,.9,.3,1.2);}
+.header-stats-row .header-stat.compact{flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:86px; padding:10px 8px; gap:0;}
+.header-stats-row .header-stat.compact .icon{display:none;}
+.header-stats-row .header-stat.compact .txt{align-items:center; text-align:center; gap:3px; width:100%;}
+.header-stats-row .header-stat.compact .label{font-size:calc(12.5px * var(--fs,1)); font-weight:800; white-space:normal; min-height:2.6em; display:flex; align-items:center; justify-content:center; line-height:1.3; opacity:1;}
+.header-stats-row .header-stat.compact .val{font-size:calc(24px * var(--fs,1)); font-weight:900; line-height:1.1; overflow:visible;}
+.yr-zm{max-width:640px; margin:6px auto 18px;}
+.zk-wrap.yr-zm .zk-main{padding:12px 18px; font-size:calc(19px * var(--fs,1)); justify-content:flex-start; gap:14px; border-radius:20px;
+  box-shadow:0 1px 0 #fff8d6 inset, 0 -4px 0 rgba(120,76,0,.35) inset, 0 10px 0 #a87400, 0 18px 28px rgba(120,76,0,.35);}
+.zk-wrap.yr-zm .zk-main:active{box-shadow:0 1px 0 #fff8d6 inset, 0 -4px 0 rgba(120,76,0,.35) inset, 0 4px 0 #a87400, 0 8px 14px rgba(120,76,0,.35);}
+.zk-wrap.yr-zm .zk-main .zk-ico{font-size:calc(30px * var(--fs,1));}
+.zk-wrap.yr-zm .zk-plus{margin-inline-start:auto;}
+.zk-wrap.yr-zm .zk-row{grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:18px;}
+.zk-wrap.yr-zm .zk-sq{min-height:100px; cursor:default;}
+.zk-wrap.yr-zm .zk-sq .zk-l{font-size:calc(12px * var(--fs,1));}
+.zk-wrap.yr-zm .zk-sq .zk-v{font-size:calc(24px * var(--fs,1));}
+.zk-wrap.yr-zm .zk-sq.bad{color:#450a0a;
+  background:linear-gradient(145deg,#ffd6d6 0%,#f87171 30%,#dc2626 65%,#fca5a5 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 -2px 0 rgba(0,0,0,.16) inset, 0 5px 0 #991b1b, 0 8px 12px rgba(0,0,0,.25);}
+.yr-ms{max-width:640px; margin:6px auto 16px;}
+.zk-wrap.yr-ms .zk-main{padding:12px 18px; font-size:calc(19px * var(--fs,1)); justify-content:flex-start; gap:14px; border-radius:20px; color:#0f1f5c;
+  background:linear-gradient(145deg,#e3e9ff 0%,#8aa6ff 28%,#4f6df0 62%,#a9bcff 100%);
+  box-shadow:0 1px 0 #f2f5ff inset, 0 -4px 0 rgba(20,40,140,.35) inset, 0 10px 0 #2a3fa8, 0 18px 28px rgba(20,40,140,.35);}
+.zk-wrap.yr-ms .zk-main:active{box-shadow:0 1px 0 #f2f5ff inset, 0 -4px 0 rgba(20,40,140,.35) inset, 0 4px 0 #2a3fa8, 0 8px 14px rgba(20,40,140,.35);}
+.zk-wrap.yr-ms .zk-main .zk-ico{font-size:calc(30px * var(--fs,1));}
+.ms-arrow{margin-inline-start:auto; font-size:16px; padding:6px 8px; border-radius:12px; background:rgba(255,255,255,.45); transition:transform .25s;}
+.yr-ms.off .ms-arrow{transform:rotate(180deg);}
+.months-off{display:none !important;}
+.zk-wrap.yr-ms .ms-plus{pointer-events:auto; cursor:pointer; margin-inline-start:auto;}
+.zk-wrap.yr-ms .ms-plus::after{pointer-events:none;}
 /* ===== GENERAL INCOME END ===== */
 /* ===== MODAL SCROLL LOCK ===== */
 .modal-overlay{overscroll-behavior:contain;}
@@ -1219,22 +1272,79 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <button type="button" class="nav-btn" onclick="shiftYear(1)">‹</button>
   </div>
 
+  <div class="gi-wrap yr-gi" id="yrGI">
+    <div class="zk-main" onclick="toggleYr()" role="button">
+      <span class="zk-ico">💵</span>
+      <span class="gi-col"><span>الدخل العام السنوي</span><span class="yr-amt" id="yrGIAmt">0</span></span>
+      <span class="plus-badge in-card gi-plus" onclick="event.stopPropagation(); openYrSummary()" role="button" aria-label="ملخص الدخل العام">+</span>
+    </div>
+  </div>
+
   <div class="header-stats-row">
     <div class="header-stat compact">
       <span class="icon">🧮</span>
       <div class="txt">
-        <span class="label">المصروفات السنوية</span>
+        <span class="label">🧮 إجمالي المصروف المنزلي</span>
         <span class="val" id="grandTotal">0</span>
       </div>
     </div>
 
-    <div class="header-stat compact danger" id="deficitHeaderStat">
-      <span class="icon">⚠️</span>
+    <div class="header-stat compact" id="deficitHeaderStat">
+      <span class="icon" id="yrRemIco">✅</span>
       <div class="txt">
-        <span class="label">إجمالي العجز</span>
+        <span class="label" id="yrRemLbl">المتبقي السنوي</span>
         <span class="val" id="grandDeficit">0</span>
       </div>
     </div>
+  </div>
+
+  <div class="zk-wrap yr-zm" id="yrZM">
+    <div class="zk-main" onclick="toggleZMCards()" role="button">
+      <span class="zk-ico">🕌</span>
+      <span class="gi-col"><span id="zmTitle">زكاة المال</span><span class="yr-amt" id="zmAmt">0</span></span>
+      <span class="plus-badge in-card zk-plus" onclick="event.stopPropagation(); openZM()" role="button" aria-label="إدخال زكاة المال">+</span>
+    </div>
+    <div class="zk-row">
+      <div class="zk-sq"><span class="zk-i">🤲</span><span class="zk-l">إجمالي منصرف زكاة الأشهر</span><span class="zk-v" id="zmPaid">0</span></div>
+      <div class="zk-sq" id="zmLeftSq"><span class="zk-i" id="zmLeftIco">⏳</span><span class="zk-l" id="zmLeftLbl">المتبقي</span><span class="zk-v" id="zmLeft">0</span></div>
+    </div>
+  </div>
+
+  <div class="zk-wrap yr-ms off" id="yrMS">
+    <div class="zk-main" onclick="toggleMonthsGrid()" role="button">
+      <span class="zk-ico">🗓️</span>
+      <span class="gi-col"><span>المصروفات الشهرية</span><span class="yr-amt" id="msAmt">0</span></span>
+      <span class="plus-badge in-card ms-plus" onclick="event.stopPropagation(); openMsSummary()" role="button" aria-label="ملخص المصروفات">+</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="zmOverlay">
+  <div class="modal-box">
+    <h3 id="zmModalTitle">🕌 زكاة المال</h3>
+    <div class="field"><label id="zmLbl">قيمة زكاة المال لهذه السنة</label><input type="number" id="zmIn" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeZM()">إلغاء</button>
+      <button class="btn-save" onclick="saveZM()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="msOverlay">
+  <div class="modal-box">
+    <h3 id="msTitle">🗓️ ملخص المصروفات</h3>
+    <div class="gi-sumrow"><span>إجمالي السنة: <b id="msSumTotal">0</b></span></div>
+    <div class="gi-rows" id="msList" style="max-height:340px;"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeMsSummary()">إغلاق</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="yrOverlay">
+  <div class="modal-box">
+    <h3 id="yrTitle">💵 ملخص الدخل العام</h3>
+    <div class="gi-sumrow"><span>إجمالي السنة: <b id="yrSumTotal">0</b></span></div>
+    <div class="gi-rows" id="yrList" style="max-height:340px;"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeYrSummary()">إغلاق</button></div>
   </div>
 </div>
 
@@ -1294,7 +1404,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
   </div>
 </div>
 
-<div id="months" class="months-grid"></div>
+<div id="months" class="months-grid months-off"></div>
 
 <button class="fab" onclick="openQuickAdd()" title="إضافة مصروف">＋</button>
 
@@ -2601,6 +2711,85 @@ function giRec(){
   y[currentMonth] = r;
   return r;
 }
+function giMonthTotal(i){
+  const y = data.genIncome && data.genIncome[currentYear];
+  if(typeof y === 'number') return y;
+  if(!y || typeof y !== 'object') return 0;
+  const r = y[i];
+  if(typeof r === 'number') return r;
+  return (r && Array.isArray(r.src)) ? r.src.reduce((a,x)=> a + (Number(x.amount)||0), 0) : 0;
+}
+function zmGet(){
+  if(!data.zakatMal || typeof data.zakatMal !== 'object') data.zakatMal = {};
+  return Number(data.zakatMal[currentYear]) || 0;
+}
+function renderZM(){
+  const t = document.getElementById('zmTitle'); if(!t || !data[currentYear]) return;
+  t.textContent = 'زكاة المال ' + toArabicDigits(currentYear);
+  const zm = zmGet(), paid = zmPaidTotal(), left = zm - paid, bad = left < 0;
+  document.getElementById('zmAmt').textContent = fmt(zm);
+  document.getElementById('zmPaid').textContent = fmt(paid);
+  document.getElementById('zmLeftSq').classList.toggle('bad', bad);
+  document.getElementById('zmLeftIco').textContent = bad ? '⚠️' : '⏳';
+  document.getElementById('zmLeftLbl').textContent = bad ? 'العجز' : 'المتبقي';
+  document.getElementById('zmLeft').textContent = fmt(Math.abs(left));
+}
+function zmPaidTotal(){
+  const yr = data.zakat && data.zakat[String(currentYear)];
+  if(!yr || typeof yr !== 'object') return 0;
+  const sum = a => Array.isArray(a) ? a.reduce((t,x)=> t + (Number(x.amount) || 0), 0) : 0;
+  if('payments' in yr) return sum(yr.payments); // بيانات قديمة على مستوى السنة
+  return Object.keys(yr).reduce((t,m)=> t + (yr[m] && typeof yr[m] === 'object' ? sum(yr[m].payments) : 0), 0);
+}
+function toggleZMCards(){ document.getElementById('yrZM').classList.toggle('open'); }
+function openZM(){
+  document.getElementById('zmModalTitle').textContent = '🕌 زكاة المال ' + toArabicDigits(currentYear);
+  document.getElementById('zmLbl').textContent = 'قيمة زكاة المال لسنة ' + toArabicDigits(currentYear);
+  document.getElementById('zmIn').value = zmGet() || '';
+  document.getElementById('zmOverlay').classList.add('open');
+}
+function closeZM(){ document.getElementById('zmOverlay').classList.remove('open'); }
+function saveZM(){
+  zmGet(); data.zakatMal[currentYear] = Math.max(0, Number(document.getElementById('zmIn').value) || 0);
+  save(); renderZM(); closeZM(); showToast('تم حفظ زكاة المال ✅', true);
+}
+function openMsSummary(){
+  const box = document.getElementById('msList'); box.innerHTML = '';
+  let tot = 0;
+  MONTHS.forEach((n, i)=>{
+    const v = monthExpenses(i); tot += v;
+    const d = document.createElement('div'); d.className = 'gi-row';
+    d.innerHTML = '<span>📅</span><b></b><span></span>';
+    d.children[1].textContent = n; d.children[2].textContent = v > 0 ? fmt(v) : '—';
+    if(v <= 0) d.style.opacity = '.55';
+    box.appendChild(d);
+  });
+  document.getElementById('msSumTotal').textContent = fmt(tot);
+  document.getElementById('msTitle').textContent = '🗓️ ملخص المصروفات — ' + toArabicDigits(currentYear);
+  document.getElementById('msOverlay').classList.add('open');
+}
+function closeMsSummary(){ document.getElementById('msOverlay').classList.remove('open'); }
+function toggleMonthsGrid(){
+  const off = document.getElementById('yrMS').classList.toggle('off');
+  document.getElementById('months').classList.toggle('months-off', off);
+}
+function toggleYr(){ document.getElementById('yrGI').classList.toggle('open'); }
+function openYrSummary(){
+  const box = document.getElementById('yrList'); box.innerHTML = '';
+  let tot = 0;
+  MONTHS.forEach((n, i)=>{
+    const v = giMonthTotal(i); tot += v;
+    const d = document.createElement('div'); d.className = 'gi-row';
+    d.innerHTML = '<span>📅</span><b></b><span></span>';
+    d.children[1].textContent = n; d.children[2].textContent = v > 0 ? fmt(v) : '—';
+    if(v <= 0) d.style.opacity = '.55';
+    box.appendChild(d);
+  });
+  document.getElementById('yrSumTotal').textContent = fmt(tot);
+  document.getElementById('yrTitle').textContent = '💵 ملخص الدخل العام — ' + toArabicDigits(currentYear);
+  document.getElementById('yrOverlay').classList.add('open');
+}
+function closeYrSummary(){ document.getElementById('yrOverlay').classList.remove('open'); }
 const giSum = arr => arr.reduce((a,x)=> a + (Number(x.amount)||0), 0);
 function giMeter(id, pct, color){
   const el = document.getElementById(id); if(!el) return;
@@ -2665,6 +2854,10 @@ function setGIDest(d){
   document.getElementById('giDestInc').classList.toggle('active', d === 'income');
   document.getElementById('giDestZk').classList.toggle('active', d === 'zakat');
 }
+function giDateTxt(d){
+  if(!d) return 'بدون تاريخ';
+  try{ return new Date(d + 'T12:00:00').toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'}); }catch(e){ return d; }
+}
 function renderGIOut(){
   const r = giRec(), box = document.getElementById('giOutList'), inc = giSum(r.src), tot = giSum(r.out);
   document.getElementById('giOutInc').textContent = fmt(inc);
@@ -2672,12 +2865,15 @@ function renderGIOut(){
   document.getElementById('giOutToInc').textContent = fmt(giSum(r.out.filter(x=> x.dest === 'income')));
   document.getElementById('giOutToZk').textContent = fmt(giSum(r.out.filter(x=> x.dest === 'zakat')));
   box.innerHTML = r.out.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف بعد</div>';
-  r.out.forEach(x=>{
+  const sorted = r.out.map((x,i)=> [x,i]).sort((a,b)=> String(a[0].date||'').localeCompare(String(b[0].date||'')) || a[1] - b[1]).map(z=> z[0]);
+  let last = null;
+  sorted.forEach(x=>{
+    if(x.date !== last){ last = x.date; const h = document.createElement('div'); h.className = 'date-sep'; h.textContent = '📅 ' + giDateTxt(x.date); box.appendChild(h); }
     const d = document.createElement('div'); d.className = 'gi-row';
     d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
     d.children[0].textContent = x.dest === 'zakat' ? '🕌' : '💰';
-    d.children[1].textContent = fmt(x.amount) + (x.note ? ' — ' + x.note : '');
-    d.children[2].textContent = x.date || '';
+    d.children[1].textContent = x.note || (x.dest === 'zakat' ? 'زكاتي' : 'المصروف المنزلي');
+    d.children[2].textContent = fmt(x.amount);
     d.children[3].onclick = ()=> openGenEdit('✏️ تعديل الصرف', 'ملاحظة', x.note, x.amount, (n,a)=> editGIOut(x.id, n, a));
     d.children[4].onclick = ()=> openConfirm('حذف عملية الصرف', 'سيتم التراجع عنها من ' + (x.dest === 'zakat' ? 'زكاتي' : 'المصروف المنزلي') + '. متأكد؟', ()=> deleteGIOut(x.id));
     box.appendChild(d);
@@ -2713,6 +2909,13 @@ function deleteGIOut(id){
   mon.incomeSources = (mon.incomeSources || []).filter(x=> x.id !== id);
   const z = zkGet(); z.adds = z.adds.filter(x=> x.id !== id); z.payments = z.payments.filter(x=> x.id !== id);
   giAfter();
+}
+function groupItemDates(){
+  // التاريخ بيظهر مرة واحدة فوق كل يوم (day-header)، فنخفي تكراره تحت كل مصروف
+  document.querySelectorAll('#groupsList .day-header').forEach(h=>{
+    let n = h.nextElementSibling;
+    while(n && n.classList.contains('item-row')){ n.classList.add('sep-done'); n = n.nextElementSibling; }
+  });
 }
 // ===== GENERAL INCOME JS END =====
 // ===== MODAL SCROLL LOCK JS =====
@@ -3027,10 +3230,18 @@ function renderMonths(){
     wrap.appendChild(div);
   });
   populateYearSelect();
-  setNumAnimated(document.getElementById('grandTotal'), grandTotalExpenses());
-  const deficit = grandDeficitAllMonths();
-  setNumAnimated(document.getElementById('grandDeficit'), deficit);
-  document.getElementById('deficitHeaderStat').style.display = deficit > 0 ? 'flex' : 'none';
+  let hhAll = 0, expAll = 0, genAll = 0;
+  MONTHS.forEach((_, i)=>{ hhAll += totalIncome(data[currentYear][i]); expAll += monthExpenses(i); genAll += giMonthTotal(i); });
+  const yrRem = genAll - hhAll; // الدخل العام السنوي − إجمالي المصروف المنزلي
+  setNumAnimated(document.getElementById('grandTotal'), hhAll);
+  const yg = document.getElementById('yrGIAmt'); if(yg) yg.textContent = fmt(genAll);
+  const rs = document.getElementById('deficitHeaderStat'), yrBad = yrRem < 0;
+  rs.style.display = 'flex'; rs.classList.toggle('danger', yrBad);
+  document.getElementById('yrRemIco').textContent = yrBad ? '⚠️' : '✅';
+  document.getElementById('yrRemLbl').textContent = yrBad ? '⚠️ العجز السنوي' : '✅ المتبقي السنوي';
+  setNumAnimated(document.getElementById('grandDeficit'), Math.abs(yrRem));
+  renderZM();
+  const ms = document.getElementById('msAmt'); if(ms) ms.textContent = fmt(expAll);
   renderZakat();
 }
 
@@ -3072,7 +3283,7 @@ function renderDetail(){
   const isRealCurrentMonth = (currentYear === today.getFullYear() && i === today.getMonth());
   const daysElapsed = isRealCurrentMonth ? today.getDate() : daysInMonth;
   const avgSpend = daysElapsed > 0 ? (exp / daysElapsed) : 0;
-  document.getElementById('avgSpendVal').textContent = fmt(avgSpend) + ' / يوم';
+  document.getElementById('avgSpendVal').textContent = fmt(avgSpend) + ' ج.م / يوم';
   const dailyLimit = Number(m.dailyLimit) || 0;
   const avgSpendCard = document.getElementById('avgSpendCard');
   const overLimit = dailyLimit > 0 && avgSpend >= dailyLimit;
@@ -3080,7 +3291,7 @@ function renderDetail(){
   const avgSpendOverLine = document.getElementById('avgSpendOverLine');
   if(overLimit){
     avgSpendOverLine.style.display = 'block';
-    avgSpendOverLine.textContent = '⚠️ زيادة ' + fmt(avgSpend - dailyLimit) + ' عن الحد الأقصى';
+    avgSpendOverLine.textContent = '⚠️ زيادة ' + fmt(avgSpend - dailyLimit) + ' ج.م عن الحد الأقصى';
   } else {
     avgSpendOverLine.style.display = 'none';
   }
@@ -3153,6 +3364,7 @@ function renderDetail(){
     const el = document.getElementById('gbody-'+id);
     if(el) el.classList.add('open');
   });
+  groupItemDates();
 }
 
 // أيقونة "⠿" هي نقطة السحب الوحيدة - باقي الصف يفضل قابل للسكرول عادي 100%
