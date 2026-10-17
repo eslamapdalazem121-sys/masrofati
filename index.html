@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.3300">
+<meta name="app-version" content="2026-10-15.3600">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1218,6 +1218,8 @@ body{overflow-x:hidden;}
   box-shadow:0 1px 0 #fff inset, 0 -2px 0 rgba(0,0,0,.12) inset, 0 4px 0 rgba(0,0,0,.3), 0 8px 12px rgba(0,0,0,.25);}
 .year-switcher .nav-btn:active{transform:translateY(3px); box-shadow:0 1px 0 #fff inset, 0 -2px 0 rgba(0,0,0,.12) inset, 0 1px 0 rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.25);}
 .backup-fab{display:none !important;}
+.gi-chip{cursor:pointer; border:2px solid transparent;}
+.gi-chip.on{border-color:#12b27a; background:rgba(18,178,122,.28) !important;}
 /* ===== GENERAL INCOME END ===== */
 /* ===== MODAL SCROLL LOCK ===== */
 .modal-overlay{overscroll-behavior:contain;}
@@ -1375,8 +1377,8 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 <div class="modal-overlay" id="giOutOverlay">
   <div class="modal-box">
     <h3>🧾 صرف من الدخل العام</h3>
-    <div class="gi-sumrow"><span>الدخل العام: <b id="giOutInc">0</b></span><span>المنصرف: <b id="giOutTot">0</b></span></div>
-    <div class="gi-sumrow"><span>إلى المصروف المنزلي: <b id="giOutToInc">0</b></span><span>إلى زكاتي: <b id="giOutToZk">0</b></span></div>
+    <div class="gi-sumrow"><span>الدخل العام: <b id="giOutInc">0</b></span><span id="giChipAll" class="gi-chip" onclick="setGIFilter(null)">المنصرف: <b id="giOutTot">0</b></span></div>
+    <div class="gi-sumrow"><span id="giChipInc" class="gi-chip" onclick="setGIFilter('income')">إلى المصروف المنزلي: <b id="giOutToInc">0</b></span><span id="giChipZk" class="gi-chip" onclick="setGIFilter('zakat')">إلى زكاتي: <b id="giOutToZk">0</b></span></div>
     <div class="gi-dest"><button type="button" id="giDestInc" class="active" onclick="setGIDest('income')">💰 المصروف المنزلي</button><button type="button" id="giDestZk" onclick="setGIDest('zakat')">🕌 زكاتي</button></div>
     <div class="field"><label>المبلغ</label><input type="number" id="giOutAmt" placeholder="0"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="giOutNote" placeholder="مثال: مصاريف المنزل"></div>
@@ -2876,9 +2878,13 @@ function addGISource(){
 }
 
 // الصرف من الدخل العام: إلى المصروف المنزلي أو زكاتي
-let _giDest = 'income';
+let _giDest = 'income', _giFilter = null;
+function setGIFilter(f){
+  _giFilter = (f === _giFilter) ? null : f;
+  renderGIOut();
+}
 function setGIDest(d){
-  _giDest = d;
+  _giDest = d; _giFilter = d; renderGIOut();
   document.getElementById('giDestInc').classList.toggle('active', d === 'income');
   document.getElementById('giDestZk').classList.toggle('active', d === 'zakat');
 }
@@ -2893,7 +2899,10 @@ function renderGIOut(){
   document.getElementById('giOutToInc').textContent = fmt(giSum(r.out.filter(x=> x.dest === 'income')));
   document.getElementById('giOutToZk').textContent = fmt(giSum(r.out.filter(x=> x.dest === 'zakat')));
   box.innerHTML = r.out.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف بعد</div>';
-  const sorted = r.out.map((x,i)=> [x,i]).sort((a,b)=> String(a[0].date||'').localeCompare(String(b[0].date||'')) || a[1] - b[1]).map(z=> z[0]);
+  ['giChipAll','giChipInc','giChipZk'].forEach((id,k)=> document.getElementById(id).classList.toggle('on', (k === 0 && !_giFilter) || (k === 1 && _giFilter === 'income') || (k === 2 && _giFilter === 'zakat')));
+  const shown = _giFilter ? r.out.filter(x=> x.dest === _giFilter) : r.out;
+  if(_giFilter && !shown.length) box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف إلى ' + (_giFilter === 'zakat' ? 'زكاتي' : 'المصروف المنزلي') + ' بعد</div>';
+  const sorted = shown.map((x,i)=> [x,i]).sort((a,b)=> String(a[0].date||'').localeCompare(String(b[0].date||'')) || a[1] - b[1]).map(z=> z[0]);
   let last = null;
   sorted.forEach(x=>{
     if(x.date !== last){ last = x.date; const h = document.createElement('div'); h.className = 'date-sep'; h.textContent = '📅 ' + giDateTxt(x.date); box.appendChild(h); }
@@ -2907,7 +2916,7 @@ function renderGIOut(){
     box.appendChild(d);
   });
 }
-function openGIOut(){ renderGIOut(); document.getElementById('giOutOverlay').classList.add('open'); }
+function openGIOut(){ _giFilter = null; renderGIOut(); document.getElementById('giOutOverlay').classList.add('open'); }
 function closeGIOut(){ document.getElementById('giOutOverlay').classList.remove('open'); }
 function giLabel(note){ return 'من الدخل العام' + (note ? ' — ' + note : ''); }
 function giAfter(){ save(); renderGIOut(); renderGI(); renderZakat(); if(typeof renderDetail === 'function') renderDetail(); }
