@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.3600">
+<meta name="app-version" content="2026-10-15.4000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1220,6 +1220,12 @@ body{overflow-x:hidden;}
 .backup-fab{display:none !important;}
 .gi-chip{cursor:pointer; border:2px solid transparent;}
 .gi-chip.on{border-color:#12b27a; background:rgba(18,178,122,.28) !important;}
+.ops-open{width:100%; margin-top:10px; justify-content:center; gap:8px;}
+details.ops-grp{margin:6px 0; border:1px solid var(--border,#dde); border-radius:12px; padding:4px 10px;}
+details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-size:calc(14px * var(--fs,1));}
+#monthGroupBreakdownOverlay .modal-box, #opsDetOverlay .modal-box, #dailyReportOverlay .modal-box, #monthlyReportOverlay .modal-box, #yearlyReportOverlay .modal-box, #dayDetailOverlay .modal-box{overflow-y:auto;}
+.ops-sec{margin-top:16px; border-top:2px dashed var(--border,#ccd); padding-top:10px;}
+.ops-h{margin:0 0 8px; font-size:calc(15px * var(--fs,1)); font-weight:800;}
 /* ===== GENERAL INCOME END ===== */
 /* ===== MODAL SCROLL LOCK ===== */
 .modal-overlay{overscroll-behavior:contain;}
@@ -1348,6 +1354,16 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="gi-sumrow"><span>إجمالي السنة: <b id="msSumTotal">0</b></span></div>
     <div class="gi-rows" id="msList" style="max-height:340px;"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeMsSummary()">إغلاق</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="opsOverlay">
+  <div class="modal-box">
+    <h3>📜 تقرير العمليات</h3>
+    <div class="gi-dest" id="opsTabs"><button type="button" data-t="day" class="active" onclick="opsTab('day')">اليومي</button><button type="button" data-t="month" onclick="opsTab('month')">الشهري</button><button type="button" data-t="year" onclick="opsTab('year')">السنوي</button></div>
+    <div class="gi-sumrow"><span id="opsSum"></span></div>
+    <div class="gi-rows" id="opsList" style="max-height:380px;"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeOps()">إغلاق</button></div>
   </div>
 </div>
 
@@ -1633,6 +1649,12 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       </div>
     </div>
 
+
+    <div class="settings-section">
+      <h4>🔔 الإشعارات</h4>
+      <label style="display:flex; align-items:center; gap:10px; font-weight:700;"><input type="checkbox" id="notifyChk" onchange="toggleNotifySetting(this.checked)"> إشعار على الموبايل مع كل عملية أعملها</label>
+      <p id="notifyHint" style="font-size:12px; color:var(--muted); margin:6px 0 0;">بتظهر في التطبيق المثبّت على موبايلك بعد ما تسمح بالإشعارات.</p>
+    </div>
 
     <div class="settings-section">
       <h4>🔢 شكل الأرقام</h4>
@@ -2090,7 +2112,8 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <span>إجمالي مصروفات اليوم</span>
       <span class="amt" id="dayDetailTotal">0</span>
     </div>
-    <div id="dayDetailList" style="overflow-y:auto; margin-top:12px; flex:1; min-height:0;"></div>
+    <div id="dayDetailList" style="margin-top:12px;"></div>
+    <div class="ops-sec"><h4 class="ops-h">📜 سجل عمليات هذا اليوم</h4><div class="gi-sumrow"><span id="opsSumDayD"></span></div><div class="gi-rows" id="opsListDayD" style="max-height:none; overflow:visible;"></div></div>
   </div>
 </div>
 
@@ -2100,6 +2123,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <h3 id="dailyReportTitle" style="flex:1; margin:0;">📅 التقرير اليومي</h3>
       <button type="button" class="back" style="font-size:calc(16px * var(--fs,1));" onclick="closeDailyReport()">✕</button>
     </div>
+    <div style="font-size:calc(12px * var(--fs,1)); color:var(--muted); margin:8px 2px 0;">👆 دوس على أي يوم لعرض تفاصيله وسجل عملياته</div>
     <div id="dailyReportChart" class="daily-chart"></div>
     <div id="dailyReportGrid" class="daily-report-grid"></div>
   </div>
@@ -2108,10 +2132,11 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 <div class="modal-overlay" id="yearlyReportOverlay">
   <div class="modal-box">
     <div style="display:flex; align-items:center; gap:8px;">
-      <h3 style="flex:1; margin:0;">📆 إجمالي السنة — <span id="yearlyReportYear"></span></h3>
+      <h3 style="flex:1; margin:0; cursor:pointer;" onclick="openOpsDet('year')">📆 إجمالي السنة — <span id="yearlyReportYear"></span> <span style="font-size:.7em;">📜</span></h3>
       <button type="button" class="back" style="font-size:calc(16px * var(--fs,1));" onclick="closeYearlyReport()">✕</button>
     </div>
-    <div id="yearlyReportContent" style="overflow-y:auto; flex:1; min-height:0; margin-top:14px;"></div>
+    <div id="yearlyReportContent" style="margin-top:14px;"></div>
+    <details class="ops-sec"><summary class="ops-h" style="cursor:pointer;">📜 سجل عمليات السنة — دوس لعرضه</summary><div class="gi-sumrow"><span id="opsSumYear"></span></div><div class="gi-rows" id="opsListYear" style="max-height:none; overflow:visible;"></div></details>
   </div>
 </div>
 
@@ -2121,7 +2146,8 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <h3 id="monthGroupBreakdownTitle" style="flex:1; margin:0;">📁 مجموعات الشهر</h3>
       <button type="button" class="back" style="font-size:calc(16px * var(--fs,1));" onclick="closeMonthGroupBreakdown()">✕</button>
     </div>
-    <div id="monthGroupBreakdownContent" style="overflow-y:auto; flex:1; min-height:0; margin-top:12px;"></div>
+    <div id="monthGroupBreakdownContent" style="margin-top:12px;"></div>
+    <div class="ops-sec"><h4 class="ops-h">📜 سجل عمليات الشهر</h4><div class="gi-sumrow"><span id="opsSumMonthB"></span></div><div class="gi-rows" id="opsListMonthB" style="max-height:none; overflow:visible;"></div></div>
   </div>
 </div>
 
@@ -2131,7 +2157,19 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <h3 style="flex:1; margin:0;">🗓️ تقرير شهري — <span id="monthlyReportYear"></span></h3>
       <button type="button" class="back" style="font-size:calc(16px * var(--fs,1));" onclick="closeMonthlyReport()">✕</button>
     </div>
-    <div id="monthlyReportList" style="overflow-y:auto; flex:1; min-height:0; margin-top:10px;"></div>
+    <div style="font-size:calc(12px * var(--fs,1)); color:var(--muted); margin:8px 2px 0;">👆 دوس على أي شهر لعرض مجموعاته وسجل عملياته</div>
+    <div id="monthlyReportList" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="opsDetOverlay">
+  <div class="modal-box">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <h3 id="opsDetTitle" style="flex:1; margin:0;">📜 سجل العمليات</h3>
+      <button type="button" class="back" style="font-size:calc(16px * var(--fs,1));" onclick="closeOpsDet()">✕</button>
+    </div>
+    <div class="gi-sumrow" style="margin-top:10px;"><span id="opsDetSum"></span></div>
+    <div class="gi-rows" id="opsDetList" style="max-height:none; overflow:visible;"></div>
   </div>
 </div>
 
@@ -2194,7 +2232,7 @@ function shade(hex, percent){
 var DIGITS_MODE = 'ar';
 function dateLocale(){ return DIGITS_MODE === 'en' ? 'ar-EG-u-nu-latn' : 'ar-EG'; }
 let settings = {
-  digits:'ar', theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click',
+  digits:'ar', notify:false, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click',
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -2307,6 +2345,7 @@ function refreshDigitsView(){
   }catch(e){}
 }
 function refreshSettingsUI(s){
+  const nc = document.getElementById('notifyChk'); if(nc) nc.checked = !!s.notify;
   ['theme','accent','font','depth','digits','clickType'].forEach(key=>{
     const containerId = 'opt' + key.charAt(0).toUpperCase() + key.slice(1);
     const container = document.getElementById(containerId);
@@ -2647,6 +2686,7 @@ function load(){
     : (years.length ? Math.max(...years) : new Date().getFullYear());
 
   ensureAllYears();
+  try{ _opsSnap = opsFlat(); _opsOwner = data; }catch(e){}
 }
 
 function setCurrentYear(y){
@@ -2714,6 +2754,7 @@ function saveNewYear(){
   showToast('تم إنشاء سنة ' + toArabicDigits(y), true);
 }
 function save(){
+  try{ opsDiff(); }catch(e){ console.error('ops', e); }
   try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }
   catch(e){ console.error('save failed', e); }
   scheduleDbPush();
@@ -2721,6 +2762,121 @@ function save(){
 }
 function fmt(n){ return (Number(n)||0).toLocaleString(DIGITS_MODE === 'en' ? 'en-US' : 'ar-EG'); }
 
+// ===== OPS LOG JS START =====
+var _opsSnap = null, _opsOwner = null, _opsTab = 'day';
+const OPS_T = {e:['🧾','مصروف'], g:['📁','مجموعة'], i:['💰','المصروف المنزلي'], gs:['💵','مصدر دخل عام'], go:['🔁','صرف من الدخل العام'], za:['🕌','زكاتي'], zp:['🤲','منصرف الزكاة'], zm:['🕌','زكاة المال']};
+function opsFlat(){
+  const f = {}, go = new Set(), skip = id => String(id).indexOf('lg') === 0;
+  const gi = data.genIncome || {};
+  Object.keys(gi).forEach(y=>{ const yo = gi[y]; if(!yo || typeof yo !== 'object') return;
+    Object.keys(yo).forEach(m=>{ const r = yo[m]; if(!r || typeof r !== 'object') return;
+      (r.src||[]).forEach(x=>{ if(!skip(x.id)) f['gs:'+x.id] = {t:'gs', n:x.name, a:Number(x.amount)||0, y:+y, m:+m}; });
+      (r.out||[]).forEach(x=>{ go.add(String(x.id)); f['go:'+x.id] = {t:'go', n:(x.dest === 'zakat' ? 'إلى زكاتي' : 'إلى المصروف المنزلي') + (x.note ? ' — ' + x.note : ''), a:Number(x.amount)||0, y:+y, m:+m}; });
+    }); });
+  Object.keys(data).forEach(y=>{ if(isNaN(Number(y))) return; const yo = data[y]; if(!yo || typeof yo !== 'object') return;
+    Object.keys(yo).forEach(m=>{ const mon = yo[m]; if(!mon || typeof mon !== 'object') return;
+      (mon.incomeSources||[]).forEach(x=>{ f['i:'+x.id] = {t:'i', n:x.name, a:Number(x.amount)||0, y:+y, m:+m}; });
+      const walk = (nodes, gn)=> (nodes||[]).forEach(n=>{
+        if(n.type === 'group'){ f['g:'+n.id] = {t:'g', n:n.name, a:0, y:+y, m:+m}; walk(n.children, n.name); }
+        else f['e:'+n.id] = {t:'e', n:n.name, a:Number(n.amount)||0, y:+y, m:+m, g:gn};
+      });
+      walk(mon.groups);
+    }); });
+  const z = data.zakat || {};
+  Object.keys(z).forEach(y=>{ const yo = z[y]; if(!yo || typeof yo !== 'object' || 'payments' in yo) return;
+    Object.keys(yo).forEach(m=>{ const o = yo[m]; if(!o || typeof o !== 'object') return;
+      (o.adds||[]).forEach(x=>{ if(!skip(x.id)) f['za:'+x.id] = {t:'za', n:x.name, a:Number(x.amount)||0, y:+y, m:+m}; });
+      (o.payments||[]).forEach(x=>{ f['zp:'+x.id] = {t:'zp', n:x.note || 'دفعة', a:Number(x.amount)||0, y:+y, m:+m}; });
+    }); });
+  const zm = data.zakatMal || {};
+  Object.keys(zm).forEach(y=>{ f['zm:'+y] = {t:'zm', n:y, a:Number(zm[y])||0, y:+y, m:-1}; });
+  Object.keys(f).forEach(k=>{ if(/^(i|za|zp):/.test(k) && go.has(k.split(':')[1])) f[k].link = true; });
+  return f;
+}
+function opsEntry(kind, n, o){
+  const T = OPS_T[n.t], verb = kind === 'add' ? 'أضفت' : kind === 'edit' ? 'عدّلت' : 'حذفت';
+  let txt = T[0] + ' ' + verb + ' ' + T[1] + (n.t === 'zm' ? ' ' + n.n : ' «' + n.n + '»') + (n.g ? ' في «' + n.g + '»' : '');
+  if(kind === 'edit' && o && o.a !== n.a) txt += ' (' + fmt(o.a) + ' ← ' + fmt(n.a) + ')';
+  return {id: uid(), t: Date.now(), y: n.y, m: n.m, k: kind, x: txt, a: n.a};
+}
+function opsDiff(){
+  if(_opsOwner !== data || !_opsSnap){ _opsSnap = opsFlat(); _opsOwner = data; return; }
+  const cur = opsFlat(), out = [];
+  Object.keys(cur).forEach(k=>{ const n = cur[k], o = _opsSnap[k]; if(n.link) return; if(!o) out.push(opsEntry('add', n)); else if(o.n !== n.n || o.a !== n.a) out.push(opsEntry('edit', n, o)); });
+  Object.keys(_opsSnap).forEach(k=>{ const o = _opsSnap[k]; if(o.link) return; if(!cur[k]) out.push(opsEntry('del', o)); });
+  _opsSnap = cur;
+  if(!out.length) return;
+  if(!Array.isArray(data.activity)) data.activity = [];
+  data.activity.push.apply(data.activity, out);
+  if(data.activity.length > 1500) data.activity.splice(0, data.activity.length - 1500);
+  opsNotify(out);
+}
+function opsNotify(list){
+  try{
+    if(!settings.notify || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    const items = list.length > 3 ? [{x: '📝 تمت ' + toArabicDigits(list.length) + ' عمليات', a: 0, id: 'multi' + Date.now()}] : list;
+    items.forEach(e=> showOpNotification('مصروفاتي B', e.x + (e.a ? ' — ' + fmt(e.a) : ''), e.id));
+  }catch(err){}
+}
+function showOpNotification(title, body, tag){
+  const opts = {body: body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'op-' + tag, lang: 'ar', dir: 'rtl'};
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistration().then(r=>{ if(r && r.showNotification) r.showNotification(title, opts); else new Notification(title, opts); }).catch(()=>{ try{ new Notification(title, opts); }catch(e){} });
+  } else { try{ new Notification(title, opts); }catch(e){} }
+}
+async function toggleNotifySetting(on){
+  const chk = document.getElementById('notifyChk'), hint = document.getElementById('notifyHint');
+  if(on){
+    if(typeof Notification === 'undefined'){ chk.checked = false; showToast('الإشعارات مش متاحة هنا — استخدم التطبيق المثبّت على موبايلك', false); return; }
+    let perm = Notification.permission;
+    if(perm !== 'granted'){ try{ perm = await Notification.requestPermission(); }catch(e){ perm = 'denied'; } }
+    if(perm !== 'granted'){ chk.checked = false; hint.textContent = 'الإذن مرفوض. فعّل الإشعارات للتطبيق من إعدادات الموبايل ثم جرّب تاني.'; return; }
+    showOpNotification('مصروفاتي B', '🔔 تم تفعيل إشعارات العمليات', 'test' + Date.now());
+    hint.textContent = 'مفعّلة ✅ — دوس «حفظ» علشان تثبت الاختيار.';
+  }
+  previewSetting('notify', !!on);
+}
+// ---- تقرير العمليات
+function openOps(){ _opsTab = 'day'; opsTab('day'); document.getElementById('opsOverlay').classList.add('open'); }
+function closeOps(){ document.getElementById('opsOverlay').classList.remove('open'); }
+function opsFill(t, box, sumEl, dayObj, yy, mm){
+  const all = Array.isArray(data.activity) ? data.activity : [], now = dayObj || new Date();
+  const vy = (yy !== undefined && yy !== null) ? yy : (currentYear || now.getFullYear()), vm = (mm !== undefined && mm !== null) ? mm : ((currentMonth === null || currentMonth === undefined) ? now.getMonth() : currentMonth);
+  const sameDay = d => d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  const list = all.filter(e=>{ const d = new Date(e.t); return t === 'day' ? sameDay(d) : t === 'month' ? (d.getFullYear() === vy && d.getMonth() === vm) : d.getFullYear() === vy; }).sort((a,b)=> b.t - a.t);
+  const cnt = k => list.filter(e=> e.k === k).length;
+  if(sumEl) sumEl.textContent = toArabicDigits(list.length) + ' عملية — ➕ ' + toArabicDigits(cnt('add')) + '  ✏️ ' + toArabicDigits(cnt('edit')) + '  🗑 ' + toArabicDigits(cnt('del')) + (t === 'month' ? '  (' + MONTHS[vm] + ')' : t === 'year' ? '  (' + toArabicDigits(vy) + ')' : '');
+  box.innerHTML = '';
+  if(!list.length){ box.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:14px;">لا توجد عمليات</div>'; return; }
+  const tm = e => new Date(e.t).toLocaleTimeString(dateLocale(), {hour:'2-digit', minute:'2-digit'});
+  const row = e=>{ const d = document.createElement('div'); d.className = 'gi-row'; d.innerHTML = '<span></span><b></b><span></span>'; d.children[0].textContent = tm(e); d.children[1].textContent = e.x; d.children[2].textContent = e.a ? fmt(e.a) : ''; return d; };
+  if(t === 'day'){ list.forEach(e=> box.appendChild(row(e))); return; }
+  const groups = new Map();
+  list.forEach(e=>{ const d = new Date(e.t), key = t === 'month' ? d.getDate() : d.getMonth(); if(!groups.has(key)) groups.set(key, []); groups.get(key).push(e); });
+  let first = true;
+  groups.forEach((arr, key)=>{
+    const det = document.createElement('details'); det.className = 'ops-grp'; if(t === 'month' && first) det.open = true; first = false;
+    const sm = document.createElement('summary');
+    sm.textContent = (t === 'month' ? '📅 ' + new Date(vy, vm, key).toLocaleDateString(dateLocale(), {weekday:'long', day:'numeric', month:'long'}) : '🗓️ ' + MONTHS[key]) + ' — ' + toArabicDigits(arr.length) + ' عملية';
+    det.appendChild(sm); arr.forEach(e=> det.appendChild(row(e))); box.appendChild(det);
+  });
+}
+function opsTab(t){
+  _opsTab = t;
+  document.querySelectorAll('#opsTabs button').forEach(b=> b.classList.toggle('active', b.dataset.t === t));
+  opsFill(t, document.getElementById('opsList'), document.getElementById('opsSum'));
+}
+function openOpsDet(kind, m){
+  document.getElementById('opsDetTitle').textContent = kind === 'year' ? '📜 سجل عمليات سنة ' + toArabicDigits(currentYear) : '📜 سجل عمليات ' + MONTHS[m] + ' ' + toArabicDigits(currentYear);
+  opsFill(kind, document.getElementById('opsDetList'), document.getElementById('opsDetSum'), null, currentYear, m);
+  document.getElementById('opsDetOverlay').classList.add('open');
+}
+function closeOpsDet(){ document.getElementById('opsDetOverlay').classList.remove('open'); }
+function opsIn(kind){
+  const m = {day:['opsListDay','opsSumDay'], month:['opsListMonth','opsSumMonth'], year:['opsListYear','opsSumYear']}[kind];
+  const box = document.getElementById(m[0]); if(box) opsFill(kind, box, document.getElementById(m[1]));
+}
+// ===== OPS LOG JS END =====
 // ===== GENERAL INCOME JS START =====
 function giRec(){
   if(!data.genIncome || typeof data.genIncome !== 'object') data.genIncome = {};
@@ -3627,7 +3783,9 @@ function openYearlyReport(){
     groupsHtml += renderMergedTreeHtml(yearlyGroupList, 0);
   }
 
-  document.getElementById('yearlyReportContent').innerHTML = html + groupsHtml;
+  const yearBtn = `<button type="button" class="report-mini-card" style="width:100%; margin-bottom:12px;" onclick="openOpsDet('year')"><span class="icon">📜</span><span>دوس هنا لسجل عمليات السنة (${toArabicDigits(currentYear)})</span></button>`;
+  document.getElementById('yearlyReportContent').innerHTML = yearBtn + html + groupsHtml;
+  opsIn('year');
   document.getElementById('yearlyReportOverlay').classList.add('open');
 }
 
@@ -3697,6 +3855,7 @@ function openMonthGroupBreakdown(mi){
     html = renderGroupBreakdownHtml(rootGroups, 0);
   }
   document.getElementById('monthGroupBreakdownContent').innerHTML = html;
+  opsFill('month', document.getElementById('opsListMonthB'), document.getElementById('opsSumMonthB'), null, currentYear, mi);
   document.getElementById('monthGroupBreakdownOverlay').classList.add('open');
 }
 function closeMonthGroupBreakdown(){
@@ -3847,6 +4006,7 @@ function openDayDetail(day){
     listEl.innerHTML = html;
   }
 
+  opsFill('day', document.getElementById('opsListDayD'), document.getElementById('opsSumDayD'), new Date(currentYear, currentMonth, day));
   document.getElementById('dayDetailOverlay').classList.add('open');
 }
 function closeDayDetail(){

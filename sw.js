@@ -1,5 +1,5 @@
 // مصروفاتي B — Service Worker (عمل بدون إنترنت + تحديث تلقائي للصفحة)
-const CACHE = 'masrofati-b-v10';
+const CACHE = 'masrofati-b-v13';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon-48.png'];
 
 self.addEventListener('install', (e) => {
@@ -43,4 +43,15 @@ self.addEventListener('fetch', (e) => {
       })
     );
   }
+});
+
+// الضغط على إشعار العملية يفتح التطبيق
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) { if ('focus' in c) return c.focus(); }
+      return self.clients.openWindow('./');
+    })
+  );
 });
