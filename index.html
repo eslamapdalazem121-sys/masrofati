@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.4000">
+<meta name="app-version" content="2026-10-15.4300">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1226,6 +1226,10 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 #monthGroupBreakdownOverlay .modal-box, #opsDetOverlay .modal-box, #dailyReportOverlay .modal-box, #monthlyReportOverlay .modal-box, #yearlyReportOverlay .modal-box, #dayDetailOverlay .modal-box{overflow-y:auto;}
 .ops-sec{margin-top:16px; border-top:2px dashed var(--border,#ccd); padding-top:10px;}
 .ops-h{margin:0 0 8px; font-size:calc(15px * var(--fs,1)); font-weight:800;}
+.gdate, .src-date{font-size:calc(11px * var(--fs,1)); color:var(--muted); font-weight:700; margin-inline-start:6px; white-space:nowrap;}
+.date-row{display:flex; gap:8px; align-items:center; margin-top:8px;}
+.date-row label{margin:0; font-size:calc(13px * var(--fs,1)); white-space:nowrap;}
+.date-row input{flex:1; min-width:0;}
 /* ===== GENERAL INCOME END ===== */
 /* ===== MODAL SCROLL LOCK ===== */
 .modal-overlay{overscroll-behavior:contain;}
@@ -1383,6 +1387,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="gi-rows" id="giSrcList"></div>
     <div class="field"><label>اسم المصدر</label><input type="text" id="giSrcName" placeholder="مثال: راتب، إيجار"></div>
     <div class="field"><label>المبلغ</label><input type="number" id="giSrcAmt" placeholder="0"></div>
+    <div class="field"><label>📅 التاريخ</label><input type="date" id="giSrcDate"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeGI()">إغلاق</button>
       <button class="btn-save" onclick="addGISource()">＋ إضافة</button>
@@ -1425,6 +1430,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <h3 id="gxTitle">✏️ تعديل</h3>
     <div class="field"><label id="gxNameLbl">الاسم</label><input type="text" id="gxName"></div>
     <div class="field"><label>المبلغ</label><input type="number" id="gxAmt"></div>
+    <div class="field" id="gxDateBox" style="display:none;"><label>📅 التاريخ</label><input type="date" id="gxDate"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeGenEdit()">إلغاء</button>
       <button class="btn-save" onclick="saveGenEdit()">حفظ</button>
@@ -1497,6 +1503,10 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <label>الاسم</label>
       <input type="text" id="renameInput">
     </div>
+    <div class="field">
+      <label>📅 التاريخ</label>
+      <input type="date" id="renameDate">
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeRename()">إلغاء</button>
       <button class="btn-save" onclick="saveRename()">حفظ</button>
@@ -1551,6 +1561,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
         <input type="text" id="newIncomeSrcName" placeholder="مثال: راتب، عمل حر" style="flex:2;">
         <input type="number" id="newIncomeSrcAmount" placeholder="المبلغ" style="flex:1;">
       </div>
+      <div class="date-row"><label for="newIncomeSrcDate">📅 التاريخ</label><input type="date" id="newIncomeSrcDate"></div>
       <div class="check-row">
         <input type="checkbox" id="newIncomeSrcCounted" checked>
         <label for="newIncomeSrcCounted" style="margin:0;">احتسب ضمن إجمالي المصروف المنزلي</label>
@@ -1574,6 +1585,10 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="field">
       <label>المبلغ</label>
       <input type="number" id="editIncomeSrcAmount">
+    </div>
+    <div class="field">
+      <label>📅 التاريخ</label>
+      <input type="date" id="editIncomeSrcDate">
     </div>
     <div class="check-row">
       <input type="checkbox" id="editIncomeSrcCounted">
@@ -2054,6 +2069,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <input id="newGroupName" placeholder="اسم مجموعة جديدة (مثال: فواتير)" onfocus="document.getElementById('newGroupIconGrid').style.display='flex'">
       <button onclick="addGroup()">إضافة</button>
     </div>
+    <div class="date-row" style="margin:6px 4px 8px;"><label for="newGroupDate">📅 تاريخ المجموعة</label><input type="date" id="newGroupDate"></div>
     <div id="newGroupIconGrid" style="display:none;"></div>
     <div id="groupsList"></div>
   </div>
@@ -2765,28 +2781,34 @@ function fmt(n){ return (Number(n)||0).toLocaleString(DIGITS_MODE === 'en' ? 'en
 // ===== OPS LOG JS START =====
 var _opsSnap = null, _opsOwner = null, _opsTab = 'day';
 const OPS_T = {e:['🧾','مصروف'], g:['📁','مجموعة'], i:['💰','المصروف المنزلي'], gs:['💵','مصدر دخل عام'], go:['🔁','صرف من الدخل العام'], za:['🕌','زكاتي'], zp:['🤲','منصرف الزكاة'], zm:['🕌','زكاة المال']};
+function opsMs(v){
+  if(v === undefined || v === null || v === '') return undefined;
+  if(typeof v === 'number') return v;
+  const t = /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? new Date(v + 'T12:00:00').getTime() : new Date(v).getTime();
+  return isNaN(t) ? undefined : t;
+}
 function opsFlat(){
   const f = {}, go = new Set(), skip = id => String(id).indexOf('lg') === 0;
   const gi = data.genIncome || {};
   Object.keys(gi).forEach(y=>{ const yo = gi[y]; if(!yo || typeof yo !== 'object') return;
     Object.keys(yo).forEach(m=>{ const r = yo[m]; if(!r || typeof r !== 'object') return;
-      (r.src||[]).forEach(x=>{ if(!skip(x.id)) f['gs:'+x.id] = {t:'gs', n:x.name, a:Number(x.amount)||0, y:+y, m:+m}; });
-      (r.out||[]).forEach(x=>{ go.add(String(x.id)); f['go:'+x.id] = {t:'go', n:(x.dest === 'zakat' ? 'إلى زكاتي' : 'إلى المصروف المنزلي') + (x.note ? ' — ' + x.note : ''), a:Number(x.amount)||0, y:+y, m:+m}; });
+      (r.src||[]).forEach(x=>{ if(!skip(x.id)) f['gs:'+x.id] = {t:'gs', n:x.name, a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
+      (r.out||[]).forEach(x=>{ go.add(String(x.id)); f['go:'+x.id] = {t:'go', n:(x.dest === 'zakat' ? 'إلى زكاتي' : 'إلى المصروف المنزلي') + (x.note ? ' — ' + x.note : ''), a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
     }); });
   Object.keys(data).forEach(y=>{ if(isNaN(Number(y))) return; const yo = data[y]; if(!yo || typeof yo !== 'object') return;
     Object.keys(yo).forEach(m=>{ const mon = yo[m]; if(!mon || typeof mon !== 'object') return;
-      (mon.incomeSources||[]).forEach(x=>{ f['i:'+x.id] = {t:'i', n:x.name, a:Number(x.amount)||0, y:+y, m:+m}; });
+      (mon.incomeSources||[]).forEach(x=>{ f['i:'+x.id] = {t:'i', n:x.name, a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
       const walk = (nodes, gn)=> (nodes||[]).forEach(n=>{
-        if(n.type === 'group'){ f['g:'+n.id] = {t:'g', n:n.name, a:0, y:+y, m:+m}; walk(n.children, n.name); }
-        else f['e:'+n.id] = {t:'e', n:n.name, a:Number(n.amount)||0, y:+y, m:+m, g:gn};
+        if(n.type === 'group'){ f['g:'+n.id] = {t:'g', n:n.name, a:0, y:+y, m:+m, d:opsMs(n.date)}; walk(n.children, n.name); }
+        else f['e:'+n.id] = {t:'e', n:n.name, a:Number(n.amount)||0, y:+y, m:+m, g:gn, d:opsMs(n.date)};
       });
       walk(mon.groups);
     }); });
   const z = data.zakat || {};
   Object.keys(z).forEach(y=>{ const yo = z[y]; if(!yo || typeof yo !== 'object' || 'payments' in yo) return;
     Object.keys(yo).forEach(m=>{ const o = yo[m]; if(!o || typeof o !== 'object') return;
-      (o.adds||[]).forEach(x=>{ if(!skip(x.id)) f['za:'+x.id] = {t:'za', n:x.name, a:Number(x.amount)||0, y:+y, m:+m}; });
-      (o.payments||[]).forEach(x=>{ f['zp:'+x.id] = {t:'zp', n:x.note || 'دفعة', a:Number(x.amount)||0, y:+y, m:+m}; });
+      (o.adds||[]).forEach(x=>{ if(!skip(x.id)) f['za:'+x.id] = {t:'za', n:x.name, a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
+      (o.payments||[]).forEach(x=>{ f['zp:'+x.id] = {t:'zp', n:x.note || 'دفعة', a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
     }); });
   const zm = data.zakatMal || {};
   Object.keys(zm).forEach(y=>{ f['zm:'+y] = {t:'zm', n:y, a:Number(zm[y])||0, y:+y, m:-1}; });
@@ -2797,14 +2819,26 @@ function opsEntry(kind, n, o){
   const T = OPS_T[n.t], verb = kind === 'add' ? 'أضفت' : kind === 'edit' ? 'عدّلت' : 'حذفت';
   let txt = T[0] + ' ' + verb + ' ' + T[1] + (n.t === 'zm' ? ' ' + n.n : ' «' + n.n + '»') + (n.g ? ' في «' + n.g + '»' : '');
   if(kind === 'edit' && o && o.a !== n.a) txt += ' (' + fmt(o.a) + ' ← ' + fmt(n.a) + ')';
-  return {id: uid(), t: Date.now(), y: n.y, m: n.m, k: kind, x: txt, a: n.a};
+  if(kind === 'edit' && o && n.d && o.d !== n.d) txt += ' (نقلتها ليوم ' + new Date(n.d).toLocaleDateString(dateLocale(), {day:'numeric', month:'long'}) + ')';
+  const ent = {id: uid(), t: Date.now(), y: n.y, m: n.m, k: kind, x: txt, a: n.a};
+  if(n.d) ent.d = n.d;
+  return ent;
 }
 function opsDiff(){
   if(_opsOwner !== data || !_opsSnap){ _opsSnap = opsFlat(); _opsOwner = data; return; }
   const cur = opsFlat(), out = [];
-  Object.keys(cur).forEach(k=>{ const n = cur[k], o = _opsSnap[k]; if(n.link) return; if(!o) out.push(opsEntry('add', n)); else if(o.n !== n.n || o.a !== n.a) out.push(opsEntry('edit', n, o)); });
+  Object.keys(cur).forEach(k=>{ const n = cur[k], o = _opsSnap[k]; if(n.link) return; if(!o) out.push(opsEntry('add', n)); else if(o.n !== n.n || o.a !== n.a || o.d !== n.d) out.push(opsEntry('edit', n, o)); });
   Object.keys(_opsSnap).forEach(k=>{ const o = _opsSnap[k]; if(o.link) return; if(!cur[k]) out.push(opsEntry('del', o)); });
   _opsSnap = cur;
+  if(out.length > 1){
+    const seen = {}, merged = [];
+    out.forEach(e=>{
+      if(e.x.indexOf('📁') !== 0){ merged.push(e); return; }
+      const key = e.k + '|' + e.x + '|' + (e.d || ''), f = seen[key];
+      if(f){ if(!f._n){ f._n = 1; f.x += ' (لكل شهور السنة)'; } } else { seen[key] = e; merged.push(e); }
+    });
+    out.length = 0; Array.prototype.push.apply(out, merged);
+  }
   if(!out.length) return;
   if(!Array.isArray(data.activity)) data.activity = [];
   data.activity.push.apply(data.activity, out);
@@ -2843,16 +2877,16 @@ function opsFill(t, box, sumEl, dayObj, yy, mm){
   const all = Array.isArray(data.activity) ? data.activity : [], now = dayObj || new Date();
   const vy = (yy !== undefined && yy !== null) ? yy : (currentYear || now.getFullYear()), vm = (mm !== undefined && mm !== null) ? mm : ((currentMonth === null || currentMonth === undefined) ? now.getMonth() : currentMonth);
   const sameDay = d => d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
-  const list = all.filter(e=>{ const d = new Date(e.t); return t === 'day' ? sameDay(d) : t === 'month' ? (d.getFullYear() === vy && d.getMonth() === vm) : d.getFullYear() === vy; }).sort((a,b)=> b.t - a.t);
+  const list = all.filter(e=>{ const d = new Date(e.d || e.t); return t === 'day' ? sameDay(d) : t === 'month' ? (d.getFullYear() === vy && d.getMonth() === vm) : d.getFullYear() === vy; }).sort((a,b)=> ((b.d || b.t) - (a.d || a.t)) || (b.t - a.t));
   const cnt = k => list.filter(e=> e.k === k).length;
   if(sumEl) sumEl.textContent = toArabicDigits(list.length) + ' عملية — ➕ ' + toArabicDigits(cnt('add')) + '  ✏️ ' + toArabicDigits(cnt('edit')) + '  🗑 ' + toArabicDigits(cnt('del')) + (t === 'month' ? '  (' + MONTHS[vm] + ')' : t === 'year' ? '  (' + toArabicDigits(vy) + ')' : '');
   box.innerHTML = '';
   if(!list.length){ box.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:14px;">لا توجد عمليات</div>'; return; }
-  const tm = e => new Date(e.t).toLocaleTimeString(dateLocale(), {hour:'2-digit', minute:'2-digit'});
+  const tm = e => { const rt = new Date(e.t), ed = new Date(e.d || e.t), same = rt.getFullYear() === ed.getFullYear() && rt.getMonth() === ed.getMonth() && rt.getDate() === ed.getDate(); return same ? rt.toLocaleTimeString(dateLocale(), {hour:'2-digit', minute:'2-digit'}) : '📝 ' + rt.toLocaleDateString(dateLocale(), {day:'numeric', month:'numeric'}); };
   const row = e=>{ const d = document.createElement('div'); d.className = 'gi-row'; d.innerHTML = '<span></span><b></b><span></span>'; d.children[0].textContent = tm(e); d.children[1].textContent = e.x; d.children[2].textContent = e.a ? fmt(e.a) : ''; return d; };
   if(t === 'day'){ list.forEach(e=> box.appendChild(row(e))); return; }
   const groups = new Map();
-  list.forEach(e=>{ const d = new Date(e.t), key = t === 'month' ? d.getDate() : d.getMonth(); if(!groups.has(key)) groups.set(key, []); groups.get(key).push(e); });
+  list.forEach(e=>{ const d = new Date(e.d || e.t), key = t === 'month' ? d.getDate() : d.getMonth(); if(!groups.has(key)) groups.set(key, []); groups.get(key).push(e); });
   let first = true;
   groups.forEach((arr, key)=>{
     const det = document.createElement('details'); det.className = 'ops-grp'; if(t === 'month' && first) det.open = true; first = false;
@@ -3013,23 +3047,23 @@ function renderGISources(){
   r.src.forEach(x=>{
     const d = document.createElement('div'); d.className = 'gi-row';
     d.innerHTML = '<span>💵</span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
-    d.children[1].textContent = x.name; d.children[2].textContent = fmt(x.amount);
-    d.children[3].onclick = ()=> openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a)=>{
-      x.name = n || x.name; x.amount = a; save(); renderGISources(); renderGI();
-    });
+    d.children[1].textContent = x.name + (x.date ? ' · ' + formatDate(x.date) : ''); d.children[2].textContent = fmt(x.amount);
+    d.children[3].onclick = ()=> openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a,dt)=>{
+      x.name = n || x.name; x.amount = a; if(dt) x.date = dt; save(); renderGISources(); renderGI();
+    }, x.date || Date.now());
     d.children[4].onclick = ()=> openConfirm('حذف مصدر الدخل', 'هل تريد حذف "' + x.name + '"؟', ()=>{
       const rr = giRec(); rr.src = rr.src.filter(z=> z.id !== x.id); save(); renderGISources(); renderGI();
     });
     box.appendChild(d);
   });
 }
-function openGI(){ renderGISources(); document.getElementById('giOverlay').classList.add('open'); }
+function openGI(){ const gd = document.getElementById('giSrcDate'); if(gd) gd.value = dateToInputValue(Date.now()); renderGISources(); document.getElementById('giOverlay').classList.add('open'); }
 function closeGI(){ document.getElementById('giOverlay').classList.remove('open'); }
 function addGISource(){
   const n = document.getElementById('giSrcName').value.trim(), amt = Number(document.getElementById('giSrcAmt').value) || 0;
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
-  giRec().src.push({id: uid(), name: n, amount: amt});
-  document.getElementById('giSrcName').value = ''; document.getElementById('giSrcAmt').value = '';
+  giRec().src.push({id: uid(), name: n, amount: amt, date: inputValueToDate(document.getElementById('giSrcDate').value, Date.now())});
+  document.getElementById('giSrcName').value = ''; document.getElementById('giSrcAmt').value = ''; document.getElementById('giSrcDate').value = dateToInputValue(Date.now());
   save(); renderGISources(); renderGI(); showToast('تمت إضافة مصدر الدخل', true);
 }
 
@@ -3081,7 +3115,7 @@ function addGIOut(){
   if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
   const rec = {id: uid(), dest: _giDest, amount: amt, note, date: new Date().toISOString().slice(0,10)};
   if(_giDest === 'zakat'){ zkGet().adds.push({id: rec.id, name: giLabel(note), amount: amt, date: rec.date}); }
-  else { const mon = data[currentYear][currentMonth]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: rec.id, name: giLabel(note), amount: amt, counted: true}); }
+  else { const mon = data[currentYear][currentMonth]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: rec.id, name: giLabel(note), amount: amt, counted: true, date: opsMs(rec.date)}); }
   giRec().out.push(rec);
   document.getElementById('giOutAmt').value = ''; document.getElementById('giOutNote').value = '';
   giAfter();
@@ -3229,8 +3263,10 @@ function closeZakat(){ document.getElementById('zkOverlay').classList.remove('op
 
 // نافذة تعديل عامة (اسم + مبلغ)
 let _gxCb = null;
-function openGenEdit(title, nameLabel, name, amount, cb){
+function openGenEdit(title, nameLabel, name, amount, cb, dateTs){
   _gxCb = cb;
+  const gb = document.getElementById('gxDateBox'); gb.style.display = (dateTs === undefined) ? 'none' : 'block';
+  if(dateTs !== undefined) document.getElementById('gxDate').value = dateToInputValue(dateTs);
   document.getElementById('gxTitle').textContent = title;
   document.getElementById('gxNameLbl').textContent = nameLabel;
   document.getElementById('gxName').value = name || '';
@@ -3242,8 +3278,9 @@ function saveGenEdit(){
   const a = Number(document.getElementById('gxAmt').value) || 0;
   if(a <= 0){ showToast('اكتب مبلغ صحيح', false); return; }
   const cb = _gxCb, n = document.getElementById('gxName').value.trim();
+  const dt = document.getElementById('gxDateBox').style.display !== 'none' ? inputValueToDate(document.getElementById('gxDate').value) : undefined;
   closeGenEdit();
-  if(cb) cb(n, a);
+  if(cb) cb(n, a, dt);
 }
 // ===== ZAKAT JS END =====
 
@@ -3462,6 +3499,7 @@ function openMonth(i){
 
 function renderDetail(){
   renderZakat();
+  { const ngd = document.getElementById('newGroupDate'); if(ngd && !ngd.value) ngd.value = dateToInputValue(Date.now()); }
   renderGI();
   const i = currentMonth;
   const m = data[currentYear][i];
@@ -3558,6 +3596,7 @@ function renderDetail(){
     if(el) el.classList.add('open');
   });
   groupItemDates();
+  const ngd = document.getElementById('newGroupDate'); if(ngd && !ngd.value) ngd.value = dateToInputValue(Date.now());
 }
 
 // أيقونة "⠿" هي نقطة السحب الوحيدة - باقي الصف يفضل قابل للسكرول عادي 100%
@@ -3586,7 +3625,7 @@ function renderGroupEl(g, depth, indexInParent, siblingCount){
   head.onclick = ()=> toggleGroup(g.id);
   head.innerHTML = `
     ${dragHandleHtml(g.id, indexInParent, siblingCount, 'moveNode')}
-    <span class="gname">${g.icon||'📁'} <span class="txt">${g.name}</span></span>
+    <span class="gname">${g.icon||'📁'} <span class="txt">${g.name}</span>${g.date ? ' <small class="gdate">📅 ' + formatDate(g.date) + '</small>' : ''}</span>
     <span style="display:flex;align-items:center;gap:6px;">
       <span class="gtotal">${fmt(gtotal)}</span>
       ${gExcluded>0 ? `<span class="gtotal-excluded">🚫 ${fmt(gExcluded)}</span>` : ''}
@@ -4084,6 +4123,8 @@ function addGroup(){
   if(!name) return;
   const iconInput = document.getElementById('newGroupIconInput');
   const icon = iconInput ? iconInput.value : '📁';
+  const gdEl = document.getElementById('newGroupDate');
+  const groupDate = inputValueToDate(gdEl ? gdEl.value : '', Date.now());
 
   // تضاف المجموعة تلقائيًا لكل شهور السنة الحالية - كل شهر بنسخة مستقلة تمامًا
   // (حذف أو تعديل المجموعة في شهر معين ما يأثرش على أي شهر تاني)
@@ -4091,11 +4132,11 @@ function addGroup(){
     const monGroups = data[currentYear][mi].groups;
     const exists = monGroups.some(g=> g.type==='group' && g.name===name);
     if(!exists){
-      monGroups.push({id:uid(), type:'group', name, icon, children:[]});
+      monGroups.push({id:uid(), type:'group', name, icon, date: groupDate, children:[]});
     }
   });
 
-  inp.value='';
+  inp.value=''; if(gdEl) gdEl.value = dateToInputValue(Date.now());
   const grid = document.getElementById('newGroupIconGrid');
   if(grid) grid.style.display = 'none';
   save(); renderDetail();
@@ -4161,7 +4202,7 @@ function saveNewSubgroup(){
   if(!found || found.node.type !== 'group'){ closeNewSubgroup(); return; }
   const iconInput = document.getElementById('newSubgroupIconInput');
   const icon = iconInput ? iconInput.value : '📁';
-  found.node.children.push({id:uid(), type:'group', name, icon, children:[]});
+  found.node.children.push({id:uid(), type:'group', name, icon, date: Date.now(), children:[]});
   save();
   const parentId = _newSubgroupParentId;
   closeNewSubgroup();
@@ -4304,6 +4345,7 @@ function runConfirmedAction(){
 }
 // ===== مصادر المصروف المنزلي =====
 function openIncomeSources(){
+  const nd = document.getElementById('newIncomeSrcDate'); if(nd) nd.value = dateToInputValue(Date.now());
   renderIncomeSourcesList();
   document.getElementById('incomeSourcesOverlay').classList.add('open');
 }
@@ -4322,7 +4364,7 @@ function renderIncomeSourcesList(){
   list.innerHTML = mon.incomeSources.map(src=>`
     <div class="income-src-row${src.counted===false?' excluded':''}">
       <span class="src-icon">💵</span>
-      <span class="src-name">${src.counted===false?'<span class="tag">غير محسوب</span>':''}${src.name}</span>
+      <span class="src-name">${src.counted===false?'<span class="tag">غير محسوب</span>':''}${src.name}${src.date ? ' <small class="src-date">📅 ' + formatDate(src.date) + '</small>' : ''}</span>
       <span class="src-amt">${fmt(src.amount)}</span>
       <button class="icon-btn" onclick="openEditIncomeSource('${src.id}')">✏️</button>
       <button class="del" onclick="deleteIncomeSource('${src.id}')">🗑</button>
@@ -4341,8 +4383,9 @@ function addIncomeSource(){
   const counted = countedEl ? countedEl.checked : true;
   const mon = data[currentYear][currentMonth];
   if(!mon.incomeSources) mon.incomeSources = [];
-  mon.incomeSources.push({id:uid(), name, amount:amt, counted});
-  nameEl.value = ''; amtEl.value = '';
+  const dEl = document.getElementById('newIncomeSrcDate');
+  mon.incomeSources.push({id:uid(), name, amount:amt, counted, date: inputValueToDate(dEl ? dEl.value : '', Date.now())});
+  nameEl.value = ''; amtEl.value = ''; if(dEl) dEl.value = dateToInputValue(Date.now());
   if(countedEl) countedEl.checked = true;
   save();
   renderIncomeSourcesList();
@@ -4369,6 +4412,7 @@ function openEditIncomeSource(id){
   document.getElementById('editIncomeSrcName').value = src.name;
   document.getElementById('editIncomeSrcAmount').value = src.amount;
   document.getElementById('editIncomeSrcCounted').checked = src.counted !== false;
+  document.getElementById('editIncomeSrcDate').value = dateToInputValue(src.date || Date.now());
   document.getElementById('editIncomeSourceOverlay').classList.add('open');
 }
 function closeEditIncomeSource(){
@@ -4385,7 +4429,7 @@ function saveEditIncomeSource(){
   const counted = document.getElementById('editIncomeSrcCounted').checked;
   const mon = data[currentYear][currentMonth];
   const src = (mon.incomeSources||[]).find(s=> s.id===_editIncomeSourceId);
-  if(src){ src.name = name; src.amount = amt; src.counted = counted; }
+  if(src){ src.name = name; src.amount = amt; src.counted = counted; src.date = inputValueToDate(document.getElementById('editIncomeSrcDate').value, src.date); }
   save();
   closeEditIncomeSource();
   renderIncomeSourcesList();
@@ -4400,6 +4444,7 @@ function openRenameGroup(id){
   if(!found) return;
   _renameId = id;
   document.getElementById('renameInput').value = found.node.name;
+  document.getElementById('renameDate').value = dateToInputValue(found.node.date || Date.now());
   document.getElementById('renameOverlay').classList.add('open');
 }
 function closeRename(){
@@ -4412,6 +4457,7 @@ function saveRename(){
   const found = findNode(data[currentYear][currentMonth].groups, _renameId);
   if(!found){ closeRename(); return; }
   found.node.name = newName;
+  found.node.date = inputValueToDate(document.getElementById('renameDate').value, found.node.date);
   save();
   closeRename();
   renderDetail();
