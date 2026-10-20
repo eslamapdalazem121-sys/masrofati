@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.4400">
+<meta name="app-version" content="2026-10-15.4500">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1405,8 +1405,8 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
   <div class="modal-box">
     <h3>🧾 صرف من الدخل العام</h3>
     <div class="gi-sumrow"><span>الدخل العام: <b id="giOutInc">0</b></span><span id="giChipAll" class="gi-chip" onclick="setGIFilter(null)">المنصرف: <b id="giOutTot">0</b></span></div>
-    <div class="gi-sumrow"><span id="giChipInc" class="gi-chip" onclick="setGIFilter('income')">إلى المصروف المنزلي: <b id="giOutToInc">0</b></span><span id="giChipZk" class="gi-chip" onclick="setGIFilter('zakat')">إلى زكاتي: <b id="giOutToZk">0</b></span></div>
-    <div class="gi-dest"><button type="button" id="giDestInc" class="active" onclick="setGIDest('income')">💰 المصروف المنزلي</button><button type="button" id="giDestZk" onclick="setGIDest('zakat')">🕌 زكاتي</button></div>
+    <div class="gi-sumrow"><span id="giChipInc" class="gi-chip" onclick="setGIFilter('income')">إلى المصروف المنزلي: <b id="giOutToInc">0</b></span><span id="giChipZk" class="gi-chip" onclick="setGIFilter('zakat')">إلى زكاتي: <b id="giOutToZk">0</b></span><span id="giChipOth" class="gi-chip" onclick="setGIFilter('other')">إلى أخرى: <b id="giOutToOth">0</b></span></div>
+    <div class="gi-dest"><button type="button" id="giDestInc" class="active" onclick="setGIDest('income')">💰 المصروف المنزلي</button><button type="button" id="giDestZk" onclick="setGIDest('zakat')">🕌 زكاتي</button><button type="button" id="giDestOth" onclick="setGIDest('other')">📦 أخرى</button></div>
     <div class="field"><label>المبلغ</label><input type="number" id="giOutAmt" placeholder="0"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="giOutNote" placeholder="مثال: مصاريف المنزل"></div>
     <div class="check-row"><input type="checkbox" id="giOutCounted" checked><label for="giOutCounted" style="margin:0;">احتسب ضمن المنصرف العام (لو مش متعلّم: بيتسجل بس من غير ما يتخصم أو يتحول)</label></div>
@@ -2802,7 +2802,7 @@ function opsFlat(){
   Object.keys(gi).forEach(y=>{ const yo = gi[y]; if(!yo || typeof yo !== 'object') return;
     Object.keys(yo).forEach(m=>{ const r = yo[m]; if(!r || typeof r !== 'object') return;
       (r.src||[]).forEach(x=>{ if(!skip(x.id)) f['gs:'+x.id] = {t:'gs', n:x.name + (x.counted === false ? ' (غير محسوب)' : ''), a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
-      (r.out||[]).forEach(x=>{ go.add(String(x.id)); f['go:'+x.id] = {t:'go', n:(x.dest === 'zakat' ? 'إلى زكاتي' : 'إلى المصروف المنزلي') + (x.note ? ' — ' + x.note : '') + (x.counted === false ? ' (غير محسوب)' : ''), a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
+      (r.out||[]).forEach(x=>{ go.add(String(x.id)); f['go:'+x.id] = {t:'go', n:'إلى ' + ((GI_DEST[x.dest] || GI_DEST.income).n) + (x.note ? ' — ' + x.note : '') + (x.counted === false ? ' (غير محسوب)' : ''), a:Number(x.amount)||0, y:+y, m:+m, d:opsMs(x.date)}; });
     }); });
   Object.keys(data).forEach(y=>{ if(isNaN(Number(y))) return; const yo = data[y]; if(!yo || typeof yo !== 'object') return;
     Object.keys(yo).forEach(m=>{ const mon = yo[m]; if(!mon || typeof mon !== 'object') return;
@@ -3086,6 +3086,7 @@ function addGISource(){
 }
 
 // الصرف من الدخل العام: إلى المصروف المنزلي أو زكاتي
+const GI_DEST = { income:{n:'المصروف المنزلي', ic:'💰'}, zakat:{n:'زكاتي', ic:'🕌'}, other:{n:'أخرى', ic:'📦'} };
 let _giDest = 'income', _giFilter = null;
 function setGIFilter(f){
   _giFilter = (f === _giFilter) ? null : f;
@@ -3095,6 +3096,7 @@ function setGIDest(d){
   _giDest = d; _giFilter = d; renderGIOut();
   document.getElementById('giDestInc').classList.toggle('active', d === 'income');
   document.getElementById('giDestZk').classList.toggle('active', d === 'zakat');
+  document.getElementById('giDestOth').classList.toggle('active', d === 'other');
 }
 function giDateTxt(d){
   if(!d) return 'بدون تاريخ';
@@ -3109,22 +3111,23 @@ function renderGIOut(){
   document.getElementById('giOutTot').textContent = fmt(tot);
   document.getElementById('giOutToInc').textContent = fmt(giCnt(r.out.filter(x=> x.dest === 'income')));
   document.getElementById('giOutToZk').textContent = fmt(giCnt(r.out.filter(x=> x.dest === 'zakat')));
+  document.getElementById('giOutToOth').textContent = fmt(giCnt(r.out.filter(x=> x.dest === 'other')));
   box.innerHTML = r.out.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف بعد</div>';
-  ['giChipAll','giChipInc','giChipZk'].forEach((id,k)=> document.getElementById(id).classList.toggle('on', (k === 0 && !_giFilter) || (k === 1 && _giFilter === 'income') || (k === 2 && _giFilter === 'zakat')));
+  ['giChipAll','giChipInc','giChipZk','giChipOth'].forEach((id,k)=> document.getElementById(id).classList.toggle('on', (k === 0 && !_giFilter) || (k === 1 && _giFilter === 'income') || (k === 2 && _giFilter === 'zakat') || (k === 3 && _giFilter === 'other')));
   const shown = _giFilter ? r.out.filter(x=> x.dest === _giFilter) : r.out;
-  if(_giFilter && !shown.length) box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف إلى ' + (_giFilter === 'zakat' ? 'زكاتي' : 'المصروف المنزلي') + ' بعد</div>';
+  if(_giFilter && !shown.length) box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف إلى ' + (GI_DEST[_giFilter] || GI_DEST.income).n + ' بعد</div>';
   const sorted = shown.map((x,i)=> [x,i]).sort((a,b)=> String(a[0].date||'').localeCompare(String(b[0].date||'')) || a[1] - b[1]).map(z=> z[0]);
   let last = null;
   sorted.forEach(x=>{
     if(x.date !== last){ last = x.date; const h = document.createElement('div'); h.className = 'date-sep'; h.textContent = '📅 ' + giDateTxt(x.date); box.appendChild(h); }
     const d = document.createElement('div'); d.className = 'gi-row';
     d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
-    d.children[0].textContent = x.dest === 'zakat' ? '🕌' : '💰';
-    d.children[1].textContent = x.note || (x.dest === 'zakat' ? 'زكاتي' : 'المصروف المنزلي');
+    d.children[0].textContent = (GI_DEST[x.dest] || GI_DEST.income).ic;
+    d.children[1].textContent = x.note || (GI_DEST[x.dest] || GI_DEST.income).n;
     if(x.counted === false){ d.classList.add('unc'); const tg = document.createElement('span'); tg.className = 'gi-tag'; tg.textContent = '🚫 غير محسوب'; d.children[1].prepend(tg); }
     d.children[2].textContent = fmt(x.amount);
     d.children[3].onclick = ()=> openGenEdit('✏️ تعديل الصرف', 'ملاحظة', x.note, x.amount, (n,a)=> editGIOut(x.id, n, a));
-    d.children[4].onclick = ()=> openConfirm('حذف عملية الصرف', 'سيتم التراجع عنها من ' + (x.dest === 'zakat' ? 'زكاتي' : 'المصروف المنزلي') + '. متأكد؟', ()=> deleteGIOut(x.id));
+    d.children[4].onclick = ()=> openConfirm('حذف عملية الصرف', (x.dest === 'other' ? 'هتتحذف عملية الصرف دي. متأكد؟' : 'سيتم التراجع عنها من ' + (GI_DEST[x.dest] || GI_DEST.income).n + '. متأكد؟'), ()=> deleteGIOut(x.id));
     box.appendChild(d);
   });
 }
@@ -3137,13 +3140,13 @@ function addGIOut(){
   if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
   const counted = document.getElementById('giOutCounted').checked;
   const rec = {id: uid(), dest: _giDest, amount: amt, note, counted, date: new Date().toISOString().slice(0,10)};
-  if(!counted){ /* غير محسوب: بيتسجل بس */ }
+  if(!counted || _giDest === 'other'){ /* غير محسوب أو «أخرى»: بيتسجل بس من غير تحويل */ }
   else if(_giDest === 'zakat'){ zkGet().adds.push({id: rec.id, name: giLabel(note), amount: amt, date: rec.date}); }
   else { const mon = data[currentYear][currentMonth]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: rec.id, name: giLabel(note), amount: amt, counted: true, date: opsMs(rec.date)}); }
   giRec().out.push(rec);
   document.getElementById('giOutAmt').value = ''; document.getElementById('giOutNote').value = ''; document.getElementById('giOutCounted').checked = true;
   giAfter();
-  showToast(counted ? 'تم الصرف إلى ' + (_giDest === 'zakat' ? 'زكاتي' : 'المصروف المنزلي') + ' ✅' : 'اتسجّل صرف غير محسوب 🚫', true);
+  showToast(counted ? 'تم الصرف إلى ' + (GI_DEST[_giDest] || GI_DEST.income).n + ' ✅' : 'اتسجّل صرف غير محسوب 🚫', true);
 }
 function editGIOut(id, note, amt){
   const rec = giRec().out.find(x=> x.id === id); if(!rec) return;
