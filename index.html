@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.4500">
+<meta name="app-version" content="2026-10-15.5400">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1235,6 +1235,38 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .gi-unc.bad{background:linear-gradient(180deg,#ffd0d0,#ff6b6b); color:#5a0000;}
 .gi-row.unc{background:rgba(255,179,0,.14); border-radius:8px;}
 .gi-tag{font-size:calc(11px * var(--fs,1)); font-weight:800; padding:1px 6px; border-radius:7px; background:#ffb300; color:#4a2f00; margin-inline-end:4px;}
+.yr-cap{max-width:640px; margin:6px auto 16px;}
+.zk-wrap.yr-cap .zk-main{padding:12px 18px; font-size:calc(19px * var(--fs,1)); justify-content:flex-start; gap:14px; border-radius:20px; color:#2a0f5c;
+  background:linear-gradient(145deg,#f1e6ff 0%,#b794f6 28%,#7c4ddb 62%,#cbb6ff 100%);
+  box-shadow:0 1px 0 #f8f1ff inset, 0 -4px 0 rgba(60,20,140,.35) inset, 0 10px 0 #4b2a99, 0 18px 28px rgba(60,20,140,.35);}
+.zk-wrap.yr-cap .zk-main:active{box-shadow:0 1px 0 #f8f1ff inset, 0 -4px 0 rgba(60,20,140,.35) inset, 0 4px 0 #4b2a99, 0 8px 14px rgba(60,20,140,.35);}
+.zk-wrap.yr-cap .zk-main .zk-ico{font-size:calc(30px * var(--fs,1));}
+.zk-wrap.yr-cap .cap-plus{pointer-events:auto; cursor:pointer; margin-inline-start:auto;}
+.zk-wrap.yr-cap .cap-plus::after{pointer-events:none;}
+.zk-wrap.yr-cap .zk-row{grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:18px;}
+.zk-wrap.yr-cap .zk-sq{min-height:104px; cursor:pointer; position:relative;}
+.zk-wrap.yr-cap .zk-sq .zk-l{font-size:calc(14px * var(--fs,1)); min-height:0; font-weight:800;}
+.zk-wrap.yr-cap .zk-sq .zk-v{font-size:calc(26px * var(--fs,1)); font-weight:900;}
+.zk-wrap.yr-cap .zk-sq.money{color:#04372a;
+  background:linear-gradient(145deg,#c9f9e2 0%,#4ade9f 30%,#12b27a 65%,#6ee7b7 100%);
+  box-shadow:0 1px 0 #e6fff3 inset, 0 -3px 0 rgba(4,80,55,.3) inset, 0 7px 0 #0a7a55, 0 12px 18px rgba(4,80,55,.3);}
+.zk-wrap.yr-cap .zk-sq.gold{color:#4a3000;
+  background:linear-gradient(145deg,#fff1b8 0%,#f5c542 30%,#d9a21b 65%,#f0c64f 100%);
+  box-shadow:0 1px 0 #fff8d6 inset, 0 -3px 0 rgba(120,76,0,.3) inset, 0 7px 0 #a87400, 0 12px 18px rgba(120,76,0,.3);}
+.zk-wrap.yr-cap .zk-sq:active{transform:translateY(4px);}
+.field select{width:100%; padding:11px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:inherit; font-size:calc(15px * var(--fs,1));}
+.date-row select{flex:1; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:inherit; font-size:calc(15px * var(--fs,1));}
+.date-row input[type=number]{padding:12px; border-radius:12px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-size:calc(14px * var(--fs,1)); font-family:inherit;}
+.date-row select{border:1.5px solid var(--border); background:var(--bg);}
+.date-row label{min-width:84px;}
+.cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
+.cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
+.cap-grp b{flex:1; min-width:0;} .cap-grp small{font-size:calc(11.5px * var(--fs,1)); opacity:.85; font-weight:700;}
+.cap-grp button{border:0; background:none; font-size:16px; cursor:pointer;}
+.grp-new input{padding:11px; border-radius:12px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-size:calc(14px * var(--fs,1));}
+.mini-btn{border:0; border-radius:12px; padding:11px 14px; font-family:inherit; font-weight:800; cursor:pointer; color:#fff; white-space:nowrap;
+  background:linear-gradient(180deg,#9b6dff,#6a3fd1); box-shadow:0 3px 0 #4b2a99;}
+.mini-btn:active{transform:translateY(2px); box-shadow:0 1px 0 #4b2a99;}
 /* ===== GENERAL INCOME END ===== */
 /* ===== MODAL SCROLL LOCK ===== */
 .modal-overlay{overscroll-behavior:contain;}
@@ -1337,11 +1369,84 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     </div>
   </div>
 
+  <div class="zk-wrap yr-cap" id="yrCap">
+    <div class="zk-main" onclick="toggleCapCards()" role="button">
+      <span class="zk-ico">💼</span>
+      <span class="gi-col"><span>رأس المال</span><span class="yr-amt" id="capAmt">0</span></span>
+      <span class="plus-badge in-card cap-plus" onclick="event.stopPropagation(); openCapChoose()" role="button" aria-label="إضافة رأس مال">+</span>
+    </div>
+    <div class="zk-row">
+      <div class="zk-sq cap-sq money" onclick="openCapMoney()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">💵</span><span class="zk-l">أموال</span><span class="zk-v" id="capMoney">0</span><span class="gi-pct" id="capMoneySplit"></span><span class="gi-pct" id="capMoneyPct"></span></div>
+      <div class="zk-sq cap-sq gold" onclick="openCapGold()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🪙</span><span class="zk-l">ذهب</span><span class="zk-v" id="capGold">0</span><span class="gi-pct" id="capGoldSplit"></span><span class="gi-pct" id="capGoldKarat"></span><span class="gi-pct" id="capGoldPct"></span></div>
+    </div>
+  </div>
+
   <div class="zk-wrap yr-ms off" id="yrMS">
     <div class="zk-main" onclick="toggleMonthsGrid()" role="button">
       <span class="zk-ico">🗓️</span>
       <span class="gi-col"><span>المصروفات الشهرية</span><span class="yr-amt" id="msAmt">0</span></span>
       <span class="plus-badge in-card ms-plus" onclick="event.stopPropagation(); openMsSummary()" role="button" aria-label="ملخص المصروفات">+</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="capChooseOverlay">
+  <div class="modal-box">
+    <h3>💼 إضافة إلى رأس المال</h3>
+    <div class="gi-dest" style="margin:10px 0 16px;"><button type="button" onclick="closeCapChoose(); openCapMoney()">💵 أموال</button><button type="button" onclick="closeCapChoose(); openCapGold()">🪙 ذهب</button></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeCapChoose()">إغلاق</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="capMoneyOverlay">
+  <div class="modal-box">
+    <h3>💵 أموال</h3>
+    <div class="gi-sumrow"><span id="cmChipAll" class="gi-chip" onclick="setCmFilter(null)">الإجمالي: <b id="cmTotal">0</b></span><span id="cmChipCash" class="gi-chip" onclick="setCmFilter('cash')">💵 نقدي: <b id="cmCash">0</b></span><span id="cmChipBank" class="gi-chip" onclick="setCmFilter('bank')">🏦 بنوك: <b id="cmBank">0</b></span></div>
+    <div class="gi-rows" id="cmList"></div>
+    <div class="date-row grp-new"><input type="text" id="cmGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('money')">إنشاء مجموعة</button></div>
+    <div class="gi-dest"><button type="button" id="cmSubCash" class="active" onclick="setCmSub('cash')">💵 نقدي</button><button type="button" id="cmSubBank" onclick="setCmSub('bank')">🏦 بنوك</button></div>
+    <div class="field"><label id="cmNameLbl">الاسم</label><input type="text" id="cmName" placeholder="مثال: كاش بالبيت"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="cmAmt" placeholder="0"></div>
+    <div class="date-row"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
+    <div class="field"><label>📅 التاريخ</label><input type="date" id="cmDate"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCapMoney()">إغلاق</button>
+      <button class="btn-save" id="cmSaveBtn" onclick="addCapMoney()">＋ إضافة</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="capGoldOverlay">
+  <div class="modal-box">
+    <h3>🪙 الذهب</h3>
+    <div class="gi-sumrow"><span>إجمالي الثمن: <b id="cgTotal">0</b></span><span>إجمالي الوزن: <b id="cgGrams">0</b> جم</span></div>
+    <div class="gi-sumrow" id="cgKaratRow"></div>
+    <div class="gi-sumrow" id="cgUseRow"></div>
+    <div class="gi-rows" id="cgList"></div>
+    <div class="date-row grp-new"><input type="text" id="cgGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('gold')">إنشاء مجموعة</button></div>
+    <div class="gi-dest" style="margin:4px 0 6px;"><button type="button" id="cgUseJewel" onclick="setCgUse('jewel')">💍 زينة</button><button type="button" id="cgUseSave" class="active" onclick="setCgUse('save')">💰 ادخار</button></div>
+    <div class="field"><label>اسم القطعة</label><input type="text" id="cgName" placeholder="مثال: سبيكة، خاتم، دبلة"></div>
+    <div class="date-row"><label for="cgGrp">📁 المجموعة</label><select id="cgGrp"></select></div>
+    <div class="date-row"><label for="cgKarat">العيار</label><select id="cgKarat"><option value="24">٢٤</option><option value="22">٢٢</option><option value="21" selected>٢١</option><option value="18">١٨</option><option value="14">١٤</option><option value="12">١٢</option><option value="9">٩</option></select></div>
+    <div class="date-row"><label for="cgGrams">الوزن (جرام)</label><input type="number" id="cgGramsIn" placeholder="0" step="any" oninput="cgCalc()"></div>
+    <div class="date-row"><label for="cgPpg">ثمن الجرام</label><input type="number" id="cgPpg" placeholder="0" step="any" oninput="cgCalc()"></div>
+    <div class="gi-sumrow" style="margin-top:10px;"><span>إجمالي ثمن القطعة: <b id="cgCalcTotal">0</b></span></div>
+    <div class="field"><label>📅 التاريخ</label><input type="date" id="cgDate"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCapGold()">إغلاق</button>
+      <button class="btn-save" id="cgSaveBtn" onclick="saveCapGold()">＋ إضافة</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="capGrpOverlay">
+  <div class="modal-box">
+    <h3>📁 تعديل المجموعة</h3>
+    <div class="field"><label>اسم المجموعة</label><input type="text" id="capGrpEditName"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCapGrp()">إلغاء</button>
+      <button class="btn-cancel" style="color:#c0392b;" onclick="deleteCapGrp()">🗑 حذف</button>
+      <button class="btn-save" onclick="saveCapGrp()">حفظ</button>
     </div>
   </div>
 </div>
@@ -2789,7 +2894,7 @@ function fmt(n){ return (Number(n)||0).toLocaleString(DIGITS_MODE === 'en' ? 'en
 
 // ===== OPS LOG JS START =====
 var _opsSnap = null, _opsOwner = null, _opsTab = 'day';
-const OPS_T = {e:['🧾','مصروف'], g:['📁','مجموعة'], i:['💰','المصروف المنزلي'], gs:['💵','مصدر دخل عام'], go:['🔁','صرف من الدخل العام'], za:['🕌','زكاتي'], zp:['🤲','منصرف الزكاة'], zm:['🕌','زكاة المال']};
+const OPS_T = {e:['🧾','مصروف'], g:['📁','مجموعة'], i:['💰','المصروف المنزلي'], gs:['💵','مصدر دخل عام'], go:['🔁','صرف من الدخل العام'], za:['🕌','زكاتي'], zp:['🤲','منصرف الزكاة'], zm:['🕌','زكاة المال'], cap:['💼','رأس المال'], cgp:['📁','مجموعة رأس المال']};
 function opsMs(v){
   if(v === undefined || v === null || v === '') return undefined;
   if(typeof v === 'number') return v;
@@ -2821,6 +2926,8 @@ function opsFlat(){
     }); });
   const zm = data.zakatMal || {};
   Object.keys(zm).forEach(y=>{ f['zm:'+y] = {t:'zm', n:y, a:Number(zm[y])||0, y:+y, m:-1}; });
+  (Array.isArray(data.capital) ? data.capital : []).forEach(x=>{ const dm = opsMs(x.date) || Date.now(), dd = new Date(dm); f['cap:'+x.id] = {t:'cap', n:x.name + (x.cat === 'gold' ? ' (ذهب' + (x.karat ? ' عيار ' + x.karat : '') + ' — ' + (x.use === 'jewel' ? 'زينة' : 'ادخار') + ')' : (x.sub === 'bank' ? ' (بنوك)' : ' (نقدي)')), a:Number(x.amount)||0, y:dd.getFullYear(), m:dd.getMonth(), d:opsMs(x.date)}; });
+  capGroups().forEach(g=>{ const dm = g.date || Date.now(), dd = new Date(dm); f['cgp:'+g.id] = {t:'cgp', n:g.name + (g.cat === 'gold' ? ' (ذهب)' : ' (أموال)'), a:0, y:dd.getFullYear(), m:dd.getMonth(), d:g.date}; });
   Object.keys(f).forEach(k=>{ if(/^(i|za|zp):/.test(k) && go.has(k.split(':')[1])) f[k].link = true; });
   return f;
 }
@@ -2992,6 +3099,249 @@ function openMsSummary(){
   document.getElementById('msOverlay').classList.add('open');
 }
 function closeMsSummary(){ document.getElementById('msOverlay').classList.remove('open'); }
+function capList(){ if(!Array.isArray(data.capital)) data.capital = []; return data.capital; }
+const capCatOf = x => x.cat === 'gold' ? 'gold' : 'money';
+const capSubOf = x => x.sub === 'bank' ? 'bank' : 'cash';
+function capTotals(){
+  const arr = capList(), mo = arr.filter(x=> capCatOf(x) === 'money'), go = arr.filter(x=> capCatOf(x) === 'gold');
+  const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(mo.filter(x=> capSubOf(x) === 'bank'));
+  const grams = go.reduce((a,x)=> a + (Number(x.grams)||0), 0);
+  return {money: cash + bank, cash, bank, gold: giSum(go), grams, all: cash + bank + giSum(go)};
+}
+function renderCap(){
+  const el = document.getElementById('capAmt'); if(!el) return;
+  const t = capTotals();
+  el.textContent = fmt(t.all);
+  document.getElementById('capMoney').textContent = fmt(t.money);
+  document.getElementById('capGold').textContent = fmt(t.gold);
+  document.getElementById('capMoneySplit').textContent = (t.cash > 0 || t.bank > 0) ? '💵 ' + fmt(t.cash) + ' · 🏦 ' + fmt(t.bank) : '';
+  document.getElementById('capGoldSplit').textContent = t.grams > 0 ? '⚖️ ' + fmt(Math.round(t.grams * 100) / 100) + ' جم' : '';
+  { const ks = goldKaratStats(goldPieces()); document.getElementById('capGoldKarat').textContent = t.grams > 0 ? [24,21,18].map(k=> toArabicDigits(k) + ': ' + fmt(Math.round(ks[k] * 100) / 100)).join(' · ') : ''; }
+  const mp = t.all > 0 ? Math.round(t.money / t.all * 100) : 0, lab = ' من رأس المال';
+  document.getElementById('capMoneyPct').textContent = t.all > 0 ? toArabicDigits(mp) + '٪' + lab : '';
+  document.getElementById('capGoldPct').textContent = t.all > 0 ? toArabicDigits(100 - mp) + '٪' + lab : '';
+}
+function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
+function openCapChoose(){ document.getElementById('capChooseOverlay').classList.add('open'); }
+function closeCapChoose(){ document.getElementById('capChooseOverlay').classList.remove('open'); }
+function capDel(id){ data.capital = capList().filter(z=> z.id !== id); save(); renderCap(); }
+
+// ---- مجموعات رأس المال
+let _capGrpId = null;
+function capGroups(cat){ if(!Array.isArray(data.capitalGroups)) data.capitalGroups = []; return cat ? data.capitalGroups.filter(g=> g.cat === cat) : data.capitalGroups; }
+function fillGrpSel(selId, cat, val){
+  const el = document.getElementById(selId); if(!el) return;
+  el.innerHTML = '';
+  const o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'بدون مجموعة'; el.appendChild(o0);
+  capGroups(cat).forEach(g=>{ const o = document.createElement('option'); o.value = g.id; o.textContent = g.name; el.appendChild(o); });
+  el.value = val || '';
+}
+function createCapGroup(cat){
+  const inp = document.getElementById(cat === 'gold' ? 'cgGrpName' : 'cmGrpName'), n = inp.value.trim();
+  if(!n){ showToast('اكتب اسم المجموعة', false); return; }
+  const g = {id: uid(), name: n, cat, date: Date.now()};
+  capGroups().push(g); inp.value = '';
+  save(); fillGrpSel(cat === 'gold' ? 'cgGrp' : 'cmGrp', cat, g.id);
+  if(cat === 'gold') renderCapGold(); else renderCapMoney();
+  showToast('تم إنشاء المجموعة «' + n + '»', true);
+}
+function openCapGrp(id){
+  const g = capGroups().find(x=> x.id === id); if(!g) return;
+  _capGrpId = id; document.getElementById('capGrpEditName').value = g.name;
+  document.getElementById('capGrpOverlay').classList.add('open');
+}
+function closeCapGrp(){ document.getElementById('capGrpOverlay').classList.remove('open'); _capGrpId = null; }
+function capRerender(){ fillGrpSel('cmGrp','money', document.getElementById('cmGrp').value); fillGrpSel('cgGrp','gold', document.getElementById('cgGrp').value); renderCapMoney(); renderCapGold(); renderCap(); }
+function saveCapGrp(){
+  const g = capGroups().find(x=> x.id === _capGrpId), n = document.getElementById('capGrpEditName').value.trim();
+  if(g && n){ g.name = n; save(); }
+  closeCapGrp(); capRerender();
+}
+function deleteCapGrp(){
+  const id = _capGrpId, g = capGroups().find(x=> x.id === id); if(!g) return;
+  openConfirm('حذف المجموعة', 'هتتحذف المجموعة «' + g.name + '» وبنودها هتفضل بدون مجموعة. متأكد؟', ()=>{
+    data.capitalGroups = capGroups().filter(x=> x.id !== id);
+    capList().forEach(x=>{ if(x.grp === id) delete x.grp; });
+    save(); closeCapGrp(); capRerender();
+  });
+}
+// ترتيب الصفوف تحت عناوين المجموعات
+const _capCollapsed = new Set();
+function capGroupize(box, cat){
+  const groups = capGroups(cat); if(!groups.length) return;
+  const rows = Array.from(box.querySelectorAll(':scope > .gi-row')), items = capList();
+  const byId = id => items.find(x=> x.id === id);
+  box.innerHTML = '';
+  const bucket = {}; rows.forEach(r=>{ const k = groups.some(g=> g.id === r.dataset.grp) ? r.dataset.grp : ''; (bucket[k] = bucket[k] || []).push(r); });
+  const section = (key, title, rs, gid)=>{
+    const sumA = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).amount) || 0), 0), sumG = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).grams) || 0), 0);
+    const ck = cat + ':' + (gid || '_none'), closed = _capCollapsed.has(ck);
+    const h = document.createElement('div'); h.className = 'cap-grp'; h.style.cursor = 'pointer';
+    h.innerHTML = '<span class="cap-chev"></span><span>📁</span><b></b><small></small>' + (gid ? '<button type="button">✏️</button>' : '');
+    h.children[0].textContent = closed ? '◂' : '▾';
+    h.children[2].textContent = title + ' — ' + fmt(sumA) + (cat === 'gold' && sumG > 0 ? ' (' + fmt(Math.round(sumG * 100) / 100) + ' جم)' : '');
+    h.children[3].textContent = toArabicDigits(rs.length) + ' بند';
+    if(gid) h.children[4].onclick = (e)=>{ e.stopPropagation(); openCapGrp(gid); };
+    const body = document.createElement('div'); body.className = 'cap-grp-body'; body.style.display = closed ? 'none' : 'block';
+    if(!rs.length){ const e = document.createElement('div'); e.style.cssText = 'color:var(--muted);font-size:12px;text-align:center;padding:4px;'; e.textContent = 'لا توجد بنود في المجموعة'; body.appendChild(e); }
+    rs.forEach(r=> body.appendChild(r));
+    h.onclick = ()=>{ const nowClosed = body.style.display !== 'none'; body.style.display = nowClosed ? 'none' : 'block'; h.children[0].textContent = nowClosed ? '◂' : '▾'; if(nowClosed) _capCollapsed.add(ck); else _capCollapsed.delete(ck); };
+    box.appendChild(h); box.appendChild(body);
+  };
+  groups.forEach(g=> section(g.id, g.name, bucket[g.id] || [], g.id));
+  const rest = bucket[''] || [];
+  if(rest.length) section('_none', 'بدون مجموعة', rest, null);
+}
+
+// ---- أموال: نقدي / بنوك
+let _cmSub = 'cash', _cmFilter = null, _cmEditId = null;
+function cmSubUI(c){
+  _cmSub = c;
+  document.getElementById('cmSubCash').classList.toggle('active', c === 'cash');
+  document.getElementById('cmSubBank').classList.toggle('active', c === 'bank');
+  document.getElementById('cmNameLbl').textContent = c === 'bank' ? 'اسم البنك / الحساب' : 'الاسم';
+  document.getElementById('cmName').placeholder = c === 'bank' ? 'مثال: البنك الأهلي' : 'مثال: كاش بالبيت';
+}
+function setCmSub(c){ cmSubUI(c); _cmFilter = c; renderCapMoney(); }
+function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMoney(); }
+function cmReset(){
+  _cmEditId = null;
+  document.getElementById('cmName').value = ''; document.getElementById('cmAmt').value = '';
+  document.getElementById('cmDate').value = dateToInputValue(Date.now());
+  document.getElementById('cmSaveBtn').textContent = '＋ إضافة';
+  fillGrpSel('cmGrp', 'money', '');
+}
+function renderCapMoney(){
+  const t = capTotals(), box = document.getElementById('cmList');
+  document.getElementById('cmTotal').textContent = fmt(t.money);
+  document.getElementById('cmCash').textContent = fmt(t.cash);
+  document.getElementById('cmBank').textContent = fmt(t.bank);
+  document.getElementById('cmChipAll').classList.toggle('on', !_cmFilter);
+  document.getElementById('cmChipCash').classList.toggle('on', _cmFilter === 'cash');
+  document.getElementById('cmChipBank').classList.toggle('on', _cmFilter === 'bank');
+  const arr = capList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter));
+  box.innerHTML = arr.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد بنود بعد</div>';
+  arr.forEach(x=>{
+    const d = document.createElement('div'); d.className = 'gi-row'; d.dataset.id = x.id; d.dataset.grp = x.grp || '';
+    d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
+    d.children[0].textContent = capSubOf(x) === 'bank' ? '🏦' : '💵';
+    d.children[1].textContent = x.name + (x.date ? ' · ' + formatDate(x.date) : ''); d.children[2].textContent = fmt(x.amount);
+    d.children[3].onclick = ()=>{
+      _cmEditId = x.id; cmSubUI(capSubOf(x));
+      document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount;
+      document.getElementById('cmDate').value = dateToInputValue(x.date || Date.now());
+      fillGrpSel('cmGrp', 'money', x.grp || '');
+      document.getElementById('cmSaveBtn').textContent = '💾 حفظ التعديل';
+      document.getElementById('cmName').scrollIntoView({block:'center'});
+    };
+    d.children[4].onclick = ()=> openConfirm('حذف البند', 'هل تريد حذف "' + x.name + '"؟', ()=>{ capDel(x.id); if(_cmEditId === x.id) cmReset(); renderCapMoney(); });
+    box.appendChild(d);
+  });
+  capGroupize(box, 'money');
+}
+function openCapMoney(){
+  _cmFilter = null; cmReset(); cmSubUI(_cmSub);
+  renderCapMoney();
+  document.getElementById('capMoneyOverlay').classList.add('open');
+}
+function closeCapMoney(){ document.getElementById('capMoneyOverlay').classList.remove('open'); }
+function addCapMoney(){
+  const n = document.getElementById('cmName').value.trim(), amt = Number(document.getElementById('cmAmt').value) || 0;
+  if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
+  const rec = {name: n, amount: amt, cat: 'money', sub: _cmSub, date: inputValueToDate(document.getElementById('cmDate').value, Date.now())};
+  const gv = document.getElementById('cmGrp').value; if(gv) rec.grp = gv;
+  const wasEdit = !!_cmEditId;
+  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; Object.assign(x, rec); } }
+  else capList().push(Object.assign({id: uid()}, rec));
+  save(); cmReset(); renderCapMoney(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : 'النقدي'), true);
+}
+
+// ---- ذهب: اسم القطعة، العيار، الوزن، ثمن الجرام، إجمالي الثمن، التاريخ، زينة/ادخار
+let _cgEditId = null, _cgUse = 'save', _cgFk = null, _cgFu = null;
+const cgUseOf = x => x.use === 'jewel' ? 'jewel' : 'save';
+const cgRound = v => Math.round(v * 100) / 100;
+function goldPieces(){ return capList().filter(x=> capCatOf(x) === 'gold'); }
+function goldKaratStats(arr){
+  const o = {24:0, 21:0, 18:0, other:0};
+  arr.forEach(x=>{ const k = Number(x.karat) || 0, g = Number(x.grams) || 0; if(k === 24 || k === 21 || k === 18) o[k] += g; else o.other += g; });
+  return o;
+}
+function setCgUse(u){
+  _cgUse = u;
+  document.getElementById('cgUseJewel').classList.toggle('active', u === 'jewel');
+  document.getElementById('cgUseSave').classList.toggle('active', u === 'save');
+}
+function setCgFk(k){ _cgFk = (k === _cgFk) ? null : k; renderCapGold(); }
+function setCgFu(u){ _cgFu = (u === _cgFu) ? null : u; renderCapGold(); }
+function cgCalc(){
+  const g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
+  document.getElementById('cgCalcTotal').textContent = fmt(cgRound(g * pr));
+}
+function cgReset(){
+  _cgEditId = null;
+  ['cgName','cgGramsIn','cgPpg'].forEach(id=> document.getElementById(id).value = '');
+  document.getElementById('cgKarat').value = '21';
+  document.getElementById('cgDate').value = dateToInputValue(Date.now());
+  document.getElementById('cgSaveBtn').textContent = '＋ إضافة';
+  setCgUse('save'); fillGrpSel('cgGrp', 'gold', '');
+  cgCalc();
+}
+function renderCapGold(){
+  const all = goldPieces(), box = document.getElementById('cgList'), t = capTotals();
+  document.getElementById('cgTotal').textContent = fmt(t.gold);
+  document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams));
+  // وزن كل عيار
+  const ks = goldKaratStats(all), kr = document.getElementById('cgKaratRow'); kr.innerHTML = '';
+  const mkChip = (label, grams, on, fn)=>{ const c = document.createElement('span'); c.className = 'gi-chip' + (on ? ' on' : ''); c.textContent = label + ' ' + fmt(cgRound(grams)) + ' جم'; c.onclick = fn; return c; };
+  [24, 21, 18].forEach(k=> kr.appendChild(mkChip('عيار ' + toArabicDigits(k) + ':', ks[k], _cgFk === k, ()=> setCgFk(k))));
+  if(ks.other > 0) kr.appendChild(mkChip('عيارات أخرى:', ks.other, _cgFk === 'other', ()=> setCgFk('other')));
+  // زينة / ادخار
+  const jw = all.filter(x=> cgUseOf(x) === 'jewel'), sv = all.filter(x=> cgUseOf(x) === 'save'), sumG = a => a.reduce((t2,x)=> t2 + (Number(x.grams)||0), 0);
+  const ur = document.getElementById('cgUseRow'); ur.innerHTML = '';
+  [['💍 زينة:', jw, 'jewel'], ['💰 ادخار:', sv, 'save']].forEach(([lb, arr, key])=>{
+    const c = document.createElement('span'); c.className = 'gi-chip' + (_cgFu === key ? ' on' : '');
+    c.textContent = lb + ' ' + fmt(cgRound(sumG(arr))) + ' جم — ' + fmt(giSum(arr)); c.onclick = ()=> setCgFu(key); ur.appendChild(c);
+  });
+  // القايمة بعد الفلترة
+  const arr = all.filter(x=> {
+    const k = Number(x.karat) || 0, okK = !_cgFk || (_cgFk === 'other' ? !(k === 24 || k === 21 || k === 18) : k === _cgFk);
+    return okK && (!_cgFu || cgUseOf(x) === _cgFu);
+  });
+  box.innerHTML = arr.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد قطع ذهب' + ((_cgFk || _cgFu) ? ' بهذا الفلتر' : ' بعد') + '</div>';
+  arr.forEach(x=>{
+    const d = document.createElement('div'); d.className = 'gi-row'; d.dataset.id = x.id; d.dataset.grp = x.grp || '';
+    d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
+    d.children[0].textContent = cgUseOf(x) === 'jewel' ? '💍' : '🪙';
+    d.children[1].textContent = x.name;
+    const det = document.createElement('span'); det.className = 'cg-det';
+    det.textContent = (x.karat ? 'عيار ' + toArabicDigits(x.karat) : '') + (x.grams ? ' · ' + fmt(x.grams) + ' جم' : '') + (x.ppg ? ' × ' + fmt(x.ppg) + ' للجرام' : '') + ' · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + formatDate(x.date) : '');
+    d.children[1].appendChild(det);
+    d.children[2].textContent = fmt(x.amount);
+    d.children[3].onclick = ()=>{
+      _cgEditId = x.id;
+      document.getElementById('cgName').value = x.name; document.getElementById('cgKarat').value = String(x.karat || 21);
+      document.getElementById('cgGramsIn').value = x.grams || ''; document.getElementById('cgPpg').value = x.ppg || '';
+      document.getElementById('cgDate').value = dateToInputValue(x.date || Date.now());
+      setCgUse(cgUseOf(x)); fillGrpSel('cgGrp', 'gold', x.grp || '');
+      document.getElementById('cgSaveBtn').textContent = '💾 حفظ التعديل'; cgCalc();
+      document.getElementById('cgName').scrollIntoView({block:'center'});
+    };
+    d.children[4].onclick = ()=> openConfirm('حذف القطعة', 'هل تريد حذف "' + x.name + '"؟', ()=>{ capDel(x.id); if(_cgEditId === x.id) cgReset(); renderCapGold(); });
+    box.appendChild(d);
+  });
+  capGroupize(box, 'gold');
+}
+function openCapGold(){ _cgFk = null; _cgFu = null; cgReset(); renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
+function closeCapGold(){ document.getElementById('capGoldOverlay').classList.remove('open'); }
+function saveCapGold(){
+  const n = document.getElementById('cgName').value.trim(), g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
+  if(!n || g <= 0 || pr <= 0){ showToast('اكتب اسم القطعة والوزن وثمن الجرام', false); return; }
+  const rec = {name: n, cat: 'gold', karat: Number(document.getElementById('cgKarat').value), grams: g, ppg: pr, use: _cgUse, grp: document.getElementById('cgGrp').value || undefined, amount: cgRound(g * pr), date: inputValueToDate(document.getElementById('cgDate').value, Date.now())};
+  if(_cgEditId){ const x = capList().find(z=> z.id === _cgEditId); if(x){ delete x.grp; Object.assign(x, rec); } }
+  else capList().push(Object.assign({id: uid()}, rec));
+  const wasEdit = !!_cgEditId;
+  save(); cgReset(); renderCapGold(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت إضافة القطعة', true);
+}
 function toggleMonthsGrid(){
   const off = document.getElementById('yrMS').classList.toggle('off');
   document.getElementById('months').classList.toggle('months-off', off);
@@ -3500,7 +3850,7 @@ function renderMonths(){
   document.getElementById('yrRemIco').textContent = yrBad ? '⚠️' : '✅';
   document.getElementById('yrRemLbl').textContent = yrBad ? '⚠️ العجز السنوي' : '✅ المتبقي السنوي';
   setNumAnimated(document.getElementById('grandDeficit'), Math.abs(yrRem));
-  renderZM();
+  renderZM(); renderCap();
   const ms = document.getElementById('msAmt'); if(ms) ms.textContent = fmt(expAll);
   renderZakat();
 }
