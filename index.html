@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.5400">
+<meta name="app-version" content="2026-10-15.5600">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1267,6 +1267,14 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .mini-btn{border:0; border-radius:12px; padding:11px 14px; font-family:inherit; font-weight:800; cursor:pointer; color:#fff; white-space:nowrap;
   background:linear-gradient(180deg,#9b6dff,#6a3fd1); box-shadow:0 3px 0 #4b2a99;}
 .mini-btn:active{transform:translateY(2px); box-shadow:0 1px 0 #4b2a99;}
+#capMoneyOverlay, #capGoldOverlay{align-items:stretch !important; justify-content:stretch !important; background:var(--bg); backdrop-filter:none;}
+#capMoneyOverlay .modal-box, #capGoldOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; overflow-y:auto; position:relative;
+  padding-top:calc(18px + env(safe-area-inset-top,0px)); padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));}
+.fs-close{position:absolute; top:calc(10px + env(safe-area-inset-top,0px)); left:12px; width:38px; height:38px; border-radius:50%; border:0; cursor:pointer; font-size:18px; font-weight:900;
+  background:linear-gradient(145deg,#fff,#dfe6e2); color:var(--text); box-shadow:0 1px 0 #fff inset, 0 4px 0 rgba(0,0,0,.25), 0 8px 12px rgba(0,0,0,.2); z-index:2;}
+.fs-close:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.25);}
+.bank-box{margin:8px 0; padding:10px; border-radius:14px; background:rgba(18,178,122,.12); border:1.5px dashed rgba(18,178,122,.55);}
+.bank-box .hint{font-size:calc(12px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:4px;}
 /* ===== GENERAL INCOME END ===== */
 /* ===== MODAL SCROLL LOCK ===== */
 .modal-overlay{overscroll-behavior:contain;}
@@ -1400,13 +1408,21 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 
 <div class="modal-overlay" id="capMoneyOverlay">
   <div class="modal-box">
+    <button type="button" class="fs-close" onclick="closeCapMoney()" aria-label="رجوع">✕</button>
     <h3>💵 أموال</h3>
     <div class="gi-sumrow"><span id="cmChipAll" class="gi-chip" onclick="setCmFilter(null)">الإجمالي: <b id="cmTotal">0</b></span><span id="cmChipCash" class="gi-chip" onclick="setCmFilter('cash')">💵 نقدي: <b id="cmCash">0</b></span><span id="cmChipBank" class="gi-chip" onclick="setCmFilter('bank')">🏦 بنوك: <b id="cmBank">0</b></span></div>
+    <div id="cmInterest" style="display:none;"></div>
     <div class="gi-rows" id="cmList"></div>
     <div class="date-row grp-new"><input type="text" id="cmGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('money')">إنشاء مجموعة</button></div>
     <div class="gi-dest"><button type="button" id="cmSubCash" class="active" onclick="setCmSub('cash')">💵 نقدي</button><button type="button" id="cmSubBank" onclick="setCmSub('bank')">🏦 بنوك</button></div>
     <div class="field"><label id="cmNameLbl">الاسم</label><input type="text" id="cmName" placeholder="مثال: كاش بالبيت"></div>
-    <div class="field"><label>المبلغ</label><input type="number" id="cmAmt" placeholder="0"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="cmAmt" placeholder="0" oninput="cmCalcInt()"></div>
+    <div class="bank-box" id="cmBankFields" style="display:none;">
+      <div class="date-row"><label for="cmRate">الفائدة %</label><input type="number" id="cmRate" placeholder="مثال: 5" step="any" oninput="cmCalcInt()"></div>
+      <div class="gi-sumrow" style="margin:8px 0 0;"><span>الفائدة السنوية: <b id="cmAnnual">0</b></span></div>
+      <div class="date-row"><label for="cmRem">بقية الفائدة السنوية</label><input type="number" id="cmRem" placeholder="0" step="any" oninput="_cmRemTouched=true; cmCalcInt()"></div>
+      <div class="hint">بتتقسم على ١٢ شهر: <b id="cmMonthly">0</b> شهريًا — وبتظهر في نفس يوم التاريخ اللي تحت من كل شهر</div>
+    </div>
     <div class="date-row"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
     <div class="field"><label>📅 التاريخ</label><input type="date" id="cmDate"></div>
     <div class="modal-actions">
@@ -1418,6 +1434,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 
 <div class="modal-overlay" id="capGoldOverlay">
   <div class="modal-box">
+    <button type="button" class="fs-close" onclick="closeCapGold()" aria-label="رجوع">✕</button>
     <h3>🪙 الذهب</h3>
     <div class="gi-sumrow"><span>إجمالي الثمن: <b id="cgTotal">0</b></span><span>إجمالي الوزن: <b id="cgGrams">0</b> جم</span></div>
     <div class="gi-sumrow" id="cgKaratRow"></div>
@@ -2242,6 +2259,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <span>إجمالي مصروفات اليوم</span>
       <span class="amt" id="dayDetailTotal">0</span>
     </div>
+    <div id="dayDetailInterest" class="bank-box" style="display:none; margin-top:12px;"></div>
     <div id="dayDetailList" style="margin-top:12px;"></div>
     <div class="ops-sec"><h4 class="ops-h">📜 سجل عمليات هذا اليوم</h4><div class="gi-sumrow"><span id="opsSumDayD"></span></div><div class="gi-rows" id="opsListDayD" style="max-height:none; overflow:visible;"></div></div>
   </div>
@@ -3194,12 +3212,61 @@ function capGroupize(box, cat){
 }
 
 // ---- أموال: نقدي / بنوك
-let _cmSub = 'cash', _cmFilter = null, _cmEditId = null;
+let _cmSub = 'cash', _cmFilter = null, _cmEditId = null, _cmRemTouched = false;
+function bankAnnual(x){ return cgRound((Number(x.amount) || 0) * (Number(x.rate) || 0) / 100); }
+function bankRemain(x){ return (x.remInt !== undefined && x.remInt !== null && x.remInt !== '') ? Number(x.remInt) || 0 : bankAnnual(x); }
+function cmCalcInt(){
+  const amt = Number(document.getElementById('cmAmt').value) || 0, rate = Number(document.getElementById('cmRate').value) || 0, annual = cgRound(amt * rate / 100);
+  document.getElementById('cmAnnual').textContent = fmt(annual);
+  const rem = document.getElementById('cmRem');
+  if(!_cmRemTouched) rem.value = annual > 0 ? annual : '';
+  document.getElementById('cmMonthly').textContent = fmt(cgRound((Number(rem.value) || 0) / 12));
+}
+function bankDueDay(x, y, m){ const dd = new Date(x.date || Date.now()).getDate(), last = new Date(y, m + 1, 0).getDate(); return Math.min(dd, last); }
+function bankInterestDue(y, m, d){
+  return capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank' && bankRemain(x) > 0 && bankDueDay(x, y, m) === d)
+    .map(x=> ({name: x.name, amt: cgRound(bankRemain(x) / 12)}));
+}
+function renderBankInterest(){
+  const box = document.getElementById('cmInterest');
+  const banks = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank');
+  if(_cmFilter !== 'bank'){ box.style.display = 'none'; return; }
+  box.style.display = 'block'; box.innerHTML = '';
+  const yr = currentYear, today = new Date(), annual = banks.reduce((t,x)=> t + bankAnnual(x), 0), rem = banks.reduce((t,x)=> t + bankRemain(x), 0);
+  const h = document.createElement('div'); h.className = 'cap-grp'; h.style.cursor = 'default'; h.innerHTML = '<span>📆</span><b></b>';
+  h.children[1].textContent = 'مواعيد الفائدة الشهرية — ' + toArabicDigits(yr); box.appendChild(h);
+  const sm = document.createElement('div'); sm.className = 'gi-sumrow';
+  sm.innerHTML = '<span></span><span></span>'; sm.children[0].textContent = 'الفائدة السنوية: ' + fmt(annual); sm.children[1].textContent = 'بقية الفائدة: ' + fmt(rem);
+  box.appendChild(sm);
+  const list = document.createElement('div'); list.className = 'gi-rows'; list.style.cssText = 'max-height:none; overflow:visible;';
+  let received = 0;
+  MONTHS.forEach((mn, m)=>{
+    const due = banks.filter(x=> bankRemain(x) > 0).map(x=> ({x, day: bankDueDay(x, yr, m), amt: cgRound(bankRemain(x) / 12)})).sort((a,b)=> a.day - b.day);
+    const total = due.reduce((t,e)=> t + e.amt, 0);
+    const allPast = due.length > 0 && due.every(e=> new Date(yr, m, e.day, 23, 59) < today);
+    if(allPast) received += total;
+    const d = document.createElement('div'); d.className = 'gi-row';
+    d.innerHTML = '<span></span><b></b><span></span>';
+    d.children[0].textContent = !due.length ? '📅' : (allPast ? '✅' : '⏳');
+    d.children[1].textContent = mn;
+    if(due.length){
+      const det = document.createElement('span'); det.className = 'cg-det';
+      det.textContent = due.map(e=> toArabicDigits(e.day) + ' ' + mn + ' — ' + e.x.name + ' ' + fmt(e.amt)).join(' · ');
+      d.children[1].appendChild(det);
+    }
+    d.children[2].textContent = due.length ? fmt(cgRound(total)) : '—';
+    list.appendChild(d);
+  });
+  const tot = document.createElement('div'); tot.className = 'gi-row'; tot.style.fontWeight = '800'; tot.innerHTML = '<span>Σ</span><b></b><span></span>'; tot.children[1].textContent = 'الإجمالي (✅ وصلت: ' + fmt(cgRound(received)) + ')'; tot.children[2].textContent = fmt(cgRound(rem)); list.appendChild(tot);
+  box.appendChild(list);
+  if(!banks.length){ const e = document.createElement('div'); e.style.cssText = 'color:var(--muted);font-size:12px;text-align:center;'; e.textContent = 'مفيش حسابات بنكية لسه'; box.appendChild(e); }
+}
 function cmSubUI(c){
   _cmSub = c;
   document.getElementById('cmSubCash').classList.toggle('active', c === 'cash');
   document.getElementById('cmSubBank').classList.toggle('active', c === 'bank');
   document.getElementById('cmNameLbl').textContent = c === 'bank' ? 'اسم البنك / الحساب' : 'الاسم';
+  document.getElementById('cmBankFields').style.display = c === 'bank' ? 'block' : 'none';
   document.getElementById('cmName').placeholder = c === 'bank' ? 'مثال: البنك الأهلي' : 'مثال: كاش بالبيت';
 }
 function setCmSub(c){ cmSubUI(c); _cmFilter = c; renderCapMoney(); }
@@ -3207,6 +3274,7 @@ function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMone
 function cmReset(){
   _cmEditId = null;
   document.getElementById('cmName').value = ''; document.getElementById('cmAmt').value = '';
+  document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; _cmRemTouched = false; cmCalcInt();
   document.getElementById('cmDate').value = dateToInputValue(Date.now());
   document.getElementById('cmSaveBtn').textContent = '＋ إضافة';
   fillGrpSel('cmGrp', 'money', '');
@@ -3226,9 +3294,15 @@ function renderCapMoney(){
     d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
     d.children[0].textContent = capSubOf(x) === 'bank' ? '🏦' : '💵';
     d.children[1].textContent = x.name + (x.date ? ' · ' + formatDate(x.date) : ''); d.children[2].textContent = fmt(x.amount);
+    if(capSubOf(x) === 'bank' && (x.rate || x.remInt)){
+      const det = document.createElement('span'); det.className = 'cg-det';
+      det.textContent = 'فائدة ' + toArabicDigits(Number(x.rate) || 0) + '٪ · سنوية ' + fmt(bankAnnual(x)) + ' · بقية ' + fmt(bankRemain(x)) + ' · شهريًا ' + fmt(cgRound(bankRemain(x) / 12)) + ' · يوم ' + toArabicDigits(new Date(x.date || Date.now()).getDate()) + ' من كل شهر';
+      d.children[1].appendChild(det);
+    }
     d.children[3].onclick = ()=>{
       _cmEditId = x.id; cmSubUI(capSubOf(x));
-      document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount;
+      document.getElementById('cmRate').value = x.rate || ''; _cmRemTouched = (x.remInt !== undefined && x.remInt !== null && x.remInt !== ''); document.getElementById('cmRem').value = _cmRemTouched ? x.remInt : ''; 
+      document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt();
       document.getElementById('cmDate').value = dateToInputValue(x.date || Date.now());
       fillGrpSel('cmGrp', 'money', x.grp || '');
       document.getElementById('cmSaveBtn').textContent = '💾 حفظ التعديل';
@@ -3238,6 +3312,7 @@ function renderCapMoney(){
     box.appendChild(d);
   });
   capGroupize(box, 'money');
+  renderBankInterest();
 }
 function openCapMoney(){
   _cmFilter = null; cmReset(); cmSubUI(_cmSub);
@@ -3250,8 +3325,9 @@ function addCapMoney(){
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
   const rec = {name: n, amount: amt, cat: 'money', sub: _cmSub, date: inputValueToDate(document.getElementById('cmDate').value, Date.now())};
   const gv = document.getElementById('cmGrp').value; if(gv) rec.grp = gv;
+  if(_cmSub === 'bank'){ rec.rate = Number(document.getElementById('cmRate').value) || 0; const rv = document.getElementById('cmRem').value; rec.remInt = rv === '' ? undefined : Number(rv) || 0; }
   const wasEdit = !!_cmEditId;
-  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; Object.assign(x, rec); } }
+  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; delete x.rate; delete x.remInt; Object.assign(x, rec); } }
   else capList().push(Object.assign({id: uid()}, rec));
   save(); cmReset(); renderCapMoney(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : 'النقدي'), true);
 }
@@ -4384,6 +4460,8 @@ function navigateDayDetail(delta){
 
 function openDayDetail(day){
   _currentDayDetail = day;
+  { const bi = document.getElementById('dayDetailInterest'), due = bankInterestDue(currentYear, currentMonth, day);
+    if(bi){ bi.style.display = due.length ? 'block' : 'none'; bi.textContent = due.length ? '🏦 فوائد بنكية مستحقة النهارده: ' + due.map(e=> e.name + ' ' + fmt(e.amt)).join(' · ') : ''; } }
   const mon = data[currentYear][currentMonth];
   const all = collectExpensesWithGroup(mon.groups);
   const dayExpenses = all.filter(e=>{
