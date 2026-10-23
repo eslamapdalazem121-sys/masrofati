@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.6100">
+<meta name="app-version" content="2026-10-15.6500">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1011,6 +1011,8 @@ body{overflow-x:hidden;}
 .pb-violet{--pb-hi:#e0d2ff; --pb-mid:#a07bff; --pb-lo:#6a3df0; --pb-edge:#4220ad; --pb-glow:rgba(88,50,214,.60); --pb-ring:rgba(106,61,240,.55); --pb-txt:rgba(40,10,120,.55);}
 .pb-blue{--pb-hi:#c4e8ff; --pb-mid:#3fa9ff; --pb-lo:#0a68ee; --pb-edge:#0746a3; --pb-glow:rgba(10,90,210,.60); --pb-ring:rgba(10,108,240,.50); --pb-txt:rgba(0,40,110,.55);}
 .pb-teal{--pb-hi:#c2f7e2; --pb-mid:#2fd69a; --pb-lo:#0a9a69; --pb-edge:#066547; --pb-glow:rgba(6,120,80,.60); --pb-ring:rgba(10,154,105,.50); --pb-txt:rgba(0,70,45,.55);}
+.plus-badge.pb-sm{width:calc(20px * var(--fs,1)); height:calc(20px * var(--fs,1)); font-size:calc(16px * var(--fs,1)); box-shadow:inset 0 2px 0 rgba(255,255,255,.65), inset 0 -2px 0 rgba(0,0,0,.22), 0 2px 0 var(--pb-edge), 0 5px 8px -3px var(--pb-glow);}
+.plus-badge.pb-sm::after{display:none;}
 .pb-pop{animation:pbPop .4s var(--ease-spring);}
 @keyframes plusPulse{
   0%{transform:scale(.85); opacity:.95;}
@@ -1417,6 +1419,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="gi-rows" id="cmList"></div>
     <div class="date-row grp-new"><input type="text" id="cmGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('money')">إنشاء مجموعة</button></div>
     <div class="gi-dest"><button type="button" id="cmSubCash" class="active" onclick="setCmSub('cash')">💵 نقدي</button><button type="button" id="cmSubBank" onclick="setCmSub('bank')">🏦 بنوك</button><button type="button" id="cmSubPen" onclick="setCmSub('pension')">💳 معاش</button></div>
+    <div id="cmForm" style="display:none;">
     <div class="field"><label id="cmNameLbl">الاسم</label><input type="text" id="cmName" placeholder="مثال: كاش بالبيت"></div>
     <div class="field"><label id="cmAmtLbl">المبلغ</label><input type="number" id="cmAmt" placeholder="0" oninput="cmCalcInt()"></div>
     <div class="bank-box" id="cmBankFields" style="display:none;">
@@ -1430,6 +1433,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeCapMoney()">إغلاق</button>
       <button class="btn-save" id="cmSaveBtn" onclick="addCapMoney()">＋ إضافة</button>
+    </div>
     </div>
   </div>
 </div>
@@ -1849,7 +1853,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="groups-toggle-card" id="colorsToggleCard" onclick="toggleColorsSection()" style="margin-top:6px;">
       <span class="icon">🎨</span>
       <span class="txt">ألوان الشاشة</span>
-      <span class="chevron" id="colorsSectionChevron" style="transform:rotate(-90deg);">▾</span>
+      <span class="plus-badge pb-violet pb-sm in-card" id="colorsSectionChevron" aria-hidden="true">+</span>
     </div>
     <div id="colorsSectionBody" style="display:none;">
 
@@ -2574,7 +2578,7 @@ function setColorsSection(open){
   const chevron = document.getElementById('colorsSectionChevron');
   if(!body || !chevron) return;
   body.style.display = open ? 'block' : 'none';
-  chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
+  setBadgeState(chevron, !!open);
 }
 function toggleColorsSection(){
   const body = document.getElementById('colorsSectionBody');
@@ -3198,15 +3202,15 @@ function capGroupize(box, cat){
     const sumA = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).amount) || 0), 0), sumG = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).grams) || 0), 0);
     const ck = cat + ':' + (gid || '_none'), closed = _capCollapsed.has(ck);
     const h = document.createElement('div'); h.className = 'cap-grp'; h.style.cursor = 'pointer';
-    h.innerHTML = '<span class="cap-chev"></span><span>📁</span><b></b><small></small>' + (gid ? '<button type="button">✏️</button>' : '');
-    h.children[0].textContent = closed ? '◂' : '▾';
+    h.innerHTML = '<span class="plus-badge pb-blue pb-sm in-card"></span><span>📁</span><b></b><small></small>' + (gid ? '<button type="button">✏️</button>' : '');
+    setBadgeState(h.children[0], !closed);
     h.children[2].textContent = title + ' — ' + fmt(sumA) + (cat === 'gold' && sumG > 0 ? ' (' + fmt(Math.round(sumG * 100) / 100) + ' جم)' : '');
     h.children[3].textContent = toArabicDigits(rs.length) + ' بند';
     if(gid) h.children[4].onclick = (e)=>{ e.stopPropagation(); openCapGrp(gid); };
     const body = document.createElement('div'); body.className = 'cap-grp-body'; body.style.display = closed ? 'none' : 'block';
     if(!rs.length){ const e = document.createElement('div'); e.style.cssText = 'color:var(--muted);font-size:12px;text-align:center;padding:4px;'; e.textContent = 'لا توجد بنود في المجموعة'; body.appendChild(e); }
     rs.forEach(r=> body.appendChild(r));
-    h.onclick = ()=>{ const nowClosed = body.style.display !== 'none'; body.style.display = nowClosed ? 'none' : 'block'; h.children[0].textContent = nowClosed ? '◂' : '▾'; if(nowClosed) _capCollapsed.add(ck); else _capCollapsed.delete(ck); };
+    h.onclick = ()=>{ const nowClosed = body.style.display !== 'none'; body.style.display = nowClosed ? 'none' : 'block'; setBadgeState(h.children[0], !nowClosed); if(nowClosed) _capCollapsed.add(ck); else _capCollapsed.delete(ck); };
     box.appendChild(h); box.appendChild(body);
   };
   groups.forEach(g=> section(g.id, g.name, bucket[g.id] || [], g.id));
@@ -3215,7 +3219,15 @@ function capGroupize(box, cat){
 }
 
 // ---- أموال: نقدي / بنوك
-let _cmSub = 'cash', _cmFilter = null, _cmEditId = null, _cmRemTouched = false, _cmYear = null;
+let _cmTbl = {bank:false, pension:false};
+function cmTblToggle(h, list, key){
+  h.style.cursor = 'pointer';
+  const ar = document.createElement('span'); ar.className = 'plus-badge pb-teal pb-sm in-card'; ar.style.marginInlineStart = 'auto'; h.appendChild(ar);
+  const upd = ()=>{ list.style.display = _cmTbl[key] ? '' : 'none'; setBadgeState(ar, _cmTbl[key]); };
+  h.onclick = ()=>{ _cmTbl[key] = !_cmTbl[key]; upd(); };
+  upd();
+}
+let _cmSub = 'cash', _cmFormOpen = false, _cmFilter = null, _cmEditId = null, _cmRemTouched = false, _cmYear = null;
 function cmYear(){ return _cmYear || currentYear; }
 function cmShiftYear(d){ _cmYear = cmYear() + d; renderCapMoney(); }
 // عنوان الجدول مع التنقل بين السنين (البيانات بتستمر لكل سنة لحد ما تعدلها)
@@ -3302,8 +3314,9 @@ function renderPensionPanel(){
     });
     box.appendChild(acc);
   }
-  box.appendChild(mk('جدول استحقاق المعاشات'));
+  const tblH = mk('جدول استحقاق المعاشات'); box.appendChild(tblH);
   const list = document.createElement('div'); list.className = 'gi-rows'; list.style.cssText = 'max-height:none; overflow:visible;';
+  cmTblToggle(tblH, list, 'pension');
   months.forEach(mo=>{
     const got = mo.items.filter(e=> e.reached).reduce((t,e)=> t + e.amt, 0), exp = mo.items.reduce((t,e)=> t + e.amt, 0);
     const d = document.createElement('div'); d.className = 'gi-row'; d.innerHTML = '<span></span><b></b><span></span>';
@@ -3364,8 +3377,9 @@ function renderBankInterest(){
     box.appendChild(acc);
   }
   // الجدول
-  box.appendChild(mk('cap-grp', 'جدول الفوائد الشهرية'));
+  const tblH = mk('cap-grp', 'جدول الفوائد الشهرية'); box.appendChild(tblH);
   const list = document.createElement('div'); list.className = 'gi-rows'; list.style.cssText = 'max-height:none; overflow:visible;';
+  cmTblToggle(tblH, list, 'bank');
   months.forEach(mo=>{
     const got = mo.items.filter(e=> e.reached).reduce((t,e)=> t + e.amt, 0), exp = mo.items.reduce((t,e)=> t + e.amt, 0);
     const d = document.createElement('div'); d.className = 'gi-row'; d.innerHTML = '<span></span><b></b><span></span>';
@@ -3391,16 +3405,21 @@ function renderBankInterest(){
 }
 function cmSubUI(c){
   _cmSub = c;
-  document.getElementById('cmSubCash').classList.toggle('active', c === 'cash');
-  document.getElementById('cmSubBank').classList.toggle('active', c === 'bank');
-  document.getElementById('cmSubPen').classList.toggle('active', c === 'pension');
+  document.getElementById('cmForm').style.display = _cmFormOpen ? '' : 'none';
+  document.getElementById('cmSubCash').classList.toggle('active', _cmFormOpen && c === 'cash');
+  document.getElementById('cmSubBank').classList.toggle('active', _cmFormOpen && c === 'bank');
+  document.getElementById('cmSubPen').classList.toggle('active', _cmFormOpen && c === 'pension');
   document.getElementById('cmAmtLbl').textContent = c === 'pension' ? 'المبلغ الشهري' : 'المبلغ';
   document.getElementById('cmNameLbl').textContent = c === 'bank' ? 'اسم البنك / الحساب' : (c === 'pension' ? 'اسم المعاش' : 'الاسم');
   document.getElementById('cmBankFields').style.display = c === 'bank' ? 'block' : 'none';
   document.getElementById('cmDateLbl').textContent = c === 'bank' ? '📅 تاريخ بداية الوديعة (منه بيتحدد يوم الفائدة)' : (c === 'pension' ? '📅 تاريخ الاستحقاق (أول موعد، وبيتكرر في نفس اليوم كل شهر)' : '📅 التاريخ');
   document.getElementById('cmName').placeholder = c === 'bank' ? 'مثال: البنك الأهلي' : (c === 'pension' ? 'مثال: معاش التأمينات' : 'مثال: كاش بالبيت');
 }
-function setCmSub(c){ cmSubUI(c); _cmFilter = c; renderCapMoney(); }
+function setCmSub(c){
+  if(_cmFormOpen && _cmSub === c){ _cmFormOpen = false; cmReset(); }
+  else { _cmFormOpen = true; _cmFilter = c; }
+  cmSubUI(c); renderCapMoney();
+}
 function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMoney(); }
 function cmReset(){
   _cmEditId = null;
@@ -3434,7 +3453,7 @@ function renderCapMoney(){
       d.children[1].appendChild(det);
     }
     d.children[3].onclick = ()=>{
-      _cmEditId = x.id; cmSubUI(capSubOf(x));
+      _cmEditId = x.id; _cmFormOpen = true; cmSubUI(capSubOf(x));
       document.getElementById('cmRate').value = x.rate || ''; _cmRemTouched = (x.monthlyInt !== undefined && x.monthlyInt !== null && x.monthlyInt !== ''); document.getElementById('cmRem').value = _cmRemTouched ? x.monthlyInt : ''; 
       document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt();
       document.getElementById('cmDate').value = dateToInputValue(x.date || Date.now());
@@ -3450,7 +3469,7 @@ function renderCapMoney(){
   renderPensionPanel();
 }
 function openCapMoney(){
-  _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
+  _cmTbl = {bank:false, pension:false}; _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
   renderCapMoney();
   document.getElementById('capMoneyOverlay').classList.add('open');
 }
