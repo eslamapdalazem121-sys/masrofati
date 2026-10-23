@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.6800">
+<meta name="app-version" content="2026-10-24.6900">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1262,6 +1262,16 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .date-row input[type=number]{padding:12px; border-radius:12px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-size:calc(14px * var(--fs,1)); font-family:inherit;}
 .date-row select{border:1.5px solid var(--border); background:var(--bg);}
 .date-row label{min-width:84px;}
+.gl-panel{margin:6px 0 10px; padding:10px; border-radius:14px; background:rgba(255,179,0,.13); border:1px solid rgba(255,179,0,.35);}
+.gl-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; font-size:calc(13px * var(--fs,1));}
+.gl-head .mini-btn{padding:7px 10px; font-size:calc(12px * var(--fs,1));}
+.gl-prices{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;}
+.gl-prices span{flex:1; min-width:84px; text-align:center; padding:7px 4px; border-radius:10px; background:rgba(255,255,255,.55); font-size:calc(12px * var(--fs,1)); font-weight:800;}
+.gl-prices b{display:block; font-size:calc(15px * var(--fs,1));}
+.gl-meta{font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-bottom:6px;}
+.gl-adj summary{cursor:pointer; font-size:calc(12px * var(--fs,1)); font-weight:800; margin:4px 0;}
+#cgList{max-height:none !important; overflow:visible !important;}
+.gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
 .cap-grp b{flex:1; min-width:0;} .cap-grp small{font-size:calc(11.5px * var(--fs,1)); opacity:.85; font-weight:700;}
@@ -1404,7 +1414,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     </div>
     <div class="zk-row">
       <div class="zk-sq cap-sq money" onclick="openCapMoney()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">💵</span><span class="zk-l">أموال</span><span class="zk-v" id="capMoney">0</span><span class="gi-pct" id="capMoneySplit"></span><span class="gi-pct" id="capMoneyPct"></span></div>
-      <div class="zk-sq cap-sq gold" onclick="openCapGold()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🪙</span><span class="zk-l">ذهب</span><span class="zk-v" id="capGold">0</span><span class="gi-pct" id="capGoldSplit"></span><span class="gi-pct" id="capGoldKarat"></span><span class="gi-pct" id="capGoldPct"></span></div>
+      <div class="zk-sq cap-sq gold" onclick="openCapGold()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🪙</span><span class="zk-l">ذهب</span><span class="zk-v" id="capGold">0</span><span class="gi-pct" id="capGoldSplit"></span><span class="gi-pct" id="capGoldKarat"></span><span class="gi-pct" id="capGoldPct"></span><span class="gi-pct" id="capGoldPnl"></span></div>
     </div>
   </div>
 
@@ -1460,6 +1470,17 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="gi-sumrow"><span>إجمالي الثمن: <b id="cgTotal">0</b></span><span>إجمالي الوزن: <b id="cgGrams">0</b> جم</span></div>
     <div class="gi-sumrow" id="cgKaratRow"></div>
     <div class="gi-sumrow" id="cgUseRow"></div>
+    <div class="gl-panel">
+      <div class="gl-head"><b>📈 سعر الذهب الحالي (للشراء)</b><button type="button" class="mini-btn" id="glRefreshBtn" onclick="goldLiveRefresh(true)">🔄 تحديث</button></div>
+      <div class="gl-prices" id="glPrices"></div>
+      <div class="gl-meta" id="glMeta"></div>
+      <div class="gi-sumrow"><span>إجمالي الشراء: <b id="glBuy">0</b></span><span>إجمالي الآن: <b id="glNow">0</b></span></div>
+      <div class="gi-sumrow"><span id="glProfitBox">الربح / الخسارة: <b id="glProfit">0</b></span></div>
+      <details class="gl-adj"><summary>⚙️ ضبط السعر ليطابق سوق الصاغة</summary>
+        <div class="date-row"><label for="glAdj">علاوة / خصم ٪</label><input type="number" id="glAdj" placeholder="0" step="any" oninput="goldAdjChange()"></div>
+        <div class="date-row"><label for="glManual">سعر جرام ٢٤ يدوي</label><input type="number" id="glManual" placeholder="فاضي = تلقائي" step="any" oninput="goldAdjChange()"></div>
+      </details>
+    </div>
     <div class="gi-rows" id="cgList"></div>
     <div class="date-row grp-new"><input type="text" id="cgGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('gold')">إنشاء مجموعة</button></div>
     <div class="gi-dest" style="margin:4px 0 6px;"><button type="button" id="cgUseJewel" onclick="setCgUse('jewel')">💍 زينة</button><button type="button" id="cgUseSave" class="active" onclick="setCgUse('save')">💰 ادخار</button></div>
@@ -3160,6 +3181,7 @@ function renderCap(){
   const mp = t.all > 0 ? Math.round(t.money / t.all * 100) : 0, lab = ' من رأس المال';
   document.getElementById('capMoneyPct').textContent = t.all > 0 ? toArabicDigits(mp) + '٪' + lab : '';
   document.getElementById('capGoldPct').textContent = t.all > 0 ? toArabicDigits(100 - mp) + '٪' + lab : '';
+  { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.textContent = g.ok ? '📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) : ''; } }
 }
 function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
 function openCapChoose(){ document.getElementById('capChooseOverlay').classList.add('open'); }
@@ -3530,10 +3552,102 @@ function cgReset(){
   setCgUse('save'); fillGrpSel('cgGrp', 'gold', '');
   cgCalc();
 }
+
+// ---- سعر الذهب الحالي من الإنترنت (بيتحدّث أول ما التطبيق يفتح) + حساب الربح
+var GL_KEY = 'masrofati_gold_live_v1', GL_ADJ_KEY = 'masrofati_gold_adj_v1', GL_OZ = 31.1034768;
+var _gl = null, _glAdj = {adj: 0, manual: 0}, _glBusy = false;
+try{ _gl = JSON.parse(localStorage.getItem(GL_KEY)) || null; }catch(e){}
+try{ _glAdj = Object.assign({adj: 0, manual: 0}, JSON.parse(localStorage.getItem(GL_ADJ_KEY)) || {}); }catch(e){}
+function glSigned(v){ v = cgRound(v); return (v > 0 ? '+' : (v < 0 ? '−' : '')) + fmt(Math.abs(v)); }
+function glBase24(){
+  if(Number(_glAdj.manual) > 0) return Number(_glAdj.manual);
+  if(_gl && _gl.p24 > 0) return _gl.p24 * (1 + (Number(_glAdj.adj) || 0) / 100);
+  return 0;
+}
+function glPpg(karat){ const b = glBase24(), k = Number(karat) || 0; return (b > 0 && k > 0) ? cgRound(b * k / 24) : 0; }
+function goldPnl(){
+  const arr = goldPieces(); let buy = 0, now = 0;
+  arr.forEach(x=>{ buy += Number(x.amount) || 0; now += cgRound((Number(x.grams) || 0) * glPpg(x.karat)); });
+  const ok = glBase24() > 0 && arr.length > 0;
+  return {ok, buy: cgRound(buy), now: cgRound(now), pnl: cgRound(now - buy), pct: buy > 0 ? (now - buy) / buy * 100 : 0};
+}
+async function glFetchJson(url){
+  const c = new AbortController(), t = setTimeout(()=> c.abort(), 9000);
+  try{ const r = await fetch(url, {cache: 'no-store', signal: c.signal}); if(!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
+  finally{ clearTimeout(t); }
+}
+async function glGetXauUsd(){ try{ const j = await glFetchJson('https://api.gold-api.com/price/XAU'); const v = Number(j && j.price); if(v > 0) return v; }catch(e){} return 0; }
+async function glGetUsdEgp(){
+  const tries = [
+    ['https://open.er-api.com/v6/latest/USD', j=> j && j.rates && j.rates.EGP],
+    ['https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', j=> j && j.usd && j.usd.egp],
+    ['https://latest.currency-api.pages.dev/v1/currencies/usd.json', j=> j && j.usd && j.usd.egp]
+  ];
+  for(const [u, pick] of tries){ try{ const v = Number(pick(await glFetchJson(u))); if(v > 0) return v; }catch(e){} }
+  return 0;
+}
+async function goldLiveRefresh(manual){
+  if(_glBusy) return;
+  _glBusy = true;
+  const btn = document.getElementById('glRefreshBtn'); if(btn){ btn.disabled = true; btn.textContent = '⏳ ...'; }
+  let ok = false;
+  try{
+    const [xau, rate] = await Promise.all([glGetXauUsd(), glGetUsdEgp()]);
+    let p24 = 0, src = '';
+    if(xau > 0 && rate > 0){ p24 = xau / GL_OZ * rate; src = 'spot'; }
+    else {
+      try{ const j = await glFetchJson('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json'); const v = Number(j && j.xau && j.xau.egp); if(v > 0){ p24 = v / GL_OZ; src = 'spot2'; } }catch(e){}
+    }
+    if(p24 > 0){
+      _gl = {p24: cgRound(p24), ts: Date.now(), usd: xau || 0, rate: rate || 0, src};
+      try{ localStorage.setItem(GL_KEY, JSON.stringify(_gl)); }catch(e){}
+      ok = true;
+    }
+  }catch(e){}
+  _glBusy = false;
+  if(btn){ btn.disabled = false; btn.textContent = '🔄 تحديث'; }
+  if(manual) showToast(ok ? 'تم تحديث سعر الذهب' : 'تعذّر تحديث السعر — تأكد من الإنترنت', ok);
+  glRefreshUI();
+}
+function goldAdjChange(){
+  _glAdj.adj = Number(document.getElementById('glAdj').value) || 0;
+  _glAdj.manual = Number(document.getElementById('glManual').value) || 0;
+  try{ localStorage.setItem(GL_ADJ_KEY, JSON.stringify(_glAdj)); }catch(e){}
+  glRefreshUI();
+}
+function glRefreshUI(){
+  try{ renderCap(); }catch(e){}
+  const ov = document.getElementById('capGoldOverlay');
+  if(ov && ov.classList.contains('open')) renderCapGold();
+}
+function glPanel(){
+  const pr = document.getElementById('glPrices'), meta = document.getElementById('glMeta');
+  if(!pr) return;
+  pr.innerHTML = '';
+  const b = glBase24();
+  if(b > 0){
+    [24, 21, 18].forEach(k=>{ const s = document.createElement('span'); s.textContent = 'عيار ' + toArabicDigits(k); const bb = document.createElement('b'); bb.textContent = fmt(glPpg(k)); s.appendChild(bb); pr.appendChild(s); });
+  }
+  let m = '';
+  if(Number(_glAdj.manual) > 0) m = '✍️ سعر يدوي لعيار 24 (بدون تحديث تلقائي)';
+  else if(_gl && _gl.ts){
+    const d = new Date(_gl.ts);
+    m = 'آخر تحديث: ' + formatDate(_gl.ts) + ' ' + d.toLocaleTimeString(DIGITS_MODE === 'en' ? 'en-US' : 'ar-EG', {hour: '2-digit', minute: '2-digit'}) + ' · السعر العالمي محوّل للجنيه' + ((Number(_glAdj.adj) || 0) ? ' ' + (_glAdj.adj > 0 ? '+' : '') + _glAdj.adj + '٪' : '');
+    if(!navigator.onLine) m += ' · (أوفلاين)';
+  } else m = navigator.onLine ? '⏳ لسه ما اتحمّلش السعر، دوس «تحديث»' : 'محتاج إنترنت لأول تحميل للسعر';
+  meta.textContent = m;
+  const g = goldPnl();
+  document.getElementById('glBuy').textContent = fmt(g.buy);
+  document.getElementById('glNow').textContent = g.ok ? fmt(g.now) : '—';
+  const pe = document.getElementById('glProfit'), pb = document.getElementById('glProfitBox');
+  pe.textContent = g.ok ? glSigned(g.pnl) + ' (' + (g.pnl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(g.pct * 10) / 10)) + '٪)' : '—';
+  pb.classList.toggle('gl-pos', g.ok && g.pnl >= 0); pb.classList.toggle('gl-neg', g.ok && g.pnl < 0);
+}
 function renderCapGold(){
   const all = goldPieces(), box = document.getElementById('cgList'), t = capTotals();
   document.getElementById('cgTotal').textContent = fmt(t.gold);
   document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams));
+  glPanel();
   // وزن كل عيار
   const ks = goldKaratStats(all), kr = document.getElementById('cgKaratRow'); kr.innerHTML = '';
   const mkChip = (label, grams, on, fn)=>{ const c = document.createElement('span'); c.className = 'gi-chip' + (on ? ' on' : ''); c.textContent = label + ' ' + fmt(cgRound(grams)) + ' جم'; c.onclick = fn; return c; };
@@ -3558,7 +3672,15 @@ function renderCapGold(){
     d.children[0].textContent = cgUseOf(x) === 'jewel' ? '💍' : '🪙';
     d.children[1].textContent = x.name;
     const det = document.createElement('span'); det.className = 'cg-det';
-    det.textContent = (x.karat ? 'عيار ' + toArabicDigits(x.karat) : '') + (x.grams ? ' · ' + fmt(x.grams) + ' جم' : '') + (x.ppg ? ' × ' + fmt(x.ppg) + ' للجرام' : '') + ' · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + formatDate(x.date) : '');
+    const ln = (txt, cls)=>{ const e = document.createElement('span'); e.style.display = 'block'; if(cls) e.className = cls; e.textContent = txt; det.appendChild(e); };
+    ln((x.karat ? 'عيار ' + toArabicDigits(x.karat) : '') + (x.grams ? ' · ' + fmt(x.grams) + ' جم' : '') + ' · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار'));
+    ln('🛒 وقت الشراء' + (x.date ? ' (' + formatDate(x.date) + ')' : '') + ': ' + (x.ppg ? fmt(x.ppg) + ' للجرام · ' : '') + 'الإجمالي ' + fmt(x.amount));
+    const cp = glPpg(x.karat);
+    if(cp > 0){
+      const nowT = cgRound((Number(x.grams) || 0) * cp), pl = cgRound(nowT - (Number(x.amount) || 0)), pc = (Number(x.amount) || 0) > 0 ? pl / Number(x.amount) * 100 : 0;
+      ln('📈 الآن: ' + fmt(cp) + ' للجرام · الإجمالي ' + fmt(nowT));
+      ln((pl >= 0 ? '✅ الربح: ' : '🔻 الخسارة: ') + glSigned(pl) + ' (' + (pl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(pc * 10) / 10)) + '٪)', pl >= 0 ? 'gl-pos' : 'gl-neg');
+    }
     d.children[1].appendChild(det);
     d.children[2].textContent = fmt(x.amount);
     d.children[3].onclick = ()=>{
@@ -3575,7 +3697,7 @@ function renderCapGold(){
   });
   capGroupize(box, 'gold');
 }
-function openCapGold(){ _cgFk = null; _cgFu = null; cgReset(); renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
+function openCapGold(){ _cgFk = null; _cgFu = null; cgReset(); document.getElementById('glAdj').value = _glAdj.adj || ''; document.getElementById('glManual').value = _glAdj.manual || ''; renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
 function closeCapGold(){ document.getElementById('capGoldOverlay').classList.remove('open'); }
 function saveCapGold(){
   const n = document.getElementById('cgName').value.trim(), g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
@@ -7086,6 +7208,9 @@ function startApp(){
 }
 
 checkLockOnStartup();
+try{ goldLiveRefresh(false); }catch(e){}
+window.addEventListener('online', function(){ try{ goldLiveRefresh(false); }catch(e){} });
+document.addEventListener('visibilitychange', function(){ try{ if(document.visibilityState === 'visible' && (!_gl || Date.now() - _gl.ts > 30*60*1000)) goldLiveRefresh(false); }catch(e){} });
 </script>
 <script>
 // تسجيل خدمة التخزين (Service Worker) عشان التطبيق يشتغل بدون نت ويتثبّت
