@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.6700">
+<meta name="app-version" content="2026-10-15.6800">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1285,6 +1285,18 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .modal-overlay{overscroll-behavior:contain;}
 .modal-box{overscroll-behavior:contain; -webkit-overflow-scrolling:touch;}
 body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
+
+/* ===== HOME REORDER START (نقل بطاقات الصفحة الأولى) ===== */
+.home-reorder-row{display:flex; justify-content:center; margin:0 0 8px;}
+.home-reorder-btn{border:1px solid var(--border); background:var(--card); color:var(--muted); font-family:inherit; font-weight:700; font-size:calc(12px * var(--fs,1)); padding:5px 14px; border-radius:999px; cursor:pointer;}
+.home-reorder-btn.on{background:var(--accent, #7c4ddb); color:#fff; border-color:transparent;}
+.home-mv{display:none;}
+.home-edit .hc{position:relative; outline:2px dashed rgba(124,77,219,.55); outline-offset:3px; border-radius:16px;}
+.home-edit .hc > *:not(.home-mv){pointer-events:none;}
+.home-edit .home-mv{display:flex; gap:8px; position:absolute; top:-14px; left:12px; z-index:30; pointer-events:auto;}
+.home-mvb{width:32px; height:32px; border-radius:50%; border:0; cursor:pointer; color:#fff; font-size:15px; font-weight:900; line-height:1; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 34% 26%, #c4e8ff 0%, #3fa9ff 38%, #0a68ee 100%); box-shadow:inset 0 2px 0 rgba(255,255,255,.65), inset 0 -3px 0 rgba(0,0,0,.22), 0 3px 0 #0746a3, 0 8px 12px -3px rgba(10,90,210,.6);}
+.home-mvb:disabled{opacity:.35; box-shadow:none; cursor:default;}
+/* ===== HOME REORDER END ===== */
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1344,6 +1356,8 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <button type="button" class="nav-btn" onclick="shiftYear(1)">‹</button>
   </div>
 
+  <div class="home-reorder-row"><button type="button" id="homeReorderBtn" class="home-reorder-btn" onclick="toggleHomeReorder()">↕️ ترتيب البطاقات</button></div>
+
   <div class="gi-wrap yr-gi" id="yrGI">
     <div class="zk-main" onclick="toggleYr()" role="button">
       <span class="zk-ico">💵</span>
@@ -1352,7 +1366,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     </div>
   </div>
 
-  <div class="header-stats-row">
+  <div class="header-stats-row" id="homeStats">
     <div class="header-stat compact">
       <span class="icon">🧮</span>
       <div class="txt">
@@ -7088,6 +7102,63 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
       .catch(function(e){ console.warn('SW register failed', e); });
   });
 }
+</script>
+<script>
+/* نقل بطاقات الصفحة الأولى */
+(function(){
+  var KEY = 'masrofati_home_order_v1', IDS = ['yrGI','homeStats','yrZM','yrCap','yrMS'];
+  function host(){ return document.getElementById('homeExtras'); }
+  function currentOrder(){ var h = host(); if(!h) return IDS.slice(); return Array.prototype.slice.call(h.children).map(function(c){ return c.id; }).filter(function(id){ return IDS.indexOf(id) > -1; }); }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(currentOrder())); }catch(e){} }
+  function applyOrder(){
+    var h = host(); if(!h) return; var ord = null;
+    try{ ord = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+    if(!Array.isArray(ord)) return;
+    ord = ord.filter(function(id){ return IDS.indexOf(id) > -1; });
+    IDS.forEach(function(id){ if(ord.indexOf(id) < 0) ord.push(id); });
+    ord.forEach(function(id){ var el = document.getElementById(id); if(el) h.appendChild(el); });
+  }
+  function refreshButtons(){
+    var ord = currentOrder();
+    ord.forEach(function(id, i){
+      var el = document.getElementById(id); if(!el) return;
+      var up = el.querySelector('.home-mv [data-d="-1"]'), dn = el.querySelector('.home-mv [data-d="1"]');
+      if(up) up.disabled = (i === 0); if(dn) dn.disabled = (i === ord.length - 1);
+    });
+  }
+  function move(id, d){
+    var h = host(), el = document.getElementById(id); if(!h || !el) return;
+    var ord = currentOrder(), i = ord.indexOf(id), j = i + d;
+    if(i < 0 || j < 0 || j >= ord.length) return;
+    var other = document.getElementById(ord[j]);
+    if(d < 0) h.insertBefore(el, other); else h.insertBefore(other, el);
+    save(); refreshButtons();
+    try{ el.scrollIntoView({behavior:'smooth', block:'nearest'}); }catch(e){}
+  }
+  function addControls(){
+    IDS.forEach(function(id){
+      var el = document.getElementById(id); if(!el) return;
+      el.classList.add('hc');
+      if(el.querySelector(':scope > .home-mv')) return;
+      var c = document.createElement('div'); c.className = 'home-mv';
+      [['▲',-1,'نقل لأعلى'],['▼',1,'نقل لأسفل']].forEach(function(b){
+        var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'home-mvb'; btn.textContent = b[0]; btn.setAttribute('data-d', b[1]); btn.setAttribute('aria-label', b[2]);
+        btn.onclick = function(e){ e.stopPropagation(); move(id, b[1]); };
+        c.appendChild(btn);
+      });
+      el.appendChild(c);
+    });
+  }
+  window.toggleHomeReorder = function(){
+    var h = host(), btn = document.getElementById('homeReorderBtn'); if(!h) return;
+    var on = !h.classList.contains('home-edit');
+    if(on) addControls();
+    h.classList.toggle('home-edit', on);
+    if(btn){ btn.classList.toggle('on', on); btn.textContent = on ? '✔ تم' : '↕️ ترتيب البطاقات'; }
+    if(on) refreshButtons();
+  };
+  applyOrder(); addControls();
+})();
 </script>
 </body>
 </html>
