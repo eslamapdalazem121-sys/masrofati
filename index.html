@@ -1302,6 +1302,12 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .gl-ir b{font-size:calc(20px * var(--fs,1)); font-weight:800; direction:ltr; white-space:nowrap;}
 .gl-ir input{width:38%; max-width:150px; text-align:center; font-size:calc(18px * var(--fs,1)); font-weight:800; padding:8px; border-radius:10px; border:1px solid var(--border,#cdd);}
 .gl-in{font-size:calc(12.5px * var(--fs,1)); color:var(--muted); font-weight:700; line-height:1.5; padding-bottom:6px;}
+#glInfoSar > span{padding:9px 4px;}
+#glInfoSar > span > span{background:none !important; padding:0; border-radius:0; min-width:0; flex:none;}
+#glInfoSar .gl-k{display:block; font-size:calc(14px * var(--fs,1)); font-weight:800; margin-bottom:4px;}
+#glInfoSar .gl-row{display:block; margin-top:3px; font-size:calc(12px * var(--fs,1)); font-weight:800;}
+#glInfoSar .gl-row b{display:block; font-size:calc(19px * var(--fs,1)); margin-top:0;}
+#glInfoSar .gl-buy{color:#0b7a55;} #glInfoSar .gl-sell{color:#d9480f; border-top:1px dashed rgba(184,134,11,.5); padding-top:4px; margin-top:6px;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -1519,6 +1525,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
         <div class="gl-ir"><span class="gl-il">💵 سعر الدولار في مصر</span><b id="glInfoUsd">—</b></div>
         <div class="gl-ir"><span class="gl-il">🏪 دولار الصاغة (ج)</span><input type="number" id="glSarUsd" placeholder="اكتبه" step="any" oninput="goldAdjChange()"></div>
         <div class="gl-in" id="glSarNote"></div>
+        <div class="gl-ir"><span class="gl-il">📉 فرق سعر البيع عن الشراء ٪ <small style="font-weight:700;color:var(--muted);">(تقديري، عدّله)</small></span><input type="number" id="glSpread" placeholder="1" step="any" oninput="goldAdjChange()"></div>
         <div class="gl-ir"><span class="gl-il">🪙 الذهب حسب تسعير الصاغة (جرام)</span></div>
         <div class="gl-prices" id="glInfoSar"></div>
       </div>
@@ -3607,9 +3614,9 @@ function cgReset(){
 
 // ---- سعر الذهب الحالي من الإنترنت (بيتحدّث أول ما التطبيق يفتح) + حساب الربح
 var GL_KEY = 'masrofati_gold_live_v1', GL_ADJ_KEY = 'masrofati_gold_adj_v1', GL_OZ = 31.1034768;
-var _gl = null, _glAdj = {adj: 0, manual: 0, sarUsd: 0}, _glBusy = false, _glInfoOpen = false;
+var _gl = null, _glAdj = {adj: 0, manual: 0, sarUsd: 0, spread: 1}, _glBusy = false, _glInfoOpen = false;
 try{ _gl = JSON.parse(localStorage.getItem(GL_KEY)) || null; }catch(e){}
-try{ _glAdj = Object.assign({adj: 0, manual: 0, sarUsd: 0}, JSON.parse(localStorage.getItem(GL_ADJ_KEY)) || {}); }catch(e){}
+try{ _glAdj = Object.assign({adj: 0, manual: 0, sarUsd: 0, spread: 1}, JSON.parse(localStorage.getItem(GL_ADJ_KEY)) || {}); }catch(e){}
 function glSigned(v){ v = cgRound(v); return (v > 0 ? '+' : (v < 0 ? '−' : '')) + fmt(Math.abs(v)); }
 function glBase24(){
   if(_glAdj && Number(_glAdj.manual) > 0) return Number(_glAdj.manual);
@@ -3617,6 +3624,7 @@ function glBase24(){
   if(_gl && _gl.p24 > 0) return _gl.p24 * (1 + (Number(_glAdj && _glAdj.adj) || 0) / 100);
   return 0;
 }
+function glSellPpg(karat){ const b = glPpg(karat); return b > 0 ? cgRound(b * (1 - (Number(_glAdj.spread) || 0) / 100)) : 0; }
 function glPpg(karat){ const b = glBase24(), k = Number(karat) || 0; return (b > 0 && k > 0) ? cgRound(b * k / 24) : 0; }
 function goldPnl(){
   const arr = goldPieces(); let buy = 0, now = 0;
@@ -3666,6 +3674,7 @@ function goldAdjChange(){
   _glAdj.adj = Number(document.getElementById('glAdj').value) || 0;
   _glAdj.manual = Number(document.getElementById('glManual').value) || 0;
   _glAdj.sarUsd = Number(document.getElementById('glSarUsd').value) || 0;
+  _glAdj.spread = Math.max(0, Number(document.getElementById('glSpread').value) || 0);
   try{ localStorage.setItem(GL_ADJ_KEY, JSON.stringify(_glAdj)); }catch(e){}
   glRefreshUI();
 }
@@ -3688,7 +3697,15 @@ function glInfoPanel(){
   else note = 'محتاج تحميل السعر العالمي (اتصل بالنت ودوس تحديث)';
   document.getElementById('glSarNote').textContent = note;
   const box = document.getElementById('glInfoSar'); box.innerHTML = '';
-  if(b24 > 0) [24, 21, 18].forEach(k=>{ const sp = document.createElement('span'); sp.textContent = 'عيار ' + toArabicDigits(k); const bb = document.createElement('b'); bb.textContent = fmt(glPpg(k)); sp.appendChild(bb); box.appendChild(sp); });
+  if(b24 > 0) [24, 21, 18].forEach(k=>{
+    const sp = document.createElement('span');
+    const kk = document.createElement('span'); kk.className = 'gl-k'; kk.textContent = 'عيار ' + toArabicDigits(k); sp.appendChild(kk);
+    [['شراء', glPpg(k), 'gl-buy'], ['بيع', glSellPpg(k), 'gl-sell']].forEach(([lb, v, cls])=>{
+      const r = document.createElement('span'); r.className = 'gl-row ' + cls; r.appendChild(document.createTextNode(lb));
+      const bb = document.createElement('b'); bb.textContent = fmt(v); r.appendChild(bb); sp.appendChild(r);
+    });
+    box.appendChild(sp);
+  });
 }
 function glRefreshUI(){
   try{ renderCap(); }catch(e){}
@@ -3778,7 +3795,7 @@ function renderCapGold(){
   });
   capGroupize(box, 'gold');
 }
-function openCapGold(){ _cgFk = null; _cgFu = null; cgReset(); document.getElementById('glAdj').value = _glAdj.adj || ''; document.getElementById('glManual').value = _glAdj.manual || ''; document.getElementById('glSarUsd').value = _glAdj.sarUsd || ''; renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
+function openCapGold(){ _cgFk = null; _cgFu = null; cgReset(); document.getElementById('glAdj').value = _glAdj.adj || ''; document.getElementById('glManual').value = _glAdj.manual || ''; document.getElementById('glSarUsd').value = _glAdj.sarUsd || ''; document.getElementById('glSpread').value = (_glAdj.spread === undefined ? 1 : _glAdj.spread); renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
 function closeCapGold(){ document.getElementById('capGoldOverlay').classList.remove('open'); }
 function saveCapGold(){
   const n = document.getElementById('cgName').value.trim(), g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
