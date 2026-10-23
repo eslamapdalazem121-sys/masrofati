@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.6500">
+<meta name="app-version" content="2026-10-15.6700">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1117,6 +1117,7 @@ body{overflow-x:hidden;}
 .gi-sumrow{display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 10px; font-size:calc(12px * var(--fs,1)); font-weight:800;}
 .gi-sumrow span{flex:1; min-width:0; padding:8px; border-radius:12px; background:rgba(18,178,122,.12); text-align:center;}
 .gi-rows{max-height:210px; overflow:auto; margin:6px 0 10px;}
+#cmList{max-height:none; overflow:visible;}
 .gi-row{display:flex; align-items:center; gap:8px; padding:8px 4px; border-bottom:1px solid var(--border,#dde); font-size:calc(13px * var(--fs,1));}
 .gi-row b{flex:1; min-width:0; overflow-wrap:anywhere;} .gi-row button{border:0; background:none; font-size:16px; cursor:pointer;}
 .gi-wrap .zk-sq .zk-v{font-size:calc(30px * var(--fs,1)); line-height:1.1;}
@@ -3300,7 +3301,6 @@ function renderPensionPanel(){
   box.appendChild(cmYearHeader('💳', 'المعاشات', yr));
   const sum = (a, b)=>{ const r = document.createElement('div'); r.className = 'gi-sumrow'; r.innerHTML = '<span></span><span></span>'; r.children[0].textContent = a; r.children[1].textContent = b; box.appendChild(r); };
   sum('إجمالي المعاش الشهري: ' + fmt(cgRound(monthlyAll)), 'إجمالي السنة المتوقع: ' + fmt(cgRound(expectedYear)));
-  sum('✅ استُلم حتى الآن: ' + fmt(cgRound(received)), '⏳ المتبقي في السنة: ' + fmt(cgRound(expectedYear - received)));
   { const nt = nextDueTxt('pension'); if(nt) box.appendChild(cmNote(nt)); }
   box.appendChild(cmNote('↻ المعاشات بتستمر تلقائيًا كل سنة بنفس المبلغ والموعد لحد ما تعدّلها أو تحذفها.'));
   if(pens.length){
@@ -3359,7 +3359,6 @@ function renderBankInterest(){
   box.appendChild(cmYearHeader('📆', 'الفوائد البنكية', yr));
   const sum = (a, b)=>{ const r = document.createElement('div'); r.className = 'gi-sumrow'; r.innerHTML = '<span></span><span></span>'; r.children[0].textContent = a; r.children[1].textContent = b; box.appendChild(r); };
   sum('الفائدة السنوية: ' + fmt(cgRound(annualAll)), 'الفائدة الشهرية: ' + fmt(cgRound(monthlyAll)));
-  sum('✅ وصل حتى الآن: ' + fmt(cgRound(received)), '⏳ المتبقي في السنة: ' + fmt(cgRound(expectedYear - received)));
   { const nt = nextDueTxt('bank'); if(nt) box.appendChild(cmNote(nt)); }
   box.appendChild(cmNote('↻ الفوائد بتستمر تلقائيًا كل سنة بنفس النسبة والمواعيد لحد ما تعدّلها أو تحذفها.'));
   // الحسابات
@@ -3419,6 +3418,7 @@ function setCmSub(c){
   if(_cmFormOpen && _cmSub === c){ _cmFormOpen = false; cmReset(); }
   else { _cmFormOpen = true; _cmFilter = c; }
   cmSubUI(c); renderCapMoney();
+  if(_cmFormOpen) setTimeout(()=>{ const f = document.getElementById('cmForm'); if(f) f.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
 }
 function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMoney(); }
 function cmReset(){
