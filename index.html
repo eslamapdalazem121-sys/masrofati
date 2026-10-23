@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-15.6000">
+<meta name="app-version" content="2026-10-15.6100">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3215,7 +3215,38 @@ function capGroupize(box, cat){
 }
 
 // ---- أموال: نقدي / بنوك
-let _cmSub = 'cash', _cmFilter = null, _cmEditId = null, _cmRemTouched = false;
+let _cmSub = 'cash', _cmFilter = null, _cmEditId = null, _cmRemTouched = false, _cmYear = null;
+function cmYear(){ return _cmYear || currentYear; }
+function cmShiftYear(d){ _cmYear = cmYear() + d; renderCapMoney(); }
+// عنوان الجدول مع التنقل بين السنين (البيانات بتستمر لكل سنة لحد ما تعدلها)
+function cmYearHeader(icon, title, yr){
+  const d = document.createElement('div'); d.className = 'cap-grp'; d.style.cursor = 'default';
+  d.innerHTML = '<span></span><b></b><button type="button" style="font-size:12px;font-weight:800;"></button><button type="button" style="font-size:12px;font-weight:800;"></button>';
+  d.children[0].textContent = icon; d.children[1].textContent = title + ' — ' + toArabicDigits(yr);
+  d.children[2].textContent = '◂ ' + toArabicDigits(yr - 1); d.children[2].onclick = ()=> cmShiftYear(-1);
+  d.children[3].textContent = toArabicDigits(yr + 1) + ' ▸'; d.children[3].onclick = ()=> cmShiftYear(1);
+  return d;
+}
+function cmNote(txt){ const n = document.createElement('div'); n.className = 'hint'; n.style.cssText = 'font-size:12px;color:var(--muted);font-weight:700;margin:4px 6px 8px;'; n.textContent = txt; return n; }
+// أقرب موعد قادم (بيبص لقدام حتى السنة الجاية)
+function nextDueOf(kind){
+  const now = new Date(); let best = null;
+  const items = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === kind);
+  for(let k = 0; k < 26; k++){
+    const dt = new Date(now.getFullYear(), now.getMonth() + k, 1), y = dt.getFullYear(), m = dt.getMonth();
+    items.forEach(x=>{
+      const act = kind === 'bank' ? bankActive(x, y, m) : penActive(x, y, m); if(!act) return;
+      const due = kind === 'bank' ? bankDueOf(x, y, m) : penDueOf(x, y, m);
+      if(due > now && (!best || due < best.due)) best = {due, name: x.name, amt: kind === 'bank' ? bankMonthly(x) : (Number(x.amount) || 0)};
+    });
+    if(best) break;
+  }
+  return best;
+}
+function nextDueTxt(kind){
+  const n = nextDueOf(kind);
+  return n ? '⏭ أقرب موعد قادم: ' + n.due.toLocaleDateString(dateLocale(), {day:'numeric', month:'long', year:'numeric'}) + ' — ' + n.name + ' ' + fmt(cgRound(n.amt)) : '';
+}
 function bankAnnual(x){ return cgRound((Number(x.amount) || 0) * (Number(x.rate) || 0) / 100); }
 function bankMonthly(x){
   if(x.monthlyInt !== undefined && x.monthlyInt !== null && x.monthlyInt !== '') return cgRound(Number(x.monthlyInt) || 0);
@@ -3249,15 +3280,17 @@ function renderPensionPanel(){
   const box = document.getElementById('cmInterest');
   const pens = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'pension');
   box.style.display = 'block'; box.innerHTML = '';
-  const yr = currentYear, now = new Date(), monthlyAll = pens.reduce((t,x)=> t + (Number(x.amount) || 0), 0);
+  const yr = cmYear(), now = new Date(), monthlyAll = pens.reduce((t,x)=> t + (Number(x.amount) || 0), 0);
   const months = MONTHS.map((mn, m)=> ({mn, m, items: pens.filter(x=> penActive(x, yr, m)).map(x=>{ const due = penDueOf(x, yr, m); return {x, day: due.getDate(), amt: Number(x.amount) || 0, reached: due <= now}; }).sort((a,b)=> a.day - b.day)}));
   const received = months.reduce((t,mo)=> t + mo.items.filter(e=> e.reached).reduce((a,e)=> a + e.amt, 0), 0);
   const expectedYear = months.reduce((t,mo)=> t + mo.items.reduce((a,e)=> a + e.amt, 0), 0);
   const mk = (txt)=>{ const d = document.createElement('div'); d.className = 'cap-grp'; d.style.cursor = 'default'; d.innerHTML = '<span>💳</span><b></b>'; d.children[1].textContent = txt; return d; };
-  box.appendChild(mk('المعاشات — ' + toArabicDigits(yr)));
+  box.appendChild(cmYearHeader('💳', 'المعاشات', yr));
   const sum = (a, b)=>{ const r = document.createElement('div'); r.className = 'gi-sumrow'; r.innerHTML = '<span></span><span></span>'; r.children[0].textContent = a; r.children[1].textContent = b; box.appendChild(r); };
   sum('إجمالي المعاش الشهري: ' + fmt(cgRound(monthlyAll)), 'إجمالي السنة المتوقع: ' + fmt(cgRound(expectedYear)));
   sum('✅ استُلم حتى الآن: ' + fmt(cgRound(received)), '⏳ المتبقي في السنة: ' + fmt(cgRound(expectedYear - received)));
+  { const nt = nextDueTxt('pension'); if(nt) box.appendChild(cmNote(nt)); }
+  box.appendChild(cmNote('↻ المعاشات بتستمر تلقائيًا كل سنة بنفس المبلغ والموعد لحد ما تعدّلها أو تحذفها.'));
   if(pens.length){
     box.appendChild(mk('المعاشات المسجلة'));
     const acc = document.createElement('div'); acc.className = 'gi-rows'; acc.style.cssText = 'max-height:none; overflow:visible;';
@@ -3303,17 +3336,19 @@ function renderBankInterest(){
   const banks = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank');
   if(_cmFilter !== 'bank'){ box.style.display = 'none'; return; }
   box.style.display = 'block'; box.innerHTML = '';
-  const yr = currentYear, now = new Date();
+  const yr = cmYear(), now = new Date();
   const annualAll = banks.reduce((t,x)=> t + bankAnnualAny(x), 0), monthlyAll = banks.reduce((t,x)=> t + bankMonthly(x), 0);
   // جدول السنة: كل فائدة في موعدها، وبتتحسب من أول يوم استحقاقها
   const months = MONTHS.map((mn, m)=> ({mn, m, items: banks.filter(x=> bankActive(x, yr, m)).map(x=>{ const due = bankDueOf(x, yr, m); return {x, day: due.getDate(), amt: bankMonthly(x), reached: due <= now}; }).sort((a,b)=> a.day - b.day)}));
   const received = months.reduce((t,mo)=> t + mo.items.filter(e=> e.reached).reduce((a,e)=> a + e.amt, 0), 0);
   const expectedYear = months.reduce((t,mo)=> t + mo.items.reduce((a,e)=> a + e.amt, 0), 0);
   const mk = (cls, txt)=>{ const d = document.createElement('div'); d.className = cls; d.innerHTML = '<span>📆</span><b></b>'; d.children[1].textContent = txt; d.style.cursor = 'default'; return d; };
-  box.appendChild(mk('cap-grp', 'الفوائد البنكية — ' + toArabicDigits(yr)));
+  box.appendChild(cmYearHeader('📆', 'الفوائد البنكية', yr));
   const sum = (a, b)=>{ const r = document.createElement('div'); r.className = 'gi-sumrow'; r.innerHTML = '<span></span><span></span>'; r.children[0].textContent = a; r.children[1].textContent = b; box.appendChild(r); };
   sum('الفائدة السنوية: ' + fmt(cgRound(annualAll)), 'الفائدة الشهرية: ' + fmt(cgRound(monthlyAll)));
   sum('✅ وصل حتى الآن: ' + fmt(cgRound(received)), '⏳ المتبقي في السنة: ' + fmt(cgRound(expectedYear - received)));
+  { const nt = nextDueTxt('bank'); if(nt) box.appendChild(cmNote(nt)); }
+  box.appendChild(cmNote('↻ الفوائد بتستمر تلقائيًا كل سنة بنفس النسبة والمواعيد لحد ما تعدّلها أو تحذفها.'));
   // الحسابات
   if(banks.length){
     box.appendChild(mk('cap-grp', 'الحسابات'));
@@ -3415,7 +3450,7 @@ function renderCapMoney(){
   renderPensionPanel();
 }
 function openCapMoney(){
-  _cmFilter = null; cmReset(); cmSubUI(_cmSub);
+  _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
   renderCapMoney();
   document.getElementById('capMoneyOverlay').classList.add('open');
 }
