@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -1283,7 +1283,9 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 #cgList .gi-row > b{font-size:calc(18px * var(--fs,1));}
 #cgList .gi-row > span:nth-of-type(2){font-size:calc(20px * var(--fs,1)); font-weight:800;}
 #cgList .cg-det{font-size:calc(14px * var(--fs,1)); line-height:1.5;}
-#cgList .gi-row{flex-wrap:wrap;}
+#cgList .gi-row{flex-wrap:wrap; padding:14px 6px 16px; margin-bottom:4px; border-bottom:3px solid transparent; border-image:linear-gradient(90deg, transparent 0%, #e0a800 18%, #b8860b 50%, #e0a800 82%, transparent 100%) 1;}
+#cgList .gi-row:last-child{border-image:none; border-bottom:0;}
+#cgList .cg-det .cg-ln + .cg-ln{border-top:1px dashed rgba(184,134,11,.5); padding-top:8px; margin-top:8px;}
 #cgList .gi-row > .cg-det{flex:0 0 100%; margin-top:2px; padding-inline-start:30px;}
 #cgList .cg-det .cg-ln{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 14px; margin-top:6px;}
 #cgList .cg-det .cg-ln .cg-h{flex:0 0 100%; font-size:calc(14px * var(--fs,1)); font-weight:800; color:var(--muted);}
@@ -1292,6 +1294,14 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 #cgList .cg-det .cg-ln b{font-size:calc(18px * var(--fs,1)); font-weight:800; color:var(--text,#1c2430);}
 #cgList .cg-det .cg-ln.gl-pos b{color:#0b8f5f;} #cgList .cg-det .cg-ln.gl-neg b{color:#d93a3a;}
 .cap-sq .gi-pct{font-size:calc(14px * var(--fs,1)); line-height:1.35;}
+.gl-adjwrap{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+.gl-adjwrap .gl-adj{flex:1; min-width:0;}
+.gl-adjwrap .plus-badge{pointer-events:auto; cursor:pointer; margin-top:2px; width:calc(30px * var(--fs,1)); height:calc(30px * var(--fs,1)); font-size:calc(24px * var(--fs,1));}
+.gl-ir{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px dashed rgba(184,134,11,.5); font-size:calc(14px * var(--fs,1)); font-weight:700;}
+.gl-ir .gl-il{flex:1; min-width:0;}
+.gl-ir b{font-size:calc(20px * var(--fs,1)); font-weight:800; direction:ltr; white-space:nowrap;}
+.gl-ir input{width:38%; max-width:150px; text-align:center; font-size:calc(18px * var(--fs,1)); font-weight:800; padding:8px; border-radius:10px; border:1px solid var(--border,#cdd);}
+.gl-in{font-size:calc(12.5px * var(--fs,1)); color:var(--muted); font-weight:700; line-height:1.5; padding-bottom:6px;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -1497,14 +1507,26 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <div class="gl-meta" id="glMeta"></div>
       <div class="gi-sumrow"><span>إجمالي الشراء: <b id="glBuy">0</b></span><span>إجمالي الآن: <b id="glNow">0</b></span></div>
       <div class="gi-sumrow"><span id="glProfitBox">الربح / الخسارة: <b id="glProfit">0</b></span></div>
+      <div class="gl-adjwrap">
       <details class="gl-adj"><summary>⚙️ ضبط السعر ليطابق سوق الصاغة</summary>
         <div class="date-row"><label for="glAdj">علاوة / خصم ٪</label><input type="number" id="glAdj" placeholder="0" step="any" oninput="goldAdjChange()"></div>
         <div class="date-row"><label for="glManual">سعر جرام ٢٤ يدوي</label><input type="number" id="glManual" placeholder="فاضي = تلقائي" step="any" oninput="goldAdjChange()"></div>
       </details>
+        <span class="plus-badge pb-teal pb-sm in-card" id="glInfoPlus" role="button" aria-label="أسعار السوق والصاغة" onclick="glInfoToggle()">+</span>
+      </div>
+      <div id="glInfo" style="display:none;">
+        <div class="gl-ir"><span class="gl-il">🌍 السعر العالمي الآن (أونصة)</span><b id="glInfoWorld">—</b></div>
+        <div class="gl-ir"><span class="gl-il">💵 سعر الدولار في مصر</span><b id="glInfoUsd">—</b></div>
+        <div class="gl-ir"><span class="gl-il">🏪 دولار الصاغة (ج)</span><input type="number" id="glSarUsd" placeholder="اكتبه" step="any" oninput="goldAdjChange()"></div>
+        <div class="gl-in" id="glSarNote"></div>
+        <div class="gl-ir"><span class="gl-il">🪙 الذهب حسب تسعير الصاغة (جرام)</span></div>
+        <div class="gl-prices" id="glInfoSar"></div>
+      </div>
     </div>
     <div class="gi-rows" id="cgList"></div>
     <div class="date-row grp-new"><input type="text" id="cgGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('gold')">إنشاء مجموعة</button></div>
-    <div class="gi-dest" style="margin:4px 0 6px;"><button type="button" id="cgUseJewel" onclick="setCgUse('jewel')">💍 زينة</button><button type="button" id="cgUseSave" class="active" onclick="setCgUse('save')">💰 ادخار</button></div>
+    <div class="gi-dest" style="margin:4px 0 6px;"><button type="button" id="cgUseJewel" onclick="cgUseTap('jewel')">💍 زينة</button><button type="button" id="cgUseSave" onclick="cgUseTap('save')">💰 ادخار</button></div>
+    <div id="cgForm" style="display:none;">
     <div class="field"><label>اسم القطعة</label><input type="text" id="cgName" placeholder="مثال: سبيكة، خاتم، دبلة"></div>
     <div class="date-row"><label for="cgGrp">📁 المجموعة</label><select id="cgGrp"></select></div>
     <div class="date-row"><label for="cgKarat">العيار</label><select id="cgKarat"><option value="24">٢٤</option><option value="22">٢٢</option><option value="21" selected>٢١</option><option value="18">١٨</option><option value="14">١٤</option><option value="12">١٢</option><option value="9">٩</option></select></div>
@@ -1515,6 +1537,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeCapGold()">إغلاق</button>
       <button class="btn-save" id="cgSaveBtn" onclick="saveCapGold()">＋ إضافة</button>
+    </div>
     </div>
   </div>
 </div>
@@ -3554,10 +3577,17 @@ function goldKaratStats(arr){
   arr.forEach(x=>{ const k = Number(x.karat) || 0, g = Number(x.grams) || 0; if(k === 24 || k === 21 || k === 18) o[k] += g; else o.other += g; });
   return o;
 }
+var _cgFormOpen = false;
 function setCgUse(u){
   _cgUse = u;
-  document.getElementById('cgUseJewel').classList.toggle('active', u === 'jewel');
-  document.getElementById('cgUseSave').classList.toggle('active', u === 'save');
+  document.getElementById('cgUseJewel').classList.toggle('active', _cgFormOpen && u === 'jewel');
+  document.getElementById('cgUseSave').classList.toggle('active', _cgFormOpen && u === 'save');
+  document.getElementById('cgForm').style.display = _cgFormOpen ? '' : 'none';
+}
+function cgUseTap(u){
+  if(_cgFormOpen && _cgUse === u){ cgReset(); return; }   // دوسة تانية على نفس الزرار = إخفاء النموذج
+  _cgFormOpen = true; setCgUse(u);
+  setTimeout(()=>{ const f = document.getElementById('cgForm'); if(f) f.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
 }
 function setCgFk(k){ _cgFk = (k === _cgFk) ? null : k; renderCapGold(); }
 function setCgFu(u){ _cgFu = (u === _cgFu) ? null : u; renderCapGold(); }
@@ -3566,7 +3596,7 @@ function cgCalc(){
   document.getElementById('cgCalcTotal').textContent = fmt(cgRound(g * pr));
 }
 function cgReset(){
-  _cgEditId = null;
+  _cgEditId = null; _cgFormOpen = false;
   ['cgName','cgGramsIn','cgPpg'].forEach(id=> document.getElementById(id).value = '');
   document.getElementById('cgKarat').value = '21';
   document.getElementById('cgDate').value = dateToInputValue(Date.now());
@@ -3577,12 +3607,13 @@ function cgReset(){
 
 // ---- سعر الذهب الحالي من الإنترنت (بيتحدّث أول ما التطبيق يفتح) + حساب الربح
 var GL_KEY = 'masrofati_gold_live_v1', GL_ADJ_KEY = 'masrofati_gold_adj_v1', GL_OZ = 31.1034768;
-var _gl = null, _glAdj = {adj: 0, manual: 0}, _glBusy = false;
+var _gl = null, _glAdj = {adj: 0, manual: 0, sarUsd: 0}, _glBusy = false, _glInfoOpen = false;
 try{ _gl = JSON.parse(localStorage.getItem(GL_KEY)) || null; }catch(e){}
-try{ _glAdj = Object.assign({adj: 0, manual: 0}, JSON.parse(localStorage.getItem(GL_ADJ_KEY)) || {}); }catch(e){}
+try{ _glAdj = Object.assign({adj: 0, manual: 0, sarUsd: 0}, JSON.parse(localStorage.getItem(GL_ADJ_KEY)) || {}); }catch(e){}
 function glSigned(v){ v = cgRound(v); return (v > 0 ? '+' : (v < 0 ? '−' : '')) + fmt(Math.abs(v)); }
 function glBase24(){
   if(_glAdj && Number(_glAdj.manual) > 0) return Number(_glAdj.manual);
+  if(_glAdj && Number(_glAdj.sarUsd) > 0 && _gl && _gl.usd > 0) return _gl.usd / GL_OZ * Number(_glAdj.sarUsd);   // سعر الجرام عيار 24 = السعر العالمي للجرام بالدولار × دولار الصاغة
   if(_gl && _gl.p24 > 0) return _gl.p24 * (1 + (Number(_glAdj && _glAdj.adj) || 0) / 100);
   return 0;
 }
@@ -3634,8 +3665,30 @@ async function goldLiveRefresh(manual){
 function goldAdjChange(){
   _glAdj.adj = Number(document.getElementById('glAdj').value) || 0;
   _glAdj.manual = Number(document.getElementById('glManual').value) || 0;
+  _glAdj.sarUsd = Number(document.getElementById('glSarUsd').value) || 0;
   try{ localStorage.setItem(GL_ADJ_KEY, JSON.stringify(_glAdj)); }catch(e){}
   glRefreshUI();
+}
+function glInfoToggle(){
+  _glInfoOpen = !_glInfoOpen;
+  document.getElementById('glInfo').style.display = _glInfoOpen ? '' : 'none';
+  const b = document.getElementById('glInfoPlus'); b.textContent = _glInfoOpen ? '−' : '+'; b.classList.toggle('is-open', _glInfoOpen);
+}
+function glInfoPanel(){
+  const w = document.getElementById('glInfoWorld'); if(!w) return;
+  const usd = _gl && _gl.usd > 0 ? _gl.usd : 0, rate = _gl && _gl.rate > 0 ? _gl.rate : 0, b24 = glBase24();
+  const f2 = v => (Number(v) || 0).toLocaleString(DIGITS_MODE === 'en' ? 'en-US' : 'ar-EG', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  w.textContent = usd ? '$' + f2(usd) : '—';
+  document.getElementById('glInfoUsd').textContent = rate ? f2(rate) + ' ج' : '—';
+  // دولار الصاغة: المكتوب، أو المحسوب من السعر اليدوي
+  let note = '';
+  if(usd && Number(_glAdj.manual) > 0) note = 'محسوب من سعر الجرام اليدوي: ' + f2(Number(_glAdj.manual) / (usd / GL_OZ)) + ' ج للدولار';
+  else if(usd && Number(_glAdj.sarUsd) > 0) note = 'سعر الجرام عيار 24 = ' + f2(usd / GL_OZ) + ' $ × ' + f2(_glAdj.sarUsd) + ' = ' + f2(usd / GL_OZ * _glAdj.sarUsd) + ' ج';
+  else if(usd) note = 'اكتب دولار الصاغة عشان السعر يتحسب بيه (دلوقتي بسعر الدولار في مصر' + ((Number(_glAdj.adj) || 0) ? ' ' + (_glAdj.adj > 0 ? '+' : '') + _glAdj.adj + '٪' : '') + ')';
+  else note = 'محتاج تحميل السعر العالمي (اتصل بالنت ودوس تحديث)';
+  document.getElementById('glSarNote').textContent = note;
+  const box = document.getElementById('glInfoSar'); box.innerHTML = '';
+  if(b24 > 0) [24, 21, 18].forEach(k=>{ const sp = document.createElement('span'); sp.textContent = 'عيار ' + toArabicDigits(k); const bb = document.createElement('b'); bb.textContent = fmt(glPpg(k)); sp.appendChild(bb); box.appendChild(sp); });
 }
 function glRefreshUI(){
   try{ renderCap(); }catch(e){}
@@ -3652,6 +3705,7 @@ function glPanel(){
   }
   let m = '';
   if(Number(_glAdj.manual) > 0) m = '✍️ سعر يدوي لعيار 24 (بدون تحديث تلقائي)';
+  else if(Number(_glAdj.sarUsd) > 0 && _gl && _gl.usd > 0) m = '🏪 بدولار الصاغة ' + fmt(_glAdj.sarUsd) + ' ج × السعر العالمي (آخر تحديث: ' + formatDate(_gl.ts) + ')';
   else if(_gl && _gl.ts){
     const d = new Date(_gl.ts);
     m = 'آخر تحديث: ' + formatDate(_gl.ts) + ' ' + d.toLocaleTimeString(DIGITS_MODE === 'en' ? 'en-US' : 'ar-EG', {hour: '2-digit', minute: '2-digit'}) + ' · السعر العالمي محوّل للجنيه' + ((Number(_glAdj.adj) || 0) ? ' ' + (_glAdj.adj > 0 ? '+' : '') + _glAdj.adj + '٪' : '');
@@ -3669,7 +3723,7 @@ function renderCapGold(){
   const all = goldPieces(), box = document.getElementById('cgList'), t = capTotals();
   document.getElementById('cgTotal').textContent = fmt(t.gold);
   document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams));
-  glPanel();
+  glPanel(); glInfoPanel();
   // وزن كل عيار
   const ks = goldKaratStats(all), kr = document.getElementById('cgKaratRow'); kr.innerHTML = '';
   const mkChip = (label, grams, on, fn)=>{ const c = document.createElement('span'); c.className = 'gi-chip' + (on ? ' on' : ''); c.textContent = label + ' ' + fmt(cgRound(grams)) + ' جم'; c.onclick = fn; return c; };
@@ -3715,7 +3769,7 @@ function renderCapGold(){
       document.getElementById('cgName').value = x.name; document.getElementById('cgKarat').value = String(x.karat || 21);
       document.getElementById('cgGramsIn').value = x.grams || ''; document.getElementById('cgPpg').value = x.ppg || '';
       document.getElementById('cgDate').value = dateToInputValue(x.date || Date.now());
-      setCgUse(cgUseOf(x)); fillGrpSel('cgGrp', 'gold', x.grp || '');
+      _cgFormOpen = true; setCgUse(cgUseOf(x)); fillGrpSel('cgGrp', 'gold', x.grp || '');
       document.getElementById('cgSaveBtn').textContent = '💾 حفظ التعديل'; cgCalc();
       document.getElementById('cgName').scrollIntoView({block:'center'});
     };
@@ -3724,7 +3778,7 @@ function renderCapGold(){
   });
   capGroupize(box, 'gold');
 }
-function openCapGold(){ _cgFk = null; _cgFu = null; cgReset(); document.getElementById('glAdj').value = _glAdj.adj || ''; document.getElementById('glManual').value = _glAdj.manual || ''; renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
+function openCapGold(){ _cgFk = null; _cgFu = null; cgReset(); document.getElementById('glAdj').value = _glAdj.adj || ''; document.getElementById('glManual').value = _glAdj.manual || ''; document.getElementById('glSarUsd').value = _glAdj.sarUsd || ''; renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
 function closeCapGold(){ document.getElementById('capGoldOverlay').classList.remove('open'); }
 function saveCapGold(){
   const n = document.getElementById('cgName').value.trim(), g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
