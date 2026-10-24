@@ -7314,9 +7314,10 @@ document.addEventListener('visibilitychange', function(){ try{ if(document.visib
 // تسجيل خدمة التخزين (Service Worker) عشان التطبيق يشتغل بدون نت ويتثبّت
 if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js')
+    navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'})
       .then(function(){ return navigator.serviceWorker.ready; })
       .then(function(){
+        try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}   // يمنع المتصفح من مسح التخزين لو الموبايل ضغط الذاكرة
         if(typeof updateOfflineStatus === 'function') updateOfflineStatus();
         if(typeof warmFontCache === 'function') warmFontCache();
         if(typeof updateVersionUI === 'function') updateVersionUI();
