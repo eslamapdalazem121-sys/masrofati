@@ -1311,6 +1311,11 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .gl-basis{margin:2px 0 8px; padding:9px 10px; border-radius:12px; font-size:calc(14px * var(--fs,1)); font-weight:800; line-height:1.5; cursor:pointer;}
 .gl-basis.ok{background:rgba(18,178,122,.16); color:#0b7a55;}
 .gl-basis.warn{background:rgba(217,72,15,.13); color:#b13a0b;}
+.gl-chip2{display:flex !important; flex-direction:column; align-items:center; justify-content:center; gap:2px; line-height:1.35; text-align:center;}
+.gl-chip2 > span{background:none !important; padding:0 !important; border-radius:0 !important; box-shadow:none !important; border:0 !important; min-width:0; flex:none;}
+.gl-chip2 .gc-l{font-size:calc(14px * var(--fs,1)); font-weight:800;}
+.gl-chip2 .gc-s{font-size:calc(12px * var(--fs,1)); font-weight:700; opacity:.8;}
+.gl-chip2 .gc-v{font-size:calc(19px * var(--fs,1)); font-weight:800;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -3761,15 +3766,27 @@ function renderCapGold(){
   glPanel(); glInfoPanel();
   // وزن كل عيار
   const ks = goldKaratStats(all), kr = document.getElementById('cgKaratRow'); kr.innerHTML = '';
-  const mkChip = (label, grams, on, fn)=>{ const c = document.createElement('span'); c.className = 'gi-chip' + (on ? ' on' : ''); c.textContent = label + ' ' + fmt(cgRound(grams)) + ' جم'; c.onclick = fn; return c; };
-  [24, 21, 18].forEach(k=> kr.appendChild(mkChip('عيار ' + toArabicDigits(k) + ':', ks[k], _cgFk === k, ()=> setCgFk(k))));
-  if(ks.other > 0) kr.appendChild(mkChip('عيارات أخرى:', ks.other, _cgFk === 'other', ()=> setCgFk('other')));
+  const live = glBase24() > 0;
+  const pieceNow = x => cgRound((Number(x.grams) || 0) * glSellPpg(x.karat));   // الوزن × سعر البيع الحالي لعيار القطعة
+  const sumNow = a => a.reduce((t2, x)=> t2 + pieceNow(x), 0);
+  const mkChip = (label, grams, on, fn, val, sub)=>{
+    const c = document.createElement('span'); c.className = 'gi-chip gl-chip2' + (on ? ' on' : ''); c.onclick = fn;
+    const l1 = document.createElement('span'); l1.className = 'gc-l'; l1.textContent = label + ' ' + fmt(cgRound(grams)) + ' جم'; c.appendChild(l1);
+    if(sub){ const l2 = document.createElement('span'); l2.className = 'gc-s'; l2.textContent = sub; c.appendChild(l2); }
+    const l3 = document.createElement('b'); l3.className = 'gc-v'; l3.textContent = val; c.appendChild(l3);
+    return c;
+  };
+  [24, 21, 18].forEach(k=>{
+    const sp = glSellPpg(k);
+    kr.appendChild(mkChip('عيار ' + toArabicDigits(k) + ':', ks[k], _cgFk === k, ()=> setCgFk(k), live ? fmt(cgRound(ks[k] * sp)) : '—', live ? '× ' + fmt(sp) + ' (بيع)' : ''));
+  });
+  if(ks.other > 0) kr.appendChild(mkChip('عيارات أخرى:', ks.other, _cgFk === 'other', ()=> setCgFk('other'),
+    live ? fmt(sumNow(all.filter(x=> { const k = Number(x.karat) || 0; return !(k === 24 || k === 21 || k === 18); }))) : '—', live ? 'الوزن × سعر البيع' : ''));
   // زينة / ادخار
   const jw = all.filter(x=> cgUseOf(x) === 'jewel'), sv = all.filter(x=> cgUseOf(x) === 'save'), sumG = a => a.reduce((t2,x)=> t2 + (Number(x.grams)||0), 0);
   const ur = document.getElementById('cgUseRow'); ur.innerHTML = '';
   [['💍 زينة:', jw, 'jewel'], ['💰 ادخار:', sv, 'save']].forEach(([lb, arr, key])=>{
-    const c = document.createElement('span'); c.className = 'gi-chip' + (_cgFu === key ? ' on' : '');
-    c.textContent = lb + ' ' + fmt(cgRound(sumG(arr))) + ' جم — ' + fmt(giSum(arr)); c.onclick = ()=> setCgFu(key); ur.appendChild(c);
+    ur.appendChild(mkChip(lb, sumG(arr), _cgFu === key, ()=> setCgFu(key), live ? fmt(sumNow(arr)) : fmt(giSum(arr)), live ? 'الوزن × سعر البيع' : 'بسعر الشراء'));
   });
   // القايمة بعد الفلترة
   const arr = all.filter(x=> {
