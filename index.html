@@ -1562,6 +1562,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
   <div class="modal-box">
     <h3>📁 تعديل المجموعة</h3>
     <div class="field"><label>اسم المجموعة</label><input type="text" id="capGrpEditName"></div>
+    <div class="field"><label>🎨 لون المجموعة</label><input type="color" id="capGrpColor" style="height:46px;padding:4px;"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeCapGrp()">إلغاء</button>
       <button class="btn-cancel" style="color:#c0392b;" onclick="deleteCapGrp()">🗑 حذف</button>
@@ -3270,14 +3271,14 @@ function createCapGroup(cat){
 }
 function openCapGrp(id){
   const g = capGroups().find(x=> x.id === id); if(!g) return;
-  _capGrpId = id; document.getElementById('capGrpEditName').value = g.name;
+  _capGrpId = id; document.getElementById('capGrpEditName').value = g.name; ensureGrpColors(); document.getElementById('capGrpColor').value = g.color || '#7c4ddb';
   document.getElementById('capGrpOverlay').classList.add('open');
 }
 function closeCapGrp(){ document.getElementById('capGrpOverlay').classList.remove('open'); _capGrpId = null; }
 function capRerender(){ fillGrpSel('cmGrp','money', document.getElementById('cmGrp').value); fillGrpSel('cgGrp','gold', document.getElementById('cgGrp').value); renderCapMoney(); renderCapGold(); renderCap(); }
 function saveCapGrp(){
   const g = capGroups().find(x=> x.id === _capGrpId), n = document.getElementById('capGrpEditName').value.trim();
-  if(g && n){ g.name = n; save(); }
+  if(g && n){ g.name = n; g.color = document.getElementById('capGrpColor').value || g.color; save(); }
   closeCapGrp(); capRerender();
 }
 function deleteCapGrp(){
@@ -3287,6 +3288,29 @@ function deleteCapGrp(){
     capList().forEach(x=>{ if(x.grp === id) delete x.grp; });
     save(); closeCapGrp(); capRerender();
   });
+}
+
+// ---- ألوان المجموعات + فوائد كل مجموعة/بنك (بتتجمع في موعدها كل شهر)
+var GRP_COLORS = ['#7c4ddb','#0ea5a4','#e8590c','#2f9e44','#d6336c','#1971c2','#f08c00','#5f3dc4','#c2255c','#087f5b'];
+function ensureGrpColors(){
+  let ch = false; const gs = capGroups(), used = new Set(gs.map(g=> g.color).filter(Boolean));
+  gs.forEach((g, i)=>{ if(!g.color){ g.color = GRP_COLORS.find(c=> !used.has(c)) || GRP_COLORS[i % GRP_COLORS.length]; used.add(g.color); ch = true; } });
+  if(ch) save();
+}
+function hexA(hex, a){ const h = String(hex || '#7c4ddb').replace('#', ''), n = parseInt(h.length === 3 ? h.split('').map(c=> c + c).join('') : h, 16) || 0; return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; }
+function bankIntMonth(x, y, m, now){ if(!bankActive(x, y, m)) return {exp: 0, got: 0, due: null}; const amt = bankMonthly(x), due = bankDueOf(x, y, m); return {exp: amt, got: due <= now ? amt : 0, due}; }
+function bankIntSince(x, now){   // كل الفوائد اللي استحقت من أول فائدة لحد النهاردة
+  let tot = 0; const f = bankFirstDue(x); let y = f.getFullYear(), m = f.getMonth();
+  for(let i = 0; i < 1200; i++){ const due = bankDueOf(x, y, m); if(due > now) break; tot += bankMonthly(x); if(++m > 11){ m = 0; y++; } }
+  return tot;
+}
+function grpIntStats(items, now){
+  const y = now.getFullYear(), m = now.getMonth(); let exp = 0, got = 0, since = 0, yGot = 0, yExp = 0;
+  items.forEach(x=>{
+    const r = bankIntMonth(x, y, m, now); exp += r.exp; got += r.got; since += bankIntSince(x, now);
+    for(let mm = 0; mm < 12; mm++){ const q = bankIntMonth(x, y, mm, now); yExp += q.exp; yGot += q.got; }
+  });
+  return {exp: cgRound(exp), got: cgRound(got), since: cgRound(since), yGot: cgRound(yGot), yExp: cgRound(yExp)};
 }
 // ترتيب الصفوف تحت عناوين المجموعات
 const _capCollapsed = new Set();
@@ -3302,10 +3326,18 @@ function capGroupize(box, cat){
     const h = document.createElement('div'); h.className = 'cap-grp'; h.style.cursor = 'pointer';
     h.innerHTML = '<span class="plus-badge pb-blue pb-sm in-card"></span><span>📁</span><b></b><small></small>' + (gid ? '<button type="button">✏️</button>' : '');
     setBadgeState(h.children[0], !closed);
-    h.children[2].textContent = title + ' — ' + fmt(sumA) + (cat === 'gold' && sumG > 0 ? ' (' + fmt(Math.round(sumG * 100) / 100) + ' جم)' : '');
+    let intTxt = '', gcol = null;
+    if(cat === 'money'){
+      const g0 = gid ? groups.find(g=> g.id === gid) : null; gcol = g0 ? g0.color : null;
+      const bks = rs.map(r=> byId(r.dataset.id)).filter(x=> x && capSubOf(x) === 'bank' && bankMonthly(x) > 0);
+      if(bks.length){ const now0 = new Date(), st = grpIntStats(bks, now0); intTxt = ' · فوائد ' + MONTHS[now0.getMonth()] + ': ' + fmt(st.got) + (st.got < st.exp ? ' من ' + fmt(st.exp) : ''); }
+    }
+    h.children[2].textContent = title + ' — ' + fmt(sumA) + (cat === 'gold' && sumG > 0 ? ' (' + fmt(Math.round(sumG * 100) / 100) + ' جم)' : '') + intTxt;
+    if(gcol){ h.style.background = hexA(gcol, .2); h.style.borderInlineStart = '6px solid ' + gcol; }
     h.children[3].textContent = toArabicDigits(rs.length) + ' بند';
     if(gid) h.children[4].onclick = (e)=>{ e.stopPropagation(); openCapGrp(gid); };
     const body = document.createElement('div'); body.className = 'cap-grp-body'; body.style.display = closed ? 'none' : 'block';
+    if(gcol){ body.style.borderInlineStart = '4px solid ' + hexA(gcol, .6); body.style.paddingInlineStart = '4px'; }
     if(!rs.length){ const e = document.createElement('div'); e.style.cssText = 'color:var(--muted);font-size:12px;text-align:center;padding:4px;'; e.textContent = 'لا توجد بنود في المجموعة'; body.appendChild(e); }
     rs.forEach(r=> body.appendChild(r));
     h.onclick = ()=>{ const nowClosed = body.style.display !== 'none'; body.style.display = nowClosed ? 'none' : 'block'; setBadgeState(h.children[0], !nowClosed); if(nowClosed) _capCollapsed.add(ck); else _capCollapsed.delete(ck); };
@@ -3458,6 +3490,35 @@ function renderBankInterest(){
   sum('الفائدة السنوية: ' + fmt(cgRound(annualAll)), 'الفائدة الشهرية: ' + fmt(cgRound(monthlyAll)));
   { const nt = nextDueTxt('bank'); if(nt) box.appendChild(cmNote(nt)); }
   box.appendChild(cmNote('↻ الفوائد بتستمر تلقائيًا كل سنة بنفس النسبة والمواعيد لحد ما تعدّلها أو تحذفها.'));
+  // فوائد كل مجموعة / بنك على حدة (بتزيد في موعد كل فائدة من الشهر)
+  {
+    const nowC = new Date(), yC = nowC.getFullYear(), mC = nowC.getMonth(), grps = capGroups('money');
+    const sets = grps.map(g=> ({name: g.name, color: g.color || '#7c4ddb', items: banks.filter(b=> b.grp === g.id && bankMonthly(b) > 0)}));
+    const loose = banks.filter(b=> !grps.some(g=> g.id === b.grp) && bankMonthly(b) > 0);
+    if(loose.length) sets.push({name: 'بدون مجموعة', color: '#6b7280', items: loose});
+    const act = sets.filter(z=> z.items.length);
+    if(act.length){
+      box.appendChild(mk('cap-grp', 'فوائد كل مجموعة — ' + MONTHS[mC]));
+      act.forEach(z=>{
+        const st = grpIntStats(z.items, nowC);
+        const c = document.createElement('div'); c.className = 'gl-gcard'; c.style.cssText = 'margin:6px 2px 10px; padding:10px 12px; border-radius:14px; background:' + hexA(z.color, .14) + '; border-inline-start:7px solid ' + z.color + ';';
+        const hd = document.createElement('div'); hd.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800;';
+        const nm = document.createElement('span'); nm.style.fontSize = 'calc(16px * var(--fs,1))'; nm.textContent = '📁 ' + z.name; hd.appendChild(nm);
+        const big = document.createElement('b'); big.style.cssText = 'font-size:calc(22px * var(--fs,1)); color:' + z.color + ';'; big.textContent = fmt(st.got); hd.appendChild(big); c.appendChild(hd);
+        const ln = (t)=>{ const e = document.createElement('div'); e.style.cssText = 'font-size:calc(13.5px * var(--fs,1)); font-weight:700; margin-top:4px;'; e.textContent = t; c.appendChild(e); };
+        ln('فوائد شهر ' + MONTHS[mC] + ' (وصل حتى الآن)' + (st.got < st.exp ? ' — المتوقع ' + fmt(st.exp) : ' ✅'));
+        ln('وصل في ' + toArabicDigits(yC) + ': ' + fmt(st.yGot) + ' من ' + fmt(st.yExp) + ' متوقعة');
+        ln('إجمالي الفوائد منذ البداية: ' + fmt(st.since));
+        z.items.slice().sort((a, b)=> bankDay(a) - bankDay(b)).forEach(x=>{
+          const r = bankIntMonth(x, yC, mC, nowC), row = document.createElement('div');
+          row.style.cssText = 'display:flex; justify-content:space-between; gap:8px; padding:6px 0 0; margin-top:6px; border-top:1px dashed ' + hexA(z.color, .6) + '; font-size:calc(14px * var(--fs,1)); font-weight:800;' + (r.got > 0 || !r.exp ? '' : 'opacity:.75;');
+          const a = document.createElement('span'); a.textContent = (r.got > 0 ? '✅ ' : '⏳ ') + '🏦 ' + x.name + (r.due ? ' · يوم ' + toArabicDigits(r.due.getDate()) : '');
+          const b = document.createElement('b'); b.textContent = r.exp ? fmt(r.exp) : '—'; row.appendChild(a); row.appendChild(b); c.appendChild(row);
+        });
+        box.appendChild(c);
+      });
+    }
+  }
   // الحسابات
   if(banks.length){
     box.appendChild(mk('cap-grp', 'الحسابات'));
@@ -3527,6 +3588,7 @@ function cmReset(){
   fillGrpSel('cmGrp', 'money', '');
 }
 function renderCapMoney(){
+  ensureGrpColors();
   const t = capTotals(), box = document.getElementById('cmList');
   document.getElementById('cmTotal').textContent = fmt(t.money);
   document.getElementById('cmCash').textContent = fmt(t.cash);
@@ -3547,6 +3609,7 @@ function renderCapMoney(){
     if(capSubOf(x) === 'bank' && bankMonthly(x) > 0){
       const det = document.createElement('span'); det.className = 'cg-det';
       det.textContent = (x.rate ? 'فائدة ' + toArabicDigits(Number(x.rate)) + '٪ · ' : '') + 'شهريًا ' + fmt(bankMonthly(x)) + ' · سنوية ' + fmt(bankAnnualAny(x)) + ' · كل يوم ' + toArabicDigits(bankDay(x));
+      { const now1 = new Date(), r1 = bankIntMonth(x, now1.getFullYear(), now1.getMonth(), now1); if(r1.exp > 0) det.textContent += ' · فوائد ' + MONTHS[now1.getMonth()] + ': ' + fmt(r1.exp) + (r1.got > 0 ? ' ✅' : ' ⏳ يوم ' + toArabicDigits(r1.due.getDate())); }
       d.children[1].appendChild(det);
     }
     d.children[3].onclick = ()=>{
