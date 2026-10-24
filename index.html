@@ -1302,12 +1302,12 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .gl-ir b{font-size:calc(20px * var(--fs,1)); font-weight:800; direction:ltr; white-space:nowrap;}
 .gl-ir input{width:38%; max-width:150px; text-align:center; font-size:calc(18px * var(--fs,1)); font-weight:800; padding:8px; border-radius:10px; border:1px solid var(--border,#cdd);}
 .gl-in{font-size:calc(12.5px * var(--fs,1)); color:var(--muted); font-weight:700; line-height:1.5; padding-bottom:6px;}
-#glInfoSar > span{padding:9px 4px;}
-#glInfoSar > span > span{background:none !important; padding:0; border-radius:0; min-width:0; flex:none;}
-#glInfoSar .gl-k{display:block; font-size:calc(14px * var(--fs,1)); font-weight:800; margin-bottom:4px;}
-#glInfoSar .gl-row{display:block; margin-top:3px; font-size:calc(12px * var(--fs,1)); font-weight:800;}
-#glInfoSar .gl-row b{display:block; font-size:calc(19px * var(--fs,1)); margin-top:0;}
-#glInfoSar .gl-buy{color:#0b7a55;} #glInfoSar .gl-sell{color:#d9480f; border-top:1px dashed rgba(184,134,11,.5); padding-top:4px; margin-top:6px;}
+#glInfoSar > span, #glPrices > span{padding:9px 4px;}
+#glInfoSar > span > span, #glPrices > span > span{background:none !important; padding:0; border-radius:0; min-width:0; flex:none;}
+#glInfoSar .gl-k, #glPrices .gl-k{display:block; font-size:calc(14px * var(--fs,1)); font-weight:800; margin-bottom:4px;}
+#glInfoSar .gl-row, #glPrices .gl-row{display:block; margin-top:3px; font-size:calc(12px * var(--fs,1)); font-weight:800;}
+#glInfoSar .gl-row b, #glPrices .gl-row b{display:block; font-size:calc(19px * var(--fs,1)); margin-top:0;}
+#glInfoSar .gl-buy, #glPrices .gl-buy{color:#0b7a55;} #glInfoSar .gl-sell, #glPrices .gl-sell{color:#d9480f; border-top:1px dashed rgba(184,134,11,.5); padding-top:4px; margin-top:6px;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -1508,7 +1508,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="gi-sumrow" id="cgKaratRow"></div>
     <div class="gi-sumrow" id="cgUseRow"></div>
     <div class="gl-panel">
-      <div class="gl-head"><b>📈 سعر الذهب الحالي (سعر البيع المعتمد)</b><button type="button" class="mini-btn" id="glRefreshBtn" onclick="goldLiveRefresh(true)">🔄 تحديث</button></div>
+      <div class="gl-head"><b>📈 سعر الذهب الحالي</b><button type="button" class="mini-btn" id="glRefreshBtn" onclick="goldLiveRefresh(true)">🔄 تحديث</button></div>
       <div class="gl-prices" id="glPrices"></div>
       <div class="gl-meta" id="glMeta"></div>
       <div class="gi-sumrow"><span>إجمالي الشراء: <b id="glBuy">0</b></span><span>إجمالي الآن: <b id="glNow">0</b></span></div>
@@ -3683,6 +3683,15 @@ function glInfoToggle(){
   document.getElementById('glInfo').style.display = _glInfoOpen ? '' : 'none';
   const b = document.getElementById('glInfoPlus'); b.textContent = _glInfoOpen ? '−' : '+'; b.classList.toggle('is-open', _glInfoOpen);
 }
+function glKaratBox(k){
+  const sp = document.createElement('span');
+  const kk = document.createElement('span'); kk.className = 'gl-k'; kk.textContent = 'عيار ' + toArabicDigits(k); sp.appendChild(kk);
+  [['شراء', glPpg(k), 'gl-buy'], ['بيع (التقييم)', glSellPpg(k), 'gl-sell']].forEach(([lb, v, cls])=>{
+    const r = document.createElement('span'); r.className = 'gl-row ' + cls; r.appendChild(document.createTextNode(lb));
+    const bb = document.createElement('b'); bb.textContent = fmt(v); r.appendChild(bb); sp.appendChild(r);
+  });
+  return sp;
+}
 function glInfoPanel(){
   const w = document.getElementById('glInfoWorld'); if(!w) return;
   const usd = _gl && _gl.usd > 0 ? _gl.usd : 0, rate = _gl && _gl.rate > 0 ? _gl.rate : 0, b24 = glBase24();
@@ -3697,15 +3706,7 @@ function glInfoPanel(){
   else note = 'محتاج تحميل السعر العالمي (اتصل بالنت ودوس تحديث)';
   document.getElementById('glSarNote').textContent = note;
   const box = document.getElementById('glInfoSar'); box.innerHTML = '';
-  if(b24 > 0) [24, 21, 18].forEach(k=>{
-    const sp = document.createElement('span');
-    const kk = document.createElement('span'); kk.className = 'gl-k'; kk.textContent = 'عيار ' + toArabicDigits(k); sp.appendChild(kk);
-    [['شراء', glPpg(k), 'gl-buy'], ['بيع', glSellPpg(k), 'gl-sell']].forEach(([lb, v, cls])=>{
-      const r = document.createElement('span'); r.className = 'gl-row ' + cls; r.appendChild(document.createTextNode(lb));
-      const bb = document.createElement('b'); bb.textContent = fmt(v); r.appendChild(bb); sp.appendChild(r);
-    });
-    box.appendChild(sp);
-  });
+  if(b24 > 0) [24, 21, 18].forEach(k=> box.appendChild(glKaratBox(k)));
 }
 function glRefreshUI(){
   try{ renderCap(); }catch(e){}
@@ -3718,7 +3719,7 @@ function glPanel(){
   pr.innerHTML = '';
   const b = glBase24();
   if(b > 0){
-    [24, 21, 18].forEach(k=>{ const s = document.createElement('span'); s.textContent = 'عيار ' + toArabicDigits(k); const bb = document.createElement('b'); bb.textContent = fmt(glSellPpg(k)); s.appendChild(bb); pr.appendChild(s); });
+    [24, 21, 18].forEach(k=> pr.appendChild(glKaratBox(k)));
   }
   let m = '';
   if(Number(_glAdj.manual) > 0) m = '✍️ سعر يدوي لعيار 24 (بدون تحديث تلقائي)';
