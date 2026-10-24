@@ -3350,6 +3350,7 @@ function capGroupize(box, cat){
 
 // ---- أموال: نقدي / بنوك
 let _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false};
+var _cmMonthOpen = new Set();
 function cmTblToggle(h, list, key){
   h.style.cursor = 'pointer';
   const ar = document.createElement('span'); ar.className = 'plus-badge pb-teal pb-sm in-card'; ar.style.marginInlineStart = 'auto'; h.appendChild(ar);
@@ -3549,14 +3550,21 @@ function renderBankInterest(){
     d.children[2].textContent = mo.items.length ? fmt(cgRound(got)) : '—';
     if(!mo.items.length) d.style.opacity = '.5';
     list.appendChild(d);
+    const kids = [];
     mo.items.forEach(e=>{
-      const r = document.createElement('div'); r.className = 'gi-row int-item'; r.innerHTML = '<span></span><b></b><span></span>';
+      const r = document.createElement('div'); r.className = 'gi-row int-item'; r.innerHTML = '<span></span><b></b><span></span>'; kids.push(r);
       r.children[0].textContent = e.reached ? '✅' : '⏳';
       r.children[1].textContent = toArabicDigits(e.day) + ' ' + mo.mn + ' — ' + e.x.name + (e.x.rate ? ' (' + toArabicDigits(Number(e.x.rate)) + '٪)' : '');
       r.children[2].textContent = fmt(e.amt);
       if(!e.reached) r.style.opacity = '.6';
       list.appendChild(r);
     });
+    if(mo.items.length){   // دوس على الشهر يظهر ويخفي فوايده
+      const mkey = 'bank:' + yr + ':' + mo.m, bd = document.createElement('span'); bd.className = 'plus-badge pb-teal pb-sm in-card'; d.appendChild(bd); d.style.cursor = 'pointer';
+      const upd = ()=>{ const open = _cmMonthOpen.has(mkey); kids.forEach(k=> k.style.display = open ? '' : 'none'); setBadgeState(bd, open); };
+      d.onclick = ()=>{ if(_cmMonthOpen.has(mkey)) _cmMonthOpen.delete(mkey); else _cmMonthOpen.add(mkey); upd(); };
+      upd();
+    }
   });
   const tot = document.createElement('div'); tot.className = 'gi-row'; tot.style.fontWeight = '800'; tot.innerHTML = '<span>Σ</span><b></b><span></span>';
   tot.children[1].textContent = 'وصل حتى الآن (من ' + fmt(cgRound(expectedYear)) + ' متوقعة)'; tot.children[2].textContent = fmt(cgRound(received)); list.appendChild(tot);
@@ -3632,7 +3640,7 @@ function renderCapMoney(){
   renderPensionPanel();
 }
 function openCapMoney(){
-  _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false}; _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
+  _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false}; _cmMonthOpen = new Set(); _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
   renderCapMoney();
   document.getElementById('capMoneyOverlay').classList.add('open');
 }
