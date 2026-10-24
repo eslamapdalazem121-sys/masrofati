@@ -1316,6 +1316,7 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .gl-chip2 .gc-l{font-size:calc(14px * var(--fs,1)); font-weight:800;}
 .gl-chip2 .gc-s{font-size:calc(12px * var(--fs,1)); font-weight:700; opacity:.8;}
 .gl-chip2 .gc-v{font-size:calc(19px * var(--fs,1)); font-weight:800;}
+.gl-sumline{margin-top:2px; font-size:calc(16px * var(--fs,1)); font-weight:800; line-height:1.5;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -1516,7 +1517,9 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="gi-sumrow" id="cgKaratRow"></div>
     <div class="gi-sumrow" id="cgUseRow"></div>
     <div class="gl-panel">
-      <div class="gl-head"><b>📈 سعر الذهب الحالي</b><button type="button" class="mini-btn" id="glRefreshBtn" onclick="goldLiveRefresh(true)">🔄 تحديث</button></div>
+      <div class="gl-head" id="glHead" onclick="glPanelToggle()" style="cursor:pointer;"><span style="display:flex;align-items:center;gap:8px;"><span class="plus-badge pb-teal pb-sm in-card" id="glPanelPlus"></span><b>📈 سعر الذهب الحالي</b></span><button type="button" class="mini-btn" id="glRefreshBtn" onclick="event.stopPropagation(); goldLiveRefresh(true)">🔄 تحديث</button></div>
+      <div class="gl-sumline" id="glSumLine" style="display:none;"></div>
+      <div id="glBody">
       <div class="gl-prices" id="glPrices"></div>
       <div class="gl-meta" id="glMeta"></div>
       <div class="gl-basis" id="glBasis" onclick="glBasisTap()"></div>
@@ -1537,6 +1540,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
         <div class="gl-ir"><span class="gl-il">📉 فرق سعر البيع عن الشراء ٪ <small style="font-weight:700;color:var(--muted);">(تقديري، عدّله)</small></span><input type="number" id="glSpread" placeholder="1" step="any" oninput="goldAdjChange()"></div>
         <div class="gl-ir"><span class="gl-il">🪙 الذهب حسب تسعير الصاغة (جرام)</span></div>
         <div class="gl-prices" id="glInfoSar"></div>
+      </div>
       </div>
     </div>
     <div class="gi-rows" id="cgList"></div>
@@ -3765,6 +3769,19 @@ function glBasisTap(){
   if(!_glInfoOpen) glInfoToggle();
   setTimeout(()=>{ const i = document.getElementById('glSarUsd'); if(i){ i.scrollIntoView({behavior:'smooth', block:'center'}); i.focus(); } }, 80);
 }
+var _glPanelOpen = true;
+try{ if(localStorage.getItem('masrofati_gold_panel_v1') === '0') _glPanelOpen = false; }catch(e){}
+function glPanelApply(){
+  const bd = document.getElementById('glBody'), sl = document.getElementById('glSumLine'), pb = document.getElementById('glPanelPlus');
+  if(!bd) return;
+  bd.style.display = _glPanelOpen ? '' : 'none'; sl.style.display = _glPanelOpen ? 'none' : '';
+  setBadgeState(pb, _glPanelOpen);
+}
+function glPanelToggle(){
+  _glPanelOpen = !_glPanelOpen;
+  try{ localStorage.setItem('masrofati_gold_panel_v1', _glPanelOpen ? '1' : '0'); }catch(e){}
+  glPanelApply();
+}
 function glInfoToggle(){
   _glInfoOpen = !_glInfoOpen;
   document.getElementById('glInfo').style.display = _glInfoOpen ? '' : 'none';
@@ -3832,6 +3849,9 @@ function glPanel(){
   const pe = document.getElementById('glProfit'), pb = document.getElementById('glProfitBox');
   pe.textContent = g.ok ? glSigned(g.pnl) + ' (' + (g.pnl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(g.pct * 10) / 10)) + '٪)' : '—';
   pb.classList.toggle('gl-pos', g.ok && g.pnl >= 0); pb.classList.toggle('gl-neg', g.ok && g.pnl < 0);
+  const sl = document.getElementById('glSumLine');
+  if(sl){ sl.textContent = g.ok ? 'إجمالي الآن: ' + fmt(g.now) + ' · ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) + ' (' + (g.pnl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(g.pct * 10) / 10)) + '٪)' : 'دوس عشان تشوف سعر الذهب الحالي'; sl.classList.toggle('gl-pos', g.ok && g.pnl >= 0); sl.classList.toggle('gl-neg', g.ok && g.pnl < 0); }
+  glPanelApply();
 }
 function renderCapGold(){
   const all = goldPieces(), box = document.getElementById('cgList'), t = capTotals();
