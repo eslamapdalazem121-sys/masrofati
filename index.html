@@ -3349,7 +3349,7 @@ function capGroupize(box, cat){
 }
 
 // ---- أموال: نقدي / بنوك
-let _cmTbl = {bank:false, pension:false};
+let _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false};
 function cmTblToggle(h, list, key){
   h.style.cursor = 'pointer';
   const ar = document.createElement('span'); ar.className = 'plus-badge pb-teal pb-sm in-card'; ar.style.marginInlineStart = 'auto'; h.appendChild(ar);
@@ -3498,7 +3498,9 @@ function renderBankInterest(){
     if(loose.length) sets.push({name: 'بدون مجموعة', color: '#6b7280', items: loose});
     const act = sets.filter(z=> z.items.length);
     if(act.length){
-      box.appendChild(mk('cap-grp', 'فوائد كل مجموعة — ' + MONTHS[mC]));
+      const totGot = cgRound(act.reduce((t, z)=> t + grpIntStats(z.items, nowC).got, 0));
+      const gH = mk('cap-grp', 'فوائد البنوك لشهر ' + MONTHS[mC] + ' — ' + fmt(totGot)); box.appendChild(gH);
+      const gWrap = document.createElement('div'); cmTblToggle(gH, gWrap, 'bankgrp');
       act.forEach(z=>{
         const st = grpIntStats(z.items, nowC);
         const c = document.createElement('div'); c.className = 'gl-gcard'; c.style.cssText = 'margin:6px 2px 10px; padding:10px 12px; border-radius:14px; background:' + hexA(z.color, .14) + '; border-inline-start:7px solid ' + z.color + ';';
@@ -3515,14 +3517,15 @@ function renderBankInterest(){
           const a = document.createElement('span'); a.textContent = (r.got > 0 ? '✅ ' : '⏳ ') + '🏦 ' + x.name + (r.due ? ' · يوم ' + toArabicDigits(r.due.getDate()) : '');
           const b = document.createElement('b'); b.textContent = r.exp ? fmt(r.exp) : '—'; row.appendChild(a); row.appendChild(b); c.appendChild(row);
         });
-        box.appendChild(c);
+        gWrap.appendChild(c);
       });
+      box.appendChild(gWrap);
     }
   }
   // الحسابات
   if(banks.length){
-    box.appendChild(mk('cap-grp', 'الحسابات'));
-    const acc = document.createElement('div'); acc.className = 'gi-rows'; acc.style.cssText = 'max-height:none; overflow:visible;';
+    const aH = mk('cap-grp', 'الشهادات'); box.appendChild(aH);
+    const acc = document.createElement('div'); acc.className = 'gi-rows'; acc.style.cssText = 'max-height:none; overflow:visible;'; cmTblToggle(aH, acc, 'bankacc');
     banks.forEach(x=>{
       const r = document.createElement('div'); r.className = 'gi-row'; r.innerHTML = '<span>🏦</span><b></b><span></span>';
       r.children[1].textContent = x.name + (x.rate ? ' (' + toArabicDigits(Number(x.rate)) + '٪)' : '');
@@ -3558,7 +3561,7 @@ function renderBankInterest(){
   const tot = document.createElement('div'); tot.className = 'gi-row'; tot.style.fontWeight = '800'; tot.innerHTML = '<span>Σ</span><b></b><span></span>';
   tot.children[1].textContent = 'وصل حتى الآن (من ' + fmt(cgRound(expectedYear)) + ' متوقعة)'; tot.children[2].textContent = fmt(cgRound(received)); list.appendChild(tot);
   box.appendChild(list);
-  if(!banks.length){ const e = document.createElement('div'); e.style.cssText = 'color:var(--muted);font-size:12px;text-align:center;'; e.textContent = 'مفيش حسابات بنكية لسه'; box.appendChild(e); }
+  if(!banks.length){ const e = document.createElement('div'); e.style.cssText = 'color:var(--muted);font-size:12px;text-align:center;'; e.textContent = 'مفيش شهادات بنكية لسه'; box.appendChild(e); }
 }
 function cmSubUI(c){
   _cmSub = c;
@@ -3629,7 +3632,7 @@ function renderCapMoney(){
   renderPensionPanel();
 }
 function openCapMoney(){
-  _cmTbl = {bank:false, pension:false}; _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
+  _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false}; _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
   renderCapMoney();
   document.getElementById('capMoneyOverlay').classList.add('open');
 }
