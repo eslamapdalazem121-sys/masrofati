@@ -1308,6 +1308,9 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 #glInfoSar .gl-row, #glPrices .gl-row{display:block; margin-top:3px; font-size:calc(12px * var(--fs,1)); font-weight:800;}
 #glInfoSar .gl-row b, #glPrices .gl-row b{display:block; font-size:calc(19px * var(--fs,1)); margin-top:0;}
 #glInfoSar .gl-buy, #glPrices .gl-buy{color:#0b7a55;} #glInfoSar .gl-sell, #glPrices .gl-sell{color:#d9480f; border-top:1px dashed rgba(184,134,11,.5); padding-top:4px; margin-top:6px;}
+.gl-basis{margin:2px 0 8px; padding:9px 10px; border-radius:12px; font-size:calc(14px * var(--fs,1)); font-weight:800; line-height:1.5; cursor:pointer;}
+.gl-basis.ok{background:rgba(18,178,122,.16); color:#0b7a55;}
+.gl-basis.warn{background:rgba(217,72,15,.13); color:#b13a0b;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -1511,6 +1514,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <div class="gl-head"><b>📈 سعر الذهب الحالي</b><button type="button" class="mini-btn" id="glRefreshBtn" onclick="goldLiveRefresh(true)">🔄 تحديث</button></div>
       <div class="gl-prices" id="glPrices"></div>
       <div class="gl-meta" id="glMeta"></div>
+      <div class="gl-basis" id="glBasis" onclick="glBasisTap()"></div>
       <div class="gi-sumrow"><span>إجمالي الشراء: <b id="glBuy">0</b></span><span>إجمالي الآن: <b id="glNow">0</b></span></div>
       <div class="gi-sumrow"><span id="glProfitBox">الربح / الخسارة: <b id="glProfit">0</b></span></div>
       <div class="gl-adjwrap">
@@ -3678,6 +3682,10 @@ function goldAdjChange(){
   try{ localStorage.setItem(GL_ADJ_KEY, JSON.stringify(_glAdj)); }catch(e){}
   glRefreshUI();
 }
+function glBasisTap(){
+  if(!_glInfoOpen) glInfoToggle();
+  setTimeout(()=>{ const i = document.getElementById('glSarUsd'); if(i){ i.scrollIntoView({behavior:'smooth', block:'center'}); i.focus(); } }, 80);
+}
 function glInfoToggle(){
   _glInfoOpen = !_glInfoOpen;
   document.getElementById('glInfo').style.display = _glInfoOpen ? '' : 'none';
@@ -3730,6 +3738,15 @@ function glPanel(){
     if(!navigator.onLine) m += ' · (أوفلاين)';
   } else m = navigator.onLine ? '⏳ لسه ما اتحمّلش السعر، دوس «تحديث»' : 'محتاج إنترنت لأول تحميل للسعر';
   meta.textContent = m;
+  const bs = document.getElementById('glBasis'), sp = Number(_glAdj.spread) || 0;
+  const sellTxt = ' · 📉 بسعر البيع' + (sp ? ' (−' + fmt(sp) + '٪ عن الشراء)' : '');
+  if(b <= 0){ bs.style.display = 'none'; }
+  else {
+    bs.style.display = '';
+    if(Number(_glAdj.manual) > 0){ bs.className = 'gl-basis ok'; bs.textContent = '✍️ التقييم بسعر جرام 24 اليدوي' + sellTxt; }
+    else if(Number(_glAdj.sarUsd) > 0 && _gl && _gl.usd > 0){ bs.className = 'gl-basis ok'; bs.textContent = '🏪 التقييم بتسعير الصاغة (دولار الصاغة ' + fmt(_glAdj.sarUsd) + ' ج)' + sellTxt; }
+    else { bs.className = 'gl-basis warn'; bs.textContent = '⚠️ التقييم لسه بالدولار الرسمي' + sellTxt + ' — دوس هنا واكتب «دولار الصاغة» عشان يتسعّر بتسعير الصاغة'; }
+  }
   const g = goldPnl();
   document.getElementById('glBuy').textContent = fmt(g.buy);
   document.getElementById('glNow').textContent = g.ok ? fmt(g.now) : '—';
