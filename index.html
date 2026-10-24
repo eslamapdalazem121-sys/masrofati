@@ -1508,7 +1508,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div class="gi-sumrow" id="cgKaratRow"></div>
     <div class="gi-sumrow" id="cgUseRow"></div>
     <div class="gl-panel">
-      <div class="gl-head"><b>📈 سعر الذهب الحالي (للشراء)</b><button type="button" class="mini-btn" id="glRefreshBtn" onclick="goldLiveRefresh(true)">🔄 تحديث</button></div>
+      <div class="gl-head"><b>📈 سعر الذهب الحالي (سعر البيع المعتمد)</b><button type="button" class="mini-btn" id="glRefreshBtn" onclick="goldLiveRefresh(true)">🔄 تحديث</button></div>
       <div class="gl-prices" id="glPrices"></div>
       <div class="gl-meta" id="glMeta"></div>
       <div class="gi-sumrow"><span>إجمالي الشراء: <b id="glBuy">0</b></span><span>إجمالي الآن: <b id="glNow">0</b></span></div>
@@ -3218,7 +3218,7 @@ function capTotals(){
   const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(mo.filter(x=> capSubOf(x) === 'bank'));
   const pension = giSum(mo.filter(x=> capSubOf(x) === 'pension'));   // معاش شهري: مش داخل في إجمالي رأس المال
   const grams = go.reduce((a,x)=> a + (Number(x.grams)||0), 0);
-  const goldBuy = giSum(go), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgRound((Number(x.grams) || 0) * glPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعره الحالي (لو السعر متاح) وإلا بسعر الشراء
+  const goldBuy = giSum(go), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgRound((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
   return {money: cash + bank, cash, bank, pension, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
 function renderCap(){
@@ -3628,7 +3628,7 @@ function glSellPpg(karat){ const b = glPpg(karat); return b > 0 ? cgRound(b * (1
 function glPpg(karat){ const b = glBase24(), k = Number(karat) || 0; return (b > 0 && k > 0) ? cgRound(b * k / 24) : 0; }
 function goldPnl(){
   const arr = goldPieces(); let buy = 0, now = 0;
-  arr.forEach(x=>{ buy += Number(x.amount) || 0; now += cgRound((Number(x.grams) || 0) * glPpg(x.karat)); });
+  arr.forEach(x=>{ buy += Number(x.amount) || 0; now += cgRound((Number(x.grams) || 0) * glSellPpg(x.karat)); });
   const ok = glBase24() > 0 && arr.length > 0;
   return {ok, buy: cgRound(buy), now: cgRound(now), pnl: cgRound(now - buy), pct: buy > 0 ? (now - buy) / buy * 100 : 0};
 }
@@ -3718,7 +3718,7 @@ function glPanel(){
   pr.innerHTML = '';
   const b = glBase24();
   if(b > 0){
-    [24, 21, 18].forEach(k=>{ const s = document.createElement('span'); s.textContent = 'عيار ' + toArabicDigits(k); const bb = document.createElement('b'); bb.textContent = fmt(glPpg(k)); s.appendChild(bb); pr.appendChild(s); });
+    [24, 21, 18].forEach(k=>{ const s = document.createElement('span'); s.textContent = 'عيار ' + toArabicDigits(k); const bb = document.createElement('b'); bb.textContent = fmt(glSellPpg(k)); s.appendChild(bb); pr.appendChild(s); });
   }
   let m = '';
   if(Number(_glAdj.manual) > 0) m = '✍️ سعر يدوي لعيار 24 (بدون تحديث تلقائي)';
@@ -3773,10 +3773,10 @@ function renderCapGold(){
     };
     ln('⚖️', [['عيار', toArabicDigits(x.karat || '')], ['الوزن', fmt(x.grams) + ' جم'], ['', cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار']]);
     ln('🛒 الشراء' + (x.date ? ' · ' + formatDate(x.date) : ''), [['الجرام', x.ppg ? fmt(x.ppg) : '—'], ['الإجمالي', fmt(x.amount)]]);
-    const cp = glPpg(x.karat);
+    const cp = glSellPpg(x.karat);
     if(cp > 0){
       const nowT = cgRound((Number(x.grams) || 0) * cp), pl = cgRound(nowT - (Number(x.amount) || 0)), pc = (Number(x.amount) || 0) > 0 ? pl / Number(x.amount) * 100 : 0;
-      ln('📈 الآن', [['الجرام', fmt(cp)], ['الإجمالي', fmt(nowT)]]);
+      ln('📈 الآن (بسعر البيع)', [['الجرام', fmt(cp)], ['الإجمالي', fmt(nowT)]]);
       ln(pl >= 0 ? '✅ الربح' : '🔻 الخسارة', [['', glSigned(pl)], ['', '(' + (pl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(pc * 10) / 10)) + '٪)']], pl >= 0 ? 'gl-pos' : 'gl-neg');
     }
     d.appendChild(det);
