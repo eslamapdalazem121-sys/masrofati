@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-25.7000">
+<meta name="app-version" content="2026-10-25.7100">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3599,11 +3599,16 @@ const capCatOf = x => x.cat === 'gold' ? 'gold' : 'money';
 const capSubOf = x => x.sub === 'bank' ? 'bank' : (x.sub === 'pension' ? 'pension' : 'cash');
 function capTotals(){
   const arr = capList(), mo = arr.filter(x=> capCatOf(x) === 'money'), go = arr.filter(x=> capCatOf(x) === 'gold');
-  const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(mo.filter(x=> capSubOf(x) === 'bank'));
-  const pension = giSum(mo.filter(x=> capSubOf(x) === 'pension'));   // معاش شهري: مش داخل في إجمالي رأس المال
+  const now0 = new Date(), eod0 = new Date(now0.getFullYear(), now0.getMonth(), now0.getDate(), 23, 59, 59, 999);
+  const bankItems = mo.filter(x=> capSubOf(x) === 'bank'), penItems = mo.filter(x=> capSubOf(x) === 'pension');
+  // الفوايد والمعاش اللي استحقت واتحوّلت واتصرفت من الدخل العام بتتخصم من الإجماليات
+  const bankPaid = cgRound(bankItems.reduce((a,x)=> a + bankIntSince(x, eod0), 0));
+  const penPaid = cgRound(penItems.reduce((a,x)=> a + (penActive(x, eod0.getFullYear(), eod0.getMonth()) && penDueOf(x, eod0.getFullYear(), eod0.getMonth()) <= eod0 ? (Number(x.amount) || 0) : 0), 0));
+  const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(bankItems) - bankPaid;
+  const pension = giSum(penItems) - penPaid;   // معاش شهري: مش داخل في إجمالي رأس المال
   const grams = go.reduce((a,x)=> a + (Number(x.grams)||0), 0);
   const goldBuy = cgInt(giSum(go)), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
-  return {money: cash + bank, cash, bank, pension, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
+  return {money: cash + bank, cash, bank, pension, bankPaid, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
 function renderCap(){
   const el = document.getElementById('capAmt'); if(!el) return;
@@ -3838,6 +3843,7 @@ function renderPensionPanel(){
       r.children[0].textContent = e.reached ? '✅' : '⏳';
       r.children[1].textContent = toArabicDigits(e.day) + ' ' + mo.mn + ' — ' + e.x.name;
       r.children[2].textContent = fmt(e.amt);
+      { const mk2 = document.createElement('span'); mk2.className = 'cg-det'; mk2.textContent = e.reached ? '✅ تم التحويل والصرف' : '⏳ لسه ما جاش موعده'; r.children[1].appendChild(mk2); }
       if(!e.reached) r.style.opacity = '.6';
       list.appendChild(r);
     });
@@ -3892,7 +3898,7 @@ function renderBankInterest(){
         z.items.slice().sort((a, b)=> bankDay(a) - bankDay(b)).forEach(x=>{
           const r = bankIntMonth(x, yC, mC, nowC), row = document.createElement('div');
           row.style.cssText = 'display:flex; justify-content:space-between; gap:8px; padding:6px 0 0; margin-top:6px; border-top:1px dashed ' + hexA(z.color, .6) + '; font-size:calc(14px * var(--fs,1)); font-weight:800;' + (r.got > 0 || !r.exp ? '' : 'opacity:.75;');
-          const a = document.createElement('span'); a.textContent = (r.got > 0 ? '✅ ' : '⏳ ') + '🏦 ' + x.name + (r.due ? ' · يوم ' + toArabicDigits(r.due.getDate()) : '');
+          const a = document.createElement('span'); a.textContent = (r.got > 0 ? '✅ تم التحويل والصرف · ' : '⏳ ') + '🏦 ' + x.name + (r.due ? ' · يوم ' + toArabicDigits(r.due.getDate()) : '');
           const b = document.createElement('b'); b.textContent = r.exp ? fmt(r.exp) : '—'; row.appendChild(a); row.appendChild(b); c.appendChild(row);
         });
         gWrap.appendChild(c);
@@ -3933,6 +3939,7 @@ function renderBankInterest(){
       r.children[0].textContent = e.reached ? '✅' : '⏳';
       r.children[1].textContent = toArabicDigits(e.day) + ' ' + mo.mn + ' — ' + e.x.name + (e.x.rate ? ' (' + toArabicDigits(Number(e.x.rate)) + '٪)' : '');
       r.children[2].textContent = fmt(e.amt);
+      { const mk2 = document.createElement('span'); mk2.className = 'cg-det'; mk2.textContent = e.reached ? '✅ تم التحويل والصرف' : '⏳ لسه ما جاش موعده'; r.children[1].appendChild(mk2); }
       if(!e.reached) r.style.opacity = '.6';
       list.appendChild(r);
     });
