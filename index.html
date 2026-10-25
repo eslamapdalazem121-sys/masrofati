@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-26.7640">
+<meta name="app-version" content="2026-10-26.7650">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1498,6 +1498,22 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 .gp-mb:active{transform:translateY(3px);box-shadow:none;}
 .gp-empty{text-align:center;color:var(--muted);font-weight:700;padding:18px;background:var(--card);border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.07);}
 </style>
+<style id="zkpCss">
+#zkcOverlay{background:radial-gradient(1100px 480px at 50% -8%,rgba(247,191,22,.28),transparent 60%),linear-gradient(165deg,var(--bg),var(--bg2));backdrop-filter:none;align-items:stretch;justify-content:center;z-index:96;padding-top:env(safe-area-inset-top,0px);}
+#zkcOverlay.open{animation:gpIn .3s ease both;}
+#zkcOverlay .modal-box{max-width:640px;width:100%;max-height:none;height:100%;border-radius:0;border:0;box-shadow:none;background:transparent;padding:0 14px 0;display:flex;flex-direction:column;overflow:hidden;}
+.zkp-top{flex:none;display:flex;align-items:center;gap:12px;padding:12px 0;}
+.zkp-back{border:0;cursor:pointer;font:800 15px 'Tajawal','Cairo',sans-serif;color:var(--text);background:var(--card);padding:10px 16px;border-radius:16px;box-shadow:0 1px 0 #fff inset,0 5px 0 rgba(0,0,0,.14),0 10px 16px rgba(30,41,59,.12);}
+.zkp-back:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.14);}
+#zkcOverlay .zkp-top h3{margin:0;font-size:20px;font-weight:800;color:var(--text);line-height:1.3;}
+#zkcOverlay .zkp-top h3 small{display:block;font-size:13px;color:var(--muted);font-weight:700;}
+#zkcBody{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:4px 0 18px;-webkit-overflow-scrolling:touch;}
+#zkcOverlay .modal-actions{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0;padding:12px 0 calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(0deg,var(--bg2) 70%,transparent);}
+#zkcOverlay .modal-actions button{border:0;cursor:pointer;font:800 15.5px 'Tajawal','Cairo',sans-serif;padding:14px 8px;border-radius:18px;transition:transform .08s;}
+#zkcOverlay .modal-actions .btn-cancel{color:var(--text);background:var(--card);box-shadow:0 1px 0 #fff inset,0 6px 0 rgba(0,0,0,.14),0 12px 16px rgba(30,41,59,.12);}
+#zkcOverlay .modal-actions .btn-save{color:#3b2a00;background:linear-gradient(180deg,#ffe793,#f7bf16);box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 6px 0 #a87400,0 12px 18px rgba(168,116,0,.35);}
+#zkcOverlay .modal-actions button:active{transform:translateY(5px);}
+</style>
 </head>
 <body>
 
@@ -1746,7 +1762,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 
 <div class="modal-overlay" id="zkcOverlay">
   <div class="modal-box">
-    <h3 id="zkcTitle">🕌 حساب زكاة المال</h3>
+    <div class="zkp-top"><button type="button" class="zkp-back" onclick="closeZkCalc()">› رجوع</button><h3 id="zkcTitle">🕌 زكاة المال</h3></div>
     <div id="zkcBody"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeZkCalc(); openZM();">✏️ إدخال يدوي</button>
@@ -3484,7 +3500,8 @@ try{ Object.assign(_zkc, JSON.parse(localStorage.getItem('masrofati_zkc_v1')) ||
 var _zkcResult = 0;
 function zkcBucket(x){ return x.use === 'jewel' ? 'jewel' : ((x.use && x.use !== 'save') ? 'other' : 'save'); }
 function openZkCalc(){
-  document.getElementById('zkcTitle').textContent = '🕌 حساب زكاة المال ' + toArabicDigits(currentYear);
+  document.getElementById('zkcTitle').innerHTML = '🕌 زكاة المال ' + toArabicDigits(currentYear) + '<small>حساب الزكاة وموعد الاستحقاق</small>';
+  { const zb = document.getElementById('zkcBody'); if(zb) zb.scrollTop = 0; }
   renderZkCalc();
   document.getElementById('zkcOverlay').classList.add('open');
 }
