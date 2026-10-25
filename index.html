@@ -1349,8 +1349,12 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .zkd-cr{display:flex; align-items:center; gap:8px; padding:9px 2px; border-bottom:1px dashed rgba(60,100,170,.35); font-weight:800; font-size:calc(14px * var(--fs,1));}
 .zkd-cr:last-child{border-bottom:0;} .zkd-cr .a{flex:0 0 22%;} .zkd-cr .m{flex:1; color:#4b5563; font-size:calc(12.5px * var(--fs,1)); text-align:center;} .zkd-cr .b{font-size:calc(17px * var(--fs,1)); font-weight:900; white-space:nowrap;}
 .zkd-cr.tot .a{flex:1;} .zkd-cr.z{opacity:.45;} .zkd-cr.tot{border-top:2px solid rgba(60,100,170,.5); border-bottom:0; background:rgba(60,100,170,.1); border-radius:10px; padding:10px 6px; margin-top:4px;}
-.zk-due-line{display:none; margin:14px 4px 0; padding:11px 14px; border-radius:18px; font-weight:800; font-size:calc(14px * var(--fs,1)); line-height:1.7; cursor:pointer; text-align:center; color:#fff;}
-.zk-due-line.show{display:block;}
+.zk-due-line{white-space:pre-line; display:none; margin:14px 4px 0; padding:11px 14px; border-radius:18px; font-weight:800; font-size:calc(14px * var(--fs,1)); line-height:1.7; cursor:pointer; text-align:center; color:#fff;}
+.yr-zm.open .zk-due-line.show{display:block;}
+.zk-bell{display:none; margin-top:4px; padding:3px 12px; border-radius:999px; font-size:calc(12.5px * var(--fs,1)); font-weight:800; color:#fff; text-shadow:none; background:linear-gradient(150deg,#ff8a65,#e53935); box-shadow:0 3px 0 #a82320; animation:zkBell 1.6s infinite;}
+.zk-bell.show{display:inline-block;} .zk-bell.wait{background:linear-gradient(150deg,#64b5f6,#1e6fd9); box-shadow:0 3px 0 #14509f; animation:none;}
+@keyframes zkBell{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.zkd-dateinfo{margin:-4px 2px 12px; padding:9px 12px; border-radius:14px; font-size:calc(13px * var(--fs,1)); font-weight:700; line-height:1.7; background:rgba(60,100,170,.12); color:#1c2430;}
 .zk-due-line.due, .zkd-due.due{background:linear-gradient(150deg,#ff8a65,#e53935); box-shadow:0 5px 0 #a82320, 0 12px 18px rgba(168,35,32,.3), inset 0 2px 0 rgba(255,255,255,.35);}
 .zk-due-line.wait, .zkd-due.wait{background:linear-gradient(150deg,#64b5f6,#1e6fd9); box-shadow:0 5px 0 #14509f, 0 12px 18px rgba(20,80,159,.3), inset 0 2px 0 rgba(255,255,255,.35);}
 .zk-due-line.paid, .zkd-due.paid{background:linear-gradient(150deg,#66d9a0,#12a06a); box-shadow:0 5px 0 #0b6e48, 0 12px 18px rgba(11,110,72,.3), inset 0 2px 0 rgba(255,255,255,.35);}
@@ -1361,6 +1365,10 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .zkd-due button{margin-top:8px; border:0; padding:8px 16px; border-radius:999px; font-weight:800; font-family:inherit; cursor:pointer; background:rgba(255,255,255,.9); color:#1c2430; box-shadow:0 3px 0 rgba(0,0,0,.2);}
 .zkd-date{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; margin:0 2px 12px; border-radius:18px; color:#1c2430; font-weight:800; background:linear-gradient(160deg,#fff,#eef3ff); box-shadow:0 5px 0 #c3d0ee, 0 10px 14px rgba(0,0,0,.09), inset 0 1px 0 #fff; font-size:calc(14px * var(--fs,1));}
 .zkd-date input{font-size:calc(15px * var(--fs,1)); padding:7px 8px; border-radius:10px; border:1px solid #c9d3e6; font-family:inherit;}
+.zkd-seg{display:flex; gap:8px; margin:0 2px 12px;}
+.zkd-seg button{flex:1; border:0; padding:11px 6px; border-radius:16px; font-weight:800; font-family:inherit; font-size:calc(13.5px * var(--fs,1)); color:#1c2430; cursor:pointer; background:linear-gradient(160deg,#fff,#eef3ff); box-shadow:0 4px 0 #c3d0ee, 0 8px 12px rgba(0,0,0,.08);}
+.zkd-seg button.on{background:linear-gradient(160deg,#fff3c4,#f7c948); box-shadow:0 4px 0 #b88a00, 0 8px 12px rgba(160,110,0,.2); outline:2px solid #e0a800;}
+.zkd-note.sh{background:rgba(60,100,170,.12); color:#1c2430;} .zkd-note.sh div{margin-top:3px;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -1487,7 +1495,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
   <div class="zk-wrap yr-zm" id="yrZM">
     <div class="zk-main" onclick="toggleZMCards()" role="button">
       <span class="zk-ico">🕌</span>
-      <span class="gi-col"><span id="zmTitle">زكاة المال</span><span class="yr-amt" id="zmAmt">0</span></span>
+      <span class="gi-col"><span id="zmTitle">زكاة المال</span><span class="yr-amt" id="zmAmt">0</span><span class="zk-bell" id="zmBell"></span></span>
       <span class="plus-badge in-card zk-plus" onclick="event.stopPropagation(); openZkCalc()" role="button" aria-label="حساب زكاة المال">+</span>
     </div>
     <div class="zk-due-line" id="zmDue" onclick="openZkCalc()"></div>
@@ -3290,13 +3298,34 @@ function closeZkCalc(){ document.getElementById('zkcOverlay').classList.remove('
 function zkcToggle(k){ _zkc[k] = !_zkc[k]; try{ localStorage.setItem('masrofati_zkc_v1', JSON.stringify(_zkc)); }catch(e){} renderZkCalc(); }
 
 // ===== موعد وجوب الزكاة (الحول الهجري) بالميلادي والهجري =====
+var HJ_NATIVE = (function(){   // هل المتصفح بيدعم التقويم الهجري فعلًا؟ (بعض الأجهزة بترجع للميلادي بصمت فتطلع ٣٦٥ يوم)
+  try{
+    const f = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year: 'numeric'});
+    if(!/islamic/.test(f.resolvedOptions().calendar || '')) return false;
+    const y = parseInt(f.formatToParts(new Date(2026, 9, 25)).find(q=> q.type === 'year').value, 10);
+    return y > 1400 && y < 1500;
+  }catch(e){ return false; }
+})();
+var HJ_NAMES = ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+function hjIslamicToJD(y, m, d){ return d + Math.ceil(29.5 * (m - 1)) + (y - 1) * 354 + Math.floor((3 + 11 * y) / 30) + 1948439.5 - 1; }
+function hjTabular(d){   // تقويم هجري حسابي (مدني) — فرق ±يوم عن أم القرى
+  const jd = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000 + 2440587.5) + 0.5;
+  const year = Math.floor(((30 * (jd - 1948439.5)) + 10646) / 10631);
+  const month = Math.min(12, Math.ceil((jd - (29 + hjIslamicToJD(year, 1, 1))) / 29.5) + 1);
+  const day = Math.floor(jd - hjIslamicToJD(year, month, 1)) + 1;
+  return {year, month, day};
+}
 function hjParts(d){
+  if(!HJ_NATIVE) return hjTabular(d);
   try{
     const o = {}; new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year: 'numeric', month: 'numeric', day: 'numeric'}).formatToParts(d).forEach(q=>{ if(q.type === 'year' || q.type === 'month' || q.type === 'day') o[q.type] = parseInt(q.value, 10); });
-    return (o.year && o.month && o.day) ? o : null;
-  }catch(e){ return null; }
+    return (o.year && o.month && o.day) ? o : hjTabular(d);
+  }catch(e){ return hjTabular(d); }
 }
-function hjFmt(d){ try{ return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-' + (DIGITS_MODE === 'en' ? 'latn' : 'arab'), {day: 'numeric', month: 'long', year: 'numeric'}).format(d); }catch(e){ return ''; } }
+function hjFmt(d){
+  if(HJ_NATIVE){ try{ return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-' + (DIGITS_MODE === 'en' ? 'latn' : 'arab'), {day: 'numeric', month: 'long', year: 'numeric'}).format(d); }catch(e){} }
+  const q = hjTabular(d); return yFmt(q.day) + ' ' + HJ_NAMES[q.month - 1] + ' ' + yFmt(q.year) + ' هـ';
+}
 function gFmt(d){ try{ return d.toLocaleDateString('ar-EG-u-ca-gregory-nu-' + (DIGITS_MODE === 'en' ? 'latn' : 'arab'), {day: 'numeric', month: 'long', year: 'numeric'}); }catch(e){ return d.toDateString(); } }
 function yFmt(n){ return DIGITS_MODE === 'en' ? String(n) : toArabicDigits(n); }
 function hjAnniv(start, hy){   // تاريخ ميلادي لنفس يوم وشهر البداية الهجريين في سنة هجرية hy
@@ -3307,31 +3336,52 @@ function hjAnniv(start, hy){   // تاريخ ميلادي لنفس يوم وشه
   }
   return approx;
 }
+function zkMode(){ return data.zakatMode === 'hij' ? 'hij' : 'greg'; }   // greg: موعد ثابت بالميلادي كل سنة (٢٫٥٧٧٪) | hij: الحول الهجري (٢٫٥٪)
+function zkRate(){ return zkMode() === 'greg' ? 0.02577 : 0.025; }
+function zkRateTxt(){ return zkMode() === 'greg' ? '٢٫٥٧٧٪' : '٢٫٥٪'; }
+function zkIso(d){ return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function zkDueAt(start, k){   // موعد الاستحقاق رقم k بعد التاريخ المُدخل (k=0 هو التاريخ نفسه)
+  if(k === 0) return new Date(start.getTime());
+  if(zkMode() === 'greg'){ const d = new Date(start.getTime()); d.setFullYear(start.getFullYear() + k); if(d.getMonth() !== start.getMonth()) d.setDate(0); return d; }
+  const sp = hjParts(start); return hjAnniv(start, sp.year + k) || new Date(start.getTime() + k * 354.367 * 864e5);
+}
+function zkWinEnd(next){ const d = new Date(next.getTime()); if(zkMode() === 'greg') d.setMonth(d.getMonth() - 1); else d.setDate(d.getDate() - 30); return d; }   // آخر يوم للتعجيل: قبل الموعد بشهر
 function zkDueInfo(){
   const iso = data.zakatStart; if(!iso) return {state: 'unset'};
   const start = new Date(iso + 'T12:00:00'); if(isNaN(start)) return {state: 'unset'};
-  const now = new Date(), sp = hjParts(start), np = hjParts(now); if(!sp || !np) return {state: 'unset'};
-  for(let y = np.year + 1; y >= sp.year + 1; y--){
-    const a = hjAnniv(start, y);
-    if(a && a <= now){ const next = hjAnniv(start, y + 1), paid = !!(data.zakatPaidHy && data.zakatPaidHy[y]); return {state: paid ? 'paid' : 'due', due: a, next, hy: y}; }
-  }
-  const first = hjAnniv(start, sp.year + 1);
-  return {state: 'wait', next: first, hy: sp.year + 1, days: Math.max(0, Math.ceil((first - now) / 86400000))};
+  const now = new Date();
+  if(now < start){ const prev = zkDueAt(start, -1), winEnd = zkWinEnd(start); return {state: 'wait', next: start, prev, winEnd, days: Math.max(0, Math.ceil((start - now) / 864e5)), winOpen: now >= prev && now <= winEnd}; }
+  let k = 0; while(k < 400 && zkDueAt(start, k + 1) <= now) k++;
+  const due = zkDueAt(start, k), next = zkDueAt(start, k + 1), winEnd = zkWinEnd(next), key = zkIso(due), paid = !!(data.zakatPaidD && data.zakatPaidD[key]);
+  return {state: paid ? 'paid' : 'due', due, next, winEnd, key, days: Math.max(0, Math.ceil((winEnd - now) / 864e5)), winOpen: now <= winEnd};
 }
-function zkDueText(i){   // [سطر رئيسي، سطر تفاصيل، سطر نهاية]
-  if(i.state === 'due') return ['🔔 وجب موعد زكاة ' + yFmt(i.due.getFullYear()) + 'م · ' + yFmt(i.hy) + 'هـ', 'من ' + gFmt(i.due) + ' م = ' + hjFmt(i.due), 'حتى قبل ' + gFmt(i.next) + ' م = ' + hjFmt(i.next) + ' (قبل نهاية ' + yFmt(i.next.getFullYear()) + 'م)'];
-  if(i.state === 'paid') return ['✅ تم إخراج زكاة ' + yFmt(i.due.getFullYear()) + 'م · ' + yFmt(i.hy) + 'هـ', 'الموعد القادم: ' + gFmt(i.next) + ' م = ' + hjFmt(i.next), ''];
-  if(i.state === 'wait') return ['⏳ باقي ' + yFmt(i.days) + ' يوم على موعد الزكاة', gFmt(i.next) + ' م = ' + hjFmt(i.next), ''];
-  return ['📅 حدّد موعد الزكاة (تاريخ بلوغ النصاب) عشان يظهر لك تنبيه', '', ''];
+function zkBoth(d){ return gFmt(d) + ' م = ' + hjFmt(d); }
+function zkYear(d){ return yFmt(d.getFullYear()) + 'م' + (zkMode() === 'hij' ? ' · ' + yFmt(hjParts(d).year) + 'هـ' : ''); }
+function zkDueText(i){   // مصفوفة سطور
+  if(i.state === 'due') return ['🔔 وجب موعد زكاة ' + zkYear(i.due), 'تاريخ الاستحقاق: ' + zkBoth(i.due), '⚠️ تُخرج فور الوجوب — لا يجوز التأخير ولا التقسيط بعد الموعد بدون عذر', 'وبعد إخراجها تقدر تعجّل زكاة ' + zkYear(i.next) + ' (استحقاقها ' + zkBoth(i.next) + ')'];
+  if(i.state === 'paid') return ['✅ تم إخراج زكاة ' + zkYear(i.due),
+    i.winOpen ? '🟢 تعجيل زكاة ' + zkYear(i.next) + ' متاح من ' + gFmt(i.due) + ' م حتى قبل ' + zkBoth(i.winEnd) + ' — باقي ' + yFmt(i.days) + ' يوم' : '🔔 فاضل أقل من شهر على موعد زكاة ' + zkYear(i.next) + ' — راجع مالك وأخرجها',
+    'موعد استحقاقها: ' + zkBoth(i.next)];
+  if(i.state === 'wait') return ['⏳ باقي ' + yFmt(i.days) + ' يوم على موعد زكاة ' + zkYear(i.next), 'تاريخ الاستحقاق: ' + zkBoth(i.next), i.winOpen ? '🟢 تعجيل الزكاة متاح الآن حتى قبل ' + zkBoth(i.winEnd) : ''];
+  return ['📅 حدّد تاريخ استحقاق الزكاة عشان يظهر لك تنبيه'];
 }
 function renderZmDue(){
   const e = document.getElementById('zmDue'); if(!e) return;
   const i = zkDueInfo(), t = zkDueText(i);
   e.className = 'zk-due-line show ' + i.state;
-  e.textContent = t[0] + (i.state === 'due' ? ' — حتى قبل نهاية ' + yFmt(i.next.getFullYear()) + 'م' : '') + (i.state === 'wait' ? ' — ' + t[1] : '');
+  e.textContent = t.filter(Boolean).join('\n');
+  const bl = document.getElementById('zmBell');   // تنبيه ظاهر دايمًا جوه البطاقة (حتى وهي مقفولة)
+  if(bl){
+    let txt = '', cls = 'zk-bell';
+    if(i.state === 'due'){ txt = '🔔 وجب موعد الزكاة'; cls += ' show'; }
+    else if(i.state === 'wait' && i.days <= 30){ txt = '⏳ باقي ' + yFmt(i.days) + ' يوم على الزكاة'; cls += ' show wait'; }
+    else if(i.state === 'paid' && !i.winOpen){ txt = '⏳ قرب موعد الزكاة'; cls += ' show wait'; }
+    bl.className = cls; bl.textContent = txt;
+  }
 }
 function zkSetStart(v){ data.zakatStart = v || ''; save(); renderZM(); renderZkCalc(); }
-function zkMarkPaid(on){ if(!data.zakatPaidHy) data.zakatPaidHy = {}; const i = zkDueInfo(); if(i.hy){ if(on) data.zakatPaidHy[i.hy] = true; else delete data.zakatPaidHy[i.hy]; } save(); renderZM(); renderZkCalc(); }
+function zkSetMode(m){ data.zakatMode = m; save(); renderZM(); renderZkCalc(); }
+function zkMarkPaid(on){ if(!data.zakatPaidD) data.zakatPaidD = {}; const i = zkDueInfo(); if(i.key){ if(on) data.zakatPaidD[i.key] = true; else delete data.zakatPaidD[i.key]; } save(); renderZM(); renderZkCalc(); }
 function zkcCompute(){
   const t = capTotals(), go = goldPieces(), live = glBase24() > 0, p24 = glSellPpg(24);
   const bk = {jewel: {g: 0, e: 0, v: 0, n: 0}, save: {g: 0, e: 0, v: 0, n: 0}, other: {g: 0, e: 0, v: 0, n: 0}}, kr = {};
@@ -3347,7 +3397,7 @@ function zkcCompute(){
     goldAll += b.v; eqAll += b.e; if(_zkc[k]){ goldIn += b.v; eqIn += b.e; }
   });
   const base = cgRound(t.money + goldIn);
-  return {t, live, p24, bk, kr, goldAll, goldIn, eqAll, eqIn, base, zk: cgRound(base * 0.025)};
+  return {t, live, p24, bk, kr, goldAll, goldIn, eqAll, eqIn, base, zk: cgRound(base * zkRate())};
 }
 function zkcAutoToggle(){
   if(zmAuto()){ const v = zkcCompute().zk; zmStored(); data.zakatMal[currentYear] = v; data.zakatMalAuto = false; }   // تثبيت القيمة الحالية يدويًا
@@ -3364,15 +3414,22 @@ function renderZkCalc(){
   };
   _zkcResult = c.zk;
   // موعد وجوب الزكاة
-  { const di = zkDueInfo(), dt = zkDueText(di), b = el('zkd-due ' + di.state);
-    el('h', dt[0], b); if(dt[1]) el('d', dt[1], b); if(dt[2]) el('d', dt[2], b);
-    if(di.state === 'due'){ const bt = document.createElement('button'); bt.textContent = '✅ تم إخراج زكاة هذا الحول'; bt.onclick = ()=> zkMarkPaid(true); b.appendChild(bt); }
+  { const di = zkDueInfo(), dt = zkDueText(di).filter(Boolean), b = el('zkd-due ' + di.state);
+    dt.forEach((ln, ix)=> el(ix === 0 ? 'h' : 'd', ln, b));
+    if(di.state === 'due'){ const bt = document.createElement('button'); bt.textContent = '✅ تم إخراج زكاة هذا الموعد'; bt.onclick = ()=> zkMarkPaid(true); b.appendChild(bt); }
     if(di.state === 'paid'){ const bt = document.createElement('button'); bt.textContent = '↩️ تراجع'; bt.onclick = ()=> zkMarkPaid(false); b.appendChild(bt); }
-    const dr = el('zkd-date'); const lb = document.createElement('span'); lb.textContent = '📅 موعد الزكاة (تاريخ بلوغ النصاب)'; dr.appendChild(lb);
-    const inp = document.createElement('input'); inp.type = 'date'; inp.value = data.zakatStart || ''; inp.onchange = ()=> zkSetStart(inp.value); dr.appendChild(inp); }
+    const dr = el('zkd-date'); const lb = document.createElement('span'); lb.textContent = '📅 تاريخ استحقاق الزكاة (يتكرر كل سنة)'; dr.appendChild(lb);
+    const inp = document.createElement('input'); inp.type = 'date'; inp.value = data.zakatStart || ''; inp.onchange = ()=> zkSetStart(inp.value); dr.appendChild(inp);
+    if(data.zakatStart){
+      const st = new Date(data.zakatStart + 'T12:00:00');
+      if(!isNaN(st)){ const nx = zkDueAt(st, 1), dd = Math.round((nx - st) / 86400000);
+        el('zkd-dateinfo', '📌 فهمت التاريخ: ' + zkBoth(st) + ' — الاستحقاق اللي بعده: ' + zkBoth(nx) + ' (بعد ' + yFmt(dd) + ' يوم)'); } }
+    const sg = el('zkd-seg');
+    [['greg', '📅 ميلادي — ٢٫٥٧٧٪'], ['hij', '🌙 هجري — ٢٫٥٪']].forEach(([m, lbl])=>{ const bt = document.createElement('button'); bt.type = 'button'; bt.className = zkMode() === m ? 'on' : ''; bt.textContent = lbl; bt.onclick = ()=> zkSetMode(m); sg.appendChild(bt); });
+  }
   // البطل: قيمة الزكاة
   const hero = el('zkd-hero');
-  el('t', '🕌 زكاة المال ٢٫٥٪', hero); el('big', fmt(c.zk), hero); el('s', fmt(c.base) + ' × ٢٫٥٪', hero);
+  el('t', '🕌 زكاة المال ' + zkRateTxt(), hero); el('big', fmt(c.zk), hero); el('s', fmt(c.base) + ' × ' + zkRateTxt(), hero);
   const auto = zmAuto(), canAuto = currentYear === new Date().getFullYear();
   if(canAuto){ const pill = el('zkd-pill' + (auto ? ' on' : ''), auto ? '🔄 تحديث تلقائي مع رأس المال: شغال' : '⏸ القيمة مثبّتة يدويًا — دوس للتلقائي', hero); pill.onclick = zkcAutoToggle; }
   // الأموال
@@ -3403,7 +3460,13 @@ function renderZkCalc(){
   if(c.live){
     const nis = cgRound(85 * c.p24);
     el('zkd-note', (c.base >= nis ? '✅ بلغ النصاب' : '⚠️ أقل من النصاب') + ' — نصاب الذهب ٨٥ جم عيار ٢٤ ≈ ' + fmt(nis) + ' ج. والزكاة تجب بعد مرور سنة هجرية كاملة على المال.');
-  } else el('zkd-note', 'الزكاة تجب لو بلغ المال النصاب (٨٥ جم ذهب عيار ٢٤) ومرّت عليه سنة هجرية كاملة.');
+  } else el('zkd-note', 'الزكاة تجب لو بلغ المال النصاب (٨٥ جم ذهب عيار ٢٤) ومرّت عليه سنة كاملة.');
+  const sh = el('zkd-note sh');
+  ['⚖️ الحكم الشرعي (حسب فتاوى دار الإفتاء المصرية):',
+   '• الأصل الحول الهجري بنسبة ٢٫٥٪، ويجوز الحول الميلادي بنسبة ٢٫٥٧٧٪ تعويضًا عن فرق ١١ يوم (فتوى ٨١٢٤).',
+   '• تعجيل الزكاة قبل موعدها جائز (حتى على أقساط) إذا بلغ المال النصاب، وتراجع المبلغ عند الموعد وتزيد الفرق لو زاد مالك.',
+   '• لا يجوز تأخير الزكاة بعد حلول موعدها ولا تقسيطها بعده إلا لعذر قاهر، وتُخرج كاملة فورًا.',
+   '• هذا حساب تقريبي للمساعدة، ولو عندك حالة خاصة اسأل جهة فتوى.'].forEach(t=>{ const d = document.createElement('div'); d.textContent = t; sh.appendChild(d); });
 }
 function openMsSummary(){
   const box = document.getElementById('msList'); box.innerHTML = '';
