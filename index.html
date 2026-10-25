@@ -1345,6 +1345,10 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .zkd-chips{display:flex; flex-wrap:wrap; gap:6px; margin:10px 2px 0;}
 .zkd-chips span{padding:6px 11px; border-radius:999px; font-size:calc(13px * var(--fs,1)); font-weight:800; color:#1c2430; background:linear-gradient(160deg,#fff,#fdeeb5); box-shadow:0 3px 0 #e7cd78;}
 .zkd-note{margin:12px 2px 0; padding:10px 12px; border-radius:14px; font-size:calc(13px * var(--fs,1)); font-weight:700; line-height:1.6; color:#5b4300; background:rgba(255,179,0,.18);}
+.zkd-conv{margin:0 2px; border-radius:18px; padding:6px 10px; background:linear-gradient(160deg,#ffffff,#eaf3ff); box-shadow:0 5px 0 #bcd2f0, 0 11px 16px rgba(0,0,0,.10), inset 0 1px 0 #fff; color:#1c2430;}
+.zkd-cr{display:flex; align-items:center; gap:8px; padding:9px 2px; border-bottom:1px dashed rgba(60,100,170,.35); font-weight:800; font-size:calc(14px * var(--fs,1));}
+.zkd-cr:last-child{border-bottom:0;} .zkd-cr .a{flex:0 0 22%;} .zkd-cr .m{flex:1; color:#4b5563; font-size:calc(12.5px * var(--fs,1)); text-align:center;} .zkd-cr .b{font-size:calc(17px * var(--fs,1)); font-weight:900; white-space:nowrap;}
+.zkd-cr.tot .a{flex:1;} .zkd-cr.z{opacity:.45;} .zkd-cr.tot{border-top:2px solid rgba(60,100,170,.5); border-bottom:0; background:rgba(60,100,170,.1); border-radius:10px; padding:10px 6px; margin-top:4px;}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -3271,14 +3275,21 @@ function openZkCalc(){
 function closeZkCalc(){ document.getElementById('zkcOverlay').classList.remove('open'); }
 function zkcToggle(k){ _zkc[k] = !_zkc[k]; try{ localStorage.setItem('masrofati_zkc_v1', JSON.stringify(_zkc)); }catch(e){} renderZkCalc(); }
 function zkcCompute(){
-  const t = capTotals(), go = goldPieces(), live = glBase24() > 0;
-  const val = x=> live ? cgRound((Number(x.grams) || 0) * glSellPpg(x.karat)) : (Number(x.amount) || 0);
-  const bk = {jewel: {g: 0, v: 0, n: 0}, save: {g: 0, v: 0, n: 0}, other: {g: 0, v: 0, n: 0}}, kr = {24: 0, 21: 0, 18: 0, other: 0};
-  go.forEach(x=>{ const k = zkcBucket(x), g = Number(x.grams) || 0, kk = Number(x.karat); bk[k].g += g; bk[k].v += val(x); bk[k].n++; kr[(kk === 24 || kk === 21 || kk === 18) ? kk : 'other'] += g; });
-  let goldIn = 0, goldAll = 0;
-  Object.keys(bk).forEach(k=>{ bk[k].v = cgRound(bk[k].v); goldAll += bk[k].v; if(_zkc[k]) goldIn += bk[k].v; });
+  const t = capTotals(), go = goldPieces(), live = glBase24() > 0, p24 = glSellPpg(24);
+  const bk = {jewel: {g: 0, e: 0, v: 0, n: 0}, save: {g: 0, e: 0, v: 0, n: 0}, other: {g: 0, e: 0, v: 0, n: 0}}, kr = {};
+  go.forEach(x=>{
+    const k = zkcBucket(x), g = Number(x.grams) || 0, kk = Number(x.karat) || 0, e = g * kk / 24;   // تحويل الجرامات لعيار ٢٤
+    bk[k].g += g; bk[k].e += e; bk[k].n++; bk[k].a = (bk[k].a || 0) + (Number(x.amount) || 0);
+    kr[kk] = (kr[kk] || 0) + g;
+  });
+  let goldIn = 0, goldAll = 0, eqAll = 0, eqIn = 0;
+  Object.keys(bk).forEach(k=>{
+    const b = bk[k]; b.e = Math.round(b.e * 1000) / 1000;
+    b.v = live ? cgRound(b.e * p24) : cgRound(b.a || 0);   // القيمة = جرامات عيار ٢٤ المكافئة × سعر بيع جرام ٢٤
+    goldAll += b.v; eqAll += b.e; if(_zkc[k]){ goldIn += b.v; eqIn += b.e; }
+  });
   const base = cgRound(t.money + goldIn);
-  return {t, live, bk, kr, goldAll, goldIn, base, zk: cgRound(base * 0.025)};
+  return {t, live, p24, bk, kr, goldAll, goldIn, eqAll, eqIn, base, zk: cgRound(base * 0.025)};
 }
 function zkcAutoToggle(){
   if(zmAuto()){ const v = zkcCompute().zk; zmStored(); data.zakatMal[currentYear] = v; data.zakatMalAuto = false; }   // تثبيت القيمة الحالية يدويًا
@@ -3287,11 +3298,11 @@ function zkcAutoToggle(){
 }
 function renderZkCalc(){
   const box = document.getElementById('zkcBody'); box.innerHTML = '';
-  const c = zkcCompute(), t = c.t;
+  const c = zkcCompute(), t = c.t, f2 = v => fmt(Math.round(v * 100) / 100);
   const el = (cls, txt, parent)=>{ const e = document.createElement('div'); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; (parent || box).appendChild(e); return e; };
-  const tile = (parent, cls, ic, label, big, sub, fn)=>{
+  const tile = (parent, cls, ic, label, big, subs, fn)=>{
     const d = el('zkd-tile ' + cls, undefined, parent); if(fn) d.onclick = fn;
-    el('ic', ic, d); el('l', label, d); el(cls.indexOf('g3') > -1 ? 'gr' : 'n', big, d); if(sub) el('v', sub, d); return d;
+    el('ic', ic, d); el('l', label, d); el(cls.indexOf('g3') > -1 ? 'gr' : 'n', big, d); (subs || []).forEach(sx=> el('v', sx, d)); return d;
   };
   _zkcResult = c.zk;
   // البطل: قيمة الزكاة
@@ -3303,20 +3314,29 @@ function renderZkCalc(){
   el('zkd-sec', '💰 أموالي (من رأس المال)');
   const g1 = el('zkd-grid');
   tile(g1, 'x', '💵', 'نقدي', fmt(t.cash)); tile(g1, 'x', '🏦', 'بنوك وشهادات', fmt(t.bank));
-  const tot = tile(g1, 'violet zkd-wide', '💼', 'إجمالي أموالي', fmt(t.money));
-  // الذهب
-  el('zkd-sec', '🪙 الذهب من رأس المال — ' + (c.live ? 'بسعر البيع الحالي' : 'بسعر الشراء') + ' (دوس على النوع لتضمينه أو استبعاده)');
+  tile(g1, 'violet zkd-wide', '💼', 'إجمالي أموالي', fmt(t.money));
+  // تحويل الذهب لعيار ٢٤
+  el('zkd-sec', '⚖️ تحويل الذهب إلى عيار ٢٤ (الجرام × العيار ÷ ٢٤)');
+  const cv = el('zkd-conv');
+  const karats = Object.keys(c.kr).map(Number).filter(k=> c.kr[k] > 0).sort((a, b)=> b - a);
+  [24, 21, 18].forEach(k=>{ if(karats.indexOf(k) < 0) karats.push(k); });
+  karats.sort((a, b)=> b - a).forEach(k=>{
+    const g = c.kr[k] || 0, eq = g * k / 24, r = el('zkd-cr' + (g ? '' : ' z'), undefined, cv);
+    el('a', 'عيار ' + toArabicDigits(k || '؟'), r); el('m', k === 24 ? f2(g) + ' جم' : f2(g) + ' جم × ' + toArabicDigits(k) + '/٢٤', r); el('b', f2(eq) + ' جم', r);
+  });
+  const tr = el('zkd-cr tot', undefined, cv); el('a', 'إجمالي عيار ٢٤ المكافئ', tr); el('m', '', tr); el('b', f2(c.eqAll) + ' جم', tr);
+  // الذهب مصنف
+  el('zkd-sec', '🪙 الذهب مصنفًا — ' + (c.live ? 'بسعر بيع جرام ٢٤: ' + fmt(c.p24) : 'بسعر الشراء (السعر الحالي غير متاح)') + ' (دوس على النوع لتضمينه أو استبعاده)');
   const g2 = el('zkd-grid g3');
   [['jewel', '💍', 'زينة'], ['save', '💰', 'ادخار'], ['other', '📦', 'خلافه']].forEach(([k, ic, lb])=>{
-    const b = c.bk[k], d = tile(g2, 'gold g3 tap ' + (_zkc[k] ? 'on' : 'off'), ic, lb, fmt(Math.round(b.g * 100) / 100) + ' جم', fmt(b.v) + (_zkc[k] ? ' ✓' : ' ✗'), ()=> zkcToggle(k));
+    const b = c.bk[k];
+    tile(g2, 'gold g3 tap ' + (_zkc[k] ? 'on' : 'off'), ic, lb, f2(b.e) + ' جم', ['عيار ٢٤ (فعلي ' + f2(b.g) + ')', fmt(b.v) + (_zkc[k] ? ' ✓' : ' ✗')], ()=> zkcToggle(k));
   });
-  const kc = el('zkd-chips');
-  [[24, 'عيار ٢٤'], [21, 'عيار ٢١'], [18, 'عيار ١٨'], ['other', 'أعيرة أخرى']].forEach(([k, lb])=>{ if(c.kr[k] > 0 || k !== 'other'){ const sp = document.createElement('span'); sp.textContent = lb + ': ' + fmt(Math.round(c.kr[k] * 100) / 100) + ' جم'; kc.appendChild(sp); } });
   const g3 = el('zkd-grid'); g3.style.marginTop = '10px';
-  tile(g3, 'gold zkd-wide', '🪙', 'إجمالي الذهب الداخل في الحساب', fmt(c.goldIn), 'من إجمالي ذهب ' + fmt(c.goldAll));
+  tile(g3, 'gold zkd-wide', '🪙', 'الذهب الداخل في حساب الزكاة', fmt(c.goldIn), [f2(c.eqIn) + ' جم عيار ٢٤' + (c.live ? ' × ' + fmt(c.p24) : ''), 'من إجمالي ذهب ' + fmt(c.goldAll)]);
   // النصاب
-  if(glBase24() > 0){
-    const nis = cgRound(85 * glSellPpg(24));
+  if(c.live){
+    const nis = cgRound(85 * c.p24);
     el('zkd-note', (c.base >= nis ? '✅ بلغ النصاب' : '⚠️ أقل من النصاب') + ' — نصاب الذهب ٨٥ جم عيار ٢٤ ≈ ' + fmt(nis) + ' ج. والزكاة تجب بعد مرور سنة هجرية كاملة على المال.');
   } else el('zkd-note', 'الزكاة تجب لو بلغ المال النصاب (٨٥ جم ذهب عيار ٢٤) ومرّت عليه سنة هجرية كاملة.');
 }
