@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-26.7500">
+<meta name="app-version" content="2026-10-26.7600">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4303,14 +4303,22 @@ function glPickBank(list){
 }
 // سعر عيار 24 (بيع/شراء التاجر) وأونصة الذهب من iSagha
 async function glScrapeSagha(){
-  const tx = glHtmlText(await glFetchText('https://market.isagha.com/prices'));
   const num = function(x){ return Number(String(x).replace(/,/g, '')); };
+  // المصدر الأول: eDahab (نفس أسعار تطبيق eDahab): عيار 24 بيع/شراء + الأونصة
+  try{
+    const tx = glHtmlText(await glFetchText('https://edahabapp.com/'));
+    const m = tx.match(/الذهب عيار\s*24\s*:?\s*بيع\s*:?\s*([\d,.]+)\s*جنيه\s*شراء\s*:?\s*([\d,.]+)/);
+    const o = tx.match(/سعر الأوقية[^\d]{0,25}([\d,.]+)/);
+    if(m){ const sell = num(m[1]), buy = num(m[2]), oz = o ? num(o[1]) : 0; if(sell > 1000 && oz > 500) return {sell: sell, buy: (buy > 0 && buy < sell) ? buy : 0, oz: oz, src: 'eDahab'}; }
+  }catch(e){}
+  // الاحتياطي: iSagha
+  const tx = glHtmlText(await glFetchText('https://market.isagha.com/prices'));
   let sell = 0, buy = 0, m = tx.match(/عيار\s*24\s*([\d,.]+)\s*ج\.م\s*([\d,.]+)\s*ج\.م\s*([\d,.]+)\s*ج\.م/);
   if(m){ sell = num(m[1]); buy = num(m[3]); }
   else { m = tx.match(/عيار\s*24[^\d]{0,60}?([\d,]+(?:\.\d+)?)\s*ج\.م/); if(m) sell = num(m[1]); }
   const o = tx.match(/أوقية الذهب[^\d]{0,12}([\d,]+(?:\.\d+)?)\s*\$/);
   const oz = o ? num(o[1]) : 0;
-  return (sell > 1000 && oz > 500) ? {sell: sell, buy: (buy > 0 && buy < sell) ? buy : 0, oz: oz} : null;
+  return (sell > 1000 && oz > 500) ? {sell: sell, buy: (buy > 0 && buy < sell) ? buy : 0, oz: oz, src: 'iSagha'} : null;
 }
 async function glGetXauUsd(){
   try{ const j = await glFetchJson('https://api.gold-api.com/price/XAU'); const v = Number(j && j.price); if(v > 0) return v; }catch(e){}
@@ -4340,7 +4348,7 @@ async function glDiagnose(){
     let r = null; for(const u of sr.urls){ try{ r = glParseUsd(glHtmlText(await glFetchText(u)), sr.labels); if(r) break; }catch(e){} }
     L.push(r ? '✅ ' + sr.n + ': ' + f2(r.buy) + ' / ' + f2(r.sell) : '❌ ' + sr.n + ': مش متاح');
   }
-  try{ const sg = await glScrapeSagha(); L.push(sg ? '✅ الصاغة: عيار 24 بيع ' + fmt(sg.sell) + (sg.buy ? ' / شراء ' + fmt(sg.buy) : '') + ' · أونصة $' + f2(sg.oz) + ' → دولار الصاغة ' + f2(sg.sell / (sg.oz / GL_OZ)) : '⚠️ صفحة الصاغة وصلت لكن ما قدرتش أقرا السعر'); }catch(e){ L.push('❌ صفحة الصاغة ما وصلتش'); }
+  try{ const sg = await glScrapeSagha(); L.push(sg ? '✅ الصاغة: عيار 24 بيع ' + fmt(sg.sell) + (sg.buy ? ' / شراء ' + fmt(sg.buy) : '') + ' (' + sg.src + ') · أونصة $' + f2(sg.oz) + ' → دولار الصاغة ' + f2(sg.sell / (sg.oz / GL_OZ)) : '⚠️ صفحة الصاغة وصلت لكن ما قدرتش أقرا السعر'); }catch(e){ L.push('❌ صفحة الصاغة ما وصلتش'); }
   el.textContent = L.join('\n');
 }
 function glKey(){ return [Math.round(glBase24() * 100), Math.round(glRate() * 100), glSellPpg(21)].join('|'); }
@@ -4373,7 +4381,7 @@ async function goldLiveRefresh(manual){
     }
     if(sg){
       nl.localP24 = sg.sell; nl.localBuy24 = sg.buy; nl.sarTs = now;
-      const sd = sg.sell / (sg.oz / GL_OZ), ref = nl.rate > 0 ? nl.rate : 0;
+      nl.sarSrc = sg.src; const sd = sg.sell / (((xau > 0 ? xau : sg.oz)) / GL_OZ), ref = nl.rate > 0 ? nl.rate : 0;
       if(sd >= 20 && sd <= 200 && (!ref || (sd >= ref * 0.97 && sd <= ref * 1.10))){ nl.autoSar = sd; sarOk = true; }
       nl.spreadAuto = (sg.buy > 0) ? Math.min(5, Math.max(0, (1 - sg.buy / sg.sell) * 100)) : undefined;
     }
@@ -4450,7 +4458,7 @@ function glInfoPanel(){
   let note = '';
   if(Number(_glAdj.manual) > 0) note = usd ? 'محسوب من سعر الجرام اليدوي: ' + f2(Number(_glAdj.manual) / (usd / GL_OZ)) + ' ج للدولار' : '';
   else if(se.mode === 'manual' && usd) note = 'يدوي: ' + f2(usd / GL_OZ) + ' $ × ' + f2(se.v) + ' = ' + fmt(cgInt(usd / GL_OZ * se.v)) + ' ج' + (_gl.autoSar > 0 ? ' · التلقائي دلوقتي: ' + f2(_gl.autoSar) + ' — امسح الخانة للرجوع للتلقائي' : '');
-  else if(se.mode === 'auto') note = 'تلقائي: عيار 24 في الصاغة ' + fmt(_gl.localP24) + ' ج ÷ جرام الأونصة بالدولار = ' + f2(se.v) + ' ج للدولار' + (_gl.sarTs ? ' · ' + glTm(_gl.sarTs) : '');
+  else if(se.mode === 'auto') note = 'تلقائي: عيار 24 في الصاغة (' + (_gl.sarSrc || '') + ') ' + fmt(_gl.localP24) + ' ج ÷ جرام الأونصة بالدولار = ' + f2(se.v) + ' ج للدولار' + (_gl.sarTs ? ' · ' + glTm(_gl.sarTs) : '');
   else if(usd) note = 'دولار الصاغة التلقائي مش متاح دلوقتي (التسعير بدولار البنوك' + ((Number(_glAdj.adj) || 0) ? ' ' + (_glAdj.adj > 0 ? '+' : '') + _glAdj.adj + '٪' : '') + ') — اكتبه يدوي أو دوس تحديث';
   else note = 'محتاج تحميل السعر العالمي (اتصل بالنت ودوس تحديث)';
   const sn = document.getElementById('glSarNote'); if(sn){ sn.style.whiteSpace = 'pre-line'; sn.textContent = note; }
