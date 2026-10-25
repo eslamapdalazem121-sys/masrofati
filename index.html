@@ -1369,6 +1369,42 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .zkd-seg button{flex:1; border:0; padding:11px 6px; border-radius:16px; font-weight:800; font-family:inherit; font-size:calc(13.5px * var(--fs,1)); color:#1c2430; cursor:pointer; background:linear-gradient(160deg,#fff,#eef3ff); box-shadow:0 4px 0 #c3d0ee, 0 8px 12px rgba(0,0,0,.08);}
 .zkd-seg button.on{background:linear-gradient(160deg,#fff3c4,#f7c948); box-shadow:0 4px 0 #b88a00, 0 8px 12px rgba(160,110,0,.2); outline:2px solid #e0a800;}
 .zkd-note.sh{background:rgba(60,100,170,.12); color:#1c2430;} .zkd-note.sh div{margin-top:3px;}
+.zk-wrap.yr-cap .zk-sq.cap2{aspect-ratio:auto; min-height:215px; padding:16px 10px 14px; gap:8px; border-radius:26px; justify-content:flex-start; position:relative; overflow:hidden; text-shadow:none;}
+.zk-wrap.yr-cap .zk-sq.cap2::before{content:""; position:absolute; left:0; right:0; top:0; height:46%; background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0)); border-radius:26px 26px 50% 50% / 26px 26px 22px 22px; pointer-events:none;}
+.zk-wrap.yr-cap .zk-sq.cap2.money{color:#033a2a; background:linear-gradient(160deg,#c8f8e3 0%,#38d9a0 52%,#12a874 100%); box-shadow:0 9px 0 #0a7a55, 0 18px 24px rgba(10,122,85,.35), inset 0 2px 0 rgba(255,255,255,.75);}
+.zk-wrap.yr-cap .zk-sq.cap2.gold{color:#4a3000; background:linear-gradient(160deg,#fff3bd 0%,#f8c639 52%,#df9c00 100%); box-shadow:0 9px 0 #9a6a00, 0 18px 24px rgba(154,106,0,.38), inset 0 2px 0 rgba(255,255,255,.75);}
+.zk-wrap.yr-cap .zk-sq.cap2:active{transform:translateY(6px); box-shadow:0 3px 0 rgba(0,0,0,.28), 0 6px 10px rgba(0,0,0,.2), inset 0 2px 0 rgba(255,255,255,.6);}
+.cap2 > *{position:relative;}
+.cap2 .c2-head{display:flex; align-items:center; justify-content:center; gap:8px; width:100%;}
+.cap2 .c2-ic{width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-size:calc(22px * var(--fs,1)); background:rgba(255,255,255,.65); box-shadow:0 3px 0 rgba(0,0,0,.16), inset 0 1px 0 #fff;}
+.cap2 .c2-l{font-size:calc(18px * var(--fs,1)); font-weight:900;}
+.cap2 .c2-v{font-size:calc(30px * var(--fs,1)); font-weight:900; line-height:1.15; direction:ltr; text-shadow:0 2px 0 rgba(255,255,255,.5);}
+.cap2 .c2-pill{padding:3px 11px; border-radius:999px; background:rgba(255,255,255,.6); font-size:calc(12.5px * var(--fs,1)); font-weight:800; box-shadow:0 2px 0 rgba(0,0,0,.13);}
+.cap2 .c2-rows{display:flex; flex-direction:column; gap:5px; width:100%;}
+.cap2 .c2-rows .r{display:flex; justify-content:space-between; align-items:center; gap:6px; padding:6px 10px; border-radius:13px; background:rgba(255,255,255,.42); font-size:calc(13px * var(--fs,1)); font-weight:800; box-shadow:inset 0 1px 0 rgba(255,255,255,.6);}
+.cap2 .c2-rows .r b{font-size:calc(15.5px * var(--fs,1)); font-weight:900; direction:ltr;}
+.cap2 .c2-karat{display:flex; gap:5px; width:100%;}
+.cap2 .c2-karat > span{flex:1; display:flex; flex-direction:column; align-items:center; padding:5px 2px; border-radius:11px; background:rgba(255,255,255,.42); line-height:1.3; box-shadow:inset 0 1px 0 rgba(255,255,255,.6);}
+.cap2 .c2-karat small{font-size:calc(11px * var(--fs,1)); font-weight:800;} .cap2 .c2-karat b{font-size:calc(13.5px * var(--fs,1)); font-weight:900;}
+.cap2 .c2-pnl{padding:4px 12px; border-radius:999px; font-size:calc(14px * var(--fs,1)); font-weight:900; color:#fff; box-shadow:0 3px 0 rgba(0,0,0,.2);}
+.cap2 .c2-pnl.up{background:linear-gradient(150deg,#2bd08a,#0b8f5f);} .cap2 .c2-pnl.down{background:linear-gradient(150deg,#ff7a6b,#d93a3a);}
+.cap2 .c2-pill:empty, .cap2 .c2-rows:empty, .cap2 .c2-karat:empty, .cap2 .c2-pnl:empty{display:none;}
+#capMoneyOverlay .gi-sumrow, #capGoldOverlay .gi-sumrow{gap:10px; margin:6px 2px 16px;}
+#capMoneyOverlay .gi-sumrow > span, #capGoldOverlay .gi-sumrow > span{--tb:#e4f6ee; --te:#b6dccd; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:13px 6px 11px; border-radius:20px; line-height:1.3; color:#1c2430; border:0; background:linear-gradient(160deg,#ffffff,var(--tb)) !important; box-shadow:0 5px 0 var(--te), 0 11px 16px rgba(0,0,0,.10), inset 0 1px 0 #fff; transition:transform .12s, box-shadow .12s;}
+#capMoneyOverlay .gi-sumrow > span small, #capGoldOverlay .gi-sumrow > span small{font-size:calc(13px * var(--fs,1)); font-weight:800; color:#4b5563;}
+#capMoneyOverlay .gi-sumrow > span b, #capGoldOverlay .gi-sumrow > span b{font-size:calc(22px * var(--fs,1)); font-weight:900; display:block;}
+#capMoneyOverlay .gi-sumrow > span.wide, #capGoldOverlay .gi-sumrow > span.wide{flex:1 1 100%;}
+#capMoneyOverlay .gi-sumrow > span.wide b{font-size:calc(28px * var(--fs,1));}
+#capMoneyOverlay .gi-sumrow .v-violet, #capGoldOverlay .gi-sumrow .v-violet{--tb:#ece3ff; --te:#cbbaf3;}
+#capMoneyOverlay .gi-sumrow .v-blue, #capGoldOverlay .gi-sumrow .v-blue{--tb:#e3eeff; --te:#b9cdf0;}
+#capMoneyOverlay .gi-sumrow .v-gold, #capGoldOverlay .gi-sumrow .v-gold{--tb:#fff0bf; --te:#e7cd78;}
+#capMoneyOverlay .gi-sumrow .v-pink, #capGoldOverlay .gi-sumrow .v-pink{--tb:#ffe4ef; --te:#f0b8cf;}
+#capMoneyOverlay .gi-sumrow .v-green, #capGoldOverlay .gi-sumrow .v-green{--tb:#dcf6ea; --te:#a9dcc5;}
+#capMoneyOverlay .gi-sumrow > .gi-chip.on, #capGoldOverlay .gi-sumrow > .gi-chip.on{outline:3px solid #12b27a; outline-offset:-1px; transform:translateY(3px); box-shadow:0 2px 0 var(--te), 0 5px 8px rgba(0,0,0,.12), inset 0 1px 0 #fff;}
+#capGoldOverlay .gl-chip2 .gc-l{font-size:calc(14px * var(--fs,1)); font-weight:800;}
+.gl-panel{border-radius:24px; padding:12px; border:0; background:linear-gradient(160deg,#fffaf0,#ffeec2); box-shadow:0 6px 0 #e3c46a, 0 14px 20px rgba(160,110,0,.18), inset 0 1px 0 #fff;}
+.gl-prices > span{box-shadow:0 4px 0 #ecd9a0, 0 9px 12px rgba(0,0,0,.08), inset 0 1px 0 #fff; border-radius:16px !important;}
+.gl-gcard{box-shadow:0 5px 0 rgba(0,0,0,.12), 0 10px 16px rgba(0,0,0,.08);}
 .gl-pos{color:#0b8f5f !important;} .gl-neg{color:#d93a3a !important;}
 .cg-det{display:block; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:2px;}
 .cap-grp{display:flex; align-items:center; gap:8px; margin:12px 2px 4px; padding:7px 10px; border-radius:12px; background:rgba(124,77,219,.16); font-weight:800; font-size:calc(14px * var(--fs,1));}
@@ -1512,8 +1548,18 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <span class="plus-badge in-card cap-plus" onclick="event.stopPropagation(); openCapChoose()" role="button" aria-label="إضافة رأس مال">+</span>
     </div>
     <div class="zk-row">
-      <div class="zk-sq cap-sq money" onclick="openCapMoney()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">💵</span><span class="zk-l">أموال</span><span class="zk-v" id="capMoney">0</span><span class="gi-pct" id="capMoneySplit"></span><span class="gi-pct" id="capMoneyPct"></span></div>
-      <div class="zk-sq cap-sq gold" onclick="openCapGold()"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🪙</span><span class="zk-l">ذهب</span><span class="zk-v" id="capGold">0</span><span class="gi-pct" id="capGoldSplit"></span><span class="gi-pct" id="capGoldKarat"></span><span class="gi-pct" id="capGoldPct"></span><span class="gi-pct" id="capGoldPnl"></span></div>
+      <div class="zk-sq cap-sq cap2 money" onclick="openCapMoney()"><span class="plus-badge" aria-hidden="true">+</span>
+        <span class="c2-head"><span class="c2-ic">💵</span><span class="c2-l">أموال</span></span>
+        <span class="c2-v" id="capMoney">0</span>
+        <span class="c2-pill" id="capMoneyPct"></span>
+        <span class="c2-rows" id="capMoneySplit"></span></div>
+      <div class="zk-sq cap-sq cap2 gold" onclick="openCapGold()"><span class="plus-badge" aria-hidden="true">+</span>
+        <span class="c2-head"><span class="c2-ic">🪙</span><span class="c2-l">ذهب</span></span>
+        <span class="c2-v" id="capGold">0</span>
+        <span class="c2-pill" id="capGoldPct"></span>
+        <span class="c2-rows" id="capGoldSplit"></span>
+        <span class="c2-karat" id="capGoldKarat"></span>
+        <span class="c2-pnl" id="capGoldPnl"></span></div>
     </div>
   </div>
 
@@ -1538,7 +1584,12 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
   <div class="modal-box">
     <button type="button" class="fs-close" onclick="closeCapMoney()" aria-label="رجوع">✕</button>
     <h3>💵 أموال</h3>
-    <div class="gi-sumrow"><span id="cmChipAll" class="gi-chip" onclick="setCmFilter(null)">الإجمالي: <b id="cmTotal">0</b></span><span id="cmChipCash" class="gi-chip" onclick="setCmFilter('cash')">💵 نقدي: <b id="cmCash">0</b></span><span id="cmChipBank" class="gi-chip" onclick="setCmFilter('bank')">🏦 بنوك: <b id="cmBank">0</b></span><span id="cmChipPen" class="gi-chip" onclick="setCmFilter('pension')">💳 معاشات: <b id="cmPen">0</b> / شهر</span></div>
+    <div class="gi-sumrow t3d money-t">
+      <span id="cmChipAll" class="gi-chip v-violet wide" onclick="setCmFilter(null)"><small>💼 إجمالي الأموال</small><b id="cmTotal">0</b></span>
+      <span id="cmChipCash" class="gi-chip v-green" onclick="setCmFilter('cash')"><small>💵 نقدي</small><b id="cmCash">0</b></span>
+      <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
+      <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاش شهري</small><b id="cmPen">0</b></span>
+    </div>
     <div id="cmInterest" style="display:none;"></div>
     <div class="gi-rows" id="cmList"></div>
     <div class="date-row grp-new"><input type="text" id="cmGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('money')">إنشاء مجموعة</button></div>
@@ -1566,7 +1617,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
   <div class="modal-box">
     <button type="button" class="fs-close" onclick="closeCapGold()" aria-label="رجوع">✕</button>
     <h3>🪙 الذهب</h3>
-    <div class="gi-sumrow"><span>إجمالي الذهب الآن: <b id="cgTotal">0</b></span><span>إجمالي الوزن: <b id="cgGrams">0</b> جم</span></div>
+    <div class="gi-sumrow t3d"><span class="v-gold"><small>🪙 إجمالي الذهب الآن</small><b id="cgTotal">0</b></span><span class="v-blue"><small>⚖️ إجمالي الوزن</small><b id="cgGrams">0</b></span></div>
     <div class="gi-sumrow" id="cgKaratRow"></div>
     <div class="gi-sumrow" id="cgUseRow"></div>
     <div class="gl-panel">
@@ -1576,8 +1627,8 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <div class="gl-prices" id="glPrices"></div>
       <div class="gl-meta" id="glMeta"></div>
       <div class="gl-basis" id="glBasis" onclick="glBasisTap()"></div>
-      <div class="gi-sumrow"><span>إجمالي الشراء: <b id="glBuy">0</b></span><span>إجمالي الآن: <b id="glNow">0</b></span></div>
-      <div class="gi-sumrow"><span id="glProfitBox">الربح / الخسارة: <b id="glProfit">0</b></span></div>
+      <div class="gi-sumrow t3d"><span class="v-blue"><small>إجمالي الشراء</small><b id="glBuy">0</b></span><span class="v-gold"><small>إجمالي الآن</small><b id="glNow">0</b></span></div>
+      <div class="gi-sumrow t3d"><span id="glProfitBox" class="v-green wide"><small>📈 الربح / الخسارة</small><b id="glProfit">0</b></span></div>
       <div class="gl-adjwrap">
       <details class="gl-adj"><summary>⚙️ ضبط السعر ليطابق سوق الصاغة</summary>
         <div class="date-row"><label for="glAdj">علاوة / خصم ٪</label><input type="number" id="glAdj" placeholder="0" step="any" oninput="goldAdjChange()"></div>
@@ -3393,7 +3444,7 @@ function zkcCompute(){
   let goldIn = 0, goldAll = 0, eqAll = 0, eqIn = 0;
   Object.keys(bk).forEach(k=>{
     const b = bk[k]; b.e = Math.round(b.e * 1000) / 1000;
-    b.v = live ? cgRound(b.e * p24) : cgRound(b.a || 0);   // القيمة = جرامات عيار ٢٤ المكافئة × سعر بيع جرام ٢٤
+    b.v = live ? cgInt(b.e * p24) : cgInt(b.a || 0);   // القيمة = جرامات عيار ٢٤ المكافئة × سعر بيع جرام ٢٤
     goldAll += b.v; eqAll += b.e; if(_zkc[k]){ goldIn += b.v; eqIn += b.e; }
   });
   const base = cgRound(t.money + goldIn);
@@ -3458,7 +3509,7 @@ function renderZkCalc(){
   tile(g3, 'gold zkd-wide', '🪙', 'الذهب الداخل في حساب الزكاة', fmt(c.goldIn), [f2(c.eqIn) + ' جم عيار ٢٤' + (c.live ? ' × ' + fmt(c.p24) : ''), 'من إجمالي ذهب ' + fmt(c.goldAll)]);
   // النصاب
   if(c.live){
-    const nis = cgRound(85 * c.p24);
+    const nis = cgInt(85 * c.p24);
     el('zkd-note', (c.base >= nis ? '✅ بلغ النصاب' : '⚠️ أقل من النصاب') + ' — نصاب الذهب ٨٥ جم عيار ٢٤ ≈ ' + fmt(nis) + ' ج. والزكاة تجب بعد مرور سنة هجرية كاملة على المال.');
   } else el('zkd-note', 'الزكاة تجب لو بلغ المال النصاب (٨٥ جم ذهب عيار ٢٤) ومرّت عليه سنة كاملة.');
   const sh = el('zkd-note sh');
@@ -3492,7 +3543,7 @@ function capTotals(){
   const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(mo.filter(x=> capSubOf(x) === 'bank'));
   const pension = giSum(mo.filter(x=> capSubOf(x) === 'pension'));   // معاش شهري: مش داخل في إجمالي رأس المال
   const grams = go.reduce((a,x)=> a + (Number(x.grams)||0), 0);
-  const goldBuy = giSum(go), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgRound((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
+  const goldBuy = cgInt(giSum(go)), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
   return {money: cash + bank, cash, bank, pension, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
 function renderCap(){
@@ -3501,13 +3552,15 @@ function renderCap(){
   el.textContent = fmt(t.all);
   document.getElementById('capMoney').textContent = fmt(t.money);
   document.getElementById('capGold').textContent = fmt(t.gold);
-  document.getElementById('capMoneySplit').textContent = (t.cash > 0 || t.bank > 0) ? '💵 ' + fmt(t.cash) + ' · 🏦 ' + fmt(t.bank) : '';
-  document.getElementById('capGoldSplit').textContent = t.grams > 0 ? '⚖️ ' + fmt(Math.round(t.grams * 100) / 100) + ' جم' : '';
-  { const ks = goldKaratStats(goldPieces()); document.getElementById('capGoldKarat').textContent = t.grams > 0 ? [24,21,18].map(k=> toArabicDigits(k) + ': ' + fmt(Math.round(ks[k] * 100) / 100)).join(' · ') : ''; }
+  const rowsInto = (id, arr)=>{ const e = document.getElementById(id); if(!e) return; e.innerHTML = ''; arr.forEach(([l, v])=>{ const r = document.createElement('span'); r.className = 'r'; const a = document.createElement('span'); a.textContent = l; const b = document.createElement('b'); b.textContent = v; r.appendChild(a); r.appendChild(b); e.appendChild(r); }); };
+  rowsInto('capMoneySplit', (t.cash > 0 || t.bank > 0) ? [['💵 نقدي', fmt(t.cash)], ['🏦 بنوك', fmt(t.bank)]] : []);
+  rowsInto('capGoldSplit', t.grams > 0 ? [['⚖️ الوزن', fmt(Math.round(t.grams * 100) / 100) + ' جم']] : []);
+  { const ks = goldKaratStats(goldPieces()), kb = document.getElementById('capGoldKarat'); kb.innerHTML = '';
+    if(t.grams > 0) [24, 21, 18].forEach(k=>{ const c = document.createElement('span'); const a = document.createElement('small'); a.textContent = 'عيار ' + toArabicDigits(k); const b = document.createElement('b'); b.textContent = fmt(Math.round(ks[k] * 100) / 100) + ' جم'; c.appendChild(a); c.appendChild(b); kb.appendChild(c); }); }
   const mp = t.all > 0 ? Math.round(t.money / t.all * 100) : 0, lab = ' من رأس المال';
   document.getElementById('capMoneyPct').textContent = t.all > 0 ? toArabicDigits(mp) + '٪' + lab : '';
   document.getElementById('capGoldPct').textContent = t.all > 0 ? toArabicDigits(100 - mp) + '٪' + lab : '';
-  { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.textContent = g.ok ? '📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) : ''; } }
+  { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.className = 'c2-pnl ' + (g.pnl >= 0 ? 'up' : 'down'); pe.textContent = g.ok ? '📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) : ''; } }
   try{ if(typeof renderZM === 'function') renderZM(); const zo = document.getElementById('zkcOverlay'); if(zo && zo.classList.contains('open')) renderZkCalc(); }catch(e){}   // الزكاة بتتجدد تلقائي مع أي تغيير في رأس المال
 }
 function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
@@ -3597,7 +3650,7 @@ function capGroupize(box, cat){
       const bks = rs.map(r=> byId(r.dataset.id)).filter(x=> x && capSubOf(x) === 'bank' && bankMonthly(x) > 0);
       if(bks.length){ const now0 = new Date(), st = grpIntStats(bks, now0); intTxt = ' · فوائد ' + MONTHS[now0.getMonth()] + ': ' + fmt(st.got) + (st.got < st.exp ? ' من ' + fmt(st.exp) : ''); }
     }
-    h.children[2].textContent = title + ' — ' + fmt(sumA) + (cat === 'gold' && sumG > 0 ? ' (' + fmt(Math.round(sumG * 100) / 100) + ' جم)' : '') + intTxt;
+    h.children[2].textContent = title + ' — ' + fmt(cat === 'gold' ? cgInt(sumA) : sumA) + (cat === 'gold' && sumG > 0 ? ' (' + fmt(Math.round(sumG * 100) / 100) + ' جم)' : '') + intTxt;
     if(gcol){ h.style.background = hexA(gcol, .2); h.style.borderInlineStart = '6px solid ' + gcol; }
     h.children[3].textContent = toArabicDigits(rs.length) + ' بند';
     if(gid) h.children[4].onclick = (e)=>{ e.stopPropagation(); openCapGrp(gid); };
@@ -3926,6 +3979,7 @@ function addCapMoney(){
 let _cgEditId = null, _cgUse = 'save', _cgFk = null, _cgFu = null;
 const cgUseOf = x => x.use === 'jewel' ? 'jewel' : 'save';
 const cgRound = v => Math.round(v * 100) / 100;
+const cgInt = v => Math.round(Number(v) || 0);   // ذهب: بدون قروش
 function goldPieces(){ return capList().filter(x=> capCatOf(x) === 'gold'); }
 function goldKaratStats(arr){
   const o = {24:0, 21:0, 18:0, other:0};
@@ -3948,7 +4002,7 @@ function setCgFk(k){ _cgFk = (k === _cgFk) ? null : k; renderCapGold(); }
 function setCgFu(u){ _cgFu = (u === _cgFu) ? null : u; renderCapGold(); }
 function cgCalc(){
   const g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
-  document.getElementById('cgCalcTotal').textContent = fmt(cgRound(g * pr));
+  document.getElementById('cgCalcTotal').textContent = fmt(cgInt(g * pr));
 }
 function cgReset(){
   _cgEditId = null; _cgFormOpen = false;
@@ -3965,20 +4019,20 @@ var GL_KEY = 'masrofati_gold_live_v1', GL_ADJ_KEY = 'masrofati_gold_adj_v1', GL_
 var _gl = null, _glAdj = {adj: 0, manual: 0, sarUsd: 0, spread: 1}, _glBusy = false, _glInfoOpen = false;
 try{ _gl = JSON.parse(localStorage.getItem(GL_KEY)) || null; }catch(e){}
 try{ _glAdj = Object.assign({adj: 0, manual: 0, sarUsd: 0, spread: 1}, JSON.parse(localStorage.getItem(GL_ADJ_KEY)) || {}); }catch(e){}
-function glSigned(v){ v = cgRound(v); return (v > 0 ? '+' : (v < 0 ? '−' : '')) + fmt(Math.abs(v)); }
+function glSigned(v){ v = cgInt(v); return (v > 0 ? '+' : (v < 0 ? '−' : '')) + fmt(Math.abs(v)); }
 function glBase24(){
   if(_glAdj && Number(_glAdj.manual) > 0) return Number(_glAdj.manual);
   if(_glAdj && Number(_glAdj.sarUsd) > 0 && _gl && _gl.usd > 0) return _gl.usd / GL_OZ * Number(_glAdj.sarUsd);   // سعر الجرام عيار 24 = السعر العالمي للجرام بالدولار × دولار الصاغة
   if(_gl && _gl.p24 > 0) return _gl.p24 * (1 + (Number(_glAdj && _glAdj.adj) || 0) / 100);
   return 0;
 }
-function glSellPpg(karat){ const b = glPpg(karat); return b > 0 ? cgRound(b * (1 - (Number(_glAdj.spread) || 0) / 100)) : 0; }
-function glPpg(karat){ const b = glBase24(), k = Number(karat) || 0; return (b > 0 && k > 0) ? cgRound(b * k / 24) : 0; }
+function glSellPpg(karat){ const base = glBase24(), k = Number(karat) || 0; return (base > 0 && k > 0) ? cgInt(base * k / 24 * (1 - (Number(_glAdj.spread) || 0) / 100)) : 0; }
+function glPpg(karat){ const b = glBase24(), k = Number(karat) || 0; return (b > 0 && k > 0) ? cgInt(b * k / 24) : 0; }
 function goldPnl(){
   const arr = goldPieces(); let buy = 0, now = 0;
-  arr.forEach(x=>{ buy += Number(x.amount) || 0; now += cgRound((Number(x.grams) || 0) * glSellPpg(x.karat)); });
+  arr.forEach(x=>{ buy += cgInt(x.amount); now += cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)); });
   const ok = glBase24() > 0 && arr.length > 0;
-  return {ok, buy: cgRound(buy), now: cgRound(now), pnl: cgRound(now - buy), pct: buy > 0 ? (now - buy) / buy * 100 : 0};
+  return {ok, buy: cgInt(buy), now: cgInt(now), pnl: cgInt(now - buy), pct: buy > 0 ? (now - buy) / buy * 100 : 0};
 }
 async function glFetchJson(url){
   const c = new AbortController(), t = setTimeout(()=> c.abort(), 9000);
@@ -4066,7 +4120,7 @@ function glInfoPanel(){
   // دولار الصاغة: المكتوب، أو المحسوب من السعر اليدوي
   let note = '';
   if(usd && Number(_glAdj.manual) > 0) note = 'محسوب من سعر الجرام اليدوي: ' + f2(Number(_glAdj.manual) / (usd / GL_OZ)) + ' ج للدولار';
-  else if(usd && Number(_glAdj.sarUsd) > 0) note = 'سعر الجرام عيار 24 = ' + f2(usd / GL_OZ) + ' $ × ' + f2(_glAdj.sarUsd) + ' = ' + f2(usd / GL_OZ * _glAdj.sarUsd) + ' ج';
+  else if(usd && Number(_glAdj.sarUsd) > 0) note = 'سعر الجرام عيار 24 = ' + f2(usd / GL_OZ) + ' $ × ' + f2(_glAdj.sarUsd) + ' = ' + fmt(cgInt(usd / GL_OZ * _glAdj.sarUsd)) + ' ج';
   else if(usd) note = 'اكتب دولار الصاغة عشان السعر يتحسب بيه (دلوقتي بسعر الدولار في مصر' + ((Number(_glAdj.adj) || 0) ? ' ' + (_glAdj.adj > 0 ? '+' : '') + _glAdj.adj + '٪' : '') + ')';
   else note = 'محتاج تحميل السعر العالمي (اتصل بالنت ودوس تحديث)';
   document.getElementById('glSarNote').textContent = note;
@@ -4117,31 +4171,31 @@ function glPanel(){
 function renderCapGold(){
   const all = goldPieces(), box = document.getElementById('cgList'), t = capTotals();
   document.getElementById('cgTotal').textContent = fmt(t.gold);
-  document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams));
+  document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams)) + ' جم';
   glPanel(); glInfoPanel();
   // وزن كل عيار
   const ks = goldKaratStats(all), kr = document.getElementById('cgKaratRow'); kr.innerHTML = '';
   const live = glBase24() > 0;
-  const pieceNow = x => cgRound((Number(x.grams) || 0) * glSellPpg(x.karat));   // الوزن × سعر البيع الحالي لعيار القطعة
+  const pieceNow = x => cgInt((Number(x.grams) || 0) * glSellPpg(x.karat));   // الوزن × سعر البيع الحالي لعيار القطعة
   const sumNow = a => a.reduce((t2, x)=> t2 + pieceNow(x), 0);
-  const mkChip = (label, grams, on, fn, val, sub)=>{
-    const c = document.createElement('span'); c.className = 'gi-chip gl-chip2' + (on ? ' on' : ''); c.onclick = fn;
-    const l1 = document.createElement('span'); l1.className = 'gc-l'; l1.textContent = label + ' ' + fmt(cgRound(grams)) + ' جم'; c.appendChild(l1);
+  const mkChip = (label, grams, on, fn, val, sub, vc, labelOnly)=>{
+    const c = document.createElement('span'); c.className = 'gi-chip gl-chip2 ' + (vc || 'v-gold') + (on ? ' on' : ''); c.onclick = fn;
+    const l1 = document.createElement('span'); l1.className = 'gc-l'; l1.textContent = labelOnly ? label : label + ' ' + fmt(cgRound(grams)) + ' جم'; c.appendChild(l1);
     if(sub){ const l2 = document.createElement('span'); l2.className = 'gc-s'; l2.textContent = sub; c.appendChild(l2); }
     const l3 = document.createElement('b'); l3.className = 'gc-v'; l3.textContent = val; c.appendChild(l3);
     return c;
   };
   [24, 21, 18].forEach(k=>{
     const sp = glSellPpg(k);
-    kr.appendChild(mkChip('عيار ' + toArabicDigits(k) + ':', ks[k], _cgFk === k, ()=> setCgFk(k), live ? fmt(cgRound(ks[k] * sp)) : '—', live ? '× ' + fmt(sp) + ' (بيع)' : ''));
+    kr.appendChild(mkChip('عيار ' + toArabicDigits(k), ks[k], _cgFk === k, ()=> setCgFk(k), live ? fmt(cgInt(ks[k] * sp)) : '—', fmt(cgRound(ks[k])) + ' جم' + (live ? ' × ' + fmt(sp) : ''), 'v-gold', true));
   });
   if(ks.other > 0) kr.appendChild(mkChip('عيارات أخرى:', ks.other, _cgFk === 'other', ()=> setCgFk('other'),
-    live ? fmt(sumNow(all.filter(x=> { const k = Number(x.karat) || 0; return !(k === 24 || k === 21 || k === 18); }))) : '—', live ? 'الوزن × سعر البيع' : ''));
+    live ? fmt(sumNow(all.filter(x=> { const k = Number(x.karat) || 0; return !(k === 24 || k === 21 || k === 18); }))) : '—', live ? 'الوزن × سعر البيع' : '', 'v-gold'));
   // زينة / ادخار
   const jw = all.filter(x=> cgUseOf(x) === 'jewel'), sv = all.filter(x=> cgUseOf(x) === 'save'), sumG = a => a.reduce((t2,x)=> t2 + (Number(x.grams)||0), 0);
   const ur = document.getElementById('cgUseRow'); ur.innerHTML = '';
   [['💍 زينة:', jw, 'jewel'], ['💰 ادخار:', sv, 'save']].forEach(([lb, arr, key])=>{
-    ur.appendChild(mkChip(lb, sumG(arr), _cgFu === key, ()=> setCgFu(key), live ? fmt(sumNow(arr)) : fmt(giSum(arr)), live ? 'الوزن × سعر البيع' : 'بسعر الشراء'));
+    ur.appendChild(mkChip(lb, sumG(arr), _cgFu === key, ()=> setCgFu(key), live ? fmt(sumNow(arr)) : fmt(cgInt(giSum(arr))), live ? 'الوزن × سعر البيع' : 'بسعر الشراء', key === 'jewel' ? 'v-pink' : 'v-green'));
   });
   // القايمة بعد الفلترة
   const arr = all.filter(x=> {
@@ -4162,15 +4216,15 @@ function renderCapGold(){
       det.appendChild(e);
     };
     ln('⚖️', [['عيار', toArabicDigits(x.karat || '')], ['الوزن', fmt(x.grams) + ' جم'], ['', cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار']]);
-    ln('🛒 الشراء' + (x.date ? ' · ' + formatDate(x.date) : ''), [['الجرام', x.ppg ? fmt(x.ppg) : '—'], ['الإجمالي', fmt(x.amount)]]);
+    ln('🛒 الشراء' + (x.date ? ' · ' + formatDate(x.date) : ''), [['الجرام', x.ppg ? fmt(cgInt(x.ppg)) : '—'], ['الإجمالي', fmt(cgInt(x.amount))]]);
     const cp = glSellPpg(x.karat);
     if(cp > 0){
-      const nowT = cgRound((Number(x.grams) || 0) * cp), pl = cgRound(nowT - (Number(x.amount) || 0)), pc = (Number(x.amount) || 0) > 0 ? pl / Number(x.amount) * 100 : 0;
+      const nowT = cgInt((Number(x.grams) || 0) * cp), pl = cgInt(nowT - cgInt(x.amount)), pc = (Number(x.amount) || 0) > 0 ? pl / Number(x.amount) * 100 : 0;
       ln('📈 الآن (بسعر البيع)', [['الجرام', fmt(cp)], ['الإجمالي', fmt(nowT)]]);
       ln(pl >= 0 ? '✅ الربح' : '🔻 الخسارة', [['', glSigned(pl)], ['', '(' + (pl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(pc * 10) / 10)) + '٪)']], pl >= 0 ? 'gl-pos' : 'gl-neg');
     }
     d.appendChild(det);
-    d.children[2].textContent = fmt(x.amount);
+    d.children[2].textContent = fmt(cgInt(x.amount));
     d.children[3].onclick = ()=>{
       _cgEditId = x.id;
       document.getElementById('cgName').value = x.name; document.getElementById('cgKarat').value = String(x.karat || 21);
@@ -4190,7 +4244,7 @@ function closeCapGold(){ document.getElementById('capGoldOverlay').classList.rem
 function saveCapGold(){
   const n = document.getElementById('cgName').value.trim(), g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
   if(!n || g <= 0 || pr <= 0){ showToast('اكتب اسم القطعة والوزن وثمن الجرام', false); return; }
-  const rec = {name: n, cat: 'gold', karat: Number(document.getElementById('cgKarat').value), grams: g, ppg: pr, use: _cgUse, grp: document.getElementById('cgGrp').value || undefined, amount: cgRound(g * pr), date: inputValueToDate(document.getElementById('cgDate').value, Date.now())};
+  const rec = {name: n, cat: 'gold', karat: Number(document.getElementById('cgKarat').value), grams: g, ppg: pr, use: _cgUse, grp: document.getElementById('cgGrp').value || undefined, amount: cgInt(g * pr), date: inputValueToDate(document.getElementById('cgDate').value, Date.now())};
   if(_cgEditId){ const x = capList().find(z=> z.id === _cgEditId); if(x){ delete x.grp; Object.assign(x, rec); } }
   else capList().push(Object.assign({id: uid()}, rec));
   const wasEdit = !!_cgEditId;
