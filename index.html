@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-24.6900">
+<meta name="app-version" content="2026-10-25.7000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3034,7 +3034,7 @@ function ensureAllYears(){
     const y = Number(k);
     if(!isNaN(y)) ensureYear(y);
   });
-  if(Object.keys(data).length === 0) ensureYear(currentYear);
+  if(currentYear && !data[currentYear]) ensureYear(currentYear);
 }
 
 function load(){
@@ -3056,6 +3056,7 @@ function load(){
     : (years.length ? Math.max(...years) : new Date().getFullYear());
 
   ensureAllYears();
+  try{ autoIncSync(); }catch(e){}
   try{ _opsSnap = opsFlat(); _opsOwner = data; }catch(e){}
 }
 
@@ -3124,6 +3125,7 @@ function saveNewYear(){
   showToast('تم إنشاء سنة ' + toArabicDigits(y), true);
 }
 function save(){
+  try{ autoIncSync(); }catch(e){}
   try{ opsDiff(); }catch(e){ console.error('ops', e); }
   try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }
   catch(e){ console.error('save failed', e); }
@@ -3142,7 +3144,7 @@ function opsMs(v){
   return isNaN(t) ? undefined : t;
 }
 function opsFlat(){
-  const f = {}, go = new Set(), skip = id => String(id).indexOf('lg') === 0;
+  const f = {}, go = new Set(), skip = id => String(id).indexOf('lg') === 0 || String(id).indexOf('ai:') === 0;
   const gi = data.genIncome || {};
   Object.keys(gi).forEach(y=>{ const yo = gi[y]; if(!yo || typeof yo !== 'object') return;
     Object.keys(yo).forEach(m=>{ const r = yo[m]; if(!r || typeof r !== 'object') return;
@@ -3268,6 +3270,63 @@ function opsIn(kind){
 }
 // ===== OPS LOG JS END =====
 // ===== GENERAL INCOME JS START =====
+// ===== دخل عام تلقائي من «أموال»: الفوائد البنكية + المعاشات (بأسمائها، كل واحدة في موعد استحقاقها) =====
+function autoIncSync(){
+  let changed = false;
+  try{
+    if(!data || typeof data !== 'object') return false;
+    const items = (Array.isArray(data.capital) ? data.capital : []).filter(x=> x && capCatOf(x) === 'money' && (capSubOf(x) === 'bank' || capSubOf(x) === 'pension'));
+    const now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+    if(!data.genIncome || typeof data.genIncome !== 'object'){ if(!items.length) return false; data.genIncome = {}; changed = true; }
+    Object.keys(data).filter(k=> /^\d{4}$/.test(k) && data[k] && typeof data[k] === 'object').forEach(ys=>{
+      const y = Number(ys);
+      for(let m = 0; m < 12; m++){
+        const want = {};
+        items.forEach(x=>{
+          const bank = capSubOf(x) === 'bank';
+          if(bank ? !bankActive(x, y, m) : !penActive(x, y, m)) return;
+          const due = (bank ? bankDueOf(x, y, m) : penDueOf(x, y, m)).getTime(), amt = bank ? bankMonthly(x) : (Number(x.amount) || 0);
+          if(!(amt > 0)) return;
+          want['ai:' + x.id] = {id: 'ai:' + x.id, name: x.name, amount: amt, date: due, counted: due <= eod, auto: bank ? 'bank' : 'pension'};
+        });
+        let yo = data.genIncome[ys];
+        if(!Object.keys(want).length){   // تنظيف فقط
+          const r0 = (yo && typeof yo === 'object') ? yo[m] : null;
+          if(r0 && typeof r0 === 'object' && Array.isArray(r0.src) && r0.src.some(z=> z && z.auto)){ r0.src = r0.src.filter(z=> !(z && z.auto)); changed = true; }
+          continue;
+        }
+        if(typeof yo === 'number'){ const n = yo; yo = {}; for(let i = 0; i < 12; i++) yo[i] = {src: n > 0 ? [{id: 'lg' + i, name: 'دخل عام', amount: n}] : [], out: []}; data.genIncome[ys] = yo; changed = true; }
+        if(!yo || typeof yo !== 'object'){ yo = {}; data.genIncome[ys] = yo; changed = true; }
+        let r = yo[m];
+        if(typeof r === 'number'){ r = {src: r > 0 ? [{id: 'lg', name: 'دخل عام', amount: r}] : [], out: []}; changed = true; }
+        if(!r || typeof r !== 'object'){ r = {src: [], out: []}; changed = true; }
+        if(!Array.isArray(r.src)){ r.src = []; changed = true; }
+        if(!Array.isArray(r.out)){ r.out = []; changed = true; }
+        yo[m] = r;
+        const have = {};
+        r.src = r.src.filter(z=>{
+          if(!(z && z.auto)) return true;
+          if(!want[z.id] || have[z.id]){ changed = true; return false; }
+          have[z.id] = z; return true;
+        });
+        Object.keys(want).forEach(id=>{
+          const w = want[id], z = have[id];
+          if(!z){ r.src.push(w); changed = true; }
+          else if(z.name !== w.name || z.amount !== w.amount || z.date !== w.date || z.counted !== w.counted || z.auto !== w.auto){ Object.assign(z, w); changed = true; }
+        });
+      }
+    });
+  }catch(e){ console.error('autoIncSync', e); }
+  return changed;
+}
+function autoIncRefresh(){
+  try{
+    if(!autoIncSync()) return;
+    save();
+    if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths();
+    if(currentMonth !== null && typeof renderGI === 'function') renderGI();
+  }catch(e){}
+}
 function giRec(){
   if(!data.genIncome || typeof data.genIncome !== 'object') data.genIncome = {};
   let y = data.genIncome[currentYear];
@@ -4322,6 +4381,12 @@ function renderGISources(){
     const d = document.createElement('div'); d.className = 'gi-row';
     d.innerHTML = '<span>💵</span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
     d.children[1].textContent = x.name + (x.date ? ' · ' + formatDate(x.date) : ''); d.children[2].textContent = fmt(x.amount);
+    if(x.auto){
+      d.children[0].textContent = x.auto === 'pension' ? '💳' : '🏦';
+      const tg = document.createElement('span'); tg.className = 'gi-tag'; tg.textContent = x.counted === false ? '⏳ جاية في موعدها' : '🔄 من أموال'; d.children[1].prepend(tg);
+      d.children[3].remove(); d.children[3].remove();
+      box.appendChild(d); return;
+    }
     if(x.counted === false){ d.classList.add('unc'); const tg = document.createElement('span'); tg.className = 'gi-tag'; tg.textContent = '🚫 غير محسوب'; d.children[1].prepend(tg); }
     d.children[3].onclick = ()=> openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a,dt,cn)=>{
       x.name = n || x.name; x.amount = a; if(dt) x.date = dt; if(cn !== undefined) x.counted = cn; save(); renderGISources(); renderGI();
@@ -7752,6 +7817,7 @@ function startApp(){
 checkLockOnStartup();
 try{ goldLiveRefresh(false); }catch(e){}
 window.addEventListener('online', function(){ try{ goldLiveRefresh(false); }catch(e){} });
+document.addEventListener('visibilitychange', function(){ try{ if(document.visibilityState === 'visible') autoIncRefresh(); }catch(e){} });
 document.addEventListener('visibilitychange', function(){ try{ if(document.visibilityState === 'visible' && (!_gl || Date.now() - _gl.ts > 30*60*1000)) goldLiveRefresh(false); }catch(e){} });
 </script>
 <script>
