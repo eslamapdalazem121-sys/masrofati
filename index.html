@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-25.7100">
+<meta name="app-version" content="2026-10-25.7200">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1602,6 +1602,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <div class="gi-sumrow" style="margin:8px 0 0;"><span>الفائدة السنوية: <b id="cmAnnual">0</b></span><span>الفائدة الشهرية: <b id="cmMonthly">0</b></span></div>
       <div class="date-row"><label for="cmRem">تعديل الفائدة الشهرية (اختياري)</label><input type="number" id="cmRem" placeholder="تلقائي" step="any" oninput="_cmRemTouched = this.value !== ''; cmCalcInt()"></div>
       <div class="hint">الفائدة بتتصرف شهريًا في نفس يوم «تاريخ بداية الوديعة»، وأول فائدة بعد شهر من البداية.</div>
+      <div class="check-row"><input type="checkbox" id="cmIntOut" checked><label for="cmIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد البنك)</label></div>
     </div>
     <div class="date-row"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
     <div class="field"><label id="cmDateLbl">📅 التاريخ</label><input type="date" id="cmDate"></div>
@@ -3275,7 +3276,7 @@ function autoIncSync(){
   let changed = false;
   try{
     if(!data || typeof data !== 'object') return false;
-    const items = (Array.isArray(data.capital) ? data.capital : []).filter(x=> x && capCatOf(x) === 'money' && (capSubOf(x) === 'bank' || capSubOf(x) === 'pension'));
+    const items = (Array.isArray(data.capital) ? data.capital : []).filter(x=> x && capCatOf(x) === 'money' && (capSubOf(x) === 'pension' || (capSubOf(x) === 'bank' && x.intKeep !== true)));
     const now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
     if(!data.genIncome || typeof data.genIncome !== 'object'){ if(!items.length) return false; data.genIncome = {}; changed = true; }
     Object.keys(data).filter(k=> /^\d{4}$/.test(k) && data[k] && typeof data[k] === 'object').forEach(ys=>{
@@ -3601,14 +3602,14 @@ function capTotals(){
   const arr = capList(), mo = arr.filter(x=> capCatOf(x) === 'money'), go = arr.filter(x=> capCatOf(x) === 'gold');
   const now0 = new Date(), eod0 = new Date(now0.getFullYear(), now0.getMonth(), now0.getDate(), 23, 59, 59, 999);
   const bankItems = mo.filter(x=> capSubOf(x) === 'bank'), penItems = mo.filter(x=> capSubOf(x) === 'pension');
-  // الفوايد والمعاش اللي استحقت واتحوّلت واتصرفت من الدخل العام بتتخصم من الإجماليات
-  const bankPaid = cgRound(bankItems.reduce((a,x)=> a + bankIntSince(x, eod0), 0));
+  // الفوايد اللي مش بتتحوّل بتتضاف للرصيد، واللي بتتحوّل وتتصرف ما بتتضافش. والمعاش المحوّل بيتخصم
+  const bankAdded = cgRound(bankItems.filter(x=> x.intKeep === true).reduce((a,x)=> a + bankIntSince(x, eod0), 0));   // فوايد ما اتحوّلتش: بتتضاف لرصيد البنك
   const penPaid = cgRound(penItems.reduce((a,x)=> a + (penActive(x, eod0.getFullYear(), eod0.getMonth()) && penDueOf(x, eod0.getFullYear(), eod0.getMonth()) <= eod0 ? (Number(x.amount) || 0) : 0), 0));
-  const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(bankItems) - bankPaid;
+  const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(bankItems) + bankAdded;
   const pension = giSum(penItems) - penPaid;   // معاش شهري: مش داخل في إجمالي رأس المال
   const grams = go.reduce((a,x)=> a + (Number(x.grams)||0), 0);
   const goldBuy = cgInt(giSum(go)), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
-  return {money: cash + bank, cash, bank, pension, bankPaid, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
+  return {money: cash + bank, cash, bank, pension, bankAdded, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
 function renderCap(){
   const el = document.getElementById('capAmt'); if(!el) return;
@@ -3843,7 +3844,7 @@ function renderPensionPanel(){
       r.children[0].textContent = e.reached ? '✅' : '⏳';
       r.children[1].textContent = toArabicDigits(e.day) + ' ' + mo.mn + ' — ' + e.x.name;
       r.children[2].textContent = fmt(e.amt);
-      { const mk2 = document.createElement('span'); mk2.className = 'cg-det'; mk2.textContent = e.reached ? '✅ تم التحويل والصرف' : '⏳ لسه ما جاش موعده'; r.children[1].appendChild(mk2); }
+      { const mk2 = document.createElement('span'); mk2.className = 'cg-det'; mk2.textContent = e.reached ? (e.x.intKeep === true ? '✅ أُضيفت لرصيد البنك' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعده'; r.children[1].appendChild(mk2); }
       if(!e.reached) r.style.opacity = '.6';
       list.appendChild(r);
     });
@@ -3898,7 +3899,7 @@ function renderBankInterest(){
         z.items.slice().sort((a, b)=> bankDay(a) - bankDay(b)).forEach(x=>{
           const r = bankIntMonth(x, yC, mC, nowC), row = document.createElement('div');
           row.style.cssText = 'display:flex; justify-content:space-between; gap:8px; padding:6px 0 0; margin-top:6px; border-top:1px dashed ' + hexA(z.color, .6) + '; font-size:calc(14px * var(--fs,1)); font-weight:800;' + (r.got > 0 || !r.exp ? '' : 'opacity:.75;');
-          const a = document.createElement('span'); a.textContent = (r.got > 0 ? '✅ تم التحويل والصرف · ' : '⏳ ') + '🏦 ' + x.name + (r.due ? ' · يوم ' + toArabicDigits(r.due.getDate()) : '');
+          const a = document.createElement('span'); a.textContent = (r.got > 0 ? (x.intKeep === true ? '✅ أُضيفت للرصيد · ' : '✅ تم التحويل والصرف · ') : '⏳ ') + '🏦 ' + x.name + (r.due ? ' · يوم ' + toArabicDigits(r.due.getDate()) : '');
           const b = document.createElement('b'); b.textContent = r.exp ? fmt(r.exp) : '—'; row.appendChild(a); row.appendChild(b); c.appendChild(row);
         });
         gWrap.appendChild(c);
@@ -3939,7 +3940,7 @@ function renderBankInterest(){
       r.children[0].textContent = e.reached ? '✅' : '⏳';
       r.children[1].textContent = toArabicDigits(e.day) + ' ' + mo.mn + ' — ' + e.x.name + (e.x.rate ? ' (' + toArabicDigits(Number(e.x.rate)) + '٪)' : '');
       r.children[2].textContent = fmt(e.amt);
-      { const mk2 = document.createElement('span'); mk2.className = 'cg-det'; mk2.textContent = e.reached ? '✅ تم التحويل والصرف' : '⏳ لسه ما جاش موعده'; r.children[1].appendChild(mk2); }
+      { const mk2 = document.createElement('span'); mk2.className = 'cg-det'; mk2.textContent = e.reached ? (e.x.intKeep === true ? '✅ أُضيفت لرصيد البنك' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعده'; r.children[1].appendChild(mk2); }
       if(!e.reached) r.style.opacity = '.6';
       list.appendChild(r);
     });
@@ -3977,7 +3978,7 @@ function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMone
 function cmReset(){
   _cmEditId = null;
   document.getElementById('cmName').value = ''; document.getElementById('cmAmt').value = '';
-  document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; _cmRemTouched = false; cmCalcInt();
+  document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; _cmRemTouched = false; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = true; }
   document.getElementById('cmDate').value = dateToInputValue(Date.now());
   document.getElementById('cmSaveBtn').textContent = '＋ إضافة';
   fillGrpSel('cmGrp', 'money', '');
@@ -4010,7 +4011,7 @@ function renderCapMoney(){
     d.children[3].onclick = ()=>{
       _cmEditId = x.id; _cmFormOpen = true; cmSubUI(capSubOf(x));
       document.getElementById('cmRate').value = x.rate || ''; _cmRemTouched = (x.monthlyInt !== undefined && x.monthlyInt !== null && x.monthlyInt !== ''); document.getElementById('cmRem').value = _cmRemTouched ? x.monthlyInt : ''; 
-      document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt();
+      document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = x.intKeep !== true; }
       document.getElementById('cmDate').value = dateToInputValue(x.date || Date.now());
       fillGrpSel('cmGrp', 'money', x.grp || '');
       document.getElementById('cmSaveBtn').textContent = '💾 حفظ التعديل';
@@ -4034,9 +4035,9 @@ function addCapMoney(){
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
   const rec = {name: n, amount: amt, cat: 'money', sub: _cmSub, date: inputValueToDate(document.getElementById('cmDate').value, Date.now())};
   const gv = document.getElementById('cmGrp').value; if(gv) rec.grp = gv;
-  if(_cmSub === 'bank'){ rec.rate = Number(document.getElementById('cmRate').value) || 0; const rv = document.getElementById('cmRem').value; rec.monthlyInt = (_cmRemTouched && rv !== '') ? Number(rv) || 0 : undefined; }
+  if(_cmSub === 'bank'){ rec.rate = Number(document.getElementById('cmRate').value) || 0; const rv = document.getElementById('cmRem').value; rec.monthlyInt = (_cmRemTouched && rv !== '') ? Number(rv) || 0 : undefined; { const io = document.getElementById('cmIntOut'); rec.intKeep = (io && !io.checked) ? true : undefined; } }
   const wasEdit = !!_cmEditId;
-  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; Object.assign(x, rec); } }
+  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; Object.assign(x, rec); } }
   else capList().push(Object.assign({id: uid()}, rec));
   save(); cmReset(); renderCapMoney(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : (_cmSub === 'pension' ? 'المعاشات' : 'النقدي')), true);
 }
