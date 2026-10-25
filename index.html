@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-25.7200">
+<meta name="app-version" content="2026-10-25.7300">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1449,6 +1449,55 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="مصروفاتي B">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style id="gpCss">
+.gp{display:none;position:fixed;inset:0;z-index:95;background:radial-gradient(1200px 500px at 50% -10%,rgba(22,168,112,.18),transparent 60%),linear-gradient(165deg,var(--bg),var(--bg2));overflow-y:auto;overscroll-behavior:contain;padding-top:env(safe-area-inset-top,0px);font-family:'Tajawal','Cairo',sans-serif;}
+.gp.open{display:block;animation:gpIn .3s ease both;}
+@keyframes gpIn{from{opacity:0;transform:translateY(26px) scale(.98)}to{opacity:1;transform:none}}
+.gp-top{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(180deg,var(--bg) 60%,transparent);}
+.gp-back{border:0;cursor:pointer;font:800 15px 'Tajawal','Cairo',sans-serif;color:var(--text);background:var(--card);padding:10px 16px;border-radius:16px;box-shadow:0 1px 0 #fff inset,0 5px 0 rgba(0,0,0,.14),0 10px 16px rgba(30,41,59,.12);transition:transform .08s,box-shadow .08s;}
+.gp-back:active{transform:translateY(4px);box-shadow:0 1px 0 #fff inset,0 1px 0 rgba(0,0,0,.14),0 3px 6px rgba(30,41,59,.12);}
+.gp-ttl{font-weight:800;font-size:19px;color:var(--text);line-height:1.3;}
+.gp-ttl small{display:block;font-size:13px;font-weight:700;color:var(--muted);}
+.gp-body{max-width:640px;margin:0 auto;padding:6px 14px calc(34px + env(safe-area-inset-bottom,0px));perspective:1100px;}
+.gp-hero{position:relative;border-radius:28px;padding:20px 20px 18px;color:#fff;background:linear-gradient(145deg,#22d49a 0%,#12a56f 45%,#0b7a53 100%);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 -8px 0 rgba(0,0,0,.16) inset,0 7px 0 #0a6644,0 24px 34px -10px rgba(14,140,92,.6);transform:rotateX(4deg);transform-origin:50% 100%;overflow:hidden;}
+.gp-hero::after{content:'';position:absolute;inset:-40% -20% auto auto;width:70%;height:90%;background:radial-gradient(closest-side,rgba(255,255,255,.28),transparent);pointer-events:none;}
+.gp-hero.bad{background:linear-gradient(145deg,#ff6b6b 0%,#e03131 50%,#a61e1e 100%);box-shadow:0 2px 0 rgba(255,255,255,.35) inset,0 -8px 0 rgba(0,0,0,.18) inset,0 7px 0 #8f1a1a,0 24px 34px -10px rgba(224,49,49,.55);}
+.gp-hero small{display:block;font-size:14px;font-weight:700;opacity:.92;}
+.gp-big{display:block;font-size:40px;font-weight:800;line-height:1.15;margin:2px 0 10px;direction:ltr;text-align:right;text-shadow:0 3px 0 rgba(0,0,0,.18);}
+.gp-bar{height:14px;border-radius:99px;background:rgba(0,0,0,.25);box-shadow:0 2px 4px rgba(0,0,0,.3) inset;overflow:hidden;}
+.gp-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(180deg,#fff,#d7ffe9);box-shadow:0 0 12px rgba(255,255,255,.7);transition:width .6s ease;}
+.gp-pct{display:block;font-size:13px;font-weight:700;margin-top:6px;opacity:.95;}
+.gp-mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.gp-mini div{background:rgba(0,0,0,.18);border-radius:16px;padding:10px 12px;box-shadow:0 2px 0 rgba(255,255,255,.18) inset,0 4px 0 rgba(0,0,0,.14);}
+.gp-mini b{display:block;font-size:21px;font-weight:800;direction:ltr;text-align:right;}
+.gp-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0 6px;}
+.gp-tile{background:var(--card);color:var(--text);border-radius:20px;padding:12px 12px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 5px 0 rgba(0,0,0,.09),0 12px 20px rgba(30,41,59,.1);}
+.gp-ic{flex:none;width:44px;height:44px;border-radius:15px;display:grid;place-items:center;font-size:22px;background:linear-gradient(145deg,#fff,#e6ebf3);box-shadow:0 2px 0 #fff inset,0 4px 0 rgba(0,0,0,.12),0 8px 12px rgba(30,41,59,.12);}
+.gp-tile small{display:block;font-size:12.5px;color:var(--muted);font-weight:700;}
+.gp-tile b{display:block;font-size:19px;font-weight:800;direction:ltr;text-align:right;}
+.gp-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0 8px;}
+.gp-btn{border:0;cursor:pointer;color:#fff;font:800 15.5px 'Tajawal','Cairo',sans-serif;padding:15px 8px;border-radius:18px;transition:transform .08s,box-shadow .08s;}
+.gp-btn.g{background:linear-gradient(180deg,#2bd89f,#12a56f);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 6px 0 #0a6644,0 14px 18px rgba(14,140,92,.35);}
+.gp-btn.r{background:linear-gradient(180deg,#ffa94d,#f76707);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 6px 0 #b34700,0 14px 18px rgba(247,103,7,.35);}
+.gp-btn:active{transform:translateY(5px);}
+.gp-btn.g:active{box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 1px 0 #0a6644;}
+.gp-btn.r:active{box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 1px 0 #b34700;}
+.gp-h{margin:24px 4px 10px;font-size:18px;font-weight:800;color:var(--text);display:flex;justify-content:space-between;align-items:center;}
+.gp-h span{font-size:15px;color:var(--muted);direction:ltr;}
+.gp-row{position:relative;display:flex;align-items:center;gap:10px;background:var(--card);color:var(--text);border-radius:20px;padding:12px 14px 12px 12px;margin-bottom:12px;border-inline-start:7px solid #12a56f;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 5px 0 rgba(0,0,0,.08),0 12px 18px rgba(30,41,59,.09);}
+.gp-row.bank{border-inline-start-color:#1971c2;} .gp-row.pension{border-inline-start-color:#7c4ddb;} .gp-row.out{border-inline-start-color:#f76707;}
+.gp-row.pend{opacity:.78;border-inline-start-color:#f08c00;} .gp-row.unc{opacity:.7;border-inline-start-color:#9aa3b2;}
+.gp-main{flex:1;min-width:0;}
+.gp-name{font-size:16px;font-weight:800;line-height:1.35;word-break:break-word;}
+.gp-sub{font-size:13px;color:var(--muted);font-weight:700;margin-top:2px;}
+.gp-tag{display:inline-block;font-size:12.5px;font-weight:800;padding:2px 9px;border-radius:99px;margin-top:5px;margin-inline-end:5px;background:#e5f7ef;color:#0e8c5c;}
+.gp-tag.w{background:#fff3d6;color:#a86400;} .gp-tag.n{background:#eceff4;color:#5b6472;}
+.gp-amt{flex:none;font-size:18px;font-weight:800;direction:ltr;}
+.gp-acts{display:flex;flex-direction:column;gap:6px;}
+.gp-mb{border:0;cursor:pointer;width:36px;height:36px;border-radius:12px;font-size:16px;background:linear-gradient(145deg,#fff,#e6ebf3);box-shadow:0 2px 0 #fff inset,0 3px 0 rgba(0,0,0,.14);}
+.gp-mb:active{transform:translateY(3px);box-shadow:none;}
+.gp-empty{text-align:center;color:var(--muted);font-weight:700;padding:18px;background:var(--card);border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.07);}
+</style>
 </head>
 <body>
 
@@ -1789,6 +1838,36 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <button class="btn-cancel" onclick="closeGenEdit()">إلغاء</button>
       <button class="btn-save" onclick="saveGenEdit()">حفظ</button>
     </div>
+  </div>
+</div>
+
+<div class="gp" id="giPage" role="dialog" aria-label="الدخل العام الشهري">
+  <div class="gp-top"><button type="button" class="gp-back" onclick="closeGIPage()">› رجوع</button><div class="gp-ttl">💵 الدخل العام الشهري<small id="gpMonth"></small></div></div>
+  <div class="gp-body">
+    <div class="gp-hero" id="gpHero">
+      <small>إجمالي الدخل العام لهذا الشهر</small>
+      <span class="gp-big" id="gpInc">0</span>
+      <div class="gp-bar"><i id="gpBar"></i></div>
+      <span class="gp-pct" id="gpPct"></span>
+      <div class="gp-mini">
+        <div><small>🧾 المنصرف</small><b id="gpOut">0</b></div>
+        <div><small id="gpLeftLbl">✅ المتبقي</small><b id="gpLeft">0</b></div>
+      </div>
+    </div>
+    <div class="gp-tiles">
+      <div class="gp-tile"><span class="gp-ic">💵</span><div><small>دخل أضفته بنفسك</small><b id="gpManual">0</b></div></div>
+      <div class="gp-tile"><span class="gp-ic">🏦</span><div><small>فوائد البنوك</small><b id="gpBank">0</b></div></div>
+      <div class="gp-tile"><span class="gp-ic">💳</span><div><small>المعاش</small><b id="gpPen">0</b></div></div>
+      <div class="gp-tile"><span class="gp-ic">⏳</span><div><small>لسه ما جاش موعده</small><b id="gpPend">0</b></div></div>
+    </div>
+    <div class="gp-actions">
+      <button type="button" class="gp-btn g" onclick="openGIAdd()">＋ إضافة دخل</button>
+      <button type="button" class="gp-btn r" onclick="openGIOut()">🧾 صرف من الدخل</button>
+    </div>
+    <div class="gp-h">💵 مصادر الدخل <span id="gpSrcCnt"></span></div>
+    <div id="gpSrc"></div>
+    <div class="gp-h">🧾 المنصرف <span id="gpOutCnt"></span></div>
+    <div id="gpOutList"></div>
   </div>
 </div>
 
@@ -4377,6 +4456,7 @@ function renderGI(){
   else { lp = inc > 0 ? left / inc * 100 : 0; lc = lp > 40 ? '#00e676' : (lp > 10 ? '#ffb300' : '#ff3d3d'); lt = inc > 0 ? giPctTxt(lp) + ' متبقي' : ''; }
   giMeter('giMeterLeft', lp, lc);
   document.getElementById('giPctLeft').textContent = lt;
+  try{ const gpg = document.getElementById('giPage'); if(gpg && gpg.classList.contains('open')) renderGIPage(); }catch(e){ console.error(e); }
 }
 function toggleGI(){ document.getElementById('giWrap').classList.toggle('open'); }
 
@@ -4405,7 +4485,66 @@ function renderGISources(){
     box.appendChild(d);
   });
 }
-function openGI(){ const gd = document.getElementById('giSrcDate'); if(gd) gd.value = dateToInputValue(Date.now()); renderGISources(); document.getElementById('giOverlay').classList.add('open'); }
+function openGI(){ openGIPage(); }
+function openGIAdd(){
+  const gd = document.getElementById('giSrcDate'); if(gd) gd.value = dateToInputValue(Date.now());
+  const ov = document.getElementById('giOverlay');
+  { const h = ov.querySelector('h3'); if(h) h.textContent = '＋ إضافة مصدر دخل'; const sr = ov.querySelector('.gi-sumrow'), ls = document.getElementById('giSrcList'); if(sr) sr.style.display = 'none'; if(ls) ls.style.display = 'none'; }
+  ov.classList.add('open');
+}
+function openGIPage(){ const pg = document.getElementById('giPage'); if(!pg) return; pg.classList.add('open'); pg.scrollTop = 0; renderGIPage(); }
+function closeGIPage(){ const pg = document.getElementById('giPage'); if(pg) pg.classList.remove('open'); }
+function gpRow(o){
+  const d = document.createElement('div'); d.className = 'gp-row ' + (o.cls || '');
+  d.innerHTML = '<span class="gp-ic"></span><div class="gp-main"><div class="gp-name"></div><div class="gp-sub"></div><div class="gp-tags"></div></div><div class="gp-amt"></div>';
+  d.children[0].textContent = o.ic; d.querySelector('.gp-name').textContent = o.name; d.querySelector('.gp-sub').textContent = o.sub || '';
+  if(!o.sub) d.querySelector('.gp-sub').style.display = 'none';
+  (o.tags || []).forEach(t=>{ const g = document.createElement('span'); g.className = 'gp-tag ' + (t.c || ''); g.textContent = t.t; d.querySelector('.gp-tags').appendChild(g); });
+  d.querySelector('.gp-amt').textContent = fmt(o.amt);
+  if(o.acts){ const a = document.createElement('div'); a.className = 'gp-acts'; o.acts.forEach(x=>{ const b = document.createElement('button'); b.type = 'button'; b.className = 'gp-mb'; b.textContent = x.t; b.onclick = x.fn; a.appendChild(b); }); d.appendChild(a); }
+  return d;
+}
+function renderGIPage(){
+  const pg = document.getElementById('giPage'); if(!pg || currentMonth === null || !data[currentYear]) return;
+  const r = giRec(), inc = giCnt(r.src), exp = giCnt(r.out), left = inc - exp, bad = left < 0 && (inc > 0 || exp > 0);
+  document.getElementById('gpMonth').textContent = MONTHS[currentMonth] + ' ' + toArabicDigits(currentYear);
+  document.getElementById('gpInc').textContent = fmt(inc);
+  document.getElementById('gpOut').textContent = fmt(exp);
+  document.getElementById('gpLeft').textContent = (inc > 0 || exp > 0) ? fmt(Math.abs(left)) : '—';
+  document.getElementById('gpLeftLbl').textContent = bad ? '⚠️ العجز' : '✅ المتبقي';
+  document.getElementById('gpHero').classList.toggle('bad', bad);
+  const sp = inc > 0 ? Math.min(100, exp / inc * 100) : (exp > 0 ? 100 : 0);
+  document.getElementById('gpBar').style.width = sp + '%';
+  document.getElementById('gpPct').textContent = inc > 0 ? 'صُرف ' + giPctTxt(exp / inc * 100) + ' من الدخل' : 'لسه مفيش دخل مسجّل في الشهر ده';
+  const sum = f => r.src.filter(f).reduce((a,x)=> a + (Number(x.amount) || 0), 0);
+  document.getElementById('gpManual').textContent = fmt(sum(x=> !x.auto && x.counted !== false));
+  document.getElementById('gpBank').textContent = fmt(sum(x=> x.auto === 'bank' && x.counted !== false));
+  document.getElementById('gpPen').textContent = fmt(sum(x=> x.auto === 'pension' && x.counted !== false));
+  document.getElementById('gpPend').textContent = fmt(sum(x=> x.auto && x.counted === false));
+  const box = document.getElementById('gpSrc'); box.innerHTML = '';
+  document.getElementById('gpSrcCnt').textContent = r.src.length ? toArabicDigits(r.src.length) + ' بند' : '';
+  if(!r.src.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه مفيش مصادر دخل. دوس «＋ إضافة دخل» أو سجّل فوائد ومعاشات في «أموال» وهتظهر هنا لوحدها.'; box.appendChild(e); }
+  r.src.slice().sort((a,b)=> (Number(a.date) || 0) - (Number(b.date) || 0)).forEach(x=>{
+    const dt = x.date ? formatDate(x.date) : '';
+    if(x.auto){
+      const pend = x.counted === false, day = x.date ? toArabicDigits(new Date(x.date).getDate()) : '';
+      box.appendChild(gpRow({cls: x.auto + (pend ? ' pend' : ''), ic: x.auto === 'pension' ? '💳' : '🏦', name: x.name, sub: (x.auto === 'pension' ? 'معاش' : 'فايدة بنك') + ' \u200f·\u200f من «أموال» \u200f·\u200f ' + dt, amt: x.amount,
+        tags: [pend ? {t: '⏳ هتتحوّل يوم ' + day, c: 'w'} : {t: '✅ تم التحويل والصرف'}]}));
+    } else {
+      box.appendChild(gpRow({cls: x.counted === false ? 'unc' : '', ic: '💵', name: x.name, sub: dt, amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب في الإجمالي', c: 'n'}] : [],
+        acts: [{t: '✏️', fn: ()=> gpEditSrc(x)}, {t: '🗑', fn: ()=> gpDelSrc(x)}]}));
+    }
+  });
+  const ob = document.getElementById('gpOutList'); ob.innerHTML = '';
+  document.getElementById('gpOutCnt').textContent = r.out.length ? toArabicDigits(r.out.length) + ' عملية' : '';
+  if(!r.out.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه ماصرفتش من الدخل العام في الشهر ده.'; ob.appendChild(e); }
+  r.out.slice().sort((a,b)=> (Number(a.date) || 0) - (Number(b.date) || 0)).forEach(x=>{
+    const dd = GI_DEST[x.dest] || GI_DEST.income;
+    ob.appendChild(gpRow({cls: 'out' + (x.counted === false ? ' unc' : ''), ic: dd.ic, name: 'إلى ' + dd.n, sub: (x.note ? x.note + ' \u200f·\u200f ' : '') + (x.date ? formatDate(x.date) : ''), amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب', c: 'n'}] : []}));
+  });
+}
+function gpEditSrc(x){ openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a,dt,cn)=>{ x.name = n || x.name; x.amount = a; if(dt) x.date = dt; if(cn !== undefined) x.counted = cn; save(); renderGISources(); renderGI(); }, x.date || Date.now(), x.counted !== false); }
+function gpDelSrc(x){ openConfirm('حذف مصدر الدخل', 'هل تريد حذف "' + x.name + '"؟', ()=>{ const rr = giRec(); rr.src = rr.src.filter(z=> z.id !== x.id); save(); renderGISources(); renderGI(); }); }
 function closeGI(){ document.getElementById('giOverlay').classList.remove('open'); }
 function addGISource(){
   const n = document.getElementById('giSrcName').value.trim(), amt = Number(document.getElementById('giSrcAmt').value) || 0;
