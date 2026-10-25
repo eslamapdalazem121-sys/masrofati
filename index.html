@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-26.7630">
+<meta name="app-version" content="2026-10-26.7640">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4308,9 +4308,12 @@ async function glScrapeIsagha(){
   let sell = 0, buy = 0, m = tx.match(/عيار\s*24\s*([\d,.]+)\s*ج\.م\s*([\d,.]+)\s*ج\.م\s*([\d,.]+)\s*ج\.م/);
   if(m){ sell = num(m[1]); buy = num(m[3]); }
   else { m = tx.match(/عيار\s*24[^\d]{0,60}?([\d,]+(?:\.\d+)?)\s*ج\.م/); if(m) sell = num(m[1]); }
-  const o = tx.match(/أوقية الذهب[^\d]{0,12}([\d,]+(?:\.\d+)?)\s*\$/);
+  // أوقية الذهب: نقرا سعر «بيع» بالظبط (نفس اللي iSagha بيحسب بيه)، ولو الشكل اتغيّر نرجع لأول رقم بالدولار
+  let o = tx.match(/أوقية الذهب[^\d]{0,12}[\d,]+(?:\.\d+)?\s*\$\s*بيع\s*([\d,]+(?:\.\d+)?)\s*\$/);
+  if(!o) o = tx.match(/أوقية الذهب[^\d]{0,12}([\d,]+(?:\.\d+)?)\s*\$/);
   const oz = o ? num(o[1]) : 0;
-  return (sell > 1000 && oz > 500) ? {sell: sell, buy: (buy > 0 && buy < sell) ? buy : 0, oz: oz, src: 'iSagha'} : null;
+  const st = tx.match(/آخر تحديث:\s*(\d{1,2}\s+\S+\s+\d{4}\s*-\s*\d{1,2}:\d{2}\s*[صم])/);
+  return (sell > 1000 && oz > 500) ? {sell: sell, buy: (buy > 0 && buy < sell) ? buy : 0, oz: oz, src: 'iSagha', stamp: st ? st[1] : ''} : null;
 }
 async function glScrapeEdahab(){
   const num = function(x){ return Number(String(x).replace(/,/g, '')); };
@@ -4389,7 +4392,7 @@ async function goldLiveRefresh(manual){
     if(sg){
       nl.localP24 = sg.sell; nl.localBuy24 = sg.buy; nl.sarTs = now;
       // دولار الصاغة المعروض = سعر عيار 24 (بيع) ÷ جرام الأونصة من نفس مصدر الصاغة (نفس طريقة iSagha)؛ والتسعير بيستخدم النسخة المربوطة بالسعر العالمي الحي
-      nl.sarSrc = sg.src; nl.sarOz = sg.oz;
+      nl.sarSrc = sg.src; nl.sarOz = sg.oz; nl.sarStamp = sg.stamp || '';
       const sd = sg.sell / (((sg.oz > 0 ? sg.oz : xau)) / GL_OZ), sdPx = sg.sell / (((xau > 0 ? xau : sg.oz)) / GL_OZ), ref = nl.rate > 0 ? nl.rate : 0;
       if(sd >= 20 && sd <= 200 && (!ref || (sd >= ref * 0.97 && sd <= ref * 1.10))){ nl.autoSar = sd; nl.autoSarPx = sdPx; sarOk = true; }
       nl.spreadAuto = (sg.buy > 0) ? Math.min(5, Math.max(0, (1 - sg.buy / sg.sell) * 100)) : undefined;
@@ -4469,6 +4472,7 @@ function glInfoPanel(){
   else if(se.mode === 'manual' && usd) note = 'يدوي: ' + f2(usd / GL_OZ) + ' $ × ' + f2(se.v) + ' = ' + fmt(cgInt(usd / GL_OZ * se.v)) + ' ج' + (_gl.autoSar > 0 ? ' · التلقائي دلوقتي: ' + f2(_gl.autoSar) + ' — امسح الخانة للرجوع للتلقائي' : '');
   else if(se.mode === 'auto'){
     note = 'تلقائي (' + (_gl.sarSrc || '') + '): عيار 24 بيع ' + fmt(_gl.localP24) + ' ج ÷ جرام الأونصة' + (_gl.sarOz > 0 ? ' (' + f2(_gl.sarOz) + ' $ ÷ ' + f2(GL_OZ) + ' = ' + f2(_gl.sarOz / GL_OZ) + ' $)' : '') + ' = ' + f2(_gl.autoSar > 0 ? _gl.autoSar : se.v) + ' ج للدولار' + (_gl.sarTs ? ' · ' + glTm(_gl.sarTs) : '');
+    if(_gl.sarStamp) note += '\nآخر تحديث على موقع ' + _gl.sarSrc + ': ' + _gl.sarStamp;
     if(_gl.sarTs && Date.now() - _gl.sarTs > 30 * 60 * 1000) note += '\n⚠️ السعر قديم (آخر تحديث ناجح) — دوس 🔄 تحديث';
     if(_gl.rate > 0 && _gl.autoSar > 0) note += '\nفرق الصاغة عن البنك: ' + f2(_gl.autoSar - _gl.rate) + ' ج';
   }
