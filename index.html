@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-26.7660">
+<meta name="app-version" content="2026-10-26.7680">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1659,6 +1659,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
       <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاش شهري</small><b id="cmPen">0</b></span>
     </div>
+    <button type="button" class="gp-btn r" style="width:100%;margin:6px 0 12px;" onclick="openCmOut()">💸 صرف من الأموال</button>
     <div id="cmInterest" style="display:none;"></div>
     <div class="gi-rows" id="cmList"></div>
     <div class="date-row grp-new"><input type="text" id="cmGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('money')">إنشاء مجموعة</button></div>
@@ -1680,6 +1681,22 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <button class="btn-save" id="cmSaveBtn" onclick="addCapMoney()">＋ إضافة</button>
     </div>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="cmOutOverlay">
+  <div class="modal-box">
+    <button type="button" class="fs-close" onclick="closeCmOut()" aria-label="رجوع">✕</button>
+    <h3>💸 صرف من الأموال</h3>
+    <div class="gi-dest" id="cmoKinds" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetKind('cash')">💵 نقدي</button><button type="button" onclick="cmoSetKind('bank')">🏦 شهادات وحسابات</button><button type="button" onclick="cmoSetKind('int')">🪙 فوائد</button><button type="button" onclick="cmoSetKind('pension')">💳 معاش</button></div>
+    <div class="field"><label>الصرف من</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
+    <div class="hint" id="cmoAvail"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any"></div>
+    <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetDest('zakat')">🕌 زكاتي</button><button type="button" onclick="cmoSetDest('other')">📦 أخرى</button></div>
+    <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" onclick="cmOutSave()">💸 صرف</button></div>
+    <h4 style="margin:18px 0 8px;">🧾 سجل الصرف</h4>
+    <div class="gi-rows" id="cmoLog"></div>
   </div>
 </div>
 
@@ -3707,7 +3724,7 @@ function capTotals(){
   const now0 = new Date(), eod0 = new Date(now0.getFullYear(), now0.getMonth(), now0.getDate(), 23, 59, 59, 999);
   const bankItems = mo.filter(x=> capSubOf(x) === 'bank'), penItems = mo.filter(x=> capSubOf(x) === 'pension');
   // الفوايد اللي مش بتتحوّل بتتضاف للرصيد، واللي بتتحوّل وتتصرف ما بتتضافش. والمعاش المحوّل بيتخصم
-  const bankAdded = cgRound(bankItems.filter(x=> x.intKeep === true).reduce((a,x)=> a + bankIntSince(x, eod0), 0));   // فوايد ما اتحوّلتش: بتتضاف لرصيد البنك
+  const bankAdded = cgRound(bankItems.filter(x=> x.intKeep === true).reduce((a,x)=> a + Math.max(0, bankIntSince(x, eod0) - (Number(x.intSpent) || 0)), 0));   // فوايد ما اتحوّلتش: بتتضاف لرصيد البنك
   const penPaid = cgRound(penItems.reduce((a,x)=> a + (penActive(x, eod0.getFullYear(), eod0.getMonth()) && penDueOf(x, eod0.getFullYear(), eod0.getMonth()) <= eod0 ? (Number(x.amount) || 0) : 0), 0));
   const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(bankItems) + bankAdded;
   const pension = giSum(penItems) - penPaid;   // معاش شهري: مش داخل في إجمالي رأس المال
@@ -4128,6 +4145,89 @@ function renderCapMoney(){
   renderBankInterest();
   renderPensionPanel();
 }
+// ===== صرف من الأموال: نقدي / شهادات وحسابات / فوائد / معاش =====
+let _cmoKind = 'cash', _cmoDest = 'income';
+function giRecAt(y, m){ const sy = currentYear, sm = currentMonth; currentYear = y; currentMonth = m; try{ return giRec(); } finally{ currentYear = sy; currentMonth = sm; } }
+function cmoYM(){ const n = new Date(); return {y: n.getFullYear(), m: n.getMonth(), k: n.getFullYear() + '-' + n.getMonth()}; }
+function cmoEntryAmt(x){
+  const t = cmoYM(), gy = data.genIncome && data.genIncome[t.y], r = (gy && typeof gy === 'object') ? gy[t.m] : null;
+  const e = (r && Array.isArray(r.src)) ? r.src.find(z=> z.id === 'ai:' + x.id && z.counted !== false) : null;
+  const spent = (data.moneyOut || []).filter(o=> o.gi && o.itemId === x.id && o.ym === t.k).reduce((a,o)=> a + (Number(o.amount) || 0), 0);
+  return Math.max(0, cgRound((e ? Number(e.amount) || 0 : 0) - spent));
+}
+function cmoAvailOf(kind, x){
+  if(kind === 'cash' || kind === 'bank') return Math.max(0, Number(x.amount) || 0);
+  if(kind === 'int' && x.intKeep === true){ const n = new Date(); return Math.max(0, cgRound(bankIntSince(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)) - (Number(x.intSpent) || 0))); }
+  return cmoEntryAmt(x);
+}
+function cmoItems(kind){ return capList().filter(x=> capCatOf(x) === 'money' && (kind === 'int' ? (capSubOf(x) === 'bank' && bankMonthly(x) > 0) : capSubOf(x) === kind)); }
+function openCmOut(){ _cmoKind = 'cash'; _cmoDest = 'income'; cmoRender(); document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; document.getElementById('cmOutOverlay').classList.add('open'); }
+function closeCmOut(){ document.getElementById('cmOutOverlay').classList.remove('open'); }
+function cmoSetKind(k){ _cmoKind = k; cmoRender(); }
+function cmoSetDest(d){ _cmoDest = d; [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest)); }
+function cmoAvail(){
+  const sel = document.getElementById('cmoItem'), x = capList().find(z=> z.id === sel.value), el = document.getElementById('cmoAvail');
+  if(!x){ el.textContent = _cmoKind === 'int' ? 'مفيش بنوك عليها فوايد' : 'مفيش بنود هنا. ضيف بند من «أموال» الأول.'; return; }
+  const av = cmoAvailOf(_cmoKind, x);
+  let t = 'المتاح للصرف: ' + fmt(av);
+  if((_cmoKind === 'int' && x.intKeep !== true) || _cmoKind === 'pension') t += ' (من الدخل العام لهذا الشهر، بعد ما استحق وتحوّل)';
+  else if(_cmoKind === 'int') t += ' (فوايد متضافة لرصيد البنك)';
+  el.textContent = t;
+}
+function cmoRender(){
+  [...document.querySelectorAll('#cmoKinds button')].forEach((b,i)=> b.classList.toggle('active', ['cash','bank','int','pension'][i] === _cmoKind));
+  [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest));
+  const sel = document.getElementById('cmoItem'), keepSel = sel.value; sel.innerHTML = '';
+  cmoItems(_cmoKind).forEach(x=>{ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + ' — متاح ' + fmt(cmoAvailOf(_cmoKind, x)); sel.appendChild(o); });
+  if(keepSel && [...sel.options].some(o=> o.value === keepSel)) sel.value = keepSel;
+  cmoAvail(); cmoLog();
+}
+function cmoLog(){
+  const box = document.getElementById('cmoLog'), arr = (data.moneyOut || []).slice().reverse().slice(0, 30);
+  box.innerHTML = arr.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لسه مفيش صرف</div>';
+  const ic = {cash: '💵', bank: '🏦', int: '🪙', pension: '💳'};
+  arr.forEach(r=>{
+    const d = document.createElement('div'); d.className = 'gi-row';
+    d.innerHTML = '<span></span><b></b><span></span><button type="button">🗑</button>';
+    d.children[0].textContent = ic[r.kind] || '💸';
+    d.children[1].textContent = r.name + ' → ' + (GI_DEST[r.dest] || GI_DEST.other).n + (r.note ? ' · ' + r.note : '') + ' · ' + formatDate(opsMs(r.date));
+    d.children[2].textContent = fmt(r.amount);
+    d.children[3].onclick = ()=> openConfirm('حذف الصرف', 'هل تريد حذف الصرف ده؟ المبلغ هيرجع لمكانه.', ()=>{ cmOutDel(r.id); });
+    box.appendChild(d);
+  });
+}
+function cmoAfter(){ save(); try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderGI(); }catch(e){} try{ renderZakat(); }catch(e){} cmoRender(); }
+function cmOutSave(){
+  const sel = document.getElementById('cmoItem'), x = capList().find(z=> z.id === sel.value);
+  const amt = Number(document.getElementById('cmoAmt').value) || 0, note = document.getElementById('cmoNote').value.trim();
+  if(!x){ showToast('اختار البند اللي هتصرف منه', false); return; }
+  if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
+  const av = cmoAvailOf(_cmoKind, x);
+  if(amt > av + 0.001){ showToast('المبلغ أكبر من المتاح (' + fmt(av) + ')', false); return; }
+  const t = cmoYM(), id = uid(), date = new Date().toISOString().slice(0, 10);
+  const rec = {id: id, kind: _cmoKind, itemId: x.id, name: x.name, amount: amt, dest: _cmoDest, note: note, date: date, ym: t.k};
+  if(_cmoKind === 'cash' || _cmoKind === 'bank'){ x.amount = cgRound((Number(x.amount) || 0) - amt); }
+  else if(_cmoKind === 'int' && x.intKeep === true){ x.intSpent = cgRound((Number(x.intSpent) || 0) + amt); rec.keep = true; }
+  else { ensureYear(t.y); giRecAt(t.y, t.m).out.push({id: id, dest: _cmoDest, amount: amt, note: x.name + (note ? ' · ' + note : ''), counted: true, date: date}); rec.gi = true; }
+  const label = giLabel(x.name + (note ? ' · ' + note : ''));
+  if(_cmoDest === 'zakat'){ zkGet().adds.push({id: id, name: label, amount: amt, date: date}); }
+  else if(_cmoDest === 'income'){ ensureYear(t.y); const mon = data[t.y][t.m]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: id, name: label, amount: amt, counted: true, date: opsMs(date)}); }
+  if(!Array.isArray(data.moneyOut)) data.moneyOut = [];
+  data.moneyOut.push(rec);
+  document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = '';
+  cmoAfter(); showToast('تم الصرف إلى ' + (GI_DEST[_cmoDest] || GI_DEST.other).n + ' ✅', true);
+}
+function cmOutDel(id){
+  const i = (data.moneyOut || []).findIndex(r=> r.id === id); if(i < 0) return;
+  const rec = data.moneyOut[i], x = capList().find(z=> z.id === rec.itemId), ym = String(rec.ym || '').split('-').map(Number);
+  if(rec.keep){ if(x) x.intSpent = Math.max(0, cgRound((Number(x.intSpent) || 0) - rec.amount)); }
+  else if(rec.gi){ if(ym.length === 2){ const gr = giRecAt(ym[0], ym[1]); gr.out = gr.out.filter(o=> o.id !== id); } }
+  else if(x){ x.amount = cgRound((Number(x.amount) || 0) + rec.amount); }
+  if(rec.dest === 'zakat'){ const z = zkGet(); z.adds = z.adds.filter(a=> a.id !== id); }
+  else if(rec.dest === 'income' && ym.length === 2){ const mon = data[ym[0]] && data[ym[0]][ym[1]]; if(mon && Array.isArray(mon.incomeSources)) mon.incomeSources = mon.incomeSources.filter(z=> z.id !== id); }
+  data.moneyOut.splice(i, 1);
+  cmoAfter(); showToast('اتحذف الصرف ورجع المبلغ ✅', true);
+}
 function openCapMoney(){
   _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false}; _cmMonthOpen = new Set(); _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
   renderCapMoney();
@@ -4415,7 +4515,14 @@ async function goldLiveRefresh(manual){
       // دولار الصاغة المعروض = سعر عيار 24 (بيع) ÷ جرام الأونصة من نفس مصدر الصاغة (نفس طريقة iSagha)؛ والتسعير بيستخدم النسخة المربوطة بالسعر العالمي الحي
       nl.sarSrc = sg.src; nl.sarOz = sg.oz; nl.sarStamp = sg.stamp || '';
       const sd = sg.sell / (((sg.oz > 0 ? sg.oz : xau)) / GL_OZ), sdPx = sg.sell / (((xau > 0 ? xau : sg.oz)) / GL_OZ), ref = nl.rate > 0 ? nl.rate : 0;
-      if(sd >= 20 && sd <= 200 && (!ref || (sd >= ref * 0.97 && sd <= ref * 1.10))){ nl.autoSar = sd; nl.autoSarPx = sdPx; sarOk = true; }
+      if(sd >= 20 && sd <= 200 && (!ref || (sd >= ref * 0.97 && sd <= ref * 1.10))){
+        // لو سعر عيار 24 عند الصاغة ما اتغيّرش من آخر مرة (السوق المحلي مقفول)، دولار الصاغة يفضل ثابت على آخر تسعير للتجار، لأن الأونصة العالمية بتتحرك وهم لسه ما سعّروش
+        const pv = _gl || {};
+        const same = pv.sarStick === true && pv.sarSrc === sg.src && pv.autoSar > 0 && Math.abs((Number(pv.localP24) || 0) - sg.sell) < 0.5;
+        if(same){ nl.autoSar = pv.autoSar; }
+        else { nl.autoSar = sd; nl.sarChangeTs = now; nl.sarChangeStamp = sg.stamp || ''; }
+        nl.sarStick = true; nl.autoSarPx = sdPx; sarOk = true;
+      }
       nl.spreadAuto = (sg.buy > 0) ? Math.min(5, Math.max(0, (1 - sg.buy / sg.sell) * 100)) : undefined;
     }
     if(usd > 0 && nl.rate > 0) nl.p24 = cgRound(usd / GL_OZ * nl.rate);
@@ -4494,6 +4601,8 @@ function glInfoPanel(){
   else if(se.mode === 'auto'){
     note = 'تلقائي (' + (_gl.sarSrc || '') + '): عيار 24 بيع ' + fmt(_gl.localP24) + ' ج ÷ جرام الأونصة' + (_gl.sarOz > 0 ? ' (' + f2(_gl.sarOz) + ' $ ÷ ' + f2(GL_OZ) + ' = ' + f2(_gl.sarOz / GL_OZ) + ' $)' : '') + ' = ' + f2(_gl.autoSar > 0 ? _gl.autoSar : se.v) + ' ج للدولار' + (_gl.sarTs ? ' · ' + glTm(_gl.sarTs) : '');
     if(_gl.sarStamp) note += '\nآخر تحديث على موقع ' + _gl.sarSrc + ': ' + _gl.sarStamp;
+    { const calc = (_gl.sarOz > 0 && _gl.localP24 > 0) ? _gl.localP24 / (_gl.sarOz / GL_OZ) : 0;
+      if(calc > 0 && _gl.autoSar > 0 && Math.abs(calc - _gl.autoSar) > 0.005) note += '\n📌 دولار الصاغة المعتمد ' + f2(_gl.autoSar) + ' = آخر تسعير للتجار' + (_gl.sarChangeStamp ? ' (' + _gl.sarChangeStamp + ')' : '') + ' — الأونصة اتحركت بعده والصاغة لسه ما سعّرتش (لو اتحسب بالأونصة دلوقتي = ' + f2(calc) + ')'; }
     if(_gl.sarTs && Date.now() - _gl.sarTs > 30 * 60 * 1000) note += '\n⚠️ السعر قديم (آخر تحديث ناجح) — دوس 🔄 تحديث';
     if(_gl.rate > 0 && _gl.autoSar > 0) note += '\nفرق الصاغة عن البنك: ' + f2(_gl.autoSar - _gl.rate) + ' ج';
   }
