@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-26.7680">
+<meta name="app-version" content="2026-10-26.7700">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1689,9 +1689,10 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <button type="button" class="fs-close" onclick="closeCmOut()" aria-label="رجوع">✕</button>
     <h3>💸 صرف من الأموال</h3>
     <div class="gi-dest" id="cmoKinds" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetKind('cash')">💵 نقدي</button><button type="button" onclick="cmoSetKind('bank')">🏦 شهادات وحسابات</button><button type="button" onclick="cmoSetKind('int')">🪙 فوائد</button><button type="button" onclick="cmoSetKind('pension')">💳 معاش</button></div>
-    <div class="field"><label>الصرف من</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
+    <div class="gi-sumrow t3d money-t" id="cmoTotalRow"><span class="gi-chip v-violet"><small id="cmoTotLbl">💵 إجمالي النقدي</small><b id="cmoTot">0</b></span><span class="gi-chip v-green"><small>المتبقي بعد الصرف</small><b id="cmoAfter">0</b></span></div>
+    <div class="field"><label>الصرف من (كل بند وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
     <div class="hint" id="cmoAvail"></div>
-    <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
     <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetDest('zakat')">🕌 زكاتي</button><button type="button" onclick="cmoSetDest('other')">📦 أخرى</button></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" onclick="cmOutSave()">💸 صرف</button></div>
@@ -4161,12 +4162,21 @@ function cmoAvailOf(kind, x){
   return cmoEntryAmt(x);
 }
 function cmoItems(kind){ return capList().filter(x=> capCatOf(x) === 'money' && (kind === 'int' ? (capSubOf(x) === 'bank' && bankMonthly(x) > 0) : capSubOf(x) === kind)); }
-function openCmOut(){ _cmoKind = 'cash'; _cmoDest = 'income'; cmoRender(); document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; document.getElementById('cmOutOverlay').classList.add('open'); }
+function openCmOut(){ _cmoKind = 'cash'; _cmoDest = 'income'; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); document.getElementById('cmOutOverlay').classList.add('open'); }
 function closeCmOut(){ document.getElementById('cmOutOverlay').classList.remove('open'); }
 function cmoSetKind(k){ _cmoKind = k; cmoRender(); }
 function cmoSetDest(d){ _cmoDest = d; [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest)); }
+function cmoTotals(){
+  const lbl = {cash: '💵 إجمالي النقدي', bank: '🏦 إجمالي الشهادات والحسابات', int: '🪙 إجمالي الفوائد المتاحة', pension: '💳 إجمالي المعاش المتاح'};
+  const items = cmoItems(_cmoKind), tot = cgRound(items.reduce((a,x)=> a + cmoAvailOf(_cmoKind, x), 0)), amt = Number((document.getElementById('cmoAmt') || {}).value) || 0;
+  document.getElementById('cmoTotLbl').textContent = lbl[_cmoKind] + (items.length > 1 ? ' (' + toArabicDigits(items.length) + ' بنود)' : '');
+  document.getElementById('cmoTot').textContent = fmt(tot);
+  const left = cgRound(tot - amt), el = document.getElementById('cmoAfter'); el.textContent = fmt(Math.abs(left)); el.style.color = left < 0 ? '#e03131' : '';
+  if(left < 0) el.textContent = '−' + el.textContent;
+}
 function cmoAvail(){
   const sel = document.getElementById('cmoItem'), x = capList().find(z=> z.id === sel.value), el = document.getElementById('cmoAvail');
+  if(sel.value === '__all__'){ el.textContent = 'هيتصرف من البنود بالترتيب لحد ما المبلغ يخلص، وكل بند هيتسجّل لوحده في السجل.'; return; }
   if(!x){ el.textContent = _cmoKind === 'int' ? 'مفيش بنوك عليها فوايد' : 'مفيش بنود هنا. ضيف بند من «أموال» الأول.'; return; }
   const av = cmoAvailOf(_cmoKind, x);
   let t = 'المتاح للصرف: ' + fmt(av);
@@ -4178,9 +4188,10 @@ function cmoRender(){
   [...document.querySelectorAll('#cmoKinds button')].forEach((b,i)=> b.classList.toggle('active', ['cash','bank','int','pension'][i] === _cmoKind));
   [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest));
   const sel = document.getElementById('cmoItem'), keepSel = sel.value; sel.innerHTML = '';
-  cmoItems(_cmoKind).forEach(x=>{ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + ' — متاح ' + fmt(cmoAvailOf(_cmoKind, x)); sel.appendChild(o); });
+  { const its = cmoItems(_cmoKind); if(its.length > 1){ const o = document.createElement('option'); o.value = '__all__'; o.textContent = '⭐ الإجمالي كله — متاح ' + fmt(cgRound(its.reduce((a,x)=> a + cmoAvailOf(_cmoKind, x), 0))) + ' (يتوزّع تلقائي)'; sel.appendChild(o); }
+    its.forEach(x=>{ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + ' — متاح ' + fmt(cmoAvailOf(_cmoKind, x)); sel.appendChild(o); }); }
   if(keepSel && [...sel.options].some(o=> o.value === keepSel)) sel.value = keepSel;
-  cmoAvail(); cmoLog();
+  cmoAvail(); cmoTotals(); cmoLog();
 }
 function cmoLog(){
   const box = document.getElementById('cmoLog'), arr = (data.moneyOut || []).slice().reverse().slice(0, 30);
@@ -4197,13 +4208,7 @@ function cmoLog(){
   });
 }
 function cmoAfter(){ save(); try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderGI(); }catch(e){} try{ renderZakat(); }catch(e){} cmoRender(); }
-function cmOutSave(){
-  const sel = document.getElementById('cmoItem'), x = capList().find(z=> z.id === sel.value);
-  const amt = Number(document.getElementById('cmoAmt').value) || 0, note = document.getElementById('cmoNote').value.trim();
-  if(!x){ showToast('اختار البند اللي هتصرف منه', false); return; }
-  if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
-  const av = cmoAvailOf(_cmoKind, x);
-  if(amt > av + 0.001){ showToast('المبلغ أكبر من المتاح (' + fmt(av) + ')', false); return; }
+function cmoApply(x, amt, note){
   const t = cmoYM(), id = uid(), date = new Date().toISOString().slice(0, 10);
   const rec = {id: id, kind: _cmoKind, itemId: x.id, name: x.name, amount: amt, dest: _cmoDest, note: note, date: date, ym: t.k};
   if(_cmoKind === 'cash' || _cmoKind === 'bank'){ x.amount = cgRound((Number(x.amount) || 0) - amt); }
@@ -4214,6 +4219,17 @@ function cmOutSave(){
   else if(_cmoDest === 'income'){ ensureYear(t.y); const mon = data[t.y][t.m]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: id, name: label, amount: amt, counted: true, date: opsMs(date)}); }
   if(!Array.isArray(data.moneyOut)) data.moneyOut = [];
   data.moneyOut.push(rec);
+}
+function cmOutSave(){
+  const sel = document.getElementById('cmoItem'), all = sel.value === '__all__';
+  const amt = Number(document.getElementById('cmoAmt').value) || 0, note = document.getElementById('cmoNote').value.trim();
+  const list = all ? cmoItems(_cmoKind) : capList().filter(z=> z.id === sel.value);
+  if(!list.length){ showToast('اختار البند اللي هتصرف منه', false); return; }
+  if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
+  const av = cgRound(list.reduce((a,x)=> a + cmoAvailOf(_cmoKind, x), 0));
+  if(amt > av + 0.001){ showToast('المبلغ أكبر من المتاح (' + fmt(av) + ')', false); return; }
+  let rest = amt;
+  list.forEach(x=>{ if(rest <= 0.0001) return; const take = Math.min(cmoAvailOf(_cmoKind, x), rest); if(take > 0){ cmoApply(x, cgRound(take), note); rest = cgRound(rest - take); } });
   document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = '';
   cmoAfter(); showToast('تم الصرف إلى ' + (GI_DEST[_cmoDest] || GI_DEST.other).n + ' ✅', true);
 }
