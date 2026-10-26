@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-27.7760">
+<meta name="app-version" content="2026-10-27.7770">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3514,7 +3514,7 @@ function zkUnfreeze(){
     zkSnapInit(); delete data.zakatMal[y]; delete data.zakatSnap[y]; zkFreeze(y, true);
   } else {
     if(!confirm('إلغاء تثبيت زكاة ' + toArabicDigits(y) + '؟ هترجع تتحسب تلقائيًا من رأس المال الحالي.')) return;
-    zkSnapInit(); delete data.zakatFrozen[y]; delete data.zakatSnap[y]; delete data.zakatMal[y]; data.zakatMalAuto = true;
+    zkSnapInit(); delete data.zakatFrozen[y]; delete data.zakatSnap[y]; delete data.zakatMal[y]; data.zakatMalAuto = true; { const di = zkDueInfo(); if(di.key) data.zakatDueHandled = di.key; }
   }
   save(); renderZM(); try{ renderZkCalc(); }catch(e){}
 }
@@ -3532,7 +3532,14 @@ function zmGet(){
     if(currentYear <= new Date().getFullYear() && zkIsFrozen(currentYear) && !data.zakatSnap[currentYear] && !(zmStored() > 0)){ zkFreeze(currentYear, true); save(); }   // سنة عدّت من غير تثبيت: نثبّتها بتقدير آخر السنة
     if(zmAuto()){
       const c = zkcCompute(), prev = data.zakatSnap[currentYear], di = zkDueInfo();
-      if(di.state === 'due' || di.state === 'paid'){ zkSnapTake(currentYear, false); zkFreeze(currentYear); save(); return zmStored(); }   // موعد الزكاة عدّى: القيمة بتتثبّت
+      if((di.state === 'due' || di.state === 'paid') && di.key){
+        if(data.zakatDueHandled === undefined){ data.zakatDueHandled = di.key; save(); }   // موعد عدّى قبل التحديث: ما نثبّتش عليه، القيمة تفضل حيّة
+        else if(data.zakatDueHandled !== di.key){
+          data.zakatDueHandled = di.key;
+          if(di.due && di.due.getFullYear() === currentYear){ zkSnapTake(currentYear, false); zkFreeze(currentYear); save(); return zmStored(); }   // ميعاد الاستحقاق جه: القيمة بتتثبّت لوحدها
+          save();
+        }
+      }
       if(!prev || !prev.c || prev.c.zk !== c.zk){ data.zakatSnap[currentYear] = {c: JSON.parse(JSON.stringify(c)), ts: Date.now(), est: false}; save(); }   // آخر حساب حي (بيتحفظ عشان يتثبّت لوحده في آخر السنة)
       return c.zk;
     }
@@ -3669,7 +3676,7 @@ function renderZmDue(){
 }
 function zkSetStart(v){ data.zakatStart = v || ''; save(); renderZM(); renderZkCalc(); }
 function zkSetMode(m){ data.zakatMode = m; save(); renderZM(); renderZkCalc(); }
-function zkMarkPaid(on){ if(!data.zakatPaidD) data.zakatPaidD = {}; const i = zkDueInfo(); if(i.key){ if(on) data.zakatPaidD[i.key] = true; else delete data.zakatPaidD[i.key]; } if(on && currentYear === new Date().getFullYear() && !zkIsFrozen(currentYear)){ zkSnapTake(currentYear, false); zkFreeze(currentYear); } save(); renderZM(); renderZkCalc(); }
+function zkMarkPaid(on){ if(!data.zakatPaidD) data.zakatPaidD = {}; const i = zkDueInfo(); if(i.key){ if(on) data.zakatPaidD[i.key] = true; else delete data.zakatPaidD[i.key]; } if(on && currentYear === new Date().getFullYear() && !zkIsFrozen(currentYear)){ zkSnapTake(currentYear, false); zkFreeze(currentYear); if(i.key) data.zakatDueHandled = i.key; } save(); renderZM(); renderZkCalc(); }
 function zkcCompute(){
   const t = capTotals(), go = goldPieces(), live = glBase24() > 0, p24 = glSellPpg(24);
   const bk = {jewel: {g: 0, e: 0, v: 0, n: 0}, save: {g: 0, e: 0, v: 0, n: 0}, other: {g: 0, e: 0, v: 0, n: 0}}, kr = {};
@@ -3708,7 +3715,8 @@ function renderZkCalc(){
   if(frozen){
     const sn = data.zakatSnap[currentYear], fb = el('zkd-note');
     fb.style.cssText = 'background:rgba(14,138,90,.12);border:1px solid rgba(14,138,90,.4);border-radius:12px;padding:10px;font-weight:800;line-height:1.7;';
-    fb.textContent = '🔒 زكاة ' + toArabicDigits(currentYear) + ' مثبّتة' + (sn && sn.est ? ' (تقدير من تواريخ الإضافة — اللي اتباع أو اتحذف قبل كده مش ظاهر، راجع الرقم)' : (sn && sn.ts ? ' بتاريخ ' + gFmt(new Date(sn.ts)) : '')) + ' — أي بيع أو خصم أو إضافة أو تعديل في الذهب بعد كده ما بيغيّرهاش.';
+    fb.textContent = '🔒 زكاة ' + toArabicDigits(currentYear) + ' مثبّتة' + (sn && sn.est ? ' (تقدير من تواريخ الإضافة — اللي اتباع أو اتحذف قبل كده مش ظاهر، راجع الرقم)' : (sn && sn.ts ? ' بتاريخ ' + gFmt(new Date(sn.ts)) : '')) + ' — أي بيع أو خصم أو إضافة أو تعديل في الذهب بعد كده ما بيغيّرهاش.\n💰 القيمة: ' + fmt(c.zk) + ' · المصروف: ' + fmt(zmPaidTotal()) + ' · المتبقي: ' + fmt(Math.max(0, c.zk - zmPaidTotal())) + (zmPaidTotal() > c.zk ? ' (زيادة ' + fmt(zmPaidTotal() - c.zk) + ')' : '');
+    fb.style.whiteSpace = 'pre-line';
     const ub = document.createElement('button'); ub.type = 'button'; ub.style.cssText = 'display:block;margin-top:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border,#cdd);background:#fff;font-weight:800;font-family:inherit;'; ub.textContent = currentYear < new Date().getFullYear() ? '🔄 إعادة التقدير من تواريخ الإضافة' : '🔓 إلغاء التثبيت وإعادة الحساب'; ub.onclick = zkUnfreeze; fb.appendChild(ub);
   }
   // موعد وجوب الزكاة
