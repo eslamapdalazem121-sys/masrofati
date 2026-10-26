@@ -1,5 +1,5 @@
 /* Service Worker — مصروفاتي B (العمل بدون إنترنت) */
-const VERSION = '2026-10-26.7720';
+const VERSION = '2026-10-26.7730';
 const CACHE_PREFIX = 'masrofati-b-v';
 const CACHE = CACHE_PREFIX + VERSION;
 const SHELL = [
