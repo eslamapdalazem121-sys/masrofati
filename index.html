@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-26.7730">
+<meta name="app-version" content="2026-10-26.7750">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1300,7 +1300,9 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .gl-ir{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px dashed rgba(184,134,11,.5); font-size:calc(14px * var(--fs,1)); font-weight:700;}
 .gl-ir .gl-il{flex:1; min-width:0;}
 .gl-ir b{font-size:calc(20px * var(--fs,1)); font-weight:800; direction:ltr; white-space:nowrap;}
-.gl-ir input{width:38%; max-width:150px; text-align:center; font-size:calc(18px * var(--fs,1)); font-weight:800; padding:8px; border-radius:10px; border:1px solid var(--border,#cdd);}
+.gl-ir input::placeholder{font-size:.78em; font-weight:700;}
+.gl-ir input{width:40%; max-width:160px; min-width:118px; text-align:center; font-size:calc(18px * var(--fs,1)); font-weight:800; padding:8px; border-radius:10px; border:1px solid var(--border,#cdd);}
+.gl-sub{font-size:calc(11px * var(--fs,1)); color:var(--muted); font-weight:700; line-height:1.5; padding:0 0 6px; text-align:start; unicode-bidi:plaintext; overflow-wrap:anywhere;}
 .gl-in{font-size:calc(12.5px * var(--fs,1)); color:var(--muted); font-weight:700; line-height:1.5; padding-bottom:6px;}
 #glInfoSar > span, #glPrices > span{padding:9px 4px;}
 #glInfoSar > span > span, #glPrices > span > span{background:none !important; padding:0; border-radius:0; min-width:0; flex:none;}
@@ -1726,6 +1728,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       </div>
       <div id="glInfo" style="display:none;">
         <div class="gl-ir"><span class="gl-il">🌍 السعر العالمي الآن (أونصة)</span><b id="glInfoWorld">—</b></div>
+        <div class="gl-sub" id="glWorldNote"></div>
         <div class="gl-ir"><span class="gl-il">💵 دولار البنوك الحكومية (الأهلي · مصر · القاهرة) شراء / بيع</span><b id="glInfoUsd">—</b></div>
         <div class="gl-in" id="glUsdNote"></div>
         <div class="gl-ir"><span class="gl-il">✍️ دولار البنك يدوي (فاضي = تلقائي)</span><input type="number" id="glUsdManual" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
@@ -4726,7 +4729,9 @@ function glKaratBox(k){
 function glInfoPanel(){
   const w = document.getElementById('glInfoWorld'); if(!w) return;
   const usd = _gl && _gl.usd > 0 ? _gl.usd : 0, r = glRate(), b24 = glBase24(), se = glSarEff(), f2 = glF2;
-  w.textContent = usd ? '$' + f2(usd) + (_gl.usdTs ? ' · ' + glTmS(_gl.usdT || _gl.usdTs) : '') + (_gl.usdSrc ? ' · ' + _gl.usdSrc : '') + ((_gl.usdT && Date.now() - _gl.usdT > 15 * 60 * 1000) ? ' ⚠️ متأخر' : '') : '—';
+  w.textContent = usd ? '$' + f2(usd) : '—';
+  const wn = document.getElementById('glWorldNote');
+  if(wn){ const parts = []; if(usd && _gl.usdSrc) parts.push('المصدر: ' + _gl.usdSrc); if(usd && _gl.usdTs) parts.push(glTmS(_gl.usdT || _gl.usdTs)); if(usd && _gl.usdT && Date.now() - _gl.usdT > 15 * 60 * 1000) parts.push('⚠️ متأخر'); wn.textContent = parts.join(' · '); }
   document.getElementById('glInfoUsd').textContent = r ? (Number(_glAdj.usdManual) > 0 ? f2(r) + ' ج (يدوي)' : f2(_gl.rateBuy) + ' / ' + f2(r) + ' ج') : '—';
   let un = '';
   if(Number(_glAdj.usdManual) > 0) un = 'بتستخدم الدولار اللي كتبته بإيدك' + (_gl && _gl.rate > 0 ? ' (التلقائي دلوقتي: ' + f2(_gl.rate) + ')' : '') + ' — امسح الخانة للرجوع للتلقائي';
