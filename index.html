@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-26.7710">
+<meta name="app-version" content="2026-10-26.7720">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4479,16 +4479,36 @@ async function glFetchJsonAny(url){
   throw new Error('fetch failed');
 }
 // سعر أونصة الذهب العالمي اللحظي: بنسأل أكتر من مصدر مع بعض وناخد الأحدث وقتًا
+var _glInv = {v: 0, t: 0, fail: 0};
+// Investing.com XAU/USD (سعر الذهب الفوري): بنقراه من الصفحة عن طريق الوسطاء، ومرة كل 30 ثانية بس (ولو فشل نستنى دقيقتين) عشان ما نضغطش عليهم
+async function glGetInvesting(force){
+  const now = Date.now();
+  if(!force && _glInv.v > 0 && now - _glInv.t < 30000) return {v: _glInv.v, t: _glInv.t, src: 'Investing.com'};
+  if(!force && _glInv.fail && now - _glInv.fail < 120000) throw new Error('backoff');
+  try{
+    const raw = await glFetchText('https://www.investing.com/currencies/xau-usd');
+    let m = raw.match(/data-test="instrument-price-last"[^>]*>\s*([\d,]+(?:\.\d+)?)/);
+    if(!m) m = raw.match(/instrument-price-last[^>]*>\s*([\d,]+(?:\.\d+)?)/);
+    const v = m ? Number(m[1].replace(/,/g, '')) : 0;
+    if(!(v > 500 && v < 20000)) throw new Error('parse');
+    _glInv = {v: v, t: Date.now(), fail: 0};
+    return {v: v, t: _glInv.t, src: 'Investing.com'};
+  }catch(e){ _glInv.fail = Date.now(); throw e; }
+}
 async function glGetXauLive(){
   const srcs = [
     async function(){ const j = await glFetchJson('https://api.gold-api.com/price/XAU?_=' + Date.now()); const v = Number(j && j.price); if(!(v > 500)) throw new Error('bad'); const t = j && j.updatedAt ? Date.parse(j.updatedAt) : 0; return {v: v, t: t > 0 ? t : Date.now(), src: 'gold-api'}; },
-    async function(){ const j = await glFetchJsonAny('https://data-asg.goldprice.org/dbXRates/USD'); const it = j && j.items && j.items[0], v = Number(it && it.xauPrice); if(!(v > 500)) throw new Error('bad'); const t = Number(j.ts) > 0 ? Number(j.ts) : Date.now(); return {v: v, t: t, src: 'goldprice'}; }
+    async function(){ const j = await glFetchJsonAny('https://data-asg.goldprice.org/dbXRates/USD'); const it = j && j.items && j.items[0], v = Number(it && it.xauPrice); if(!(v > 500)) throw new Error('bad'); const t = Number(j.ts) > 0 ? Number(j.ts) : Date.now(); return {v: v, t: t, src: 'goldprice'}; },
+    function(){ return glGetInvesting(false); }
   ];
   const res = await Promise.allSettled(srcs.map(function(f){ return f(); }));
   const ok = res.filter(function(r){ return r.status === 'fulfilled' && r.value && r.value.v > 0; }).map(function(r){ return r.value; });
   if(!ok.length) return null;
-  ok.sort(function(a, b){ return b.t - a.t; });   // الأحدث وقتًا الأول
-  return ok[0];
+  const inv = ok.find(function(x){ return x.src === 'Investing.com'; });
+  const others = ok.filter(function(x){ return x.src !== 'Investing.com'; }).sort(function(p, q){ return q.t - p.t; });
+  // Investing.com هو المرجع لو قراءته معقولة (فرقها عن باقي المصادر أقل من 1٪)، وإلا الأحدث وقتًا من الباقي
+  if(inv && (!others.length || Math.abs(inv.v - others[0].v) / others[0].v <= 0.01)){ inv.all = ok; return inv; }
+  return others[0] || ok[0];
 }
 async function glGetXauUsd(){
   try{ const r = await glGetXauLive(); if(r) return r.v; }catch(e){}
@@ -4528,7 +4548,9 @@ async function glDiagnose(){
   const el = document.getElementById('glDiag'); if(!el) return;
   el.style.display = ''; el.style.whiteSpace = 'pre-line'; el.textContent = '⏳ بيفحص المصادر...';
   const L = [], f2 = glF2;
-  try{ const x = await glGetXauUsd(); L.push(x > 0 ? '✅ الذهب العالمي: $' + f2(x) : '❌ الذهب العالمي: مش شغال'); }catch(e){ L.push('❌ الذهب العالمي: مش شغال'); }
+  let liveV = 0;
+  try{ const lv = await glGetXauLive(); if(lv){ liveV = lv.v; L.push('✅ الأونصة الحية (المعتمدة): $' + f2(lv.v) + ' — المصدر: ' + lv.src); } else L.push('❌ الأونصة الحية: مش شغالة'); }catch(e){ L.push('❌ الأونصة الحية: مش شغالة'); }
+  try{ const iv = await glGetInvesting(true); L.push('✅ Investing.com (XAU/USD الفوري): $' + f2(iv.v)); }catch(e){ L.push('❌ Investing.com: الصفحة ما اتقراتش (محجوبة) — بنستخدم gold-api وgoldprice'); }
   try{
     const tx = glHtmlText(await glFetchText(GL_SARF)), bk = glParseBanks(tx);
     L.push(bk.length ? '✅ جدول البنوك (' + toArabicDigits(bk.length) + ' من ٤):\n' + bk.map(function(x){ return '   ' + x.n + ': ' + f2(x.buy) + ' / ' + f2(x.sell); }).join('\n') : '⚠️ الصفحة وصلت لكن ما قدرتش أقرا أسعار البنوك منها');
@@ -4538,7 +4560,7 @@ async function glDiagnose(){
     L.push(r ? '✅ ' + sr.n + ': ' + f2(r.buy) + ' / ' + f2(r.sell) : '❌ ' + sr.n + ': مش متاح');
   }
   for(const gs of [['iSagha (المصدر الأول)', glScrapeIsagha], ['eDahab (احتياطي)', glScrapeEdahab]]){
-    try{ const sg = await gs[1](); L.push(sg ? '✅ ذهب ' + gs[0] + ': عيار 24 بيع ' + fmt(sg.sell) + (sg.buy ? ' / شراء ' + fmt(sg.buy) : '') + ' · 21 ≈ ' + fmt(Math.round(sg.sell * 21 / 24)) + ' · 18 ≈ ' + fmt(Math.round(sg.sell * 18 / 24)) + ' · أونصة $' + f2(sg.oz) + ' → دولار الصاغة ' + f2(sg.sell / (sg.oz / GL_OZ)) : '⚠️ ذهب ' + gs[0] + ': الصفحة وصلت لكن ما قدرتش أقرا السعر'); }catch(e){ L.push('❌ ذهب ' + gs[0] + ': ما وصلتش'); }
+    try{ const sg = await gs[1](); L.push(sg ? '✅ ذهب ' + gs[0] + ': عيار 24 بيع ' + fmt(sg.sell) + (sg.buy ? ' / شراء ' + fmt(sg.buy) : '') + ' · 21 ≈ ' + fmt(Math.round(sg.sell * 21 / 24)) + ' · 18 ≈ ' + fmt(Math.round(sg.sell * 18 / 24)) + ' · أونصة تسعير الصاغة $' + f2(sg.oz) + (liveV > 0 ? ' (الحية الآن $' + f2(liveV) + '، الفرق ' + f2(liveV - sg.oz) + '$)' : '') + ' → دولار الصاغة ' + f2(sg.sell / (sg.oz / GL_OZ)) : '⚠️ ذهب ' + gs[0] + ': الصفحة وصلت لكن ما قدرتش أقرا السعر'); }catch(e){ L.push('❌ ذهب ' + gs[0] + ': ما وصلتش'); }
   }
   el.textContent = L.join('\n');
 }
@@ -4641,7 +4663,7 @@ function glKaratBox(k){
 function glInfoPanel(){
   const w = document.getElementById('glInfoWorld'); if(!w) return;
   const usd = _gl && _gl.usd > 0 ? _gl.usd : 0, r = glRate(), b24 = glBase24(), se = glSarEff(), f2 = glF2;
-  w.textContent = usd ? '$' + f2(usd) + (_gl.usdTs ? ' · ' + glTmS(_gl.usdTs) : '') : '—';
+  w.textContent = usd ? '$' + f2(usd) + (_gl.usdSrc ? ' (' + _gl.usdSrc + ')' : '') + (_gl.usdTs ? ' · ' + glTmS(_gl.usdTs) : '') : '—';
   document.getElementById('glInfoUsd').textContent = r ? (Number(_glAdj.usdManual) > 0 ? f2(r) + ' ج (يدوي)' : f2(_gl.rateBuy) + ' / ' + f2(r) + ' ج') : '—';
   let un = '';
   if(Number(_glAdj.usdManual) > 0) un = 'بتستخدم الدولار اللي كتبته بإيدك' + (_gl && _gl.rate > 0 ? ' (التلقائي دلوقتي: ' + f2(_gl.rate) + ')' : '') + ' — امسح الخانة للرجوع للتلقائي';
@@ -4660,6 +4682,7 @@ function glInfoPanel(){
   else if(se.mode === 'manual' && usd) note = 'يدوي: ' + f2(usd / GL_OZ) + ' $ × ' + f2(se.v) + ' = ' + fmt(cgInt(usd / GL_OZ * se.v)) + ' ج' + (_gl.autoSar > 0 ? ' · التلقائي دلوقتي: ' + f2(_gl.autoSar) + ' — امسح الخانة للرجوع للتلقائي' : '');
   else if(se.mode === 'auto'){
     note = 'تلقائي (' + (_gl.sarSrc || '') + '): عيار 24 بيع ' + fmt(_gl.localP24) + ' ج ÷ جرام الأونصة' + (_gl.sarOz > 0 ? ' (' + f2(_gl.sarOz) + ' $ ÷ ' + f2(GL_OZ) + ' = ' + f2(_gl.sarOz / GL_OZ) + ' $)' : '') + ' = ' + f2(_gl.autoSar > 0 ? _gl.autoSar : se.v) + ' ج للدولار' + (_gl.sarTs ? ' · ' + glTm(_gl.sarTs) : '');
+    if(usd > 0 && _gl.sarOz > 0 && Math.abs(usd - _gl.sarOz) >= 0.5) note += '\n🌍 الأونصة الآن $' + f2(usd) + ' · أونصة وقت تسعير الصاغة $' + f2(_gl.sarOz) + ' (فرق ' + f2(usd - _gl.sarOz) + '$) — الفرق طبيعي: الصاغة بتسعّر على فترات والأونصة بتتحرك بينهم';
     if(_gl.sarStamp) note += '\nآخر تحديث على موقع ' + _gl.sarSrc + ': ' + _gl.sarStamp;
     { const calc = (_gl.sarOz > 0 && _gl.localP24 > 0) ? _gl.localP24 / (_gl.sarOz / GL_OZ) : 0;
       if(calc > 0 && _gl.autoSar > 0 && Math.abs(calc - _gl.autoSar) > 0.005) note += '\n📌 دولار الصاغة المعتمد ' + f2(_gl.autoSar) + ' = آخر تسعير للتجار' + (_gl.sarChangeStamp ? ' (' + _gl.sarChangeStamp + ')' : '') + ' — الأونصة اتحركت بعده والصاغة لسه ما سعّرتش (لو اتحسب بالأونصة دلوقتي = ' + f2(calc) + ')'; }
