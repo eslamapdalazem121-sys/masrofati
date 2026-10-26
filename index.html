@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-27.7770">
+<meta name="app-version" content="2026-10-27.7780">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3558,8 +3558,9 @@ function renderZM(){
   document.getElementById('zmLeft').textContent = fmt(Math.abs(left));
   try{ renderZmDue(); }catch(e){}
 }
-function zmPaidTotal(){
-  const yr = data.zakat && data.zakat[String(currentYear)];
+function zmPaidTotal(){ return zmPaidFor(currentYear); }
+function zmPaidFor(y){
+  const yr = data.zakat && data.zakat[String(y)];
   if(!yr || typeof yr !== 'object') return 0;
   const sum = a => Array.isArray(a) ? a.reduce((t,x)=> t + (Number(x.amount) || 0), 0) : 0;
   if('payments' in yr) return sum(yr.payments); // بيانات قديمة على مستوى السنة
@@ -3652,7 +3653,26 @@ function zkDueInfo(){
 }
 function zkBoth(d){ return gFmt(d) + ' م = ' + hjFmt(d); }
 function zkYear(d){ return yFmt(d.getFullYear()) + 'م' + (zkMode() === 'hij' ? ' · ' + yFmt(hjParts(d).year) + 'هـ' : ''); }
-function zkDueText(i){   // مصفوفة سطور
+// زكاة السنة الماضية: القيمة والمُخرَج والمتبقي اللي لازم يتخرج قبل استحقاق السنة الحالية
+function zkPrevLines(i){
+  try{
+    zkSnapInit();
+    const py = currentYear - 1, sn = data.zakatSnap[py], val = Number(data.zakatMal[py]) || (sn && sn.c ? Number(sn.c.zk) || 0 : 0), paid = zmPaidFor(py);
+    if(!(val > 0) && !(paid > 0)) return [];
+    const left = Math.max(0, val - paid), yy = toArabicDigits(py), cy = toArabicDigits(currentYear), L = [];
+    L.push('📜 زكاة ' + yy + ' الماضية: القيمة ' + fmt(val) + ' · المُخرَج ' + fmt(paid) + ' · المتبقي ' + fmt(left));
+    if(left > 0){
+      let dd = null;
+      if(i && i.state === 'wait') dd = i.next;
+      else if(i && (i.state === 'due' || i.state === 'paid')) dd = (i.due && i.due.getFullYear() === currentYear) ? i.due : i.next;
+      if(dd){ const days = Math.ceil((dd - new Date()) / 864e5); L.push('⚠️ المتبقي ' + fmt(left) + ' لازم يتخرج ' + (days >= 0 ? 'قبل استحقاق ' + cy + ' (' + zkBoth(dd) + ') — باقي ' + yFmt(days) + ' يوم' : 'فورًا — موعد استحقاق ' + cy + ' عدّى (' + zkBoth(dd) + ')')); }
+      else L.push('⚠️ المتبقي ' + fmt(left) + ' لازم يتخرج قبل استحقاق ' + cy);
+    } else L.push('✅ زكاة ' + yy + ' اتخرجت بالكامل' + (paid > val ? ' (زيادة ' + fmt(paid - val) + ')' : ''));
+    return L;
+  }catch(e){ return []; }
+}
+function zkDueText(i){ return zkDueText0(i).concat(zkPrevLines(i)); }
+function zkDueText0(i){   // مصفوفة سطور
   if(i.state === 'due') return ['🔔 وجب موعد زكاة ' + zkYear(i.due), 'تاريخ الاستحقاق: ' + zkBoth(i.due), '⚠️ تُخرج فور الوجوب — لا يجوز التأخير ولا التقسيط بعد الموعد بدون عذر', 'وبعد إخراجها تقدر تعجّل زكاة ' + zkYear(i.next) + ' (استحقاقها ' + zkBoth(i.next) + ')'];
   if(i.state === 'paid') return ['✅ تم إخراج زكاة ' + zkYear(i.due),
     i.winOpen ? '🟢 تعجيل زكاة ' + zkYear(i.next) + ' متاح من ' + gFmt(i.due) + ' م حتى قبل ' + zkBoth(i.winEnd) + ' — باقي ' + yFmt(i.days) + ' يوم' : '🔔 فاضل أقل من شهر على موعد زكاة ' + zkYear(i.next) + ' — راجع مالك وأخرجها',
