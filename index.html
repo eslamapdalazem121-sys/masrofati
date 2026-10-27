@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-27.7810">
+<meta name="app-version" content="2026-10-27.7820">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3332,6 +3332,9 @@ function load(){
   try{ storedYear = Number(localStorage.getItem('budget_current_year')) || null; }catch(e){}
   currentYear = (storedYear && data[storedYear]) ? storedYear
     : (years.length ? Math.max(...years) : new Date().getFullYear());
+  // لما تبدأ سنة جديدة: بتتفتح لوحدها وبتكمّل على رأس مال السنة اللي قبلها (٢٠٢٦ ← ٢٠٢٧ وهكذا)
+  { const ry = new Date().getFullYear(), my = years.length ? Math.max(...years) : null;
+    if(my !== null && ry > my){ data[ry] = data[ry] || {}; if(currentYear === my){ currentYear = ry; try{ localStorage.setItem('budget_current_year', String(ry)); }catch(e){} } } }
 
   ensureAllYears();
   try{ bankChgMigrate(); }catch(e){}
@@ -3404,6 +3407,7 @@ function saveNewYear(){
   showToast('تم إنشاء سنة ' + toArabicDigits(y), true);
 }
 function save(){
+  try{ capSnapLive(); }catch(e){}
   try{ autoIncSync(); }catch(e){}
   try{ opsDiff(); }catch(e){ console.error('ops', e); }
   try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }
@@ -3963,11 +3967,35 @@ function openMsSummary(){
   document.getElementById('msOverlay').classList.add('open');
 }
 function closeMsSummary(){ document.getElementById('msOverlay').classList.remove('open'); }
-function capList(){ if(!Array.isArray(data.capital)) data.capital = []; return data.capital; }
+function capRaw(){ if(!Array.isArray(data.capital)) data.capital = []; return data.capital; }
+function capIsPast(){ return !!currentYear && currentYear < new Date().getFullYear(); }
+// ===== لقطة رأس المال لكل سنة: السنة اللي عدّت بترجع بحساباتها (رأس مال + إجماليات)، للرجوع فقط =====
+function capSnapObj(y){
+  if(!data.capSnap || typeof data.capSnap !== 'object') data.capSnap = {};
+  let sn = data.capSnap[y];
+  if(!sn){   // سنة عدّت من غير لقطة: تقدير من تواريخ إضافة البنود (اللي اتباع أو اتحذف قبل كده مش ظاهر) وبيتثبّت
+    const end = new Date(y, 11, 31, 23, 59, 59, 999).getTime();
+    const list = JSON.parse(JSON.stringify(capRaw().filter(function(x){ return !((opsMs(x.date) || 0) > end); })));
+    sn = {list: list, totals: capTotalsCalc(list), ts: Date.now(), est: true};
+    data.capSnap[y] = sn;
+    try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }catch(e){}
+  }
+  return sn;
+}
+// لقطة السنة الحالية بتتحدّث مع كل حفظ، وهي اللي بتبقى «رأس مال آخر السنة» لما السنة تعدّي
+function capSnapLive(){
+  const ry = new Date().getFullYear();
+  if(!data.capSnap || typeof data.capSnap !== 'object') data.capSnap = {};
+  const list = capRaw(), js = JSON.stringify(list), cur = data.capSnap[ry];
+  if(cur && !cur.est && cur.list && JSON.stringify(cur.list) === js && Date.now() - cur.ts < 6 * 3600 * 1000) return;
+  data.capSnap[ry] = {list: JSON.parse(js), totals: capTotalsCalc(list), ts: Date.now(), est: false};
+}
+function capList(){ return capIsPast() ? capSnapObj(currentYear).list : capRaw(); }
 const capCatOf = x => x.cat === 'gold' ? 'gold' : 'money';
 const capSubOf = x => x.sub === 'bank' ? 'bank' : (x.sub === 'pension' ? 'pension' : 'cash');
-function capTotals(){
-  const arr = capList(), mo = arr.filter(x=> capCatOf(x) === 'money'), go = arr.filter(x=> capCatOf(x) === 'gold');
+function capTotals(){ return capIsPast() ? capSnapObj(currentYear).totals : capTotalsCalc(capRaw()); }
+function capTotalsCalc(arr){
+  const mo = arr.filter(x=> capCatOf(x) === 'money'), go = arr.filter(x=> capCatOf(x) === 'gold');
   const now0 = new Date(), eod0 = new Date(now0.getFullYear(), now0.getMonth(), now0.getDate(), 23, 59, 59, 999);
   const bankItems = mo.filter(x=> capSubOf(x) === 'bank'), penItems = mo.filter(x=> capSubOf(x) === 'pension');
   // الفوايد اللي مش بتتحوّل بتتضاف للرصيد، واللي بتتحوّل وتتصرف ما بتتضافش. والمعاش المحوّل بيتخصم
@@ -3979,7 +4007,16 @@ function capTotals(){
   const goldBuy = cgInt(giSum(go)), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
   return {money: cash + bank, cash, bank, pension, bankAdded, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
+function capPastBar(){
+  const wrap = document.querySelector('.zk-wrap.yr-cap'); if(!wrap || !wrap.parentNode) return;
+  let bar = document.getElementById('capPastBar');
+  if(!capIsPast()){ if(bar) bar.remove(); return; }
+  const sn = capSnapObj(currentYear);
+  if(!bar){ bar = document.createElement('div'); bar.id = 'capPastBar'; bar.style.cssText = 'max-width:640px;margin:6px auto 10px;padding:10px 14px;border-radius:14px;background:rgba(80,90,110,.12);border:1px solid rgba(80,90,110,.35);font-weight:800;line-height:1.7;text-align:center;font-size:calc(13px * var(--fs,1));'; wrap.parentNode.insertBefore(bar, wrap); }
+  bar.textContent = '📁 سنة ' + toArabicDigits(currentYear) + ' — للرجوع فقط: رأس المال والزكاة بحساباتها (مثبّت' + (sn.est ? ' — تقدير من تواريخ الإضافة، راجع الأرقام' : ' بتاريخ ' + gFmt(new Date(sn.ts))) + '). أي تعديل بيتعمل من السنة الحالية.';
+}
 function renderCap(){
+  try{ capPastBar(); }catch(e){}
   const el = document.getElementById('capAmt'); if(!el) return;
   const t = capTotals();
   el.textContent = fmt(t.all);
@@ -3999,7 +4036,13 @@ function renderCap(){
 function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
 function openCapChoose(){ document.getElementById('capChooseOverlay').classList.add('open'); }
 function closeCapChoose(){ document.getElementById('capChooseOverlay').classList.remove('open'); }
-function capDel(id){ data.capital = capList().filter(z=> z.id !== id); save(); renderCap(); }
+function capDel(id){ data.capital = capRaw().filter(z=> z.id !== id); save(); renderCap(); }
+window.addEventListener('load', function(){
+  ['capDel', 'saveCapGold', 'addCapMoney', 'cmOutSave', 'cmOutDel', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
+    const f = window[n]; if(typeof f !== 'function') return;
+    window[n] = function(){ if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; } return f.apply(this, arguments); };
+  });
+});
 
 // ---- مجموعات رأس المال
 let _capGrpId = null;
