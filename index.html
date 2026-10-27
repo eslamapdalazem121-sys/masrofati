@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-27.7780">
+<meta name="app-version" content="2026-10-27.7790">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1520,6 +1520,23 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 #zkcOverlay .modal-actions .btn-save{color:#3b2a00;background:linear-gradient(180deg,#ffe793,#f7bf16);box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 6px 0 #a87400,0 12px 18px rgba(168,116,0,.35);}
 #zkcOverlay .modal-actions button:active{transform:translateY(5px);}
 </style>
+<style id="zpCss">
+.gp-hero.zk{background:linear-gradient(145deg,#ffd45e 0%,#f2a900 48%,#b97800 100%);color:#3b2a00;box-shadow:0 2px 0 rgba(255,255,255,.55) inset,0 -8px 0 rgba(0,0,0,.14) inset,0 7px 0 #8a5a00,0 24px 34px -10px rgba(185,120,0,.55);}
+.gp-hero.zk .gp-big{text-shadow:0 3px 0 rgba(255,255,255,.35);}
+.gp-hero.zk .gp-mini div{background:rgba(255,255,255,.28);box-shadow:0 2px 0 rgba(255,255,255,.35) inset,0 4px 0 rgba(0,0,0,.1);}
+.gp-hero.zk .gp-bar{background:rgba(0,0,0,.18);}
+.gp-hero.zk .gp-bar i{background:linear-gradient(180deg,#fff,#fff3c4);}
+.zp-form{background:var(--card);color:var(--text);border-radius:22px;padding:14px;margin:20px 0 6px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 6px 0 rgba(0,0,0,.09),0 14px 22px rgba(30,41,59,.1);}
+.zp-form h4{margin:0 0 10px;font-size:17px;font-weight:800;}
+.zp-form label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:10px 2px 5px;}
+.zp-form input{width:100%;box-sizing:border-box;font:700 16px 'Tajawal','Cairo',sans-serif;padding:12px 13px;border-radius:14px;border:1.5px solid var(--border,#d6dbe4);background:var(--bg);color:var(--text);box-shadow:0 2px 4px rgba(0,0,0,.06) inset;}
+.zp-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.zp-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;}
+.zp-chips button{border:0;cursor:pointer;font:700 13px 'Tajawal','Cairo',sans-serif;color:var(--text);background:linear-gradient(145deg,#fff,#eef1f6);padding:7px 12px;border-radius:99px;box-shadow:0 2px 0 #fff inset,0 3px 0 rgba(0,0,0,.12);}
+.zp-chips button:active{transform:translateY(3px);box-shadow:none;}
+.gp-btn.y{background:linear-gradient(180deg,#ffd45e,#f2a900);color:#3b2a00;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 6px 0 #8a5a00,0 14px 18px rgba(185,120,0,.35);width:100%;margin-top:14px;}
+.gp-btn.y:active{box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 1px 0 #8a5a00;}
+</style>
 </head>
 <body>
 
@@ -1607,7 +1624,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     </div>
     <div class="zk-due-line" id="zmDue" onclick="openZkCalc()"></div>
     <div class="zk-row">
-      <div class="zk-sq"><span class="zk-i">🤲</span><span class="zk-l">إجمالي منصرف زكاة الأشهر</span><span class="zk-v" id="zmPaid">0</span></div>
+      <div class="zk-sq" onclick="openZmPay()" role="button"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🤲</span><span class="zk-l">إجمالي منصرف الزكاة</span><span class="zk-v" id="zmPaid">0</span></div>
       <div class="zk-sq" id="zmLeftSq"><span class="zk-i" id="zmLeftIco">⏳</span><span class="zk-l" id="zmLeftLbl">المتبقي</span><span class="zk-v" id="zmLeft">0</span></div>
     </div>
   </div>
@@ -1913,6 +1930,37 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <div id="gpSrc"></div>
     <div class="gp-h gp-tg" id="gpOutH" onclick="gpToggle('out')" role="button" aria-expanded="true"><b>🧾 المنصرف <i class="gp-arr">▼</i></b><span id="gpOutCnt"></span></div>
     <div id="gpOutList"></div>
+  </div>
+</div>
+
+<div class="gp" id="zpPage" role="dialog" aria-label="إجمالي منصرف الزكاة">
+  <div class="gp-top"><button type="button" class="gp-back" onclick="closeZmPay()">› رجوع</button><div class="gp-ttl">🤲 إجمالي منصرف الزكاة<small id="zpYear"></small></div></div>
+  <div class="gp-body">
+    <div class="gp-hero zk" id="zpHero">
+      <small>🕌 زكاة المال المطلوبة</small>
+      <span class="gp-big" id="zpZm">0</span>
+      <div class="gp-bar"><i id="zpBar"></i></div>
+      <span class="gp-pct" id="zpPct"></span>
+      <div class="gp-mini">
+        <div><small>🤲 المنصرف</small><b id="zpPaid">0</b></div>
+        <div><small id="zpLeftLbl">⏳ المتبقي</small><b id="zpLeft">0</b></div>
+      </div>
+    </div>
+    <div class="zp-form">
+      <h4>🤲 صرف زكاة جديد</h4>
+      <label for="zpDest">جهة الصرف</label>
+      <input type="text" id="zpDest" list="zpDestList" placeholder="مثال: أسرة محتاجة، جمعية خيرية" autocomplete="off">
+      <datalist id="zpDestList"></datalist>
+      <div class="zp-chips" id="zpChips"></div>
+      <div class="zp-row2">
+        <div><label for="zpAmt">القيمة</label><input type="number" id="zpAmt" placeholder="0" inputmode="decimal" step="any"></div>
+        <div><label for="zpDate">📅 التاريخ</label><input type="date" id="zpDate"></div>
+      </div>
+      <button type="button" class="gp-btn y" onclick="zpAdd()">🤲 صرف من الزكاة</button>
+      <div class="gp-pct" style="text-align:center;margin-top:8px;color:var(--muted);font-size:12.5px;">المبلغ بيتخصم من إجمالي زكاة المال ويظهر في المنصرف.</div>
+    </div>
+    <div class="gp-h"><b>🧾 سجل صرف الزكاة</b><span id="zpCnt"></span></div>
+    <div id="zpList"></div>
   </div>
 </div>
 
@@ -5346,6 +5394,70 @@ function addZakatItem(){
   document.getElementById('zkNameIn').value = ''; document.getElementById('zkAmtIn').value = '';
   save(); renderZakatList(); renderZakat(); showToast('تم الحفظ ✅', true);
 }
+// ===== صفحة إجمالي منصرف الزكاة: صرف (جهة + قيمة + تاريخ) بيتخصم من زكاة المال =====
+function zkGetAt(y, m){ const sy = currentYear, sm = currentMonth; currentYear = y; currentMonth = m; try{ return zkGet(); } finally{ currentYear = sy; currentMonth = sm; } }
+function zpYearPays(y){
+  const out = [], k = String(y);
+  if(!data.zakat || typeof data.zakat[k] !== 'object' || !data.zakat[k]) return out;
+  if('payments' in data.zakat[k] || 'total' in data.zakat[k]) zkGetAt(y, 0);   // تحويل البيانات القديمة لمستوى الشهر
+  const yr = data.zakat[k];
+  Object.keys(yr).forEach(function(mk){ const mo = yr[mk]; if(mo && typeof mo === 'object' && Array.isArray(mo.payments)) mo.payments.forEach(function(p){ out.push({p: p, m: Number(mk), bucket: mo}); }); });
+  out.sort(function(a, b){ return String(b.p.date || '').localeCompare(String(a.p.date || '')) || (b.m - a.m); });
+  return out;
+}
+function openZmPay(){
+  const pg = document.getElementById('zpPage'); if(!pg) return;
+  document.getElementById('zpDate').value = dateToInputValue(Date.now()); document.getElementById('zpDest').value = ''; document.getElementById('zpAmt').value = '';
+  pg.classList.add('open'); pg.scrollTop = 0; renderZmPay();
+}
+function closeZmPay(){ const pg = document.getElementById('zpPage'); if(pg) pg.classList.remove('open'); }
+function zpPick(t){ const i = document.getElementById('zpDest'); i.value = t; i.focus(); }
+function renderZmPay(){
+  const y = currentYear, zm = zmGet(), paid = zmPaidFor(y), left = zm - paid, bad = left < 0;
+  document.getElementById('zpYear').textContent = 'زكاة المال ' + toArabicDigits(y);
+  document.getElementById('zpZm').textContent = fmt(zm);
+  document.getElementById('zpPaid').textContent = fmt(paid);
+  document.getElementById('zpLeft').textContent = fmt(Math.abs(left));
+  document.getElementById('zpLeftLbl').textContent = bad ? '⚠️ زيادة عن المطلوب' : '⏳ المتبقي';
+  document.getElementById('zpHero').classList.toggle('bad', bad);
+  document.getElementById('zpBar').style.width = (zm > 0 ? Math.min(100, paid / zm * 100) : (paid > 0 ? 100 : 0)) + '%';
+  document.getElementById('zpPct').textContent = zm > 0 ? 'اتصرف ' + toArabicDigits(Math.round(paid / zm * 100)) + '٪ من الزكاة' : 'زكاة المال لسه مش محسوبة لهذه السنة';
+  const arr = zpYearPays(y), box = document.getElementById('zpList'); box.innerHTML = '';
+  document.getElementById('zpCnt').textContent = arr.length ? toArabicDigits(arr.length) + ' عملية' : '';
+  if(!arr.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه ما صرفتش زكاة في ' + toArabicDigits(y) + '.'; box.appendChild(e); }
+  const dests = {}; arr.forEach(function(x){ if(x.p.note) dests[x.p.note] = 1; });
+  const dl = document.getElementById('zpDestList'); dl.innerHTML = ''; Object.keys(dests).slice(0, 20).forEach(function(n){ const o = document.createElement('option'); o.value = n; dl.appendChild(o); });
+  const chips = document.getElementById('zpChips'); chips.innerHTML = '';
+  Object.keys(dests).slice(0, 4).concat(['أسرة محتاجة', 'أقارب', 'جمعية خيرية', 'علاج']).filter(function(v, i, a){ return a.indexOf(v) === i; }).slice(0, 7).forEach(function(n){ const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = function(){ zpPick(n); }; chips.appendChild(b); });
+  arr.forEach(function(x){
+    const p = x.p, dt = p.date ? formatDate(new Date(p.date + 'T12:00:00').getTime()) : MONTHS[x.m];
+    box.appendChild(gpRow({cls: 'out', ic: '🤲', name: p.note || 'دفعة زكاة', sub: dt, amt: p.amount, acts: [{t: '✏️', fn: function(){ zpEdit(x); }}, {t: '🗑', fn: function(){ zpDel(x); }}]}));
+  });
+}
+function zpAfter(){ save(); try{ renderZM(); }catch(e){} try{ renderZakat(); }catch(e){} try{ renderZmPay(); }catch(e){} }
+function zpAdd(){
+  const dest = document.getElementById('zpDest').value.trim(), amt = Number(document.getElementById('zpAmt').value) || 0, date = document.getElementById('zpDate').value || dateToInputValue(Date.now());
+  if(!dest){ showToast('اكتب جهة الصرف', false); return; }
+  if(amt <= 0){ showToast('اكتب القيمة', false); return; }
+  const y = Number(date.slice(0, 4)), m = Number(date.slice(5, 7)) - 1;
+  if(!(y > 2000) || !(m >= 0 && m <= 11)){ showToast('التاريخ مش صح', false); return; }
+  zkGetAt(y, m).payments.push({id: uid(), amount: amt, note: dest, date: date});
+  document.getElementById('zpDest').value = ''; document.getElementById('zpAmt').value = ''; document.getElementById('zpDate').value = dateToInputValue(Date.now());
+  zpAfter(); showToast('تم صرف الزكاة وخصمها من الإجمالي ✅', true);
+}
+function zpEdit(x){
+  const p = x.p, ts = p.date ? new Date(p.date + 'T12:00:00').getTime() : Date.now();
+  openGenEdit('✏️ تعديل صرف الزكاة', 'جهة الصرف', p.note, p.amount, function(n, a, dt){
+    p.note = n || p.note || 'دفعة زكاة'; p.amount = a;
+    if(dt){
+      const nd = dateToInputValue(dt), ny = Number(nd.slice(0, 4)), nm = Number(nd.slice(5, 7)) - 1;
+      p.date = nd;
+      if(ny !== currentYear || nm !== x.m){ x.bucket.payments = x.bucket.payments.filter(function(q){ return q.id !== p.id; }); zkGetAt(ny, nm).payments.push(p); }
+    }
+    zpAfter();
+  }, ts);
+}
+function zpDel(x){ openConfirm('حذف صرف الزكاة', 'هل تريد حذف الصرف ده؟ المبلغ هيرجع للمتبقي من الزكاة.', function(){ x.bucket.payments = x.bucket.payments.filter(function(q){ return q.id !== x.p.id; }); zpAfter(); }); }
 function closeZakat(){ document.getElementById('zkOverlay').classList.remove('open'); }
 
 // نافذة تعديل عامة (اسم + مبلغ)
