@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-27.7800">
+<meta name="app-version" content="2026-10-27.7810">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1543,6 +1543,91 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 .gp-btn.y{background:linear-gradient(180deg,#ffd45e,#f2a900);color:#3b2a00;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 6px 0 #8a5a00,0 14px 18px rgba(185,120,0,.35);width:100%;margin-top:14px;}
 .gp-btn.y:active{box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 1px 0 #8a5a00;}
 </style>
+<style id="gdCss">
+#capGoldOverlay .modal-box.gd{padding:0 14px calc(30px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,var(--bg),var(--bg2));font-family:'Tajawal','Cairo',sans-serif;}
+#capGoldOverlay .gd-top{padding:calc(12px + env(safe-area-inset-top,0px)) 0 4px;min-height:44px;display:flex;align-items:center;}
+#capGoldOverlay .gd-top h3{margin:0;font-size:23px;font-weight:900;}
+.gd-hero{position:relative;border-radius:28px;padding:18px 18px 14px;margin:8px 0 22px;color:#3b2a00;overflow:hidden;background:linear-gradient(145deg,#ffe58a 0%,#f5b800 48%,#b87a00 100%);box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 -8px 0 rgba(0,0,0,.14) inset,0 7px 0 #8a5a00,0 22px 30px -10px rgba(185,120,0,.55);transform:perspective(900px) rotateX(3deg);transform-origin:50% 100%;}
+.gd-hero::after{content:'';position:absolute;inset:-40% -20% auto auto;width:70%;height:90%;background:radial-gradient(closest-side,rgba(255,255,255,.4),transparent);pointer-events:none;}
+.gd-hero > small{display:block;font-size:14px;font-weight:800;opacity:.85;}
+.gd-big{display:block;font-size:38px;font-weight:900;direction:ltr;text-align:right;line-height:1.15;margin:2px 0 12px;text-shadow:0 3px 0 rgba(255,255,255,.4);}
+.gd-mini{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px;}
+.gd-mini > div{background:rgba(255,255,255,.36);border-radius:16px;padding:9px 6px;text-align:center;box-shadow:0 2px 0 rgba(255,255,255,.55) inset,0 4px 0 rgba(0,0,0,.1);min-width:0;}
+.gd-mini small{display:block;font-size:11.5px;font-weight:800;color:#5a3f00;}
+.gd-mini b{display:block;font-size:16px;font-weight:900;direction:ltr;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gd-mini .gl-pos b{color:#0a6b47 !important;} .gd-mini .gl-neg b{color:#b42323 !important;}
+#capGoldOverlay .gd-panel{border-radius:26px;padding:14px 12px;margin:0 0 20px;border:0;background:var(--card);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 7px 0 rgba(0,0,0,.09),0 16px 24px rgba(30,41,59,.12);}
+.gd-panel .gl-head{margin-bottom:6px;}
+.gd-hl{display:flex;align-items:center;gap:8px;font-size:17px;}
+.gd-panel .gl-head .mini-btn{background:linear-gradient(180deg,#2bd89f,#12a56f);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 4px 0 #0a6644;border-radius:14px;padding:8px 12px;font-size:13px;}
+.gd-panel .gl-head .mini-btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 1px 0 #0a6644;}
+#capGoldOverlay .gd-panel .gl-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 10px;}
+#capGoldOverlay .gd-panel #glPrices > span{min-width:0;padding:11px 4px 10px;border-radius:20px !important;background:linear-gradient(160deg,#fffaf0,#ffefbd);box-shadow:0 2px 0 #fff inset,0 5px 0 #e3c46a,0 12px 16px rgba(160,110,0,.16) !important;}
+#glPrices .gl-k{font-size:15px !important;font-weight:900;color:#6b4a00;}
+#glPrices .gl-row{font-size:11.5px !important;font-weight:800;}
+#glPrices .gl-row b{font-size:18px !important;}
+.gd-status{margin-top:2px;}
+.gd-chips3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.gd-chips3 > div{background:var(--bg);border-radius:14px;padding:7px 4px;text-align:center;box-shadow:0 2px 0 #fff inset,0 3px 0 rgba(0,0,0,.08);min-width:0;}
+.gd-chips3 span{display:block;font-size:15px;line-height:1.1;}
+.gd-chips3 small{display:block;font-size:11px;font-weight:800;color:var(--muted);}
+.gd-chips3 b{display:block;font-size:14px;font-weight:900;direction:ltr;}
+.gd-time{text-align:center;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:6px;direction:ltr;opacity:.85;}
+#glMeta{display:none !important;}
+#capGoldOverlay .gl-basis:not(.warn){display:none !important;}
+#capGoldOverlay .gl-basis.warn{margin:8px 0 0;padding:8px 10px;font-size:12.5px;border-radius:14px;}
+.gd-more{width:100%;display:flex;justify-content:space-between;align-items:center;border:0;cursor:pointer;margin-top:12px;padding:11px 14px;border-radius:16px;font:800 14.5px 'Tajawal','Cairo',sans-serif;color:var(--text);background:linear-gradient(145deg,#fff,#eef1f6);box-shadow:0 1px 0 #fff inset,0 4px 0 rgba(0,0,0,.1),0 9px 12px rgba(30,41,59,.08);}
+.gd-more:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.1);}
+#glInfo{margin-top:10px;}
+#glInfo .gl-ir{padding:8px 0;font-size:13.5px;}
+#glInfo .gl-ir b{font-size:17px;}
+#glInfo .gl-ir input{min-width:100px;font-size:16px;}
+.gd-diag{width:100%;border:0;cursor:pointer;margin:10px 0 4px;padding:11px;border-radius:14px;font:800 14px 'Tajawal','Cairo',sans-serif;color:#fff;background:linear-gradient(180deg,#8f67ff,#6a3de0);box-shadow:0 2px 0 rgba(255,255,255,.35) inset,0 4px 0 #4b27a8;}
+.gd-diag:active{transform:translateY(3px);box-shadow:0 1px 0 #4b27a8;}
+#capGoldOverlay .gd-chips{margin:0 2px 14px !important;}
+#cgList .gi-row{border-radius:20px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 5px 0 rgba(0,0,0,.08),0 12px 18px rgba(30,41,59,.09);margin-bottom:12px;}
+.gd-add{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 10px;}
+.gd-add button{border:0;cursor:pointer;font:900 16.5px 'Tajawal','Cairo',sans-serif;color:#3b2a00;padding:15px 8px;border-radius:18px;background:linear-gradient(180deg,#ffe58a,#f5b800);box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 6px 0 #8a5a00,0 14px 18px rgba(185,120,0,.3);}
+.gd-add button:active{transform:translateY(5px);box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 1px 0 #8a5a00;}
+.gd-add button.active{outline:3px solid #12b27a;outline-offset:2px;}
+.gd-grp{margin:2px 0 6px;}
+.gd-grp summary{cursor:pointer;font-weight:800;font-size:14px;padding:8px 4px;color:var(--muted);}
+.gd-form{background:var(--card);border-radius:24px;padding:14px;margin-top:12px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 7px 0 rgba(0,0,0,.09),0 16px 24px rgba(30,41,59,.12);}
+.gd-form .field label{font-size:13px;font-weight:700;color:var(--muted);}
+.gd-form select{width:100%;box-sizing:border-box;font:700 16px 'Tajawal','Cairo',sans-serif;padding:12px 10px;border-radius:14px;border:1.5px solid var(--border,#d6dbe4);background:var(--bg);color:var(--text);}
+.gd-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.gd-total{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;padding:11px 14px;border-radius:16px;background:linear-gradient(145deg,#fff6d6,#ffe9a3);box-shadow:0 2px 0 #fff inset,0 4px 0 #e3c46a;font-weight:800;}
+.gd-total b{font-size:21px;font-weight:900;direction:ltr;}
+</style>
+<style id="gdPcCss">
+/* بطاقة القطعة المدمجة */
+#cgList .gi-row.gd-pc{display:block !important;flex-wrap:nowrap !important;padding:14px 14px 12px !important;margin-bottom:14px !important;border:0 !important;border-image:none !important;border-radius:22px !important;position:relative;background:var(--card);color:var(--text);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 6px 0 rgba(0,0,0,.09),0 14px 22px rgba(30,41,59,.11) !important;border-inline-start:7px solid #e0a800 !important;}
+#cgList .gi-row.gd-pc.jw{border-inline-start-color:#e0699a !important;} #cgList .gi-row.gd-pc.sv{border-inline-start-color:#16a870 !important;}
+.gd-pc .pc-top{display:flex;align-items:center;gap:10px;}
+.gd-pc .pc-ic{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:21px;background:linear-gradient(145deg,#fff,#e9edf4);box-shadow:0 2px 0 #fff inset,0 4px 0 rgba(0,0,0,.12),0 8px 12px rgba(30,41,59,.12);}
+.gd-pc .pc-nm{flex:1;min-width:0;}
+.gd-pc .pc-name{display:block;font-size:17px;font-weight:800;line-height:1.3;word-break:break-word;}
+.gd-pc .pc-tags{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:1px;}
+.gd-pc .pc-val{flex:none;font-size:19px;font-weight:900;direction:ltr;}
+.gd-pc .pc-acts{flex:none;display:flex;flex-direction:column;gap:5px;}
+.gd-pc .pc-acts button{border:0;cursor:pointer;width:34px;height:30px;border-radius:11px;font-size:14px;background:linear-gradient(145deg,#fff,#e6ebf3);box-shadow:0 2px 0 #fff inset,0 3px 0 rgba(0,0,0,.13);}
+.gd-pc .pc-acts button:active{transform:translateY(3px);box-shadow:none;}
+.gd-pc .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.gd-pc .pc-grid.one{grid-template-columns:1fr;}
+.gd-pc .pc-c{background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(238,242,248,.8));border-radius:15px;padding:8px 6px;text-align:center;min-width:0;box-shadow:0 1px 0 #fff inset,0 3px 0 rgba(0,0,0,.07);}
+.gd-pc .pc-c small{display:block;font-size:11.5px;font-weight:800;color:var(--muted);}
+.gd-pc .pc-c b{display:block;font-size:15.5px;font-weight:900;direction:ltr;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.gd-pc .pc-c em{display:block;font-style:normal;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gd-pc .pc-c.gl-pos{background:linear-gradient(180deg,#e7f8ef,#d4f1e2);} .gd-pc .pc-c.gl-pos b,.gd-pc .pc-c.gl-pos em{color:#0b8f5f;}
+.gd-pc .pc-c.gl-neg{background:linear-gradient(180deg,#fdecec,#f9d9d9);} .gd-pc .pc-c.gl-neg b,.gd-pc .pc-c.gl-neg em{color:#d93a3a;}
+/* شرايح العيار والاستخدام */
+#capGoldOverlay .gl-chip2 .gc-s{font-size:12px;opacity:.75;}
+/* بطاقة الربح في الأعلى */
+.gd-mini .gd-pct{font-size:12px !important;font-weight:800 !important;}
+/* سطور الأسعار: أخف وأوضح */
+#capGoldOverlay .gd-time{font-size:11.5px;opacity:.75;}
+#capGoldOverlay .gl-basis{font-size:12.5px;padding:6px 10px;}
+</style>
 </head>
 <body>
 
@@ -1727,59 +1812,72 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 </div>
 
 <div class="modal-overlay" id="capGoldOverlay">
-  <div class="modal-box">
+  <div class="modal-box gd">
     <button type="button" class="fs-close" onclick="closeCapGold()" aria-label="رجوع">✕</button>
-    <h3>🪙 الذهب</h3>
-    <div class="gi-sumrow t3d"><span class="v-gold"><small>🪙 إجمالي الذهب الآن</small><b id="cgTotal">0</b></span><span class="v-blue"><small>⚖️ إجمالي الوزن</small><b id="cgGrams">0</b></span></div>
-    <div class="gi-sumrow" id="cgKaratRow"></div>
-    <div class="gi-sumrow" id="cgUseRow"></div>
-    <div class="gl-panel">
-      <div class="gl-head" id="glHead" onclick="glPanelToggle()" style="cursor:pointer;"><span style="display:flex;align-items:center;gap:8px;"><span class="plus-badge pb-teal pb-sm in-card" id="glPanelPlus"></span><b>📈 سعر الذهب الحالي</b></span><button type="button" class="mini-btn" id="glRefreshBtn" onclick="event.stopPropagation(); goldLiveRefresh(true)">🔄 تحديث</button></div>
+    <div class="gd-top"><h3>🪙 الذهب</h3></div>
+
+    <div class="gd-hero">
+      <small>إجمالي الذهب الآن</small>
+      <b class="gd-big" id="cgTotal">0</b>
+      <div class="gd-mini">
+        <div><small>⚖️ الوزن</small><b id="cgGrams">0</b></div>
+        <div><small>🛒 الشراء</small><b id="glBuy">0</b></div>
+        <div id="glProfitBox"><small>📈 الربح / الخسارة</small><b id="glProfit">0</b><small class="gd-pct" id="glProfitPct"></small></div>
+      </div>
+      <span id="glNow" style="display:none;"></span>
+    </div>
+
+    <div class="gl-panel gd-panel">
+      <div class="gl-head" id="glHead" onclick="glPanelToggle()"><span class="gd-hl"><span class="plus-badge pb-teal pb-sm in-card" id="glPanelPlus"></span><b>📈 سعر الجرام اليوم</b></span><button type="button" class="mini-btn" id="glRefreshBtn" onclick="event.stopPropagation(); goldLiveRefresh(true)">🔄 تحديث</button></div>
       <div class="gl-sumline" id="glSumLine" style="display:none;"></div>
       <div id="glBody">
-      <div class="gl-prices" id="glPrices"></div>
-      <div class="gl-meta" id="glMeta"></div>
-      <div class="gl-basis" id="glBasis" onclick="glBasisTap()"></div>
-      <div class="gi-sumrow t3d"><span class="v-blue"><small>إجمالي الشراء</small><b id="glBuy">0</b></span><span class="v-gold"><small>إجمالي الآن</small><b id="glNow">0</b></span></div>
-      <div class="gi-sumrow t3d"><span id="glProfitBox" class="v-green wide"><small>📈 الربح / الخسارة</small><b id="glProfit">0</b></span></div>
-      <div class="gl-adjwrap">
-      <details class="gl-adj"><summary>⚙️ ضبط السعر ليطابق سوق الصاغة</summary>
-        <div class="date-row"><label for="glAdj">علاوة / خصم ٪</label><input type="number" id="glAdj" placeholder="0" step="any" oninput="goldAdjChange()"></div>
-        <div class="date-row"><label for="glManual">سعر جرام ٢٤ يدوي</label><input type="number" id="glManual" placeholder="فاضي = تلقائي" step="any" oninput="goldAdjChange()"></div>
-      </details>
-        <span class="plus-badge pb-teal pb-sm in-card" id="glInfoPlus" role="button" aria-label="أسعار السوق والصاغة" onclick="glInfoToggle()">+</span>
-      </div>
-      <div id="glInfo" style="display:none;">
-        <div class="gl-ir"><span class="gl-il">🌍 السعر العالمي الآن (أونصة)</span><b id="glInfoWorld">—</b></div>
-        <div class="gl-sub" id="glWorldNote"></div>
-        <div class="gl-ir"><span class="gl-il">💵 دولار البنوك الحكومية (الأهلي · مصر · القاهرة) شراء / بيع</span><b id="glInfoUsd">—</b></div>
-        <div class="gl-in" id="glUsdNote"></div>
-        <div class="gl-ir"><span class="gl-il">✍️ دولار البنك يدوي (فاضي = تلقائي)</span><input type="number" id="glUsdManual" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
-        <div class="gl-ir"><span class="gl-il">🏪 دولار الصاغة (فاضي = تلقائي)</span><input type="number" id="glSarUsd" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
-        <div class="gl-in" id="glSarNote"></div>
-        <div class="gl-ir"><span class="gl-il">📉 فرق سعر البيع عن الشراء ٪ <small style="font-weight:700;color:var(--muted);">(تلقائي من الصاغة، عدّله لو عايز)</small></span><input type="number" id="glSpread" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
-        <div class="gl-ir"><span class="gl-il">🪙 الذهب حسب تسعير الصاغة (جرام)</span></div>
-        <div class="gl-prices" id="glInfoSar"></div>
-        <div style="margin:8px 0;"><button type="button" class="mini-btn" onclick="glDiagnose()">🧪 فحص مصادر الأسعار</button></div>
-        <div class="gl-in" id="glDiag" style="display:none;"></div>
-      </div>
+        <div class="gl-prices" id="glPrices"></div>
+        <div class="gd-status" id="glStatus"></div>
+        <div class="gl-meta" id="glMeta"></div>
+        <div class="gl-basis" id="glBasis" onclick="glBasisTap()"></div>
+        <button type="button" class="gd-more" onclick="glInfoToggle()"><span>⚙️ ضبط الأسعار</span><span class="plus-badge pb-teal pb-sm in-card" id="glInfoPlus" aria-hidden="true">+</span></button>
+        <div id="glInfo" style="display:none;">
+          <div class="gl-ir"><span class="gl-il">🌍 الأونصة العالمية</span><b id="glInfoWorld">—</b></div>
+          <div class="gl-sub" id="glWorldNote"></div>
+          <div class="gl-ir"><span class="gl-il">💵 دولار البنوك (شراء / بيع)</span><b id="glInfoUsd">—</b></div>
+          <div class="gl-in" id="glUsdNote"></div>
+          <div class="gl-ir"><span class="gl-il">✍️ دولار البنك يدوي</span><input type="number" id="glUsdManual" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
+          <div class="gl-ir"><span class="gl-il">🏪 دولار الصاغة يدوي</span><input type="number" id="glSarUsd" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
+          <div class="gl-in" id="glSarNote"></div>
+          <div class="gl-ir"><span class="gl-il">📉 فرق البيع عن الشراء ٪</span><input type="number" id="glSpread" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
+          <div class="gl-ir"><span class="gl-il">➕ علاوة / خصم ٪</span><input type="number" id="glAdj" placeholder="0" step="any" oninput="goldAdjChange()"></div>
+          <div class="gl-ir"><span class="gl-il">✍️ سعر جرام ٢٤ يدوي</span><input type="number" id="glManual" placeholder="تلقائي" step="any" oninput="goldAdjChange()"></div>
+          <div class="gl-prices" id="glInfoSar" style="display:none;"></div>
+          <button type="button" class="gd-diag" onclick="glDiagnose()">🧪 فحص المصادر</button>
+          <div class="gl-in" id="glDiag" style="display:none;"></div>
+        </div>
       </div>
     </div>
+
+    <div class="gi-sumrow gd-chips" id="cgKaratRow"></div>
+    <div class="gi-sumrow gd-chips" id="cgUseRow"></div>
+
     <div class="gi-rows" id="cgList"></div>
-    <div class="date-row grp-new"><input type="text" id="cgGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('gold')">إنشاء مجموعة</button></div>
-    <div class="gi-dest" style="margin:4px 0 6px;"><button type="button" id="cgUseJewel" onclick="cgUseTap('jewel')">💍 زينة</button><button type="button" id="cgUseSave" onclick="cgUseTap('save')">💰 ادخار</button></div>
-    <div id="cgForm" style="display:none;">
-    <div class="field"><label>اسم القطعة</label><input type="text" id="cgName" placeholder="مثال: سبيكة، خاتم، دبلة"></div>
-    <div class="date-row"><label for="cgGrp">📁 المجموعة</label><select id="cgGrp"></select></div>
-    <div class="date-row"><label for="cgKarat">العيار</label><select id="cgKarat"><option value="24">٢٤</option><option value="22">٢٢</option><option value="21" selected>٢١</option><option value="18">١٨</option><option value="14">١٤</option><option value="12">١٢</option><option value="9">٩</option></select></div>
-    <div class="date-row"><label for="cgGrams">الوزن (جرام)</label><input type="number" id="cgGramsIn" placeholder="0" step="any" oninput="cgCalc()"></div>
-    <div class="date-row"><label for="cgPpg">ثمن الجرام</label><input type="number" id="cgPpg" placeholder="0" step="any" oninput="cgCalc()"></div>
-    <div class="gi-sumrow" style="margin-top:10px;"><span>إجمالي ثمن القطعة: <b id="cgCalcTotal">0</b></span></div>
-    <div class="field"><label>📅 التاريخ</label><input type="date" id="cgDate"></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeCapGold()">إغلاق</button>
-      <button class="btn-save" id="cgSaveBtn" onclick="saveCapGold()">＋ إضافة</button>
-    </div>
+
+    <div class="gd-add"><button type="button" id="cgUseJewel" onclick="cgUseTap('jewel')">＋ 💍 زينة</button><button type="button" id="cgUseSave" onclick="cgUseTap('save')">＋ 💰 ادخار</button></div>
+    <details class="gd-grp"><summary>📁 مجموعة جديدة</summary><div class="date-row grp-new"><input type="text" id="cgGrpName" placeholder="اسم المجموعة"><button type="button" class="mini-btn" onclick="createCapGroup('gold')">إنشاء</button></div></details>
+
+    <div id="cgForm" class="gd-form" style="display:none;">
+      <div class="field"><label>اسم القطعة</label><input type="text" id="cgName" placeholder="سبيكة، خاتم، دبلة"></div>
+      <div class="gd-g2">
+        <div class="field"><label>العيار</label><select id="cgKarat"><option value="24">٢٤</option><option value="22">٢٢</option><option value="21" selected>٢١</option><option value="18">١٨</option><option value="14">١٤</option><option value="12">١٢</option><option value="9">٩</option></select></div>
+        <div class="field"><label>المجموعة</label><select id="cgGrp"></select></div>
+      </div>
+      <div class="gd-g2">
+        <div class="field"><label>الوزن (جم)</label><input type="number" id="cgGramsIn" placeholder="0" step="any" inputmode="decimal" oninput="cgCalc()"></div>
+        <div class="field"><label>سعر الجرام</label><input type="number" id="cgPpg" placeholder="0" step="any" inputmode="decimal" oninput="cgCalc()"></div>
+      </div>
+      <div class="gd-total"><span>إجمالي الثمن</span><b id="cgCalcTotal">0</b></div>
+      <div class="field"><label>📅 التاريخ</label><input type="date" id="cgDate"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeCapGold()">إغلاق</button>
+        <button class="btn-save" id="cgSaveBtn" onclick="saveCapGold()">＋ إضافة</button>
+      </div>
     </div>
   </div>
 </div>
@@ -4870,8 +4968,23 @@ function glKaratBox(k){
   });
   return sp;
 }
+function glStatusRender(){
+  const el = document.getElementById('glStatus'); if(!el) return; el.innerHTML = '';
+  if(!(_gl && (_gl.usd > 0 || _gl.rate > 0))){ const t = document.createElement('div'); t.className = 'gd-time'; t.textContent = navigator.onLine ? 'دوس «تحديث» لتحميل الأسعار' : 'محتاج إنترنت لأول تحميل'; el.appendChild(t); return; }
+  const r = glRate(), se = glSarEff(), f2 = glF2, chips = [];
+  if(_gl.usd > 0) chips.push(['🌍', 'الأونصة', '$' + f2(_gl.usd)]);
+  if(r > 0) chips.push(['💵', 'دولار البنوك', f2(r)]);
+  if(se.v > 0) chips.push(['🏪', 'دولار الصاغة', f2(se.v)]);
+  const row = document.createElement('div'); row.className = 'gd-chips3';
+  chips.forEach(function(c){ const d = document.createElement('div'); d.innerHTML = '<span></span><small></small><b></b>'; d.children[0].textContent = c[0]; d.children[1].textContent = c[1]; d.children[2].textContent = c[2]; row.appendChild(d); });
+  el.appendChild(row);
+  const parts = []; if(_gl.usd > 0 && _gl.usdTs) parts.push(glTmS(_gl.usdT || _gl.usdTs)); if(_gl.usd > 0 && _gl.usdSrc) parts.push(_gl.usdSrc); if(_gl.usdT && Date.now() - _gl.usdT > 15 * 60 * 1000) parts.push('⚠️ متأخر');
+  if(!navigator.onLine) parts.push('أوفلاين');
+  if(parts.length){ const tm = document.createElement('div'); tm.className = 'gd-time'; tm.textContent = parts.join(' · '); el.appendChild(tm); }
+}
 function glInfoPanel(){
   const w = document.getElementById('glInfoWorld'); if(!w) return;
+  try{ glStatusRender(); }catch(e){}
   const usd = _gl && _gl.usd > 0 ? _gl.usd : 0, r = glRate(), b24 = glBase24(), se = glSarEff(), f2 = glF2;
   w.textContent = usd ? '$' + f2(usd) : '—';
   const wn = document.getElementById('glWorldNote');
@@ -4927,22 +5040,21 @@ function glPanel(){
   if(se.v > 0) lines.push('🏪 دولار الصاغة ' + f2(se.v) + ' ج (' + (se.mode === 'manual' ? 'يدوي' : 'تلقائي') + ')');
   if(!lines.length) lines.push(navigator.onLine ? '⏳ لسه ما اتحمّلتش الأسعار، دوس «تحديث»' : 'محتاج إنترنت لأول تحميل للأسعار');
   else if(!navigator.onLine) lines.push('(أوفلاين — آخر أسعار محفوظة)');
-  meta.style.whiteSpace = 'pre-line';
-  meta.textContent = lines.join('\n');
+  meta.style.display = 'none'; meta.textContent = lines.join('\n');
   const bs = document.getElementById('glBasis'), sp = glSpreadEff();
-  const sellTxt = ' · 📉 بسعر البيع' + (sp ? ' (−' + f2(sp) + '٪ عن الشراء)' : '');
+  const sellTxt = '';
   if(b <= 0){ bs.style.display = 'none'; }
   else {
     bs.style.display = '';
-    if(Number(_glAdj.manual) > 0){ bs.className = 'gl-basis ok'; bs.textContent = '✍️ التقييم بسعر جرام 24 اليدوي' + sellTxt; }
-    else if(se.v > 0 && _gl && _gl.usd > 0){ bs.className = 'gl-basis ok'; bs.textContent = '🏪 التقييم بتسعير الصاغة (دولار الصاغة ' + f2(se.v) + ' ج — ' + (se.mode === 'manual' ? 'يدوي' : 'تلقائي') + ')' + sellTxt; }
-    else { bs.className = 'gl-basis warn'; bs.textContent = '⚠️ التقييم لسه بدولار البنوك' + sellTxt + ' — دوس هنا واكتب «دولار الصاغة» عشان يتسعّر بتسعير الصاغة'; }
+    if(Number(_glAdj.manual) > 0){ bs.className = 'gl-basis ok'; bs.textContent = '✍️ التقييم بسعر يدوي'; }
+    else if(se.v > 0 && _gl && _gl.usd > 0){ bs.className = 'gl-basis ok'; bs.textContent = '🏪 التقييم بتسعير الصاغة'; }
+    else { bs.className = 'gl-basis warn'; bs.textContent = '⚠️ التقييم بدولار البنوك'; }
   }
   const g = goldPnl();
   document.getElementById('glBuy').textContent = fmt(g.buy);
   document.getElementById('glNow').textContent = g.ok ? fmt(g.now) : '—';
   const pe = document.getElementById('glProfit'), pb = document.getElementById('glProfitBox');
-  pe.textContent = g.ok ? glSigned(g.pnl) + ' (' + (g.pnl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(g.pct * 10) / 10)) + '٪)' : '—';
+  pe.textContent = g.ok ? glSigned(g.pnl) : '—'; { const pp = document.getElementById('glProfitPct'); if(pp) pp.textContent = g.ok ? (g.pnl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(g.pct * 10) / 10)) + '٪' : ''; }
   pb.classList.toggle('gl-pos', g.ok && g.pnl >= 0); pb.classList.toggle('gl-neg', g.ok && g.pnl < 0);
   const sl = document.getElementById('glSumLine');
   if(sl){ sl.textContent = g.ok ? 'إجمالي الآن: ' + fmt(g.now) + ' · ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) + ' (' + (g.pnl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(g.pct * 10) / 10)) + '٪)' : 'دوس عشان تشوف سعر الذهب الحالي'; sl.classList.toggle('gl-pos', g.ok && g.pnl >= 0); sl.classList.toggle('gl-neg', g.ok && g.pnl < 0); }
@@ -4967,15 +5079,15 @@ function renderCapGold(){
   };
   [24, 21, 18].forEach(k=>{
     const sp = glSellPpg(k);
-    kr.appendChild(mkChip('عيار ' + toArabicDigits(k), ks[k], _cgFk === k, ()=> setCgFk(k), live ? fmt(cgInt(ks[k] * sp)) : '—', fmt(cgRound(ks[k])) + ' جم' + (live ? ' × ' + fmt(sp) : ''), 'v-gold', true));
+    kr.appendChild(mkChip('عيار ' + toArabicDigits(k), ks[k], _cgFk === k, ()=> setCgFk(k), live ? fmt(cgInt(ks[k] * sp)) : '—', fmt(cgRound(ks[k])) + ' جم', 'v-gold', true));
   });
-  if(ks.other > 0) kr.appendChild(mkChip('عيارات أخرى:', ks.other, _cgFk === 'other', ()=> setCgFk('other'),
-    live ? fmt(sumNow(all.filter(x=> { const k = Number(x.karat) || 0; return !(k === 24 || k === 21 || k === 18); }))) : '—', live ? 'الوزن × سعر البيع' : '', 'v-gold'));
+  if(ks.other > 0) kr.appendChild(mkChip('أخرى', ks.other, _cgFk === 'other', ()=> setCgFk('other'),
+    live ? fmt(sumNow(all.filter(x=> { const k = Number(x.karat) || 0; return !(k === 24 || k === 21 || k === 18); }))) : '—', fmt(cgRound(ks.other)) + ' جم', 'v-gold', true));
   // زينة / ادخار
   const jw = all.filter(x=> cgUseOf(x) === 'jewel'), sv = all.filter(x=> cgUseOf(x) === 'save'), sumG = a => a.reduce((t2,x)=> t2 + (Number(x.grams)||0), 0);
   const ur = document.getElementById('cgUseRow'); ur.innerHTML = '';
-  [['💍 زينة:', jw, 'jewel'], ['💰 ادخار:', sv, 'save']].forEach(([lb, arr, key])=>{
-    ur.appendChild(mkChip(lb, sumG(arr), _cgFu === key, ()=> setCgFu(key), live ? fmt(sumNow(arr)) : fmt(cgInt(giSum(arr))), live ? 'الوزن × سعر البيع' : 'بسعر الشراء', key === 'jewel' ? 'v-pink' : 'v-green'));
+  [['💍 زينة', jw, 'jewel'], ['💰 ادخار', sv, 'save']].forEach(([lb, arr, key])=>{
+    ur.appendChild(mkChip(lb, sumG(arr), _cgFu === key, ()=> setCgFu(key), live ? fmt(sumNow(arr)) : fmt(cgInt(giSum(arr))), fmt(cgRound(sumG(arr))) + ' جم', key === 'jewel' ? 'v-pink' : 'v-green', true));
   });
   // القايمة بعد الفلترة
   const arr = all.filter(x=> {
@@ -4984,28 +5096,25 @@ function renderCapGold(){
   });
   box.innerHTML = arr.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد قطع ذهب' + ((_cgFk || _cgFu) ? ' بهذا الفلتر' : ' بعد') + '</div>';
   arr.forEach(x=>{
-    const d = document.createElement('div'); d.className = 'gi-row'; d.dataset.id = x.id; d.dataset.grp = x.grp || '';
-    d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
-    d.children[0].textContent = cgUseOf(x) === 'jewel' ? '💍' : '🪙';
-    d.children[1].textContent = x.name;
-    const det = document.createElement('span'); det.className = 'cg-det';
-    const ln = (head, pairs, cls)=>{
-      const e = document.createElement('span'); e.className = 'cg-ln' + (cls ? ' ' + cls : '');
-      const h = document.createElement('small'); h.className = 'cg-h'; h.textContent = head; e.appendChild(h);
-      pairs.forEach(([lb, v])=>{ const w = document.createElement('span'); if(lb){ const sm = document.createElement('small'); sm.textContent = lb + ' '; w.appendChild(sm); } const bb = document.createElement('b'); bb.textContent = v; w.appendChild(bb); e.appendChild(w); });
-      det.appendChild(e);
-    };
-    ln('⚖️', [['عيار', toArabicDigits(x.karat || '')], ['الوزن', fmt(x.grams) + ' جم'], ['', cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار']]);
-    ln('🛒 الشراء' + (x.date ? ' · ' + formatDate(x.date) : ''), [['الجرام', x.ppg ? fmt(cgInt(x.ppg)) : '—'], ['الإجمالي', fmt(cgInt(x.amount))]]);
+    const d = document.createElement('div'); d.className = 'gi-row gd-pc ' + (cgUseOf(x) === 'jewel' ? 'jw' : 'sv'); d.dataset.id = x.id; d.dataset.grp = x.grp || '';
+    d.innerHTML = '<div class="pc-top"><span class="pc-ic"></span><div class="pc-nm"><b class="pc-name"></b><small class="pc-tags"></small></div><b class="pc-val"></b><div class="pc-acts"><button type="button">✏️</button><button type="button">🗑</button></div></div><div class="pc-grid"></div>';
+    d.querySelector('.pc-ic').textContent = cgUseOf(x) === 'jewel' ? '💍' : '🪙';
+    d.querySelector('.pc-name').textContent = x.name;
+    d.querySelector('.pc-tags').textContent = 'عيار ' + toArabicDigits(x.karat || '') + ' · ' + fmt(x.grams) + ' جم · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + formatDate(x.date) : '');
+    const grid = d.querySelector('.pc-grid');
+    const cell = (cls, lb, big, sm)=>{ const c = document.createElement('div'); c.className = 'pc-c ' + cls; const l = document.createElement('small'); l.textContent = lb; const bb = document.createElement('b'); bb.textContent = big; c.appendChild(l); c.appendChild(bb); if(sm){ const em = document.createElement('em'); em.textContent = sm; c.appendChild(em); } grid.appendChild(c); };
     const cp = glSellPpg(x.karat);
+    cell('buy', '🛒 الشراء', fmt(cgInt(x.amount)), x.ppg ? fmt(cgInt(x.ppg)) + '/جم' : '');
+    let valTxt = fmt(cgInt(x.amount));
     if(cp > 0){
       const nowT = cgInt((Number(x.grams) || 0) * cp), pl = cgInt(nowT - cgInt(x.amount)), pc = (Number(x.amount) || 0) > 0 ? pl / Number(x.amount) * 100 : 0;
-      ln('📈 الآن (بسعر البيع)', [['الجرام', fmt(cp)], ['الإجمالي', fmt(nowT)]]);
-      ln(pl >= 0 ? '✅ الربح' : '🔻 الخسارة', [['', glSigned(pl)], ['', '(' + (pl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(pc * 10) / 10)) + '٪)']], pl >= 0 ? 'gl-pos' : 'gl-neg');
-    }
-    d.appendChild(det);
-    d.children[2].textContent = fmt(cgInt(x.amount));
-    d.children[3].onclick = ()=>{
+      valTxt = fmt(nowT);
+      cell('now', '📈 الآن', fmt(nowT), fmt(cp) + '/جم');
+      cell('pl ' + (pl >= 0 ? 'gl-pos' : 'gl-neg'), pl >= 0 ? '✅ الربح' : '🔻 الخسارة', glSigned(pl), (pl >= 0 ? '+' : '−') + fmt(Math.abs(Math.round(pc * 10) / 10)) + '٪');
+    } else grid.classList.add('one');
+    d.querySelector('.pc-val').textContent = valTxt;
+    const acts = d.querySelectorAll('.pc-acts button');
+    acts[0].onclick = ()=>{
       _cgEditId = x.id;
       document.getElementById('cgName').value = x.name; document.getElementById('cgKarat').value = String(x.karat || 21);
       document.getElementById('cgGramsIn').value = x.grams || ''; document.getElementById('cgPpg').value = x.ppg || '';
@@ -5014,7 +5123,7 @@ function renderCapGold(){
       document.getElementById('cgSaveBtn').textContent = '💾 حفظ التعديل'; cgCalc();
       document.getElementById('cgName').scrollIntoView({block:'center'});
     };
-    d.children[4].onclick = ()=> openConfirm('حذف القطعة', 'هل تريد حذف "' + x.name + '"؟', ()=>{ capDel(x.id); if(_cgEditId === x.id) cgReset(); renderCapGold(); });
+    acts[1].onclick = ()=> openConfirm('حذف القطعة', 'هل تريد حذف "' + x.name + '"؟', ()=>{ capDel(x.id); if(_cgEditId === x.id) cgReset(); renderCapGold(); });
     box.appendChild(d);
   });
   capGroupize(box, 'gold');
