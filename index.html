@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-27.7790">
+<meta name="app-version" content="2026-10-27.7800">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1526,6 +1526,12 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 .gp-hero.zk .gp-mini div{background:rgba(255,255,255,.28);box-shadow:0 2px 0 rgba(255,255,255,.35) inset,0 4px 0 rgba(0,0,0,.1);}
 .gp-hero.zk .gp-bar{background:rgba(0,0,0,.18);}
 .gp-hero.zk .gp-bar i{background:linear-gradient(180deg,#fff,#fff3c4);}
+.zp-years{display:flex;gap:9px;margin:18px 0 0;overflow-x:auto;padding:2px 2px 8px;}
+.zp-years button{flex:none;border:0;cursor:pointer;font:800 14px 'Tajawal','Cairo',sans-serif;color:var(--text);background:var(--card);padding:10px 16px;border-radius:16px;box-shadow:0 1px 0 #fff inset,0 5px 0 rgba(0,0,0,.12),0 10px 14px rgba(30,41,59,.1);text-align:center;line-height:1.35;}
+.zp-years button small{display:block;font-size:11.5px;color:var(--muted);font-weight:700;}
+.zp-years button.active{background:linear-gradient(180deg,#ffd45e,#f2a900);color:#3b2a00;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 5px 0 #8a5a00,0 10px 14px rgba(185,120,0,.3);}
+.zp-years button.active small{color:#5a3f00;}
+.zp-years button:active{transform:translateY(3px);}
 .zp-form{background:var(--card);color:var(--text);border-radius:22px;padding:14px;margin:20px 0 6px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 6px 0 rgba(0,0,0,.09),0 14px 22px rgba(30,41,59,.1);}
 .zp-form h4{margin:0 0 10px;font-size:17px;font-weight:800;}
 .zp-form label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:10px 2px 5px;}
@@ -1946,8 +1952,9 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
         <div><small id="zpLeftLbl">⏳ المتبقي</small><b id="zpLeft">0</b></div>
       </div>
     </div>
+    <div class="zp-years" id="zpYears"></div>
     <div class="zp-form">
-      <h4>🤲 صرف زكاة جديد</h4>
+      <h4 id="zpFormT">🤲 صرف زكاة جديد</h4>
       <label for="zpDest">جهة الصرف</label>
       <input type="text" id="zpDest" list="zpDestList" placeholder="مثال: أسرة محتاجة، جمعية خيرية" autocomplete="off">
       <datalist id="zpDestList"></datalist>
@@ -5405,15 +5412,32 @@ function zpYearPays(y){
   out.sort(function(a, b){ return String(b.p.date || '').localeCompare(String(a.p.date || '')) || (b.m - a.m); });
   return out;
 }
+var _zpYear = null;
+function zpZmOf(y){
+  if(y === currentYear) return zmGet();
+  const sn = data.zakatSnap && data.zakatSnap[y];
+  return Number(data.zakatMal && data.zakatMal[y]) || (sn && sn.c ? Number(sn.c.zk) || 0 : 0);
+}
+function zpYears(){
+  const set = {}; set[currentYear] = 1;
+  for(let y = currentYear - 1; y >= currentYear - 5; y--){ if(zpZmOf(y) > 0 || zmPaidFor(y) > 0) set[y] = 1; }
+  return Object.keys(set).map(Number).sort(function(a, b){ return b - a; });
+}
+function zpSetYear(y){ _zpYear = y; renderZmPay(); }
+function zpMonthFor(date, zy){ return Number(date.slice(0, 4)) === zy ? Number(date.slice(5, 7)) - 1 : 11; }
 function openZmPay(){
   const pg = document.getElementById('zpPage'); if(!pg) return;
   document.getElementById('zpDate').value = dateToInputValue(Date.now()); document.getElementById('zpDest').value = ''; document.getElementById('zpAmt').value = '';
-  pg.classList.add('open'); pg.scrollTop = 0; renderZmPay();
+  _zpYear = currentYear; pg.classList.add('open'); pg.scrollTop = 0; renderZmPay();
 }
 function closeZmPay(){ const pg = document.getElementById('zpPage'); if(pg) pg.classList.remove('open'); }
 function zpPick(t){ const i = document.getElementById('zpDest'); i.value = t; i.focus(); }
 function renderZmPay(){
-  const y = currentYear, zm = zmGet(), paid = zmPaidFor(y), left = zm - paid, bad = left < 0;
+  if(!_zpYear) _zpYear = currentYear;
+  const y = _zpYear, zm = zpZmOf(y), paid = zmPaidFor(y), left = zm - paid, bad = left < 0;
+  { const yb = document.getElementById('zpYears'); yb.innerHTML = '';
+    const ys = zpYears(); if(ys.length > 1) ys.forEach(function(yy){ const b = document.createElement('button'); b.type = 'button'; const lf = zpZmOf(yy) - zmPaidFor(yy); b.innerHTML = '<span></span><small></small>'; b.children[0].textContent = 'زكاة ' + toArabicDigits(yy); b.children[1].textContent = lf > 0.5 ? 'متبقي ' + fmt(lf) : (zpZmOf(yy) > 0 ? '✅ اتخرجت' : '—'); if(yy === y) b.classList.add('active'); b.onclick = function(){ zpSetYear(yy); }; yb.appendChild(b); }); }
+  document.getElementById('zpFormT').textContent = '🤲 صرف زكاة عن سنة ' + toArabicDigits(y);
   document.getElementById('zpYear').textContent = 'زكاة المال ' + toArabicDigits(y);
   document.getElementById('zpZm').textContent = fmt(zm);
   document.getElementById('zpPaid').textContent = fmt(paid);
@@ -5439,20 +5463,20 @@ function zpAdd(){
   const dest = document.getElementById('zpDest').value.trim(), amt = Number(document.getElementById('zpAmt').value) || 0, date = document.getElementById('zpDate').value || dateToInputValue(Date.now());
   if(!dest){ showToast('اكتب جهة الصرف', false); return; }
   if(amt <= 0){ showToast('اكتب القيمة', false); return; }
-  const y = Number(date.slice(0, 4)), m = Number(date.slice(5, 7)) - 1;
-  if(!(y > 2000) || !(m >= 0 && m <= 11)){ showToast('التاريخ مش صح', false); return; }
-  zkGetAt(y, m).payments.push({id: uid(), amount: amt, note: dest, date: date});
+  const zy = _zpYear || currentYear, dy = Number(date.slice(0, 4)), dm = Number(date.slice(5, 7)) - 1;
+  if(!(dy > 2000) || !(dm >= 0 && dm <= 11)){ showToast('التاريخ مش صح', false); return; }
+  zkGetAt(zy, zpMonthFor(date, zy)).payments.push({id: uid(), amount: amt, note: dest, date: date});
   document.getElementById('zpDest').value = ''; document.getElementById('zpAmt').value = ''; document.getElementById('zpDate').value = dateToInputValue(Date.now());
-  zpAfter(); showToast('تم صرف الزكاة وخصمها من الإجمالي ✅', true);
+  zpAfter(); showToast('تم صرف الزكاة وخصمها من زكاة ' + toArabicDigits(zy) + ' ✅', true);
 }
 function zpEdit(x){
   const p = x.p, ts = p.date ? new Date(p.date + 'T12:00:00').getTime() : Date.now();
   openGenEdit('✏️ تعديل صرف الزكاة', 'جهة الصرف', p.note, p.amount, function(n, a, dt){
     p.note = n || p.note || 'دفعة زكاة'; p.amount = a;
     if(dt){
-      const nd = dateToInputValue(dt), ny = Number(nd.slice(0, 4)), nm = Number(nd.slice(5, 7)) - 1;
+      const nd = dateToInputValue(dt), zy = _zpYear || currentYear, nm = zpMonthFor(nd, zy);
       p.date = nd;
-      if(ny !== currentYear || nm !== x.m){ x.bucket.payments = x.bucket.payments.filter(function(q){ return q.id !== p.id; }); zkGetAt(ny, nm).payments.push(p); }
+      if(nm !== x.m){ x.bucket.payments = x.bucket.payments.filter(function(q){ return q.id !== p.id; }); zkGetAt(zy, nm).payments.push(p); }
     }
     zpAfter();
   }, ts);
