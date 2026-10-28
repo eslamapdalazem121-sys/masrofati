@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7890">
+<meta name="app-version" content="2026-10-29.7900">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1366,12 +1366,19 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .bn-card .ed button{border:0; padding:6px 12px; border-radius:10px; font:inherit; font-weight:900; cursor:pointer; color:#7a0a3c; background:#fff; box-shadow:0 2px 0 rgba(0,0,0,.2);}
 .zk-sub{display:block; font-size:calc(12px * var(--fs,1)); font-weight:800; line-height:1.55; margin-top:3px; white-space:normal; text-shadow:none; opacity:.95;}
 .zk-bell{display:none; margin-top:4px; padding:3px 12px; border-radius:999px; font-size:calc(12.5px * var(--fs,1)); font-weight:800; color:#fff; text-shadow:none; background:linear-gradient(150deg,#ff8a65,#e53935); box-shadow:0 3px 0 #a82320; animation:zkBell 1.6s infinite;}
-.zk-bell.show{display:inline-block;} .zk-bell.wait{background:linear-gradient(150deg,#64b5f6,#1e6fd9); box-shadow:0 3px 0 #14509f; animation:none;}
+.zk-bell.show{display:inline-block;} .zk-bell.paid{background:linear-gradient(150deg,#66d9a0,#12a06a); box-shadow:0 3px 0 #0b6e48; animation:none;} .zk-bell.wait{background:linear-gradient(150deg,#64b5f6,#1e6fd9); box-shadow:0 3px 0 #14509f; animation:none;}
 @keyframes zkBell{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 .zkd-dateinfo{margin:-4px 2px 12px; padding:9px 12px; border-radius:14px; font-size:calc(13px * var(--fs,1)); font-weight:700; line-height:1.7; background:rgba(60,100,170,.12); color:#1c2430;}
 .zk-due-line.due, .zkd-due.due{background:linear-gradient(150deg,#ff8a65,#e53935); box-shadow:0 5px 0 #a82320, 0 12px 18px rgba(168,35,32,.3), inset 0 2px 0 rgba(255,255,255,.35);}
 .zk-due-line.wait, .zkd-due.wait{background:linear-gradient(150deg,#64b5f6,#1e6fd9); box-shadow:0 5px 0 #14509f, 0 12px 18px rgba(20,80,159,.3), inset 0 2px 0 rgba(255,255,255,.35);}
 .zk-due-line.paid, .zkd-due.paid{background:linear-gradient(150deg,#66d9a0,#12a06a); box-shadow:0 5px 0 #0b6e48, 0 12px 18px rgba(11,110,72,.3), inset 0 2px 0 rgba(255,255,255,.35);}
+.zk-due-line.prep{background:linear-gradient(150deg,#81d4fa,#0288d1); box-shadow:0 5px 0 #01579b, 0 12px 18px rgba(1,87,155,.3), inset 0 2px 0 rgba(255,255,255,.35);}
+.zk-due-line.near{background:linear-gradient(150deg,#fff176,#f9a825); color:#3b2f00; text-shadow:none; box-shadow:0 5px 0 #b57a00, 0 12px 18px rgba(181,122,0,.3), inset 0 2px 0 rgba(255,255,255,.45);}
+.zk-due-line.month{background:linear-gradient(150deg,#ffb74d,#ef6c00); box-shadow:0 5px 0 #a84a00, 0 12px 18px rgba(168,74,0,.32), inset 0 2px 0 rgba(255,255,255,.35);}
+.zk-bell.prep{background:linear-gradient(150deg,#81d4fa,#0288d1); box-shadow:0 3px 0 #01579b; animation:none;}
+.zk-bell.near{background:linear-gradient(150deg,#fff176,#f9a825); color:#3b2f00; box-shadow:0 3px 0 #b57a00; animation:none;}
+.zk-bell.month{background:linear-gradient(150deg,#ffb74d,#ef6c00); box-shadow:0 3px 0 #a84a00;}
+.zk-due-line.zm-prev{margin-top:10px;}
 .zk-due-line.unset, .zkd-due.unset{background:linear-gradient(150deg,#b0b8c4,#7d8896); box-shadow:0 4px 0 #5b6573, 0 10px 16px rgba(0,0,0,.2);}
 .zkd-due{border-radius:22px; padding:14px 12px; margin:4px 2px 14px; text-align:center; color:#fff; font-weight:800; line-height:1.7; font-size:calc(14.5px * var(--fs,1));}
 .zkd-due .h{font-size:calc(19px * var(--fs,1)); font-weight:900;}
@@ -1843,6 +1850,7 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
       <span class="plus-badge in-card zk-plus" onclick="event.stopPropagation(); openZkCalc()" role="button" aria-label="حساب زكاة المال">+</span>
     </div>
     <div class="zk-due-line" id="zmDue" onclick="openZkCalc()"></div>
+    <div class="zk-due-line zm-prev" id="zmPrev" onclick="openZkCalc()"></div>
     <div class="zk-row">
       <div class="zk-sq" onclick="openZmPay()" role="button"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🤲</span><span class="zk-l">إجمالي منصرف الزكاة</span><span class="zk-v" id="zmPaid">0</span></div>
       <div class="zk-sq" id="zmLeftSq"><span class="zk-i" id="zmLeftIco">⏳</span><span class="zk-l" id="zmLeftLbl">المتبقي</span><span class="zk-v" id="zmLeft">0</span></div>
@@ -3993,24 +4001,72 @@ function zkDueText0(i){   // مصفوفة سطور
   if(i.state === 'wait') return ['⏳ باقي ' + yFmt(i.days) + ' يوم على موعد زكاة ' + zkYear(i.next), 'تاريخ الاستحقاق: ' + zkBoth(i.next), i.winOpen ? '🟢 تعجيل الزكاة متاح الآن حتى قبل ' + zkBoth(i.winEnd) : ''];
   return ['📅 حدّد تاريخ استحقاق الزكاة عشان يظهر لك تنبيه'];
 }
+// حالة زكاة سنة معيّنة: paid (أخضر) / due (أحمر) / wait / none
+function zkYearPay(y, zm){
+  const paid = zmPaidFor(y), z = Number(zm) || 0, left = Math.max(0, Math.round((z - paid) * 100) / 100);
+  const full = z > 0 && paid >= z - 0.5;
+  return {paid, zm: z, left, full};
+}
+function zkPrevCard(){
+  try{
+    zkSnapInit();
+    const py = currentYear - 1, sn = data.zakatSnap[py], val = Number(data.zakatMal[py]) || (sn && sn.c ? Number(sn.c.zk) || 0 : 0), paid = zmPaidFor(py);
+    if(!(val > 0) && !(paid > 0)) return null;
+    const yy = toArabicDigits(py), left = Math.max(0, Math.round((val - paid) * 100) / 100);
+    if(val > 0 && paid >= val - 0.5) return {cls: 'paid', txt: '✅ زكاة ' + yy + ' تم سدادها بالكامل\nالقيمة ' + fmt(val) + ' · المُخرَج ' + fmt(paid) + (paid > val + 0.5 ? ' (زيادة ' + fmt(paid - val) + ')' : '')};
+    return {cls: 'due', txt: '🔴 زكاة ' + yy + ' لم تُسدَّد بالكامل\nالقيمة ' + fmt(val) + ' · المُخرَج ' + fmt(paid) + ' · المتبقي ' + fmt(left)};
+  }catch(e){ return null; }
+}
+function zkCdLines(yd, cy, reqTxt){
+  let ms = Math.max(0, yd - new Date()); const d = Math.floor(ms / 864e5); ms -= d * 864e5; const h = Math.floor(ms / 36e5); ms -= h * 36e5; const m = Math.floor(ms / 6e4), sc = Math.floor((ms - m * 6e4) / 1000);
+  const ar = function(n){ return yFmt(String(n).padStart(2, '0')); };
+  const lines = ['🟠 باقي ' + yFmt(d) + ' يوم على استحقاق زكاة ' + cy, '⏱️ ' + yFmt(d) + ' يوم · ' + ar(h) + ' ساعة · ' + ar(m) + ' دقيقة · ' + ar(sc) + ' ثانية', 'تاريخ الاستحقاق: ' + zkBoth(yd)];
+  if(reqTxt) lines.push(reqTxt);
+  return {lines: lines, bell: '⏳ باقي ' + yFmt(d) + ' يوم على الزكاة'};
+}
 function renderZmDue(){
+  if(window._zkCdT){ clearInterval(window._zkCdT); window._zkCdT = null; }
   const e = document.getElementById('zmDue'); if(!e) return;
-  const i = zkDueInfo(), t = zkDueText(i);
-  e.className = 'zk-due-line show ' + i.state;
-  e.textContent = t.filter(Boolean).join('\n');
-  const bl = document.getElementById('zmBell');   // تنبيه ظاهر دايمًا جوه البطاقة (حتى وهي مقفولة)
-  if(bl){
-    let txt = '', cls = 'zk-bell';
-    const yd = (i.state !== 'unset') ? zkYearDue(currentYear) : null;   // التنبيه بيتبع موعد السنة المعروضة
-    if(yd){
-      const now = new Date(), dl = Math.ceil((yd - now) / 864e5);
-      if(dl > 0){ if(dl <= 30){ txt = '⏳ باقي ' + yFmt(dl) + ' يوم على الزكاة'; cls += ' show wait'; } }
-      else if(!(data.zakatPaidD && data.zakatPaidD[zkIso(yd)])){ txt = '🔔 وجب موعد الزكاة'; cls += ' show'; }
-    } else if(i.state === 'due'){ txt = '🔔 وجب موعد الزكاة'; cls += ' show'; }
-    else if(i.state === 'wait' && i.days <= 30){ txt = '⏳ باقي ' + yFmt(i.days) + ' يوم على الزكاة'; cls += ' show wait'; }
-    else if(i.state === 'paid' && !i.winOpen){ txt = '⏳ قرب موعد الزكاة'; cls += ' show wait'; }
-    bl.className = cls; bl.textContent = txt;
-  }
+  const i = zkDueInfo(), y = currentYear, cy = toArabicDigits(y);
+  const zm = zmGet(), yp = zkYearPay(y, zm), yd = (i.state !== 'unset') ? zkYearDue(y) : null;
+  const dueReached = !!(yd && yd <= new Date());
+  let cls = i.state, lines = zkDueText0(i).filter(Boolean), bellTxt = '', bellCls = 'zk-bell';
+  if(yp.zm > 0 && yp.full){   // اتسدّدت بالكامل → أخضر
+    cls = 'paid';
+    lines = ['✅ زكاة ' + cy + ' تم سدادها بالكامل', 'القيمة ' + fmt(yp.zm) + ' · المُخرَج ' + fmt(yp.paid) + (yp.paid > yp.zm + 0.5 ? ' (زيادة ' + fmt(yp.paid - yp.zm) + ')' : '')];
+    if(yd) lines.push('تاريخ الاستحقاق: ' + zkBoth(yd));
+    bellTxt = '✅ تم سداد زكاة ' + cy; bellCls += ' show paid';
+  } else if(yp.zm > 0 && (dueReached || (i.state === 'due' && y === new Date().getFullYear()))){   // موعدها جه ولسه فيها متبقي → أحمر
+    cls = 'due';
+    lines = [yp.paid > 0 ? '🔴 وجب استحقاق زكاة ' + cy + ' — لم تُسدَّد بالكامل' : '🔴 وجب استحقاق زكاة ' + cy, 'المطلوب ' + fmt(yp.zm) + ' · المُخرَج ' + fmt(yp.paid) + ' · المتبقي ' + fmt(yp.left)];
+    if(yd) lines.push('تاريخ الاستحقاق: ' + zkBoth(yd));
+    lines.push('⚠️ تُخرج فور الوجوب — لا يجوز التأخير بدون عذر');
+    bellTxt = yp.paid > 0 ? '🔴 متبقي ' + fmt(yp.left) + ' من زكاة ' + cy : '🔴 وجب استحقاق زكاة ' + cy; bellCls += ' show';
+  } else if(yd){   // لسه ما حلّش موعدها: مراحل بتدرّج الألوان
+    const dl = Math.ceil((yd - new Date()) / 864e5), reqTxt = yp.zm > 0 ? 'المطلوب ' + fmt(yp.zm) + ' · المُخرَج ' + fmt(yp.paid) : '';
+    if(dl > 0 && dl <= 30){   // آخر شهر: عدّاد تنازلي
+      cls = 'month'; bellCls += ' show month';
+      const mk = function(){ return zkCdLines(yd, cy, reqTxt); };
+      const r = mk(); lines = r.lines; bellTxt = r.bell;
+      window._zkCdT = setInterval(function(){
+        const el2 = document.getElementById('zmDue'), b2 = document.getElementById('zmBell');
+        if(!el2 || (yd - new Date()) <= 0){ clearInterval(window._zkCdT); window._zkCdT = null; try{ renderZmDue(); }catch(er){} return; }
+        const q = mk(); el2.textContent = q.lines.join('\n'); if(b2) b2.textContent = q.bell;
+      }, 1000);
+    } else if(dl > 30 && dl <= 183){   // من نص السنة: اقترب
+      cls = 'near'; bellCls += ' show near'; bellTxt = '🟡 اقترب موعد زكاة ' + cy;
+      lines = ['🟡 اقترب موعد زكاة ' + cy, 'باقي ' + yFmt(dl) + ' يوم', 'تاريخ الاستحقاق: ' + zkBoth(yd)]; if(reqTxt) lines.push(reqTxt);
+    } else if(dl > 183){   // من أول السنة: استعد
+      cls = 'prep'; bellCls += ' show prep'; bellTxt = '🔵 استعد لموعد زكاة ' + cy;
+      lines = ['🔵 استعد لموعد زكاة ' + cy, 'باقي ' + yFmt(dl) + ' يوم', 'تاريخ الاستحقاق: ' + zkBoth(yd)]; if(reqTxt) lines.push(reqTxt);
+    }
+  } else if(i.state === 'wait' && i.days <= 30){ bellTxt = '⏳ باقي ' + yFmt(i.days) + ' يوم على الزكاة'; bellCls += ' show wait'; }
+  e.className = 'zk-due-line show ' + cls;
+  e.textContent = lines.join('\n');
+  const bl = document.getElementById('zmBell'); if(bl){ bl.className = bellCls; bl.textContent = bellTxt; }
+  // بطاقة السنة الماضية: أخضر لو اتسدّدت، أحمر لو فيها متبقي
+  const pe = document.getElementById('zmPrev');
+  if(pe){ const pc = zkPrevCard(); if(pc){ pe.className = 'zk-due-line zm-prev show ' + pc.cls; pe.textContent = pc.txt; } else { pe.className = 'zk-due-line zm-prev'; pe.textContent = ''; } }
 }
 function zkSetStart(v){ data.zakatStart = v || ''; save(); renderZM(); renderZkCalc(); }
 function zkSetMode(m){ data.zakatMode = m; save(); renderZM(); renderZkCalc(); }
