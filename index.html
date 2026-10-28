@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-28.7860">
+<meta name="app-version" content="2026-10-28.7871">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1454,6 +1454,10 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 .home-edit .home-mv{display:flex; gap:8px; position:absolute; top:-14px; left:12px; z-index:30; pointer-events:auto;}
 .home-mvb{width:32px; height:32px; border-radius:50%; border:0; cursor:pointer; color:#fff; font-size:15px; font-weight:900; line-height:1; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 34% 26%, #c4e8ff 0%, #3fa9ff 38%, #0a68ee 100%); box-shadow:inset 0 2px 0 rgba(255,255,255,.65), inset 0 -3px 0 rgba(0,0,0,.22), 0 3px 0 #0746a3, 0 8px 12px -3px rgba(10,90,210,.6);}
 .home-mvb:disabled{opacity:.35; box-shadow:none; cursor:default;}
+.hc{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
+.hc-ph{opacity:.3; outline:2px dashed rgba(124,77,219,.75); outline-offset:3px; border-radius:16px;}
+.hc-ghost{position:fixed !important; margin:0 !important; z-index:99999; pointer-events:none; transform:scale(1.03); opacity:.97; box-shadow:0 18px 40px rgba(0,0,0,.38); will-change:top,transform;}
+body.hc-dragging{-webkit-user-select:none; user-select:none; cursor:grabbing; overscroll-behavior:contain;}
 /* ===== HOME REORDER END ===== */
 </style>
 <link rel="manifest" href="manifest.webmanifest">
@@ -1700,6 +1704,21 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 #capMoneyOverlay .cap-grp b .gt{display:block; font-size:calc(16px * var(--fs,1)); font-weight:900; line-height:1.35; overflow-wrap:anywhere;}
 #capMoneyOverlay .cap-grp b .gs{display:block; margin-top:2px; font-size:calc(13px * var(--fs,1)); font-weight:800; line-height:1.5; color:var(--muted);}
 #capMoneyOverlay .cap-grp b .ga{font-size:calc(19px * var(--fs,1)); font-weight:900; color:var(--text);}
+#capGoldOverlay .cap-grp{margin:16px 2px 10px; padding:11px 13px; border-radius:18px; font-size:calc(15px * var(--fs,1)); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 5px 0 rgba(0,0,0,.10), 0 11px 16px var(--mcsh);}
+#capGoldOverlay .cap-grp small{padding:3px 11px; border-radius:999px; background:var(--card); opacity:1; box-shadow:0 2px 0 rgba(0,0,0,.13);}
+#capGoldOverlay .cap-grp button{padding:6px 10px; border-radius:11px; font-family:inherit; color:var(--text); background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 2px 0 rgba(255,255,255,.7), 0 3px 0 rgba(0,0,0,.18); transition:transform .08s, box-shadow .08s;}
+#capGoldOverlay .cap-grp button:active{transform:translateY(3px); box-shadow:0 0 0 rgba(0,0,0,.18);}
+#capGoldOverlay .cap-grp b .gt{display:block; font-size:calc(16px * var(--fs,1)); font-weight:900; line-height:1.35; overflow-wrap:anywhere;}
+#capGoldOverlay .cap-grp b .gs{display:block; margin-top:2px; font-size:calc(13px * var(--fs,1)); font-weight:800; line-height:1.5; color:var(--muted);}
+#capGoldOverlay .cap-grp b .ga{font-size:calc(19px * var(--fs,1)); font-weight:900; color:var(--text);}
+#capGoldOverlay{--mchl:rgba(255,255,255,.95); --mcsh:rgba(30,41,59,.13); --mcbtn:#ffffff; --mcbtn2:#e6ebf3;}
+:root[data-theme="dark"] #capGoldOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #capGoldOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;} }
+#capGoldOverlay .cap-grp{position:relative; padding:13px 14px; border-radius:22px; box-shadow:inset 0 3px 0 rgba(255,255,255,.65), inset 0 -4px 0 rgba(0,0,0,.10), 0 7px 0 rgba(0,0,0,.14), 0 16px 22px var(--mcsh); transform:translateY(-1px); transition:transform .1s, box-shadow .1s;}
+#capGoldOverlay .cap-grp:active{transform:translateY(5px); box-shadow:inset 0 3px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.08), 0 2px 0 rgba(0,0,0,.14), 0 5px 9px var(--mcsh);}
+#capGoldOverlay .cap-grp::after{content:""; position:absolute; inset:3px 10px auto 10px; height:34%; border-radius:18px 18px 40px 40px; background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0)); pointer-events:none;}
+#capGoldOverlay .cap-grp-body{margin-bottom:6px;}
+#capGoldOverlay .cap-grp .zk-tg, #capMoneyOverlay .cap-grp .zk-tg{margin-inline-start:2px;}
 /* صفوف الجداول الشهرية */
 #cmInterest .gi-rows > .gi-row:not(.mc){border:0; margin:0 2px 9px; padding:12px 13px; border-radius:16px; background:var(--card); box-shadow:inset 0 2px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.09), 0 8px 12px var(--mcsh);}
 #cmInterest .gi-rows > .gi-row.int-item{margin-inline-start:20px; padding-inline-start:13px; background:rgba(47,123,255,.08); box-shadow:inset 0 2px 0 var(--mchl), 0 3px 0 rgba(0,0,0,.07);}
@@ -1786,7 +1805,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <button type="button" class="nav-btn" onclick="shiftYear(1)">‹</button>
   </div>
 
-  <div class="home-reorder-row"><button type="button" id="homeReorderBtn" class="home-reorder-btn" onclick="toggleHomeReorder()">↕️ ترتيب البطاقات</button></div>
+  <div class="home-reorder-row"><button type="button" id="homeReorderBtn" class="home-reorder-btn" onclick="toggleHomeReorder()" title="اضغط مطوّلًا على أي بطاقة وحرّكها">↕️ ترتيب البطاقات</button></div>
 
   <div class="gi-wrap yr-gi" id="yrGI">
     <div class="zk-main" onclick="toggleYr()" role="button">
@@ -1892,6 +1911,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
       <div class="check-row"><input type="checkbox" id="cmIntOut" checked><label for="cmIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد البنك)</label></div>
     </div>
     <div class="date-row"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
+    <div class="check-row" id="cmZkRow"><input type="checkbox" id="cmZk" checked><label for="cmZk" style="margin:0;">🕌 يدخل في حساب زكاة المال (شيل العلامة لو عايز تستبعده)</label></div>
     <div class="field"><label id="cmDateLbl">📅 التاريخ</label><input type="date" id="cmDate"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeCapMoney()">إغلاق</button>
@@ -1994,6 +2014,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
     <h3>📁 تعديل المجموعة</h3>
     <div class="field"><label>اسم المجموعة</label><input type="text" id="capGrpEditName"></div>
     <div class="field"><label>🎨 لون المجموعة</label><input type="color" id="capGrpColor" style="height:46px;padding:4px;"></div>
+    <div class="check-row"><input type="checkbox" id="capGrpZk" checked><label for="capGrpZk" style="margin:0;">🕌 تدخل المجموعة دي في حساب زكاة المال (شيل العلامة لو عايز تستبعدها)</label></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeCapGrp()">إلغاء</button>
       <button class="btn-cancel" style="color:#c0392b;" onclick="deleteCapGrp()">🗑 حذف</button>
@@ -3985,7 +4006,9 @@ function zkMarkPaid(on){ if(!data.zakatPaidD) data.zakatPaidD = {}; const i = zk
 function zkcCompute(){
   const t = capTotals(), go = goldPieces(), live = glBase24() > 0, p24 = glSellPpg(24);
   const bk = {jewel: {g: 0, e: 0, v: 0, n: 0}, save: {g: 0, e: 0, v: 0, n: 0}, other: {g: 0, e: 0, v: 0, n: 0}}, kr = {};
+  let exGold = 0;
   go.forEach(x=>{
+    if(!capZkIn(x)){ exGold += live ? cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)) : cgInt(Number(x.amount) || 0); return; }   // مستبعد من الزكاة
     const k = zkcBucket(x), g = Number(x.grams) || 0, kk = Number(x.karat) || 0, e = g * kk / 24;   // تحويل الجرامات لعيار ٢٤
     bk[k].g += g; bk[k].e += e; bk[k].n++; bk[k].a = (bk[k].a || 0) + (Number(x.amount) || 0);
     kr[kk] = (kr[kk] || 0) + g;
@@ -3996,8 +4019,9 @@ function zkcCompute(){
     b.v = live ? cgInt(b.e * p24) : cgInt(b.a || 0);   // القيمة = جرامات عيار ٢٤ المكافئة × سعر بيع جرام ٢٤
     goldAll += b.v; eqAll += b.e; if(_zkc[k]){ goldIn += b.v; eqIn += b.e; }
   });
-  const base = cgRound(t.money + goldIn);
-  return {t, live, p24, bk, kr, goldAll, goldIn, eqAll, eqIn, base, zk: cgRound(base * zkRate())};
+  const zkMoney = (t.zkMoney !== undefined) ? t.zkMoney : t.money, exMoney = Math.max(0, cgRound(t.money - zkMoney));
+  const base = cgRound(zkMoney + goldIn);
+  return {t, zkMoney, exMoney, exGold, live, p24, bk, kr, goldAll, goldIn, eqAll, eqIn, base, zk: cgRound(base * zkRate())};
 }
 function zkcAutoToggle(){
   if(zmAuto()){ zkSnapTake(currentYear, false); zkFreeze(currentYear); }   // تثبيت القيمة الحالية
@@ -4046,8 +4070,10 @@ function renderZkCalc(){
   // الأموال
   el('zkd-sec', '💰 أموالي (من رأس المال)');
   const g1 = el('zkd-grid');
-  tile(g1, 'x', '💵', 'نقدي', fmt(t.cash)); tile(g1, 'x', '🏦', 'بنوك وشهادات', fmt(t.bank));
-  tile(g1, 'violet zkd-wide', '💼', 'إجمالي أموالي', fmt(t.money));
+  const zkM = (c.zkMoney !== undefined) ? c.zkMoney : t.money, zkC = (t.zkCash !== undefined) ? t.zkCash : t.cash, zkB = (t.zkBank !== undefined) ? t.zkBank : t.bank;
+  tile(g1, 'x', '💵', 'نقدي', fmt(zkC)); tile(g1, 'x', '🏦', 'بنوك وشهادات', fmt(zkB));
+  tile(g1, 'violet zkd-wide', '💼', 'إجمالي أموالي (الداخل في الزكاة)', fmt(zkM), (c.exMoney > 0) ? ['🚫 مستبعد: ' + fmt(c.exMoney)] : []);
+  if(c.exMoney > 0 || c.exGold > 0) el('zkd-note', '🚫 مستبعد من حساب الزكاة (حسب اختيارك للمجموعات والبنود): أموال ' + fmt(c.exMoney || 0) + ' · ذهب ' + fmt(c.exGold || 0) + '. تقدر ترجّعه من زرار 🕌 جنب المجموعة أو البند في صفحة أموال/ذهب.');
   // تحويل الذهب لعيار ٢٤
   el('zkd-sec', '⚖️ تحويل الذهب إلى عيار ٢٤ (الجرام × العيار ÷ ٢٤)');
   const cv = el('zkd-conv');
@@ -4121,6 +4147,11 @@ function capSnapLive(){
 function capList(){ return capIsPast() ? capSnapObj(currentYear).list : capRaw(); }
 const capCatOf = x => x.cat === 'gold' ? 'gold' : 'money';
 const capSubOf = x => x.sub === 'bank' ? 'bank' : (x.sub === 'pension' ? 'pension' : 'cash');
+function capZkIn(x){   // هل البند داخل في حساب الزكاة؟ (يتحكم فيه البند نفسه أو مجموعته)
+  if(!x || x.noZk === true) return false;
+  if(x.grp){ const g = (Array.isArray(data.capitalGroups) ? data.capitalGroups : []).find(q=> q.id === x.grp); if(g && g.noZk === true) return false; }
+  return true;
+}
 function capTotals(){ return capIsPast() ? capSnapObj(currentYear).totals : capTotalsCalc(capRaw()); }
 function capTotalsCalc(arr){
   const mo = arr.filter(x=> capCatOf(x) === 'money'), go = arr.filter(x=> capCatOf(x) === 'gold');
@@ -4133,7 +4164,10 @@ function capTotalsCalc(arr){
   const pension = giSum(penItems) - penPaid;   // معاش شهري: مش داخل في إجمالي رأس المال
   const grams = go.reduce((a,x)=> a + (Number(x.grams)||0), 0);
   const goldBuy = cgInt(giSum(go)), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
-  return {money: cash + bank, cash, bank, pension, bankAdded, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
+  const zi = mo.filter(capZkIn), ziBank = zi.filter(x=> capSubOf(x) === 'bank');
+  const zkCash = giSum(zi.filter(x=> capSubOf(x) === 'cash'));
+  const zkBank = giSum(ziBank) + cgRound(ziBank.filter(x=> x.intKeep === true).reduce((a,x)=> a + Math.max(0, bankIntSince(x, eod0) - (Number(x.intSpent) || 0)), 0));
+  return {zkCash, zkBank, zkMoney: zkCash + zkBank, money: cash + bank, cash, bank, pension, bankAdded, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
 function capPastBar(){
   const wrap = document.querySelector('.zk-wrap.yr-cap'); if(!wrap || !wrap.parentNode) return;
@@ -4166,7 +4200,7 @@ function openCapChoose(){ document.getElementById('capChooseOverlay').classList.
 function closeCapChoose(){ document.getElementById('capChooseOverlay').classList.remove('open'); }
 function capDel(id){ data.capital = capRaw().filter(z=> z.id !== id); save(); renderCap(); }
 window.addEventListener('load', function(){
-  ['capDel', 'saveCapGold', 'addCapMoney', 'cmOutSave', 'cmOutDel', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
+  ['capDel', 'capGrpZkToggle', 'capItemZkToggle', 'saveCapGold', 'addCapMoney', 'cmOutSave', 'cmOutDel', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
     const f = window[n]; if(typeof f !== 'function') return;
     window[n] = function(){ if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; } return f.apply(this, arguments); };
   });
@@ -4193,14 +4227,17 @@ function createCapGroup(cat){
 }
 function openCapGrp(id){
   const g = capGroups().find(x=> x.id === id); if(!g) return;
-  _capGrpId = id; document.getElementById('capGrpEditName').value = g.name; ensureGrpColors(); document.getElementById('capGrpColor').value = g.color || '#7c4ddb';
+  _capGrpId = id; document.getElementById('capGrpEditName').value = g.name; ensureGrpColors(); document.getElementById('capGrpColor').value = g.color || '#7c4ddb'; document.getElementById('capGrpZk').checked = g.noZk !== true;
   document.getElementById('capGrpOverlay').classList.add('open');
 }
+function capGrpZkToggle(id){ const g = capGroups().find(x=> x.id === id); if(!g) return; if(g.noZk === true) delete g.noZk; else g.noZk = true; save(); capRerender(); showToast(g.noZk === true ? '🚫 «' + g.name + '» خرجت من حساب الزكاة' : '🕌 «' + g.name + '» داخلة في حساب الزكاة', true); }
+function capItemZkToggle(id){ const x = capList().find(z=> z.id === id); if(!x) return;
+  if(x.noZk !== true && !capZkIn(x)){ showToast('المجموعة مستبعدة من الزكاة — غيّرها من زرار 🚫 جنب اسم المجموعة', false); return; } if(x.noZk === true) delete x.noZk; else x.noZk = true; save(); capRerender(); showToast(x.noZk === true ? '🚫 «' + x.name + '» خرج من حساب الزكاة' : '🕌 «' + x.name + '» داخل في حساب الزكاة', true); }
 function closeCapGrp(){ document.getElementById('capGrpOverlay').classList.remove('open'); _capGrpId = null; }
 function capRerender(){ fillGrpSel('cmGrp','money', document.getElementById('cmGrp').value); fillGrpSel('cgGrp','gold', document.getElementById('cgGrp').value); renderCapMoney(); renderCapGold(); renderCap(); }
 function saveCapGrp(){
   const g = capGroups().find(x=> x.id === _capGrpId), n = document.getElementById('capGrpEditName').value.trim();
-  if(g && n){ g.name = n; g.color = document.getElementById('capGrpColor').value || g.color; save(); }
+  if(g && n){ g.name = n; g.color = document.getElementById('capGrpColor').value || g.color; if(document.getElementById('capGrpZk').checked) delete g.noZk; else g.noZk = true; save(); }
   closeCapGrp(); capRerender();
 }
 function deleteCapGrp(){
@@ -4238,6 +4275,7 @@ function grpIntStats(items, now){
 const _capCollapsed = new Set();
 function capGroupize(box, cat){
   const groups = capGroups(cat); if(!groups.length) return;
+  try{ ensureGrpColors(); }catch(e){}
   const rows = Array.from(box.querySelectorAll(':scope > .gi-row')), items = capList();
   const byId = id => items.find(x=> x.id === id);
   box.innerHTML = '';
@@ -4246,21 +4284,27 @@ function capGroupize(box, cat){
     const sumA = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).amount) || 0), 0), sumG = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).grams) || 0), 0);
     const ck = cat + ':' + (gid || '_none'), closed = _capCollapsed.has(ck);
     const h = document.createElement('div'); h.className = 'cap-grp'; h.style.cursor = 'pointer';
-    h.innerHTML = '<span class="plus-badge pb-blue pb-sm in-card"></span><span>📁</span><b></b><small></small>' + (gid ? '<button type="button">✏️</button>' : '');
+    h.innerHTML = '<span class="plus-badge pb-blue pb-sm in-card"></span><span>📁</span><b></b><small></small>' + (gid ? '<button type="button">✏️</button><button type="button" class="zk-tg"></button>' : '');
     setBadgeState(h.children[0], !closed);
     let intTxt = '', gcol = null;
+    const gObj = gid ? groups.find(g=> g.id === gid) : null, zkOut = !!(gObj && gObj.noZk === true);
+    if(cat === 'gold') gcol = gObj ? gObj.color : null;
     if(cat === 'money'){
       const g0 = gid ? groups.find(g=> g.id === gid) : null; gcol = g0 ? g0.color : null;
       const bks = rs.map(r=> byId(r.dataset.id)).filter(x=> x && capSubOf(x) === 'bank' && bankMonthly(x) > 0);
       if(bks.length){ const now0 = new Date(), st = grpIntStats(bks, now0); intTxt = ' · فوائد ' + MONTHS[now0.getMonth()] + ': ' + fmt(st.got) + (st.got < st.exp ? ' من ' + fmt(st.exp) : ''); }
     }
-    if(cat === 'money'){   // عنوان من سطرين: الاسم، وتحته الإجمالي والفوائد
+    if(true){   // عنوان من سطرين: الاسم، وتحته الإجمالي والفوائد
       const tb = h.children[2]; tb.innerHTML = '<span class="gt"></span><span class="gs"><span class="ga"></span><span class="gi"></span></span>';
-      tb.querySelector('.gt').textContent = title; tb.querySelector('.ga').textContent = fmt(sumA); tb.querySelector('.gi').textContent = intTxt;
-    } else h.children[2].textContent = title + ' — ' + fmt(cat === 'gold' ? cgInt(sumA) : sumA) + (cat === 'gold' && sumG > 0 ? ' (' + fmt(Math.round(sumG * 100) / 100) + ' جم)' : '') + intTxt;
-    if(gcol){ h.style.background = hexA(gcol, .2); h.style.borderInlineStart = '6px solid ' + gcol; }
+      tb.querySelector('.gt').textContent = title;
+      tb.querySelector('.ga').textContent = fmt(cat === 'gold' ? cgInt(sumA) : sumA);
+      tb.querySelector('.gi').textContent = (cat === 'gold' ? (sumG > 0 ? ' · ' + fmt(Math.round(sumG * 100) / 100) + ' جم' : '') : intTxt) + (zkOut ? ' · 🚫 خارج الزكاة' : '');
+    }
+    if(gcol){ h.style.background = cat === 'gold' ? 'linear-gradient(160deg,' + hexA(gcol, .10) + ',' + hexA(gcol, .34) + ')' : hexA(gcol, .2); h.style.borderInlineStart = '6px solid ' + gcol; }
+    if(zkOut) h.style.opacity = '.92';
     h.children[3].textContent = toArabicDigits(rs.length) + ' بند';
-    if(gid) h.children[4].onclick = (e)=>{ e.stopPropagation(); openCapGrp(gid); };
+    if(gid){ h.children[4].onclick = (e)=>{ e.stopPropagation(); openCapGrp(gid); };
+      const zb = h.children[5]; zb.textContent = zkOut ? '🚫' : '🕌'; zb.title = zkOut ? 'مستبعدة من الزكاة — دوس لإدخالها' : 'داخلة في الزكاة — دوس لاستبعادها'; zb.onclick = (e)=>{ e.stopPropagation(); capGrpZkToggle(gid); }; }
     const body = document.createElement('div'); body.className = 'cap-grp-body'; body.style.display = closed ? 'none' : 'block';
     if(gcol){ body.style.borderInlineStart = '4px solid ' + hexA(gcol, .6); body.style.paddingInlineStart = '4px'; }
     if(!rs.length){ const e = document.createElement('div'); e.style.cssText = 'color:var(--muted);font-size:12px;text-align:center;padding:4px;'; e.textContent = 'لا توجد بنود في المجموعة'; body.appendChild(e); }
@@ -4564,7 +4608,7 @@ function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMone
 function cmReset(){
   _cmEditId = null;
   document.getElementById('cmName').value = ''; document.getElementById('cmAmt').value = '';
-  document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; _cmRemTouched = false; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = true; }
+  document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; _cmRemTouched = false; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = true; } { const zc = document.getElementById('cmZk'); if(zc) zc.checked = true; }
   document.getElementById('cmDate').value = dateToInputValue(Date.now());
   document.getElementById('cmSaveBtn').textContent = '＋ إضافة';
   fillGrpSel('cmGrp', 'money', '');
@@ -4581,7 +4625,7 @@ function mcPill(d, cls, txt){ const p = document.createElement('div'); p.classNa
 function cmEditItem(x){
   _cmEditId = x.id; _cmFormOpen = true; cmSubUI(capSubOf(x));
   document.getElementById('cmRate').value = x.rate || ''; _cmRemTouched = (x.monthlyInt !== undefined && x.monthlyInt !== null && x.monthlyInt !== ''); document.getElementById('cmRem').value = _cmRemTouched ? x.monthlyInt : '';
-  document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = x.intKeep !== true; }
+  document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = x.intKeep !== true; } { const zc = document.getElementById('cmZk'); if(zc) zc.checked = x.noZk !== true; }
   document.getElementById('cmDate').value = dateToInputValue(x.date || Date.now());
   fillGrpSel('cmGrp', 'money', x.grp || '');
   document.getElementById('cmSaveBtn').textContent = '💾 حفظ التعديل';
@@ -4591,7 +4635,7 @@ function mcCard(x, o){
   o = o || {};
   const sub = capSubOf(x), now = new Date(), y = now.getFullYear(), m = now.getMonth(), dt = x.date ? formatDate(x.date) : '';
   const d = document.createElement('div'); d.className = 'gi-row mc mc-' + sub; d.dataset.id = x.id; d.dataset.grp = x.grp || '';
-  d.innerHTML = '<div class="mc-top"><span class="mc-ic"></span><div class="mc-nm"><b class="mc-name"></b><small class="mc-tags"></small></div>' + (o.acts ? '<div class="mc-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button></div>' : '') + '</div><div class="mc-bal"><small></small><b></b></div><div class="mc-grid"></div>';
+  d.innerHTML = '<div class="mc-top"><span class="mc-ic"></span><div class="mc-nm"><b class="mc-name"></b><small class="mc-tags"></small></div>' + (o.acts ? '<div class="mc-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button><button type="button" aria-label="الزكاة"></button></div>' : '') + '</div><div class="mc-bal"><small></small><b></b></div><div class="mc-grid"></div>';
   d.querySelector('.mc-ic').textContent = sub === 'bank' ? '🏦' : (sub === 'pension' ? '💳' : '💵');
   d.querySelector('.mc-name').textContent = x.name;
   d.querySelector('.mc-bal b').textContent = fmt(x.amount);
@@ -4635,6 +4679,8 @@ function mcCard(x, o){
   if(o.acts){
     const acts = d.querySelectorAll('.mc-acts button');
     acts[0].onclick = ()=> cmEditItem(x);
+    acts[2].textContent = capZkIn(x) ? '🕌' : '🚫'; acts[2].title = capZkIn(x) ? 'داخل في الزكاة — دوس لاستبعاده' : 'مستبعد من الزكاة — دوس لإدخاله'; acts[2].onclick = ()=> capItemZkToggle(x.id);
+    if(!capZkIn(x)) acts[2].style.opacity = '.75';
     acts[1].onclick = ()=> openConfirm('حذف البند', 'هل تريد حذف "' + x.name + '"؟', ()=>{ capDel(x.id); if(_cmEditId === x.id) cmReset(); renderCapMoney(); });
   }
   return d;
@@ -4781,9 +4827,10 @@ function addCapMoney(){
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
   const rec = {name: n, amount: amt, cat: 'money', sub: _cmSub, date: inputValueToDate(document.getElementById('cmDate').value, Date.now())};
   const gv = document.getElementById('cmGrp').value; if(gv) rec.grp = gv;
+  { const zc = document.getElementById('cmZk'); if(zc && !zc.checked) rec.noZk = true; }
   if(_cmSub === 'bank'){ rec.rate = Number(document.getElementById('cmRate').value) || 0; const rv = document.getElementById('cmRem').value; rec.monthlyInt = (_cmRemTouched && rv !== '') ? Number(rv) || 0 : undefined; { const io = document.getElementById('cmIntOut'); rec.intKeep = (io && !io.checked) ? true : undefined; } }
   const wasEdit = !!_cmEditId;
-  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; Object.assign(x, rec); } }
+  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; Object.assign(x, rec); } }
   else capList().push(Object.assign({id: uid()}, rec));
   save(); cmReset(); renderCapMoney(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : (_cmSub === 'pension' ? 'المعاشات' : 'النقدي')), true);
 }
@@ -9111,7 +9158,104 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(btn){ btn.classList.toggle('on', on); btn.textContent = on ? '✔ تم' : '↕️ ترتيب البطاقات'; }
     if(on) refreshButtons();
   };
+  window.__homeOrderSave = save; window.__homeRefresh = refreshButtons;
   applyOrder(); addControls();
+})();
+</script>
+<script>
+/* نقل بطاقات الصفحة الأولى بالضغط المطوّل والسحب */
+(function(){
+  var IDS = ['yrGI', 'homeStats', 'yrZM', 'yrCap', 'yrMS'], HOLD = 380, TOL = 9, HINT = 'masrofati_home_hint_v1';
+  var host = function(){ return document.getElementById('homeExtras'); };
+  var st = null, suppressUntil = 0, lastTouchEnd = 0;
+  var isCard = function(el){ return !!el && el.nodeType === 1 && IDS.indexOf(el.id) > -1; };
+  function cardOf(t){ var h = host(); while(t && t !== h){ if(isCard(t) && t.parentNode === h) return t; t = t.parentNode; } return null; }
+  var visible = function(el){ return el.getBoundingClientRect().height > 1; };
+  function neighbor(el, dir){ var n = dir > 0 ? el.nextElementSibling : el.previousElementSibling; while(n){ if(isCard(n) && visible(n)) return n; n = dir > 0 ? n.nextElementSibling : n.previousElementSibling; } return null; }
+  function vib(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+  function reorder(y){
+    var h = host(); if(!st || !h) return;
+    for(var i = 0; i < 14; i++){
+      var el = st.el, nx = neighbor(el, 1), pv = neighbor(el, -1), moved = false, r;
+      if(nx){ r = nx.getBoundingClientRect(); if(y > r.top + r.height * 0.5){ h.insertBefore(el, nx.nextSibling); moved = true; } }
+      if(!moved && pv){ r = pv.getBoundingClientRect(); if(y < r.top + r.height * 0.5){ h.insertBefore(el, pv); moved = true; } }
+      if(!moved) break;
+    }
+  }
+  function frame(){
+    if(!st || !st.active) return;
+    var y = st.lastY, H = window.innerHeight, zone = 90, dy = 0;
+    if(y < zone) dy = -Math.ceil((zone - Math.max(y, 0)) / zone * 18); else if(y > H - zone) dy = Math.ceil((Math.min(y, H) - (H - zone)) / zone * 18);
+    if(dy){ window.scrollBy(0, dy); reorder(y); }
+    st.raf = requestAnimationFrame(frame);
+  }
+  function lift(){
+    if(!st || st.active) return;
+    var el = st.el, h = host(), r = el.getBoundingClientRect();
+    if(!el.isConnected || r.height < 2){ cancel(); return; }
+    st.active = true; st.timer = null; st.offY = st.lastY - r.top;
+    var g = el.cloneNode(true); g.removeAttribute('id'); Array.prototype.forEach.call(g.querySelectorAll('[id]'), function(n){ n.removeAttribute('id'); });
+    Array.prototype.forEach.call(g.querySelectorAll('.home-mv'), function(n){ n.remove(); });
+    g.className = (el.className + ' hc-ghost').replace(/\bhc-ph\b/g, ''); g.style.left = r.left + 'px'; g.style.top = r.top + 'px'; g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    h.appendChild(g); st.ghost = g;
+    el.classList.add('hc-ph'); document.body.classList.add('hc-dragging');
+    suppressUntil = Date.now() + 600; vib(18);
+    st.raf = requestAnimationFrame(frame);
+  }
+  function move(y){ if(!st || !st.active) return; st.lastY = y; st.ghost.style.top = (y - st.offY) + 'px'; reorder(y); }
+  function finish(dropped){
+    if(!st) return; var s0 = st; st = null;
+    if(s0.timer) clearTimeout(s0.timer);
+    if(s0.raf) cancelAnimationFrame(s0.raf);
+    if(!s0.active) return;
+    document.body.classList.remove('hc-dragging');
+    var el = s0.el, g = s0.ghost, r = el.getBoundingClientRect();
+    suppressUntil = Date.now() + 500;
+    if(g){ g.style.transition = 'top .16s ease, left .16s ease, transform .16s ease, box-shadow .16s ease'; g.style.top = r.top + 'px'; g.style.left = r.left + 'px'; g.style.transform = 'none'; }
+    setTimeout(function(){ if(g && g.parentNode) g.parentNode.removeChild(g); el.classList.remove('hc-ph'); }, 175);
+    if(dropped){ try{ if(window.__homeOrderSave) window.__homeOrderSave(); if(window.__homeRefresh) window.__homeRefresh(); }catch(e){} vib(10); }
+  }
+  function cancel(){ if(st && st.timer){ clearTimeout(st.timer); } if(st && !st.active) st = null; else finish(false); }
+  function begin(t, x, y, id){
+    if(st) return;
+    var h = host(); if(!h || !t) return;
+    if(t.closest && t.closest('.home-mv, input, select, textarea, a, [contenteditable="true"]')) return;
+    var c = cardOf(t); if(!c || !visible(c)) return;
+    st = {el: c, sx: x, sy: y, lastY: y, id: id, active: false, timer: null};
+    st.timer = setTimeout(lift, HOLD);
+  }
+  /* لمس */
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1){ cancel(); return; }
+    var t = e.touches[0]; begin(e.target, t.clientX, t.clientY, t.identifier);
+  }, {passive: true});
+  document.addEventListener('touchmove', function(e){
+    if(!st) return;
+    var t = null; for(var i = 0; i < e.touches.length; i++) if(e.touches[i].identifier === st.id) t = e.touches[i];
+    if(!t) return;
+    if(!st.active){ if(Math.abs(t.clientX - st.sx) > TOL || Math.abs(t.clientY - st.sy) > TOL) cancel(); else st.lastY = t.clientY; return; }
+    if(e.cancelable) e.preventDefault();
+    move(t.clientY);
+  }, {passive: false});
+  function tEnd(e){ lastTouchEnd = Date.now(); if(st) finish(e.type === 'touchend'); }
+  document.addEventListener('touchend', tEnd, {passive: true});
+  document.addEventListener('touchcancel', tEnd, {passive: true});
+  /* ماوس (كمبيوتر) */
+  document.addEventListener('mousedown', function(e){ if(e.button !== 0 || Date.now() - lastTouchEnd < 700) return; begin(e.target, e.clientX, e.clientY, 'm'); });
+  document.addEventListener('mousemove', function(e){
+    if(!st || st.id !== 'm') return;
+    if(!st.active){ if(Math.abs(e.clientX - st.sx) > TOL || Math.abs(e.clientY - st.sy) > TOL) cancel(); else st.lastY = e.clientY; return; }
+    e.preventDefault(); move(e.clientY);
+  });
+  document.addEventListener('mouseup', function(){ if(st && st.id === 'm') finish(true); });
+  /* منع القائمة وفتح البطاقة بالغلط بعد النقل */
+  document.addEventListener('contextmenu', function(e){ if(st || (cardOf(e.target) && Date.now() < suppressUntil + 300)) e.preventDefault(); }, true);
+  document.addEventListener('click', function(e){ if(Date.now() < suppressUntil && cardOf(e.target)){ e.stopPropagation(); e.preventDefault(); } }, true);
+  document.addEventListener('dragstart', function(e){ if(st) e.preventDefault(); });
+  window.addEventListener('blur', function(){ if(st) finish(true); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && st) finish(true); });
+  /* تلميح مرة واحدة */
+  try{ if(!localStorage.getItem(HINT)){ setTimeout(function(){ try{ if(typeof showToast === 'function') showToast('اضغط مطوّلًا على أي بطاقة وحرّكها لتغيير ترتيبها ↕️', true); localStorage.setItem(HINT, '1'); }catch(e){} }, 2200); } }catch(e){}
 })();
 </script>
 </body>
