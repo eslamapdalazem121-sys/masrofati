@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-28.7850">
+<meta name="app-version" content="2026-10-28.7860">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1353,6 +1353,17 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 .zkd-cr.tot .a{flex:1;} .zkd-cr.z{opacity:.45;} .zkd-cr.tot{border-top:2px solid rgba(60,100,170,.5); border-bottom:0; background:rgba(60,100,170,.1); border-radius:10px; padding:10px 6px; margin-top:4px;}
 .zk-due-line{white-space:pre-line; display:none; margin:14px 4px 0; padding:11px 14px; border-radius:18px; font-weight:800; font-size:calc(14px * var(--fs,1)); line-height:1.7; cursor:pointer; text-align:center; color:#fff;}
 .yr-zm.open .zk-due-line.show{display:block;}
+.bn-card{margin:6px 0 8px; border-radius:16px; padding:8px 10px 7px; color:#fff; text-align:center; cursor:pointer; position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#ff2d87 0%,#ff6a3d 55%,#ffb100 100%); border:1.5px solid rgba(255,255,255,.6); text-shadow:0 1px 2px rgba(0,0,0,.28);
+  box-shadow:0 3px 0 #b3125c, 0 7px 14px rgba(255,45,135,.4), inset 0 1px 0 rgba(255,255,255,.45);}
+.bn-card::after{content:""; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent); transform:skewX(-20deg); animation:zkShine 4.5s infinite; pointer-events:none;}
+.bn-card .t{font-size:calc(12.5px * var(--fs,1)); font-weight:800; line-height:1.4;}
+.bn-card .a{display:inline-block; font-size:calc(22px * var(--fs,1)); font-weight:900; line-height:1.2; margin:3px 0; padding:1px 12px; border-radius:11px; background:rgba(255,255,255,.2);}
+.bn-card .r{font-size:calc(11px * var(--fs,1)); font-weight:800; line-height:1.5;}
+.bn-card .e{margin-top:3px; font-size:calc(10px * var(--fs,1)); font-weight:800; opacity:.92;}
+.bn-card .ed{display:flex; gap:6px; justify-content:center; align-items:center; margin-top:6px; text-shadow:none;}
+.bn-card .ed input{width:46%; padding:6px 8px; border-radius:10px; border:0; font:inherit; font-weight:900; text-align:center; color:#7a0a3c;}
+.bn-card .ed button{border:0; padding:6px 12px; border-radius:10px; font:inherit; font-weight:900; cursor:pointer; color:#7a0a3c; background:#fff; box-shadow:0 2px 0 rgba(0,0,0,.2);}
 .zk-sub{display:block; font-size:calc(12px * var(--fs,1)); font-weight:800; line-height:1.55; margin-top:3px; white-space:normal; text-shadow:none; opacity:.95;}
 .zk-bell{display:none; margin-top:4px; padding:3px 12px; border-radius:999px; font-size:calc(12.5px * var(--fs,1)); font-weight:800; color:#fff; text-shadow:none; background:linear-gradient(150deg,#ff8a65,#e53935); box-shadow:0 3px 0 #a82320; animation:zkBell 1.6s infinite;}
 .zk-bell.show{display:inline-block;} .zk-bell.wait{background:linear-gradient(150deg,#64b5f6,#1e6fd9); box-shadow:0 3px 0 #14509f; animation:none;}
@@ -4401,6 +4412,43 @@ function bankInterestDue(y, m, d){
   return capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank' && bankActive(x, y, m) && bankDueOf(x, y, m).getDate() === d)
     .map(x=> ({name: x.name, amt: bankMonthlyAt(x, bankDueOf(x, y, m))}));
 }
+// الفائدة الشهرية القادمة: أقرب شهر فيه فوايد لسه ما استحقتش، بإجمالي البنوك وتفصيل كل بنك (وممكن تكتب المبلغ بنفسك)
+function bankNextMonthInfo(){
+  const now = new Date(), banks = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank');
+  for(let k = 0; k < 26; k++){
+    const dt = new Date(now.getFullYear(), now.getMonth() + k, 1), y = dt.getFullYear(), m = dt.getMonth(), rows = [];
+    banks.forEach(function(x){ if(!bankActive(x, y, m)) return; const due = bankDueOf(x, y, m); if(due > now) rows.push({name: x.name, due: due, amt: bankMonthlyAt(x, due)}); });
+    if(rows.length){ rows.sort(function(a, b){ return a.due - b.due; }); return {y: y, m: m, rows: rows, total: rows.reduce(function(t, r){ return t + r.amt; }, 0), first: rows[0].due}; }
+  }
+  return null;
+}
+function bankNextCard(){
+  if(capIsPast()) return null;
+  const info = bankNextMonthInfo(); if(!info) return null;
+  const key = info.y + '-' + info.m, man = data.bankNextManual && data.bankNextManual.key === key ? Number(data.bankNextManual.amt) : null;
+  const total = man !== null && !isNaN(man) ? man : info.total, now = new Date();
+  const c = document.createElement('div'); c.className = 'bn-card'; c.setAttribute('role', 'button');
+  const add = function(cls, txt){ const d = document.createElement('div'); d.className = cls; d.textContent = txt; c.appendChild(d); return d; };
+  add('t', '🔔 الفائدة الشهرية القادمة — ' + MONTHS[info.m] + ' ' + toArabicDigits(info.y));
+  add('a', fmt(cgRound(total)) + ' ج');
+  const days = Math.max(0, Math.ceil((info.first - now) / 864e5));
+  const lines = info.rows.map(function(r){ return r.name + ' ' + fmt(cgRound(r.amt)) + ' (' + toArabicDigits(r.due.getDate()) + ')'; });
+  add('r', '⏳ ' + gFmt(info.first) + (days > 0 ? ' · باقي ' + toArabicDigits(days) + ' يوم' : ' · النهاردة') + (info.rows.length > 1 ? '\n🏦 ' + lines.join(' · ') : ''));
+  c.lastChild.style.whiteSpace = 'pre-line';
+  add('e', man !== null && !isNaN(man) ? '✍️ مكتوب بإيدك (التلقائي: ' + fmt(cgRound(info.total)) + ') — اضغط للتعديل' : '✏️ اضغط لكتابة المبلغ بنفسك');
+  c.onclick = function(){
+    if(c.querySelector('.ed')) return;
+    const ed = document.createElement('div'); ed.className = 'ed';
+    const inp = document.createElement('input'); inp.type = 'number'; inp.step = 'any'; inp.inputMode = 'decimal'; inp.placeholder = 'المبلغ'; inp.value = man !== null && !isNaN(man) ? man : '';
+    const ok = document.createElement('button'); ok.type = 'button'; ok.textContent = 'حفظ';
+    const rs = document.createElement('button'); rs.type = 'button'; rs.textContent = 'تلقائي';
+    ed.onclick = function(e){ e.stopPropagation(); };
+    ok.onclick = function(e){ e.stopPropagation(); const v = Number(inp.value); if(inp.value !== '' && !isNaN(v) && v >= 0) data.bankNextManual = {key: key, amt: v}; else delete data.bankNextManual; save(); renderBankInterest(); };
+    rs.onclick = function(e){ e.stopPropagation(); delete data.bankNextManual; save(); renderBankInterest(); };
+    ed.appendChild(inp); ed.appendChild(ok); ed.appendChild(rs); c.appendChild(ed); inp.focus();
+  };
+  return c;
+}
 function renderBankInterest(){
   const box = document.getElementById('cmInterest');
   const banks = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank');
@@ -4414,6 +4462,7 @@ function renderBankInterest(){
   const expectedYear = months.reduce((t,mo)=> t + mo.items.reduce((a,e)=> a + e.amt, 0), 0);
   const mk = (cls, txt)=>{ const d = document.createElement('div'); d.className = cls; d.innerHTML = '<span>📆</span><b></b>'; d.children[1].textContent = txt; d.style.cursor = 'default'; return d; };
   box.appendChild(cmYearHeader('📆', 'الفوائد البنكية', yr));
+  try{ const nc = bankNextCard(); if(nc) box.appendChild(nc); }catch(e){ console.error(e); }
   const sum = (a, b, ca, cb)=>{ const r = document.createElement('div'); r.className = 'gi-sumrow t3d'; r.innerHTML = '<span><small></small><b></b></span><span><small></small><b></b></span>'; [a, b].forEach((p, i)=>{ r.children[i].children[0].textContent = p[0]; r.children[i].children[1].textContent = p[1]; r.children[i].classList.add(i ? cb : ca); }); box.appendChild(r); };
   sum(['📆 الفائدة السنوية', fmt(cgRound(annualAll))], ['🗓 الفائدة الشهرية', fmt(cgRound(monthlyAll))], 'v-blue', 'v-green');
   { const nt = nextDueTxt('bank'); if(nt) box.appendChild(cmNote(nt)); }
