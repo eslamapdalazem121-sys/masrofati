@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-28.7840">
+<meta name="app-version" content="2026-10-28.7850">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4862,14 +4862,15 @@ function glParseUsd(text, labels){
   return null;
 }
 var GL_USD_SRC = [
-  {id: 'cbe', n: 'البنك المركزي', urls: ['https://www.cbe.org.eg/en/economic-research/statistics/exchange-rates', 'https://www.cbe.org.eg/ar/economic-research/statistics/exchange-rates'], labels: ['US Dollar', 'الدولار الأمريكي', 'دولار أمريكي']},
   {id: 'isagha', n: 'iSagha', urls: ['https://market.isagha.com/prices/currencies'], labels: ['الدولار الأمريكي']}
 ];
+// ترتيب أولوية دولار البنوك (الرسمي): الأهلي ← مصر ← القاهرة ← العربي الأفريقي ← iSagha (آخر حاجة). بنستخدم أول مصدر متاح بس، من غير متوسط ولا خلط بين المصادر
+var GL_USD_ORDER = ['bk-nbe', 'bk-misr', 'bk-cairo', 'bk-aaib', 'isagha'];
 var GL_SARF = 'https://sarflive.com/currencies/usd';
 var GL_BANKS = [
-  {id: 'bk-nbe', n: 'الأهلي', keys: ['البنك الاهلي المصري']},
-  {id: 'bk-misr', n: 'مصر', keys: ['بنك مصر']},
-  {id: 'bk-cairo', n: 'القاهرة', keys: ['بنك القاهره']},
+  {id: 'bk-nbe', n: 'البنك الأهلي', keys: ['البنك الاهلي المصري']},
+  {id: 'bk-misr', n: 'بنك مصر', keys: ['بنك مصر']},
+  {id: 'bk-cairo', n: 'بنك القاهرة', keys: ['بنك القاهره']},
   {id: 'bk-aaib', n: 'العربي الأفريقي', keys: ['البنك العربي الافريقي الدولي', 'العربي الافريقي']}
 ];
 function glNorm(s){ return String(s).replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه'); }
@@ -4891,38 +4892,38 @@ function glParseBanks(text){
   });
   return out;
 }
+async function glScrapeIsaghaUsd(){
+  for(const sr of GL_USD_SRC){
+    for(const u of sr.urls){
+      try{ const r = glParseUsd(glHtmlText(await glFetchText(u)), sr.labels); if(r) return {id: sr.id, n: sr.n, buy: r.buy, sell: r.sell}; }catch(e){}
+    }
+  }
+  return null;
+}
 async function glScrapeBank(){
   const out = [];
   try{ glParseBanks(glHtmlText(await glFetchText(GL_SARF))).forEach(function(x){ out.push(x); }); }catch(e){}
-  if(out.length >= 2) return out;
-  await Promise.all(GL_USD_SRC.map(async function(sr){
-    for(const u of sr.urls){
-      try{ const r = glParseUsd(glHtmlText(await glFetchText(u)), sr.labels); if(r){ out.push({id: sr.id, n: sr.n, buy: r.buy, sell: r.sell}); return; } }catch(e){}
-    }
-  }));
+  if(!out.length){ const is = await glScrapeIsaghaUsd(); if(is) out.push(is); }   // iSagha آخر مصدر: بنروحله بس لو ولا بنك من الأربعة اتقرا
   return out;
 }
 function glMedian(a){ const x = a.slice().sort(function(p, q){ return p - q; }), m = x.length >> 1; return x.length % 2 ? x[m] : (x[m - 1] + x[m]) / 2; }
-// الدولار الرسمي: متوسط (وسيط) البنوك الحكومية الأهلي ومصر والقاهرة، وأي بنك بعيد عن الباقي بيتشال؛ لو أقل من بنكين حكوميين نكمّل بباقي البنوك، وبعدها المركزي ثم iSagha
+// الدولار الرسمي: أول مصدر متاح بالترتيب (الأهلي ← مصر ← القاهرة ← العربي الأفريقي ← iSagha)
+// حارس واحد بس: لو بنك سعره بعيد أكتر من ٣٪ عن وسيط باقي البنوك المقروءة (بنكين على الأقل) يبقى غالبًا قراءة غلط فنعدّي للي بعده
 function glPickBank(list){
-  if(!list.length) return null;
-  const GOV = ['bk-nbe', 'bk-misr', 'bk-cairo'];
-  const gov = list.filter(function(x){ return GOV.indexOf(x.id) >= 0; });
-  const bk = list.filter(function(x){ return x.id.indexOf('bk-') === 0; });
-  const pool = gov.length >= 2 ? gov : bk;
-  if(pool.length >= 2){
-    const mS = glMedian(pool.map(function(x){ return x.sell; })), mB = glMedian(pool.map(function(x){ return x.buy; }));
-    const good = pool.filter(function(x){ return Math.abs(x.sell - mS) / mS <= 0.004 && Math.abs(x.buy - mB) / mB <= 0.006; });
-    const use = good.length >= 2 ? good : pool;
-    return {buy: glMedian(use.map(function(x){ return x.buy; })), sell: glMedian(use.map(function(x){ return x.sell; })), src: (gov.length >= 2 ? 'متوسط ' + toArabicDigits(use.length) + ' بنوك حكومية (' : 'متوسط ' + toArabicDigits(use.length) + ' بنوك (') + use.map(function(x){ return x.n; }).join('، ') + ')'};
+  if(!list || !list.length) return null;
+  const bks = list.filter(function(x){ return x.id.indexOf('bk-') === 0; }), skipped = [];
+  const nameOf = function(id){ const b = GL_BANKS.find(function(z){ return z.id === id; }); return b ? b.n : 'iSagha'; };
+  for(const id of GL_USD_ORDER){
+    const x = list.find(function(z){ return z.id === id; });
+    if(!x){ skipped.push(nameOf(id) + ' مش متاح'); continue; }
+    if(id.indexOf('bk-') === 0){
+      const oth = bks.filter(function(o){ return o.id !== id; });
+      if(oth.length >= 2){ const med = glMedian(oth.map(function(o){ return o.sell; })); if(Math.abs(x.sell - med) / med > 0.03){ skipped.push(x.n + ' سعره بعيد عن باقي البنوك'); continue; } }
+    }
+    return {buy: x.buy, sell: x.sell, src: x.n + (skipped.length ? ' — بدل: ' + skipped.join('، ') : '')};
   }
-  const cbe = list.find(function(x){ return x.id === 'cbe'; });
-  if(cbe) return {buy: cbe.buy, sell: cbe.sell, src: cbe.n};
-  if(list.length === 1) return {buy: list[0].buy, sell: list[0].sell, src: list[0].n};
-  const med = glMedian(list.map(function(x){ return x.sell; }));
-  const good2 = list.filter(function(x){ return Math.abs(x.sell - med) / med <= 0.006; });
-  const use2 = good2.length ? good2 : list;
-  return {buy: glMedian(use2.map(function(x){ return x.buy; })), sell: glMedian(use2.map(function(x){ return x.sell; })), src: 'متوسط ' + toArabicDigits(use2.length) + ' مصادر'};
+  const f = GL_USD_ORDER.map(function(id){ return list.find(function(z){ return z.id === id; }); }).find(Boolean);   // كلهم استُبعدوا بالحارس: ناخد أول واحد بالأولوية
+  return f ? {buy: f.buy, sell: f.sell, src: f.n} : null;
 }
 // سعر عيار 24 (بيع/شراء التاجر) وأونصة الذهب: المصدر الأول iSagha (نفس أسعار تطبيق آي صاغة) وبعده eDahab احتياطي
 async function glScrapeIsagha(){
@@ -5035,20 +5036,10 @@ async function goldTick(){
   _glTickBusy = false;
 }
 function goldScreenOpen(){ const o = document.getElementById('capGoldOverlay'); return !!(o && o.classList.contains('open')); }
-// احتياطي أخير فقط: سعر عالمي متوسط (مش سعر بنك) ويتعلّم «تقريبي»
-async function glGetUsdMid(){
-  const tries = [
-    ['https://open.er-api.com/v6/latest/USD', function(j){ return j && j.rates && j.rates.EGP; }],
-    ['https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', function(j){ return j && j.usd && j.usd.egp; }],
-    ['https://latest.currency-api.pages.dev/v1/currencies/usd.json', function(j){ return j && j.usd && j.usd.egp; }]
-  ];
-  for(const t of tries){ try{ const v = Number(t[1](await glFetchJson(t[0]))); if(v > 0) return v; }catch(e){} }
-  return 0;
-}
 async function glDiagnose(){
   const el = document.getElementById('glDiag'); if(!el) return;
   el.style.display = ''; el.style.whiteSpace = 'pre-line'; el.textContent = '⏳ بيفحص المصادر...';
-  const L = [], f2 = glF2;
+  const L = [], f2 = glF2; let dl = [];
   try{
     const ss = await glXauSources(), ago = function(t){ const d = Math.max(0, Math.round((Date.now() - t) / 1000)); return d < 90 ? toArabicDigits(d) + ' ث' : toArabicDigits(Math.round(d / 60)) + ' د'; };
     ss.forEach(function(r){ L.push(r.ok ? '✅ ذهب عالمي · ' + r.name + ': $' + f2(r.v) + ' · ' + glTmS(r.t) + ' (منذ ' + ago(r.t) + ')' : '❌ ذهب عالمي · ' + r.name + ': ما وصلش'); });
@@ -5058,11 +5049,10 @@ async function glDiagnose(){
   try{
     const tx = glHtmlText(await glFetchText(GL_SARF)), bk = glParseBanks(tx);
     L.push(bk.length ? '✅ جدول البنوك (' + toArabicDigits(bk.length) + ' من ٤):\n' + bk.map(function(x){ return '   ' + x.n + ': ' + f2(x.buy) + ' / ' + f2(x.sell); }).join('\n') : '⚠️ الصفحة وصلت لكن ما قدرتش أقرا أسعار البنوك منها');
+    dl = bk.slice();
   }catch(e){ L.push('❌ صفحة أسعار البنوك ما وصلتش (كل الوسطاء فشلوا)'); }
-  for(const sr of GL_USD_SRC){
-    let r = null; for(const u of sr.urls){ try{ r = glParseUsd(glHtmlText(await glFetchText(u)), sr.labels); if(r) break; }catch(e){} }
-    L.push(r ? '✅ ' + sr.n + ': ' + f2(r.buy) + ' / ' + f2(r.sell) : '❌ ' + sr.n + ': مش متاح');
-  }
+  { const is = await glScrapeIsaghaUsd(); L.push(is ? '✅ دولار iSagha (آخر أولوية): ' + f2(is.buy) + ' / ' + f2(is.sell) : '❌ دولار iSagha: مش متاح'); if(is) dl.push(is); }
+  { const pk = glPickBank(dl); L.push(pk ? '⭐ دولار البنوك المعتمد: ' + f2(pk.sell) + ' (بيع) · ' + pk.src : '❌ دولار البنوك: كل المصادر فشلت (اكتبه يدوي)'); }
   for(const gs of [['iSagha (المصدر الأول)', glScrapeIsagha], ['eDahab (احتياطي)', glScrapeEdahab]]){
     try{ const sg = await gs[1](); L.push(sg ? '✅ ذهب ' + gs[0] + ': عيار 24 بيع ' + fmt(sg.sell) + (sg.buy ? ' / شراء ' + fmt(sg.buy) : '') + ' · 21 ≈ ' + fmt(Math.round(sg.sell * 21 / 24)) + ' · 18 ≈ ' + fmt(Math.round(sg.sell * 18 / 24)) + ' · أونصة $' + f2(sg.oz) + ' → دولار الصاغة ' + f2(sg.sell / (sg.oz / GL_OZ)) : '⚠️ ذهب ' + gs[0] + ': الصفحة وصلت لكن ما قدرتش أقرا السعر'); }catch(e){ L.push('❌ ذهب ' + gs[0] + ': ما وصلتش'); }
   }
@@ -5095,10 +5085,6 @@ async function goldLiveRefresh(manual){
     if(bank && bank.length){
       const pk = glPickBank(bank);
       if(pk){ nl.rate = pk.sell; nl.rateBuy = pk.buy; nl.rateSrc = pk.src; nl.rateList = bank; nl.rateTs = now; nl.mid = false; rateOk = true; }
-    }
-    if(doScrape && !rateOk && !(nl.rate > 0 && !nl.mid)){
-      const mid = await glGetUsdMid();
-      if(mid > 0){ nl.rate = mid; nl.rateBuy = mid; nl.rateSrc = 'سعر عالمي تقريبي'; nl.rateList = []; nl.rateTs = now; nl.mid = true; }
     }
     if(sg){
       nl.localP24 = sg.sell; nl.localBuy24 = sg.buy; nl.sarTs = now;
@@ -5196,6 +5182,7 @@ function glInfoPanel(){
     un = 'شراء / بيع · المصدر: ' + _gl.rateSrc + (_gl.rateTs ? ' · ' + glTm(_gl.rateTs) : '');
     if(_gl.rateTs && Date.now() - _gl.rateTs > 30 * 60 * 1000) un += ' ⚠️ السعر قديم (آخر تحديث ناجح)';
     if(_gl.rateList && _gl.rateList.length > 1) un += '\n' + _gl.rateList.map(function(x){ return x.n + ': ' + f2(x.buy) + ' / ' + f2(x.sell); }).join('\n');
+    un += '\nترتيب الاعتماد: الأهلي ← مصر ← القاهرة ← العربي الأفريقي ← iSagha';
     if(_gl.mid) un += '\n⚠️ ده سعر عالمي تقريبي مش سعر بنك — اكتب دولار البنك يدوي لو عايز دقة';
   } else un = 'لسه ما اتحمّلش دولار البنوك — دوس 🔄 تحديث أو اكتبه يدوي';
   const un2 = document.getElementById('glUsdNote'); if(un2){ un2.style.whiteSpace = 'pre-line'; un2.textContent = un; }
