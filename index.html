@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-28.7871">
+<meta name="app-version" content="2026-10-29.7890">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1458,6 +1458,9 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 .hc-ph{opacity:.3; outline:2px dashed rgba(124,77,219,.75); outline-offset:3px; border-radius:16px;}
 .hc-ghost{position:fixed !important; margin:0 !important; z-index:99999; pointer-events:none; transform:scale(1.03); opacity:.97; box-shadow:0 18px 40px rgba(0,0,0,.38); will-change:top,transform;}
 body.hc-dragging{-webkit-user-select:none; user-select:none; cursor:grabbing; overscroll-behavior:contain;}
+body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cgList .gi-row, .cap-grp-body > .gi-row, #zkList > .gi-row, #giSrcList > .gi-row, #incomeSourcesList > .income-src-row){-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
+.mv-lock .home-reorder-row, .mv-lock .drag-handle, .mv-lock .home-mv{display:none !important;}
+.mv-lock .hc{-webkit-user-select:auto; user-select:auto;}
 /* ===== HOME REORDER END ===== */
 </style>
 <link rel="manifest" href="manifest.webmanifest">
@@ -2445,6 +2448,15 @@ body.hc-dragging{-webkit-user-select:none; user-select:none; cursor:grabbing; ov
         <button class="opt-chip" data-val="mid" onclick="previewSetting('depth','mid')">متوسط</button>
         <button class="opt-chip" data-val="strong" onclick="previewSetting('depth','strong')">قوي</button>
       </div>
+    </div>
+
+    <div class="settings-section" id="moveSection">
+      <h4>↕️ ترتيب وتحريك العناصر</h4>
+      <div class="opt-row" id="optMove">
+        <button type="button" class="opt-chip" data-val="on" onclick="setMoveMode('on')">✋ تحريك مسموح</button>
+        <button type="button" class="opt-chip" data-val="off" onclick="setMoveMode('off')">🔒 مقفول (مفيش حاجة تتحرك)</button>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin:6px 0 0;">دوس مطوّلًا على أي بطاقة أو صف في أي صفحة وحرّكه لتغيير ترتيبه. الاختيار بيتطبق فورًا، والقفل بيوقف النقل والأسهم وأيقونات السحب.</p>
     </div>
 
     <div class="settings-section" id="soundSection">
@@ -5492,7 +5504,7 @@ function renderGISources(){
   document.getElementById('giSrcTotal').textContent = fmt(giCnt(r.src)) + (giUnc(r.src) > 0 ? '   🚫 غير محسوب: ' + fmt(giUnc(r.src)) : '');
   box.innerHTML = r.src.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد مصادر دخل بعد</div>';
   r.src.forEach(x=>{
-    const d = document.createElement('div'); d.className = 'gi-row';
+    const d = document.createElement('div'); d.className = 'gi-row'; if(x.id && !x.auto) d.dataset.id = x.id;
     d.innerHTML = '<span>💵</span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
     d.children[1].textContent = x.name + (x.date ? ' · ' + formatDate(x.date) : ''); d.children[2].textContent = fmt(x.amount);
     if(x.auto){
@@ -5769,7 +5781,7 @@ function renderZakatList(){
   document.getElementById('zkSumVal').textContent = fmt(zkSum(arr));
   box.innerHTML = arr.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد بنود بعد</div>';
   arr.forEach(x=>{
-    const d = document.createElement('div'); d.className = 'gi-row';
+    const d = document.createElement('div'); d.className = 'gi-row'; if(x.id) d.dataset.id = x.id;
     d.innerHTML = '<span></span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
     d.children[0].textContent = _zkMode === 'adds' ? '💰' : '🤲';
     d.children[1].textContent = (_zkMode === 'adds' ? (x.name || 'زكاتي') : (x.note || 'دفعة'));
@@ -6982,7 +6994,7 @@ function renderIncomeSourcesList(){
     return;
   }
   list.innerHTML = mon.incomeSources.map(src=>`
-    <div class="income-src-row${src.counted===false?' excluded':''}">
+    <div class="income-src-row${src.counted===false?' excluded':''}" data-id="${src.id}">
       <span class="src-icon">💵</span>
       <span class="src-name">${src.counted===false?'<span class="tag">غير محسوب</span>':''}${src.name}${src.date ? ' <small class="src-date">📅 ' + formatDate(src.date) + '</small>' : ''}</span>
       <span class="src-amt">${fmt(src.amount)}</span>
@@ -9163,65 +9175,136 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 })();
 </script>
 <script>
-/* نقل بطاقات الصفحة الأولى بالضغط المطوّل والسحب */
+/* نقل العناصر بالضغط المطوّل والسحب في كل الصفحات (الرئيسية والداخلية) + خيار القفل من الإعدادات */
 (function(){
-  var IDS = ['yrGI', 'homeStats', 'yrZM', 'yrCap', 'yrMS'], HOLD = 380, TOL = 9, HINT = 'masrofati_home_hint_v1';
-  var host = function(){ return document.getElementById('homeExtras'); };
+  var KEYM = 'masrofati_move_v1', HINT = 'masrofati_home_hint_v1', HOLD = 380, TOL = 9;
+  var IDS = ['yrGI', 'homeStats', 'yrZM', 'yrCap', 'yrMS'];
   var st = null, suppressUntil = 0, lastTouchEnd = 0;
-  var isCard = function(el){ return !!el && el.nodeType === 1 && IDS.indexOf(el.id) > -1; };
-  function cardOf(t){ var h = host(); while(t && t !== h){ if(isCard(t) && t.parentNode === h) return t; t = t.parentNode; } return null; }
-  var visible = function(el){ return el.getBoundingClientRect().height > 1; };
-  function neighbor(el, dir){ var n = dir > 0 ? el.nextElementSibling : el.previousElementSibling; while(n){ if(isCard(n) && visible(n)) return n; n = dir > 0 ? n.nextElementSibling : n.previousElementSibling; } return null; }
+  function allowed(){ try{ return localStorage.getItem(KEYM) !== 'off'; }catch(e){ return true; } }
   function vib(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+  function toast(m, ok){ try{ if(typeof showToast === 'function') showToast(m, ok); }catch(e){} }
+  var visible = function(el){ return el.getBoundingClientRect().height > 1; };
+  /* أنواع القوائم القابلة للترتيب */
+  function kindOf(el, p){
+    if(!el || el.nodeType !== 1 || !p || p.nodeType !== 1) return null;
+    if(p.id === 'homeExtras') return IDS.indexOf(el.id) > -1 ? 'home' : null;
+    if(!el.dataset || !el.dataset.id) return null;
+    if(p.id === 'groupsList' || (p.classList && p.classList.contains('children-list'))) return (typeof arrayForContainer === 'function' && arrayForContainer(p)) ? 'detail' : null;
+    if(p.id === 'cmList' || p.id === 'cgList' || (p.classList && p.classList.contains('cap-grp-body'))) return 'cap';
+    if(p.id === 'zkList') return 'zk';
+    if(p.id === 'giSrcList') return 'gisrc';
+    if(p.id === 'incomeSourcesList') return 'inc';
+    return null;
+  }
+  function resolve(t){
+    if(!t || !t.closest) return null;
+    if(t.closest('button, input, select, textarea, a, label, .drag-handle, .home-mv, [contenteditable="true"]')) return null;
+    var el = t;
+    while(el && el !== document.body && el.nodeType === 1){
+      var p = el.parentNode, k = kindOf(el, p);
+      if(k) return {el: el, parent: p, kind: k};
+      el = p;
+    }
+    return null;
+  }
+  function neighbor(dir){
+    var n = dir > 0 ? st.el.nextElementSibling : st.el.previousElementSibling;
+    while(n){ if(kindOf(n, st.parent) === st.kind && visible(n)) return n; n = dir > 0 ? n.nextElementSibling : n.previousElementSibling; }
+    return null;
+  }
+  function scrollerOf(el){
+    var n = el.parentNode;
+    while(n && n.nodeType === 1 && n !== document.body && n !== document.documentElement){
+      var cs = getComputedStyle(n);
+      if(/(auto|scroll)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight + 2) return n;
+      n = n.parentNode;
+    }
+    return null;
+  }
   function reorder(y){
-    var h = host(); if(!st || !h) return;
+    if(!st) return;
     for(var i = 0; i < 14; i++){
-      var el = st.el, nx = neighbor(el, 1), pv = neighbor(el, -1), moved = false, r;
-      if(nx){ r = nx.getBoundingClientRect(); if(y > r.top + r.height * 0.5){ h.insertBefore(el, nx.nextSibling); moved = true; } }
-      if(!moved && pv){ r = pv.getBoundingClientRect(); if(y < r.top + r.height * 0.5){ h.insertBefore(el, pv); moved = true; } }
+      var nx = neighbor(1), pv = neighbor(-1), moved = false, r;
+      if(nx){ r = nx.getBoundingClientRect(); if(y > r.top + r.height * 0.5){ st.parent.insertBefore(st.el, nx.nextSibling); moved = true; } }
+      if(!moved && pv){ r = pv.getBoundingClientRect(); if(y < r.top + r.height * 0.5){ st.parent.insertBefore(st.el, pv); moved = true; } }
       if(!moved) break;
     }
   }
   function frame(){
     if(!st || !st.active) return;
-    var y = st.lastY, H = window.innerHeight, zone = 90, dy = 0;
-    if(y < zone) dy = -Math.ceil((zone - Math.max(y, 0)) / zone * 18); else if(y > H - zone) dy = Math.ceil((Math.min(y, H) - (H - zone)) / zone * 18);
-    if(dy){ window.scrollBy(0, dy); reorder(y); }
+    var y = st.lastY, sc = st.sc, top = 0, bottom = window.innerHeight;
+    if(sc){ var rr = sc.getBoundingClientRect(); top = Math.max(rr.top, 0); bottom = Math.min(rr.bottom, window.innerHeight); }
+    var zone = Math.min(90, (bottom - top) / 4), dy = 0;
+    if(y < top + zone) dy = -Math.ceil((top + zone - Math.max(y, top)) / zone * 18); else if(y > bottom - zone) dy = Math.ceil((Math.min(y, bottom) - (bottom - zone)) / zone * 18);
+    if(dy){ if(sc) sc.scrollTop += dy; else window.scrollBy(0, dy); reorder(y); }
     st.raf = requestAnimationFrame(frame);
+  }
+  /* تسجيل الترتيب الجديد في البيانات */
+  function reorderSubset(arr, ids){
+    if(!Array.isArray(arr)) return false;
+    var pos = [], by = {};
+    arr.forEach(function(x, i){ if(x && ids.indexOf(x.id) > -1){ pos.push(i); by[x.id] = x; } });
+    var ordered = ids.map(function(id){ return by[id]; }).filter(Boolean);
+    if(!ordered.length || ordered.length !== pos.length || ordered.length !== ids.length) return false;
+    pos.forEach(function(p, k){ arr[p] = ordered[k]; });
+    return true;
+  }
+  function idsOf(parent, kind){ return Array.prototype.filter.call(parent.children, function(c){ return kindOf(c, parent) === kind; }).map(function(c){ return c.dataset.id; }); }
+  function commit(s0){
+    var p = s0.parent, k = s0.kind, ok = true;
+    try{
+      if(k === 'home'){ if(window.__homeOrderSave) window.__homeOrderSave(); if(window.__homeRefresh) window.__homeRefresh(); return true; }
+      var ids = idsOf(p, k);
+      if(k === 'detail'){ ok = reorderSubset(arrayForContainer(p), ids); if(ok){ save(); renderDetail(); } }
+      else if(k === 'cap'){ ok = reorderSubset(capRaw(), ids); if(ok){ save(); if(p.id === 'cgList' || (p.closest && p.closest('#cgList'))) renderCapGold(); else renderCapMoney(); } }
+      else if(k === 'zk'){ ok = reorderSubset(zkGet()[_zkMode], ids); if(ok){ save(); renderZakatList(); } }
+      else if(k === 'gisrc'){ ok = reorderSubset(giRec().src, ids); if(ok){ save(); renderGISources(); } }
+      else if(k === 'inc'){ ok = reorderSubset(data[currentYear][currentMonth].incomeSources, ids); if(ok){ save(); renderIncomeSourcesList(); } }
+    }catch(e){ ok = false; console.error(e); }
+    if(!ok){ toast('تعذّر حفظ الترتيب، اتعادت القايمة زي ما كانت', false); try{ if(k === 'detail') renderDetail(); else if(k === 'cap'){ (p.id === 'cgList' || (p.closest && p.closest('#cgList'))) ? renderCapGold() : renderCapMoney(); } else if(k === 'zk') renderZakatList(); else if(k === 'gisrc') renderGISources(); else if(k === 'inc') renderIncomeSourcesList(); }catch(e){} }
+    return ok;
   }
   function lift(){
     if(!st || st.active) return;
-    var el = st.el, h = host(), r = el.getBoundingClientRect();
-    if(!el.isConnected || r.height < 2){ cancel(); return; }
-    st.active = true; st.timer = null; st.offY = st.lastY - r.top;
-    var g = el.cloneNode(true); g.removeAttribute('id'); Array.prototype.forEach.call(g.querySelectorAll('[id]'), function(n){ n.removeAttribute('id'); });
+    var el = st.el, r = el.getBoundingClientRect();
+    if(!allowed() || !el.isConnected || r.height < 2){ cancel(); return; }
+    if(st.kind === 'cap' && typeof capIsPast === 'function' && capIsPast()){ toast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); cancel(); return; }
+    st.active = true; st.timer = null; st.offY = st.lastY - r.top; st.sc = scrollerOf(el);
+    var g = el.cloneNode(true); g.removeAttribute('id'); g.removeAttribute('data-id');
+    Array.prototype.forEach.call(g.querySelectorAll('[id]'), function(n){ n.removeAttribute('id'); });
     Array.prototype.forEach.call(g.querySelectorAll('.home-mv'), function(n){ n.remove(); });
-    g.className = (el.className + ' hc-ghost').replace(/\bhc-ph\b/g, ''); g.style.left = r.left + 'px'; g.style.top = r.top + 'px'; g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
-    h.appendChild(g); st.ghost = g;
+    g.className = (el.className + ' hc-ghost').replace(/\bhc-ph\b/g, '');
+    g.style.left = r.left + 'px'; g.style.top = r.top + 'px'; g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    st.parent.appendChild(g); st.ghost = g;
+    var a = g.getBoundingClientRect(); st.cx = r.left - a.left; st.cy = r.top - a.top;   // تصحيح لو فيه عنصر أب بيغيّر مرجع fixed
+    if(st.cx || st.cy){ g.style.left = (r.left + st.cx) + 'px'; g.style.top = (r.top + st.cy) + 'px'; }
     el.classList.add('hc-ph'); document.body.classList.add('hc-dragging');
     suppressUntil = Date.now() + 600; vib(18);
     st.raf = requestAnimationFrame(frame);
   }
-  function move(y){ if(!st || !st.active) return; st.lastY = y; st.ghost.style.top = (y - st.offY) + 'px'; reorder(y); }
+  function move(y){ if(!st || !st.active) return; st.lastY = y; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; reorder(y); }
   function finish(dropped){
     if(!st) return; var s0 = st; st = null;
     if(s0.timer) clearTimeout(s0.timer);
     if(s0.raf) cancelAnimationFrame(s0.raf);
     if(!s0.active) return;
     document.body.classList.remove('hc-dragging');
-    var el = s0.el, g = s0.ghost, r = el.getBoundingClientRect();
     suppressUntil = Date.now() + 500;
-    if(g){ g.style.transition = 'top .16s ease, left .16s ease, transform .16s ease, box-shadow .16s ease'; g.style.top = r.top + 'px'; g.style.left = r.left + 'px'; g.style.transform = 'none'; }
-    setTimeout(function(){ if(g && g.parentNode) g.parentNode.removeChild(g); el.classList.remove('hc-ph'); }, 175);
-    if(dropped){ try{ if(window.__homeOrderSave) window.__homeOrderSave(); if(window.__homeRefresh) window.__homeRefresh(); }catch(e){} vib(10); }
+    var el = s0.el, g = s0.ghost, animate = (s0.kind === 'home' && dropped);
+    if(animate && el.isConnected){
+      var r = el.getBoundingClientRect();
+      g.style.transition = 'top .16s ease, left .16s ease, transform .16s ease, box-shadow .16s ease';
+      g.style.top = (r.top + s0.cy) + 'px'; g.style.left = (r.left + s0.cx) + 'px'; g.style.transform = 'none';
+      setTimeout(function(){ if(g.parentNode) g.parentNode.removeChild(g); el.classList.remove('hc-ph'); }, 175);
+    } else { if(g && g.parentNode) g.parentNode.removeChild(g); el.classList.remove('hc-ph'); }
+    if(dropped){ commit(s0); vib(10); }
+    else if(s0.kind !== 'home'){ /* ألغينا: نرجّع العرض زي ما هو */ try{ commit({parent: s0.parent, kind: s0.kind}); }catch(e){} }
   }
-  function cancel(){ if(st && st.timer){ clearTimeout(st.timer); } if(st && !st.active) st = null; else finish(false); }
+  function cancel(){ if(st && st.timer) clearTimeout(st.timer); if(st && !st.active) st = null; else finish(false); }
   function begin(t, x, y, id){
-    if(st) return;
-    var h = host(); if(!h || !t) return;
-    if(t.closest && t.closest('.home-mv, input, select, textarea, a, [contenteditable="true"]')) return;
-    var c = cardOf(t); if(!c || !visible(c)) return;
-    st = {el: c, sx: x, sy: y, lastY: y, id: id, active: false, timer: null};
+    if(st || !allowed()) return;
+    var h = resolve(t); if(!h || !visible(h.el)) return;
+    st = {el: h.el, parent: h.parent, kind: h.kind, sx: x, sy: y, lastY: y, id: id, active: false, timer: null};
     st.timer = setTimeout(lift, HOLD);
   }
   /* لمس */
@@ -9240,7 +9323,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   function tEnd(e){ lastTouchEnd = Date.now(); if(st) finish(e.type === 'touchend'); }
   document.addEventListener('touchend', tEnd, {passive: true});
   document.addEventListener('touchcancel', tEnd, {passive: true});
-  /* ماوس (كمبيوتر) */
+  /* ماوس */
   document.addEventListener('mousedown', function(e){ if(e.button !== 0 || Date.now() - lastTouchEnd < 700) return; begin(e.target, e.clientX, e.clientY, 'm'); });
   document.addEventListener('mousemove', function(e){
     if(!st || st.id !== 'm') return;
@@ -9248,14 +9331,24 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     e.preventDefault(); move(e.clientY);
   });
   document.addEventListener('mouseup', function(){ if(st && st.id === 'm') finish(true); });
-  /* منع القائمة وفتح البطاقة بالغلط بعد النقل */
-  document.addEventListener('contextmenu', function(e){ if(st || (cardOf(e.target) && Date.now() < suppressUntil + 300)) e.preventDefault(); }, true);
-  document.addEventListener('click', function(e){ if(Date.now() < suppressUntil && cardOf(e.target)){ e.stopPropagation(); e.preventDefault(); } }, true);
+  document.addEventListener('contextmenu', function(e){ if(st || (resolve(e.target) && Date.now() < suppressUntil + 300)) e.preventDefault(); }, true);
+  document.addEventListener('click', function(e){ if(Date.now() < suppressUntil && resolve(e.target)){ e.stopPropagation(); e.preventDefault(); } }, true);
   document.addEventListener('dragstart', function(e){ if(st) e.preventDefault(); });
   window.addEventListener('blur', function(){ if(st) finish(true); });
   document.addEventListener('visibilitychange', function(){ if(document.hidden && st) finish(true); });
+  /* خيار الإعدادات: تحريك مسموح / مقفول */
+  function refreshChips(){ var row = document.getElementById('optMove'); if(!row) return; Array.prototype.forEach.call(row.querySelectorAll('.opt-chip'), function(b){ b.classList.toggle('active', b.getAttribute('data-val') === (allowed() ? 'on' : 'off')); }); }
+  function applyMode(){ document.body.classList.toggle('mv-lock', !allowed()); refreshChips(); }
+  window.setMoveMode = function(v){
+    try{ localStorage.setItem(KEYM, v === 'off' ? 'off' : 'on'); }catch(e){}
+    if(v === 'off'){ if(st) finish(false); var h = document.getElementById('homeExtras'); if(h && h.classList.contains('home-edit') && window.toggleHomeReorder) window.toggleHomeReorder(); }
+    applyMode();
+    toast(v === 'off' ? '🔒 التحريك مقفول — مفيش حاجة هتتحرك في التطبيق' : '✋ التحريك مسموح — دوس مطوّلًا على أي بطاقة أو صف وحرّكه', true);
+  };
+  applyMode();
+  try{ var so = document.getElementById('settingsOverlay'); if(so && window.MutationObserver) new MutationObserver(refreshChips).observe(so, {attributes: true, attributeFilter: ['class']}); }catch(e){}
   /* تلميح مرة واحدة */
-  try{ if(!localStorage.getItem(HINT)){ setTimeout(function(){ try{ if(typeof showToast === 'function') showToast('اضغط مطوّلًا على أي بطاقة وحرّكها لتغيير ترتيبها ↕️', true); localStorage.setItem(HINT, '1'); }catch(e){} }, 2200); } }catch(e){}
+  try{ if(!localStorage.getItem(HINT) && allowed()){ setTimeout(function(){ toast('اضغط مطوّلًا على أي بطاقة أو صف وحرّكه لتغيير ترتيبه ↕️ (ولو عايز تقفل ده: من الإعدادات)', true); try{ localStorage.setItem(HINT, '1'); }catch(e){} }, 2200); } }catch(e){}
 })();
 </script>
 </body>
