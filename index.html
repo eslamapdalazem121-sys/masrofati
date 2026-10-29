@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7913">
+<meta name="app-version" content="2026-10-29.7914">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1465,7 +1465,7 @@ body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 .hc-ph{opacity:.3; outline:2px dashed rgba(124,77,219,.75); outline-offset:3px; border-radius:16px;}
 .hc-ghost{position:fixed !important; margin:0 !important; z-index:99999; pointer-events:none; transform:scale(1.03); opacity:.97; box-shadow:0 18px 40px rgba(0,0,0,.38); will-change:top,transform;}
 body.hc-dragging{-webkit-user-select:none; user-select:none; cursor:grabbing; overscroll-behavior:contain;}
-body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cgList .gi-row, #cmList .cap-grp, #cgList .cap-grp, #cmBox > [data-id], .cap-grp-body > .gi-row, #zkList > .gi-row, #giSrcList > .gi-row, #incomeSourcesList > .income-src-row){-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
+body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cgList .gi-row, #cmList .cap-grp, #cgList .cap-grp, #cmBox > [data-id], .cap-grp-body > .gi-row, #zkList > .gi-row, #giSrcList > .gi-row, #incomeSourcesList > .inc-row){-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
 .mv-lock .home-reorder-row, .mv-lock .drag-handle, .mv-lock .home-mv{display:none !important;}
 .mv-lock .hc{-webkit-user-select:auto; user-select:auto;}
 /* ===== HOME REORDER END ===== */
@@ -1753,6 +1753,43 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #cmOutOverlay .gi-sumrow .v-pink, #cmOutOverlay .gi-sumrow .v-pink{--tb:#ffe4ef; --te:#f0b8cf;}
 #cmOutOverlay .gi-sumrow .v-green, #cmOutOverlay .gi-sumrow .v-green{--tb:#dcf6ea; --te:#a9dcc5;}
 #cmOutOverlay .gi-sumrow > .gi-chip.on, #cmOutOverlay .gi-sumrow > .gi-chip.on{outline:3px solid #12b27a; outline-offset:-1px; transform:translateY(3px); box-shadow:0 2px 0 var(--te), 0 5px 8px rgba(0,0,0,.12), inset 0 1px 0 #fff;}
+/* ===== صفحة «مصادر المصروف المنزلي» كاملة وبتصميم 3D + كل يوم بتاريخه ومدخلاته ===== */
+#incomeSourcesOverlay{--mchl:rgba(255,255,255,.95); --mcsh:rgba(30,41,59,.13); --mcbtn:#ffffff; --mcbtn2:#e6ebf3;}
+:root[data-theme="dark"] #incomeSourcesOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #incomeSourcesOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;} }
+#incomeSourcesOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; overflow-y:auto; position:relative; padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(28px + env(safe-area-inset-bottom,0px));}
+#incomeSourcesOverlay .inc-title{margin:4px 0 14px; padding-inline-start:46px; font-size:calc(22px * var(--fs,1)); font-weight:900; line-height:1.3;}
+#incomeSourcesOverlay .inc-title small{display:block; font-size:calc(13px * var(--fs,1)); font-weight:700; color:var(--muted);}
+#incomeSourcesOverlay .inc-hero{position:relative; margin:0 2px 18px; padding:18px 18px 16px; border-radius:28px; color:#fff; background:linear-gradient(145deg,#22d49a 0%,#12a56f 45%,#0b7a53 100%); box-shadow:0 2px 0 rgba(255,255,255,.4) inset, 0 -8px 0 rgba(0,0,0,.16) inset, 0 8px 0 #0a5e41, 0 18px 26px rgba(14,140,92,.35);}
+#incomeSourcesOverlay .inc-hero > small{display:block; font-size:calc(14px * var(--fs,1)); font-weight:700; opacity:.92;}
+#incomeSourcesOverlay .inc-hero > b{display:block; font-size:calc(38px * var(--fs,1)); font-weight:900; line-height:1.15; margin:2px 0 12px; direction:ltr; text-align:right; text-shadow:0 3px 0 rgba(0,0,0,.18);}
+#incomeSourcesOverlay .inc-mini{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+#incomeSourcesOverlay .inc-mini div{background:rgba(0,0,0,.18); border-radius:14px; padding:8px 9px; box-shadow:0 2px 0 rgba(255,255,255,.18) inset, 0 4px 0 rgba(0,0,0,.14);}
+#incomeSourcesOverlay .inc-mini small{display:block; font-size:calc(11.5px * var(--fs,1)); font-weight:700; opacity:.92;}
+#incomeSourcesOverlay .inc-mini b{display:block; font-size:calc(17px * var(--fs,1)); font-weight:900; direction:ltr; text-align:right;}
+#incomeSourcesOverlay .inc-form{margin:0 2px 8px; padding:16px 14px; border-radius:22px; background:linear-gradient(160deg,var(--mchl) 0%,transparent 60%),var(--card); box-shadow:inset 0 1px 0 var(--mchl), 0 6px 0 rgba(0,0,0,.10), 0 13px 18px var(--mcsh);}
+#incomeSourcesOverlay .inc-form h4{margin:0 0 10px; font-size:calc(17px * var(--fs,1)); font-weight:900;}
+#incomeSourcesOverlay .inc-form .field{margin:0;}
+#incomeSourcesOverlay .inc-add{width:100%; margin-top:14px; border:0; cursor:pointer; padding:14px; border-radius:18px; font-family:inherit; font-weight:900; font-size:calc(16px * var(--fs,1)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#3ed89c,#12b27a); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 6px 0 #0b7a55, 0 13px 18px rgba(11,122,85,.3); transition:transform .1s, box-shadow .1s;}
+#incomeSourcesOverlay .inc-add:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 2px 0 #0b7a55;}
+#incomeSourcesOverlay .inc-logh{margin:24px 4px 6px; font-size:calc(18px * var(--fs,1)); font-weight:900;}
+#incomeSourcesOverlay .inc-logh small{font-weight:700; color:var(--muted); font-size:.75em;}
+#incomeSourcesOverlay .inc-empty{text-align:center; color:var(--muted); font-weight:700; padding:18px; margin:8px 2px; border-radius:20px; background:var(--card); box-shadow:0 5px 0 rgba(0,0,0,.07);}
+#incomeSourcesOverlay .inc-day{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:18px 2px 10px; padding:11px 16px; border-radius:18px; font-weight:900; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(160deg,#3ed89c,#12b27a); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 6px 0 #0b7a55, 0 13px 18px rgba(11,122,85,.28);}
+#incomeSourcesOverlay .inc-day .inc-dl{flex:1; min-width:0; overflow-wrap:anywhere;}
+#incomeSourcesOverlay .inc-day .inc-dl small{display:block; font-weight:800; opacity:.92; font-size:.74em;}
+#incomeSourcesOverlay .inc-day .inc-dt{font-size:calc(17px * var(--fs,1)); direction:ltr; white-space:nowrap;}
+#incomeSourcesOverlay .inc-row{display:flex; align-items:center; gap:10px; margin:0 2px 14px; padding:13px 12px; border-radius:20px; background:linear-gradient(160deg,var(--mchl) 0%,transparent 60%),var(--card); box-shadow:inset 0 1px 0 var(--mchl), 0 6px 0 rgba(0,0,0,.10), 0 13px 18px var(--mcsh);}
+#incomeSourcesOverlay .inc-row.excluded{opacity:.74;}
+#incomeSourcesOverlay .inc-ic{width:42px; height:42px; flex:0 0 42px; display:flex; align-items:center; justify-content:center; font-size:21px; border-radius:14px; background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.12);}
+#incomeSourcesOverlay .inc-mid{flex:1; min-width:0;}
+#incomeSourcesOverlay .inc-mid b{display:block; font-size:calc(15.5px * var(--fs,1)); font-weight:900; overflow-wrap:anywhere;}
+#incomeSourcesOverlay .inc-mid small{display:block; margin-top:2px; font-size:calc(12.5px * var(--fs,1)); font-weight:700; color:var(--muted); overflow-wrap:anywhere;}
+#incomeSourcesOverlay .inc-amt{font-size:calc(17px * var(--fs,1)); font-weight:900; color:#12b27a; white-space:nowrap; direction:ltr;}
+#incomeSourcesOverlay .inc-row.excluded .inc-amt{color:var(--muted);}
+#incomeSourcesOverlay .inc-acts{display:flex; gap:6px;}
+#incomeSourcesOverlay .inc-acts button{border:0; cursor:pointer; width:38px; height:36px; padding:0; border-radius:12px; font-size:15px; background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.18), 0 8px 10px var(--mcsh);}
+#incomeSourcesOverlay .inc-acts button:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2);}
 /* ===== صفحة «صرف من الأموال» كاملة وبتصميم 3D + سجل الصرف بالأيام ===== */
 #cmOutOverlay{--mchl:rgba(255,255,255,.95); --mcsh:rgba(30,41,59,.13); --mcbtn:#ffffff; --mcbtn2:#e6ebf3;}
 :root[data-theme="dark"] #cmOutOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;}
@@ -2408,33 +2445,39 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 </div>
 
 <div class="modal-overlay" id="incomeSourcesOverlay">
-  <div class="modal-box">
-    <h3>💰 مصادر المصروف المنزلي</h3>
+  <div class="modal-box inc-page">
+    <button type="button" class="fs-close" onclick="closeIncomeSources()" aria-label="رجوع">✕</button>
+    <h3 class="inc-title">💰 مصادر المصروف المنزلي<small id="incMonthLbl"></small></h3>
 
-    <div class="income-total-banner">
-      <span>إجمالي الدخل</span>
-      <span class="amt" id="incomeSourcesTotal">0</span>
-    </div>
-
-    <div id="incomeSourcesList" style="max-height:240px; overflow-y:auto; margin-bottom:14px;"></div>
-
-    <div class="field">
-      <label>مصدر دخل جديد</label>
-      <div style="display:flex; gap:8px;">
-        <input type="text" id="newIncomeSrcName" placeholder="مثال: راتب، عمل حر" style="flex:2;">
-        <input type="number" id="newIncomeSrcAmount" placeholder="المبلغ" style="flex:1;">
-      </div>
-      <div class="date-row"><label for="newIncomeSrcDate">📅 التاريخ</label><input type="date" id="newIncomeSrcDate"></div>
-      <div class="check-row">
-        <input type="checkbox" id="newIncomeSrcCounted" checked>
-        <label for="newIncomeSrcCounted" style="margin:0;">احتسب ضمن إجمالي المصروف المنزلي</label>
+    <div class="inc-hero">
+      <small>إجمالي الدخل المحسوب</small>
+      <b id="incomeSourcesTotal">0</b>
+      <div class="inc-mini">
+        <div><small>🧾 المصادر</small><b id="incCount">0</b></div>
+        <div><small>📅 الأيام</small><b id="incDays">0</b></div>
+        <div><small>🚫 غير محسوب</small><b id="incExclTotal">0</b></div>
       </div>
     </div>
 
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeIncomeSources()">إغلاق</button>
-      <button class="btn-save" onclick="addIncomeSource()">➕ إضافة</button>
+    <div class="inc-form">
+      <h4>➕ مصدر دخل جديد</h4>
+      <div class="field">
+        <label>الاسم والمبلغ</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="newIncomeSrcName" placeholder="مثال: راتب، عمل حر" style="flex:2;">
+          <input type="number" id="newIncomeSrcAmount" placeholder="المبلغ" inputmode="decimal" style="flex:1;">
+        </div>
+        <div class="date-row"><label for="newIncomeSrcDate">📅 التاريخ</label><input type="date" id="newIncomeSrcDate"></div>
+        <div class="check-row">
+          <input type="checkbox" id="newIncomeSrcCounted" checked>
+          <label for="newIncomeSrcCounted" style="margin:0;">احتسب ضمن إجمالي المصروف المنزلي</label>
+        </div>
+      </div>
+      <button type="button" class="inc-add" onclick="addIncomeSource()">➕ إضافة</button>
     </div>
+
+    <h4 class="inc-logh">🗓️ سجل المصادر <small>(كل يوم بتاريخه ومدخلاته)</small></h4>
+    <div id="incomeSourcesList"></div>
   </div>
 </div>
 
@@ -7340,27 +7383,50 @@ function openIncomeSources(){
   const nd = document.getElementById('newIncomeSrcDate'); if(nd) nd.value = dateToInputValue(Date.now());
   renderIncomeSourcesList();
   document.getElementById('incomeSourcesOverlay').classList.add('open');
+  try{ document.querySelector('#incomeSourcesOverlay .modal-box').scrollTop = 0; }catch(e){}
 }
 function closeIncomeSources(){
   document.getElementById('incomeSourcesOverlay').classList.remove('open');
 }
+function incDayLbl(k){
+  if(!k) return 'بدون تاريخ';
+  const dt = new Date(k + 'T12:00:00'), t0 = dateToInputValue(Date.now()), y0 = dateToInputValue(Date.now() - 864e5);
+  let wd = ''; try{ wd = dt.toLocaleDateString(dateLocale(), {weekday: 'long'}); }catch(e){}
+  let ds = ''; try{ ds = dt.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long', year: 'numeric'}); }catch(e){ ds = k; }
+  return (k === t0 ? 'اليوم — ' : k === y0 ? 'أمس — ' : '') + wd + ' ' + ds;
+}
 function renderIncomeSourcesList(){
-  const mon = data[currentYear][currentMonth];
-  const list = document.getElementById('incomeSourcesList');
-  const total = totalIncome(mon);
-  document.getElementById('incomeSourcesTotal').textContent = fmt(total);
-  if(!mon.incomeSources || mon.incomeSources.length===0){
-    list.innerHTML = '<div class="empty">لا توجد مصادر دخل بعد</div>';
-    return;
-  }
-  list.innerHTML = mon.incomeSources.map(src=>`
-    <div class="income-src-row${src.counted===false?' excluded':''}" data-id="${src.id}">
-      <span class="src-icon">💵</span>
-      <span class="src-name">${src.counted===false?'<span class="tag">غير محسوب</span>':''}${src.name}${src.date ? ' <small class="src-date">📅 ' + formatDate(src.date) + '</small>' : ''}</span>
-      <span class="src-amt">${fmt(src.amount)}</span>
-      <button class="icon-btn" onclick="openEditIncomeSource('${src.id}')">✏️</button>
-      <button class="del" onclick="deleteIncomeSource('${src.id}')">🗑</button>
-    </div>`).join('');
+  const mon = data[currentYear][currentMonth], list = document.getElementById('incomeSourcesList'), srcs = mon.incomeSources || [];
+  const set = (id, v)=>{ const e = document.getElementById(id); if(e) e.textContent = v; };
+  set('incomeSourcesTotal', fmt(totalIncome(mon)));
+  set('incExclTotal', fmt(incomeExcludedTotal(mon)));
+  set('incCount', toArabicDigits(srcs.length));
+  set('incMonthLbl', MONTHS[currentMonth] + ' ' + toArabicDigits(currentYear));
+  list.innerHTML = '';
+  if(!srcs.length){ set('incDays', toArabicDigits(0)); list.innerHTML = '<div class="inc-empty">لا توجد مصادر دخل بعد</div>'; return; }
+  const by = {}, keys = [];
+  srcs.forEach(x=>{ const ms = opsMs(x.date), k = ms ? dateToInputValue(ms) : ''; if(!by[k]){ by[k] = []; keys.push(k); } by[k].push(x); });
+  keys.sort((a, b)=> a === '' ? 1 : b === '' ? -1 : b.localeCompare(a));
+  set('incDays', toArabicDigits(keys.filter(k=> k !== '').length));
+  keys.forEach(k=>{
+    const rows = by[k], tot = rows.reduce((a, x)=> x.counted === false ? a : a + (Number(x.amount) || 0), 0);
+    const h = document.createElement('div'); h.className = 'inc-day';
+    h.innerHTML = '<span class="inc-dl"></span><b class="inc-dt"></b>';
+    h.children[0].textContent = '📅 ' + incDayLbl(k);
+    const sm = document.createElement('small'); sm.textContent = toArabicDigits(rows.length) + (rows.length === 1 ? ' مدخل' : ' مدخلات'); h.children[0].appendChild(sm);
+    h.children[1].textContent = '+' + fmt(tot);
+    list.appendChild(h);
+    rows.forEach(src=>{
+      const d = document.createElement('div'); d.className = 'inc-row' + (src.counted === false ? ' excluded' : ''); d.dataset.id = src.id;
+      d.innerHTML = '<span class="inc-ic">💵</span><div class="inc-mid"><b></b><small></small></div><span class="inc-amt"></span><div class="inc-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button></div>';
+      d.children[1].children[0].textContent = src.name;
+      d.children[1].children[1].textContent = (src.counted === false ? '🚫 غير محسوب' : '✅ محسوب') + (String(src.name).indexOf('من الدخل العام') === 0 ? ' · 🔁 محوّل من الدخل العام' : '');
+      d.children[2].textContent = fmt(src.amount);
+      d.children[3].children[0].onclick = ()=> openEditIncomeSource(src.id);
+      d.children[3].children[1].onclick = ()=> deleteIncomeSource(src.id);
+      list.appendChild(d);
+    });
+  });
 }
 function addIncomeSource(){
   const nameEl = document.getElementById('newIncomeSrcName');
