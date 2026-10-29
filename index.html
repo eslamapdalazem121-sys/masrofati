@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7900">
+<meta name="app-version" content="2026-10-29.7901">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1942,6 +1942,7 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
     <div class="hint" id="cmoAvail"></div>
     <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
     <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetDest('zakat')">🕌 زكاتي</button><button type="button" onclick="cmoSetDest('other')">📦 أخرى</button></div>
+    <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" onclick="cmOutSave()">💸 صرف</button></div>
     <h4 style="margin:18px 0 8px;">🧾 سجل الصرف</h4>
@@ -4133,6 +4134,13 @@ function renderZkCalc(){
   // البطل: قيمة الزكاة
   const hero = el('zkd-hero');
   el('t', '🕌 زكاة المال ' + zkRateTxt(), hero); el('big', fmt(c.zk), hero); el('s', fmt(c.base) + ' × ' + zkRateTxt(), hero);
+  if(currentYear < new Date().getFullYear()){
+    const pb = el('zkd-note'), left = cmoZkLeft(currentYear), ry = new Date().getFullYear();
+    pb.style.cssText = 'background:rgba(124,77,219,.10);border:1px solid rgba(124,77,219,.35);border-radius:12px;padding:10px;font-weight:800;line-height:1.7;';
+    pb.textContent = '💸 سدّدت أو هتسدّد زكاة ' + toArabicDigits(currentYear) + ' دلوقتي؟ المبلغ بيتخصم من رأس مال ' + toArabicDigits(ry) + ' (الحالي) لأن رأس مال ' + toArabicDigits(currentYear) + ' عدّى، وبيتسجّل كسداد لزكاة ' + toArabicDigits(currentYear) + (c.zk > 0 ? ' — المتبقي: ' + fmt(left) : '') + '.';
+    const bt = document.createElement('button'); bt.type = 'button'; bt.style.cssText = 'display:block;margin-top:8px;padding:9px 14px;border-radius:10px;border:0;background:#7c4ddb;color:#fff;font-weight:900;font-family:inherit;cursor:pointer;';
+    bt.textContent = '💸 سدّد زكاة ' + toArabicDigits(currentYear) + ' من رأس مال ' + toArabicDigits(ry); const yy = currentYear; bt.onclick = ()=> openCmOutZk(yy); pb.appendChild(bt);
+  }
   const auto = zmAuto(), canAuto = currentYear === new Date().getFullYear() && !frozen;
   if(canAuto){ const pill = el('zkd-pill' + (auto ? ' on' : ''), auto ? '🔄 تحديث تلقائي مع رأس المال: شغال' : '⏸ القيمة مثبّتة يدويًا — دوس للتلقائي', hero); pill.onclick = zkcAutoToggle; }
   // الأموال
@@ -4268,7 +4276,7 @@ function openCapChoose(){ document.getElementById('capChooseOverlay').classList.
 function closeCapChoose(){ document.getElementById('capChooseOverlay').classList.remove('open'); }
 function capDel(id){ data.capital = capRaw().filter(z=> z.id !== id); save(); renderCap(); }
 window.addEventListener('load', function(){
-  ['capDel', 'capGrpZkToggle', 'capItemZkToggle', 'saveCapGold', 'addCapMoney', 'cmOutSave', 'cmOutDel', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
+  ['capDel', 'capGrpZkToggle', 'capItemZkToggle', 'saveCapGold', 'addCapMoney', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
     const f = window[n]; if(typeof f !== 'function') return;
     window[n] = function(){ if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; } return f.apply(this, arguments); };
   });
@@ -4773,7 +4781,36 @@ function renderCapMoney(){
   renderPensionPanel();
 }
 // ===== صرف من الأموال: نقدي / شهادات وحسابات / فوائد / معاش =====
-let _cmoKind = 'cash', _cmoDest = 'income';
+let _cmoKind = 'cash', _cmoDest = 'income', _cmoZkYear = '';
+function zkValFor(y){ const v = Number(data.zakatMal && data.zakatMal[y]) || 0; if(v > 0) return v; const sn = data.zakatSnap && data.zakatSnap[y]; return (sn && sn.c) ? (Number(sn.c.zk) || 0) : 0; }
+function cmoZkYears(){   // السنين اللي عدّت وليها زكاة محسوبة
+  const ry = new Date().getFullYear(), set = new Set();
+  [data.zakatMal, data.zakatSnap, data.zakat].forEach(o=>{ if(o && typeof o === 'object') Object.keys(o).forEach(k=>{ const y = Number(k); if(y > 2000 && y < ry) set.add(y); }); });
+  return Array.from(set).filter(y=> zkValFor(y) > 0).sort((a, b)=> b - a);
+}
+function cmoZkLeft(y){ return Math.max(0, cgRound(zkValFor(y) - zmPaidFor(y))); }
+function cmoZkRender(){
+  const row = document.getElementById('cmoZkRow'); if(!row) return;
+  const ys = cmoZkYears(), show = _cmoDest === 'zakat' && (ys.length > 0 || _cmoZkYear);
+  row.style.display = show ? '' : 'none';
+  if(_cmoDest !== 'zakat'){ _cmoZkYear = ''; return; }
+  const sel = document.getElementById('cmoZkYear'); sel.innerHTML = '';
+  const o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'زكاتي للشهر الحالي (الوضع العادي)'; sel.appendChild(o0);
+  ys.forEach(y=>{ const o = document.createElement('option'); o.value = String(y); o.textContent = 'سداد زكاة ' + toArabicDigits(y) + ' — المتبقي ' + fmt(cmoZkLeft(y)); sel.appendChild(o); });
+  sel.value = _cmoZkYear; if(sel.value !== _cmoZkYear){ _cmoZkYear = ''; sel.value = ''; }
+  const h = document.getElementById('cmoZkHint'), ry = new Date().getFullYear();
+  h.textContent = _cmoZkYear ? '✅ المبلغ هيتخصم من رأس مال ' + toArabicDigits(ry) + ' (الحالي)، وبيتسجّل كسداد لزكاة ' + toArabicDigits(_cmoZkYear) + ' من غير ما يغيّر حسابات ' + toArabicDigits(_cmoZkYear) + ' نفسها (السنة دي بتفضل مثبّتة).' : '';
+}
+function cmoZkPick(v){
+  _cmoZkYear = v || ''; cmoZkRender();
+  const a = document.getElementById('cmoAmt'); if(_cmoZkYear && a && !(Number(a.value) > 0)){ const l = cmoZkLeft(Number(_cmoZkYear)); if(l > 0) a.value = l; }
+  cmoTotals();
+}
+function openCmOutZk(y){   // من صفحة زكاة سنة ماضية: سداد من رأس المال الحالي
+  closeZkCalc(); _cmoKind = 'cash'; _cmoDest = 'zakat'; _cmoZkYear = String(y);
+  const l = cmoZkLeft(Number(y)); document.getElementById('cmoAmt').value = l > 0 ? l : ''; document.getElementById('cmoNote').value = '';
+  cmoRender(); document.getElementById('cmOutOverlay').classList.add('open');
+}
 function giRecAt(y, m){ const sy = currentYear, sm = currentMonth; currentYear = y; currentMonth = m; try{ return giRec(); } finally{ currentYear = sy; currentMonth = sm; } }
 function bankChgMigrate(){
   let ch = false;
@@ -4801,11 +4838,11 @@ function cmoAvailOf(kind, x){
   if(kind === 'int' && x.intKeep === true){ const n = new Date(); return Math.max(0, cgRound(bankIntSince(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)) - (Number(x.intSpent) || 0))); }
   return cmoEntryAmt(x);
 }
-function cmoItems(kind){ return capList().filter(x=> capCatOf(x) === 'money' && (kind === 'int' ? (capSubOf(x) === 'bank' && (bankMonthly(x) > 0 || (Array.isArray(x.chg) && x.chg.length > 0))) : capSubOf(x) === kind)); }
-function openCmOut(){ _cmoKind = 'cash'; _cmoDest = 'income'; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); document.getElementById('cmOutOverlay').classList.add('open'); }
+function cmoItems(kind){ return capRaw().filter(x=> capCatOf(x) === 'money' && (kind === 'int' ? (capSubOf(x) === 'bank' && (bankMonthly(x) > 0 || (Array.isArray(x.chg) && x.chg.length > 0))) : capSubOf(x) === kind)); }
+function openCmOut(){ _cmoKind = 'cash'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); document.getElementById('cmOutOverlay').classList.add('open'); }
 function closeCmOut(){ document.getElementById('cmOutOverlay').classList.remove('open'); }
 function cmoSetKind(k){ _cmoKind = k; cmoRender(); }
-function cmoSetDest(d){ _cmoDest = d; [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest)); }
+function cmoSetDest(d){ _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest)); }
 function cmoTotals(){
   const lbl = {cash: '💵 إجمالي النقدي', bank: '🏦 إجمالي الشهادات والحسابات', int: '🪙 إجمالي الفوائد المتاحة', pension: '💳 إجمالي المعاش المتاح'};
   const items = cmoItems(_cmoKind), tot = cgRound(items.reduce((a,x)=> a + cmoAvailOf(_cmoKind, x), 0)), amt = Number((document.getElementById('cmoAmt') || {}).value) || 0;
@@ -4815,7 +4852,7 @@ function cmoTotals(){
   if(left < 0) el.textContent = '−' + el.textContent;
 }
 function cmoAvail(){
-  const sel = document.getElementById('cmoItem'), x = capList().find(z=> z.id === sel.value), el = document.getElementById('cmoAvail');
+  const sel = document.getElementById('cmoItem'), x = capRaw().find(z=> z.id === sel.value), el = document.getElementById('cmoAvail');
   if(sel.value === '__all__'){ el.textContent = 'هيتصرف من البنود بالترتيب لحد ما المبلغ يخلص، وكل بند هيتسجّل لوحده في السجل.'; return; }
   if(!x){ el.textContent = _cmoKind === 'int' ? 'مفيش بنوك عليها فوايد' : 'مفيش بنود هنا. ضيف بند من «أموال» الأول.'; return; }
   const av = cmoAvailOf(_cmoKind, x);
@@ -4831,7 +4868,7 @@ function cmoRender(){
   { const its = cmoItems(_cmoKind); if(its.length > 1){ const o = document.createElement('option'); o.value = '__all__'; o.textContent = '⭐ الإجمالي كله — متاح ' + fmt(cgRound(its.reduce((a,x)=> a + cmoAvailOf(_cmoKind, x), 0))) + ' (يتوزّع تلقائي)'; sel.appendChild(o); }
     its.forEach(x=>{ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + ' — متاح ' + fmt(cmoAvailOf(_cmoKind, x)); sel.appendChild(o); }); }
   if(keepSel && [...sel.options].some(o=> o.value === keepSel)) sel.value = keepSel;
-  cmoAvail(); cmoTotals(); cmoLog();
+  cmoAvail(); cmoTotals(); cmoLog(); cmoZkRender();
 }
 function cmoLog(){
   const box = document.getElementById('cmoLog'), arr = (data.moneyOut || []).slice().reverse().slice(0, 30);
@@ -4841,13 +4878,13 @@ function cmoLog(){
     const d = document.createElement('div'); d.className = 'gi-row';
     d.innerHTML = '<span></span><b></b><span></span><button type="button">🗑</button>';
     d.children[0].textContent = ic[r.kind] || '💸';
-    d.children[1].textContent = r.name + ' → ' + (GI_DEST[r.dest] || GI_DEST.other).n + (r.note ? ' · ' + r.note : '') + ' · ' + formatDate(opsMs(r.date));
+    d.children[1].textContent = r.name + ' → ' + (GI_DEST[r.dest] || GI_DEST.other).n + (r.zkY ? ' (زكاة ' + toArabicDigits(r.zkY) + ')' : '') + (r.note ? ' · ' + r.note : '') + ' · ' + formatDate(opsMs(r.date));
     d.children[2].textContent = fmt(r.amount);
     d.children[3].onclick = ()=> openConfirm('حذف الصرف', 'هل تريد حذف الصرف ده؟ المبلغ هيرجع لمكانه.', ()=>{ cmOutDel(r.id); });
     box.appendChild(d);
   });
 }
-function cmoAfter(){ save(); try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderGI(); }catch(e){} try{ renderZakat(); }catch(e){} cmoRender(); }
+function cmoAfter(){ save(); try{ renderZM(); }catch(e){} try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderGI(); }catch(e){} try{ renderZakat(); }catch(e){} cmoRender(); }
 function cmoApply(x, amt, note){
   const t = cmoYM(), id = uid(), date = new Date().toISOString().slice(0, 10);
   const rec = {id: id, kind: _cmoKind, itemId: x.id, name: x.name, amount: amt, dest: _cmoDest, note: note, date: date, ym: t.k};
@@ -4855,15 +4892,21 @@ function cmoApply(x, amt, note){
   else if(_cmoKind === 'int' && x.intKeep === true){ x.intSpent = cgRound((Number(x.intSpent) || 0) + amt); rec.keep = true; }
   else { ensureYear(t.y); giRecAt(t.y, t.m).out.push({id: id, dest: _cmoDest, amount: amt, note: x.name + (note ? ' · ' + note : ''), counted: true, date: date}); rec.gi = true; }
   const label = giLabel(x.name + (note ? ' · ' + note : ''));
-  if(_cmoDest === 'zakat'){ zkGet().adds.push({id: id, name: label, amount: amt, date: date}); }
+  if(_cmoDest === 'zakat' && _cmoZkYear){   // سداد زكاة سنة ماضية من رأس المال الحالي
+    const zy = Number(_cmoZkYear), nm = label + ' · سداد من رأس مال ' + t.y, z = zkGetAt(zy, t.m);
+    z.adds.push({id: id, name: nm, amount: amt, date: date}); z.payments.push({id: id + 'p', amount: amt, note: nm, date: date});
+    rec.zkY = zy; rec.zkM = t.m;
+  }
+  else if(_cmoDest === 'zakat'){ zkGet().adds.push({id: id, name: label, amount: amt, date: date}); }
   else if(_cmoDest === 'income'){ ensureYear(t.y); const mon = data[t.y][t.m]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: id, name: label, amount: amt, counted: true, date: opsMs(date)}); }
   if(!Array.isArray(data.moneyOut)) data.moneyOut = [];
   data.moneyOut.push(rec);
 }
 function cmOutSave(){
+  if(capIsPast() && !_cmoZkYear){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; }
   const sel = document.getElementById('cmoItem'), all = sel.value === '__all__';
   const amt = Number(document.getElementById('cmoAmt').value) || 0, note = document.getElementById('cmoNote').value.trim();
-  const list = all ? cmoItems(_cmoKind) : capList().filter(z=> z.id === sel.value);
+  const list = all ? cmoItems(_cmoKind) : capRaw().filter(z=> z.id === sel.value);
   if(!list.length){ showToast('اختار البند اللي هتصرف منه', false); return; }
   if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
   const av = cgRound(list.reduce((a,x)=> a + cmoAvailOf(_cmoKind, x), 0));
@@ -4871,15 +4914,17 @@ function cmOutSave(){
   let rest = amt;
   list.forEach(x=>{ if(rest <= 0.0001) return; const take = Math.min(cmoAvailOf(_cmoKind, x), rest); if(take > 0){ cmoApply(x, cgRound(take), note); rest = cgRound(rest - take); } });
   document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = '';
-  cmoAfter(); showToast('تم الصرف إلى ' + (GI_DEST[_cmoDest] || GI_DEST.other).n + ' ✅', true);
+  cmoAfter(); showToast(_cmoZkYear ? 'تم سداد زكاة ' + toArabicDigits(_cmoZkYear) + ' من رأس مال ' + toArabicDigits(new Date().getFullYear()) + ' ✅' : 'تم الصرف إلى ' + (GI_DEST[_cmoDest] || GI_DEST.other).n + ' ✅', true);
 }
 function cmOutDel(id){
   const i = (data.moneyOut || []).findIndex(r=> r.id === id); if(i < 0) return;
-  const rec = data.moneyOut[i], x = capList().find(z=> z.id === rec.itemId), ym = String(rec.ym || '').split('-').map(Number);
+  const rec = data.moneyOut[i], x = capRaw().find(z=> z.id === rec.itemId), ym = String(rec.ym || '').split('-').map(Number);
+  if(capIsPast() && rec.zkY === undefined){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; }
   if(rec.keep){ if(x) x.intSpent = Math.max(0, cgRound((Number(x.intSpent) || 0) - rec.amount)); }
   else if(rec.gi){ if(ym.length === 2){ const gr = giRecAt(ym[0], ym[1]); gr.out = gr.out.filter(o=> o.id !== id); } }
   else if(x){ x.amount = cgRound((Number(x.amount) || 0) + rec.amount); if(Array.isArray(x.chg)) x.chg = x.chg.filter(function(c){ return c.id !== id; }); }
-  if(rec.dest === 'zakat'){ const z = zkGet(); z.adds = z.adds.filter(a=> a.id !== id); }
+  if(rec.dest === 'zakat' && rec.zkY !== undefined){ const z = zkGetAt(rec.zkY, rec.zkM); z.adds = z.adds.filter(a=> a.id !== id); z.payments = z.payments.filter(a=> a.id !== id + 'p'); }
+  else if(rec.dest === 'zakat'){ const z = zkGet(); z.adds = z.adds.filter(a=> a.id !== id); }
   else if(rec.dest === 'income' && ym.length === 2){ const mon = data[ym[0]] && data[ym[0]][ym[1]]; if(mon && Array.isArray(mon.incomeSources)) mon.incomeSources = mon.incomeSources.filter(z=> z.id !== id); }
   data.moneyOut.splice(i, 1);
   cmoAfter(); showToast('اتحذف الصرف ورجع المبلغ ✅', true);
