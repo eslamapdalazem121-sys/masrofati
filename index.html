@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7910">
+<meta name="app-version" content="2026-10-29.7913">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1765,6 +1765,12 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #cmOutOverlay > .modal-box > .gi-dest button{border:0; padding:14px 6px; border-radius:18px; font-size:calc(15px * var(--fs,1)); background:var(--card); color:var(--text); box-shadow:inset 0 2px 0 var(--mchl), 0 5px 0 rgba(0,0,0,.12), 0 11px 16px var(--mcsh); transition:transform .1s, box-shadow .1s;}
 #cmOutOverlay > .modal-box > .gi-dest button.active{color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); transform:translateY(4px); background:linear-gradient(180deg,#9b78f0,#6d3fd6); box-shadow:inset 0 2px 0 rgba(255,255,255,.45), 0 1px 0 #4a24a3;}
 #cmOutOverlay > .modal-box > #cmoDest button.active{background:linear-gradient(180deg,#58e3ab,#12b27a); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #0b7a55;}
+#cmOutOverlay > .modal-box > #cmoDest{gap:6px;}
+#cmOutOverlay > .modal-box > #cmoDest button{font-size:calc(12.5px * var(--fs,1)); padding:12px 3px; line-height:1.35;}
+#cmOutOverlay .cmo-sub{display:flex; gap:8px; margin:0 0 8px;}
+#cmOutOverlay .cmo-sub button{flex:1; border:0; padding:12px 3px; line-height:1.35; border-radius:16px; font-family:inherit; font-weight:800; font-size:calc(12px * var(--fs,1)); cursor:pointer; background:var(--card); color:var(--text); box-shadow:inset 0 2px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.12), 0 9px 14px var(--mcsh); transition:transform .1s, box-shadow .1s;}
+#cmOutOverlay .cmo-sub button.active{color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); transform:translateY(3px); background:linear-gradient(180deg,#6cb4ff,#2f7bff); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #0a4fd1;}
+#cmoGrp{width:100%; margin-top:2px;}
 #cmOutOverlay .field{margin:0 2px 14px;} #cmOutOverlay .field > label{display:block; margin:0 6px 7px; font-weight:800;}
 #cmOutOverlay .field input, #cmOutOverlay .field select{width:100%; box-sizing:border-box; border:0; padding:15px 16px; border-radius:18px; font-family:inherit; font-size:calc(16px * var(--fs,1)); font-weight:800; color:var(--text); background:var(--card); box-shadow:inset 0 3px 7px rgba(0,0,0,.14), 0 1px 0 var(--mchl);}
 #cmOutOverlay .hint{margin:-6px 8px 14px; font-size:calc(12.5px * var(--fs,1)); font-weight:700; color:var(--muted);}
@@ -2025,9 +2031,10 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
     <div class="field"><label>الصرف من (كل بند وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
     <div class="hint" id="cmoAvail"></div>
     <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
-    <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetDest('zakat')">🕌 زكاتي</button><button type="button" onclick="cmoSetDest('other')">📦 أخرى</button></div>
+    <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetDest('zakat')">🕌 زكاتي</button><button type="button" onclick="cmoSetDest('other')">📦 أخرى</button><button type="button" onclick="cmoSetDest('gen')">💵 الدخل العام الشهري</button></div>
+    <div class="field" id="cmoGenRow" style="display:none;"><label>💵 المبلغ بعد ما يدخل الدخل العام الشهري يستقر فين؟</label><div class="cmo-sub" id="cmoSub"><button type="button" onclick="cmoSetSub('gi')">💵 الدخل العام بس</button><button type="button" class="active" onclick="cmoSetSub('home')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetSub('grp')">📁 مجموعة منه</button></div><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStlRow" style="margin-top:8px;"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div id="cmoStgRow" style="margin-top:8px;display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div><div class="hint" id="cmoGenHint"></div></div>
     <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
-    <div class="field"><label>📅 تاريخ الصرف</label><input type="date" id="cmoDate"></div>
+    <div class="field"><label>📅 تاريخ الصرف</label><input type="date" id="cmoDate" onchange="cmoGenRender()"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
     <h4 class="cmo-logh">🧾 سجل الصرف <small>(كل يوم بتاريخه)</small></h4>
@@ -3687,7 +3694,7 @@ function opsFlat(){
   Object.keys(zm).forEach(y=>{ f['zm:'+y] = {t:'zm', n:y, a:Number(zm[y])||0, y:+y, m:-1}; });
   (Array.isArray(data.capital) ? data.capital : []).forEach(x=>{ const dm = opsMs(x.date) || Date.now(), dd = new Date(dm); f['cap:'+x.id] = {t:'cap', n:x.name + (x.cat === 'gold' ? ' (ذهب' + (x.karat ? ' عيار ' + x.karat : '') + ' — ' + (x.use === 'jewel' ? 'زينة' : 'ادخار') + ')' : (x.sub === 'bank' ? ' (بنوك)' : (x.sub === 'pension' ? ' (معاش)' : ' (نقدي)'))), a:Number(x.amount)||0, y:dd.getFullYear(), m:dd.getMonth(), d:opsMs(x.date)}; });
   capGroups().forEach(g=>{ const dm = g.date || Date.now(), dd = new Date(dm); f['cgp:'+g.id] = {t:'cgp', n:g.name + (g.cat === 'gold' ? ' (ذهب)' : ' (أموال)'), a:0, y:dd.getFullYear(), m:dd.getMonth(), d:g.date}; });
-  Object.keys(f).forEach(k=>{ if(/^(i|za|zp):/.test(k) && go.has(k.split(':')[1])) f[k].link = true; });
+  Object.keys(f).forEach(k=>{ if(/^(i|za|zp|e):/.test(k) && go.has(k.split(':')[1])) f[k].link = true; });
   return f;
 }
 function opsEntry(kind, n, o){
@@ -4912,7 +4919,7 @@ function renderCmAddLog(){
   });
 }
 // ===== صرف من الأموال: نقدي / شهادات وحسابات / فوائد / معاش =====
-let _cmoKind = 'cash', _cmoDest = 'income', _cmoZkYear = '', _cmoEditId = null;
+let _cmoKind = 'cash', _cmoDest = 'income', _cmoZkYear = '', _cmoEditId = null, _cmoSub = 'home', _cmoGrp = '';
 function cmoBack(x){ if(!_cmoEditId) return 0; const o = (data.moneyOut || []).find(r=> r.id === _cmoEditId); if(!o || o.itemId !== x.id) return 0; if(o.gi && o.ym !== cmoYM().k) return 0; return Number(o.amount) || 0; }
 function cmoAvailE(kind, x){ return cgRound(cmoAvailOf(kind, x) + cmoBack(x)); }
 function cmoToday(){ return dateToInputValue(Date.now()); }
@@ -4978,10 +4985,51 @@ function cmoAvailOf(kind, x){
   return 0;
 }
 function cmoItems(kind){ return capRaw().filter(x=> capCatOf(x) === 'money' && (kind === 'int' ? (capSubOf(x) === 'bank' && (bankMonthly(x) > 0 || (Array.isArray(x.chg) && x.chg.length > 0))) : capSubOf(x) === kind)); }
-function openCmOut(){ _cmoEditId = null; document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'cash'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); document.getElementById('cmOutOverlay').classList.add('open'); }
+function openCmOut(){ _cmoEditId = null; _cmoSub = 'home'; _cmoGrp = ''; try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'cash'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); document.getElementById('cmOutOverlay').classList.add('open'); }
 function closeCmOut(){ _cmoEditId = null; document.getElementById('cmOutOverlay').classList.remove('open'); }
 function cmoSetKind(k){ if(_cmoEditId){ showToast('النوع مينفعش يتغيّر وإنت بتعدّل — احذف الصرف واعمله من جديد', false); return; } _cmoKind = k; cmoRender(); }
-function cmoSetDest(d){ _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest)); }
+function cmoSetDest(d){ _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other','gen'][i] === _cmoDest)); cmoGenRender(); }
+// ===== الدخل العام الشهري: يدخل الدخل العام الأول وبعدها يستقر في المصروف المنزلي أو في مجموعة من مجموعاته =====
+const CMO_SEP = '\u001f';
+function cmoDateYM(){ const v = (document.getElementById('cmoDate') || {}).value || cmoToday(); return {y: Number(v.slice(0, 4)), m: Number(v.slice(5, 7)) - 1}; }
+function cmoGrpOpts(y, m){
+  ensureYear(y); const out = [];
+  (function walk(nodes, path, depth){ (nodes || []).forEach(n=>{ if(n.type === 'group'){ const p = path.concat(n.name); out.push({key: p.join(CMO_SEP), label: (depth ? '\u00a0\u00a0'.repeat(depth) + '↳ ' : '') + (n.icon || '📁') + ' ' + n.name}); walk(n.children, p, depth + 1); } }); })(data[y][m].groups, [], 0);
+  return out;
+}
+function cmoGrpNode(y, m, key){
+  if(!key) return null; ensureYear(y); let nodes = data[y][m].groups, node = null;
+  for(const nm of key.split(CMO_SEP)){ node = (nodes || []).find(n=> n.type === 'group' && n.name === nm); if(!node) return null; nodes = node.children; }
+  return node;
+}
+function cmoDestLbl(r){
+  if(r.dest === 'gen'){
+    const part = (r.stl > 0 && r.stl < r.amount) ? ' (' + fmt(r.stl) + ' منه)' : '';
+    return '💵 الدخل العام الشهري' + (r.sub === 'grp' ? ' ← 💰 المصروف المنزلي' + part + ' ← 📁 ' + String(r.grp || '').split(CMO_SEP).join(' › ') + ((r.stg > 0 && r.stl > 0 && r.stg < r.stl) ? ' (' + fmt(r.stg) + ' منه)' : '') : r.sub === 'gi' ? ' (استقر فيه)' : ' ← 💰 المصروف المنزلي' + part);
+  }
+  const d = GI_DEST[r.dest] || GI_DEST.other; return d.ic + ' ' + d.n;
+}
+function cmoSetSub(k){ _cmoSub = k; cmoGenRender(); }
+function cmoGrpPick(v){ _cmoGrp = v || ''; }
+function cmoGenRender(){
+  const row = document.getElementById('cmoGenRow'); if(!row) return;
+  row.style.display = _cmoDest === 'gen' ? '' : 'none';
+  if(_cmoDest !== 'gen') return;
+  [...document.querySelectorAll('#cmoSub button')].forEach((b,i)=> b.classList.toggle('active', ['gi','home','grp'][i] === _cmoSub));
+  const sel = document.getElementById('cmoGrp'), h = document.getElementById('cmoGenHint'), d = cmoDateYM(), mn = MONTHS[d.m];
+  sel.style.display = _cmoSub === 'grp' ? '' : 'none';
+  document.getElementById('cmoStlRow').style.display = _cmoSub === 'gi' ? 'none' : '';
+  document.getElementById('cmoStgRow').style.display = _cmoSub === 'grp' ? '' : 'none';
+  document.getElementById('cmoStlLbl').textContent = _cmoSub === 'grp' ? 'المبلغ المحوّل من الدخل العام للمصروف المنزلي (سيبه فاضي = المبلغ كامل)' : 'المبلغ اللي يستقر في المصروف المنزلي (سيبه فاضي = المبلغ كامل)';
+  if(_cmoSub === 'gi'){ h.textContent = 'المبلغ كله بيدخل الدخل العام الشهري لشهر ' + mn + ' ويستقر فيه.'; return; }
+  if(_cmoSub === 'home'){ h.textContent = 'المنصرف ← الدخل العام ← المصروف المنزلي. كله أو جزء منه يستقر في المصروف المنزلي لشهر ' + mn + '، والباقي (لو فيه) يفضل في الدخل العام.'; return; }
+  const opts = cmoGrpOpts(d.y, d.m); sel.innerHTML = '';
+  if(!opts.length){ _cmoGrp = ''; h.textContent = 'مفيش مجموعات مصروف منزلي في شهر ' + mn + ' — ضيف مجموعة من صفحة الشهر الأول.'; return; }
+  const o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'اختار المجموعة…'; sel.appendChild(o0);
+  opts.forEach(o=>{ const e = document.createElement('option'); e.value = o.key; e.textContent = o.label; sel.appendChild(e); });
+  sel.value = _cmoGrp; if(sel.value !== _cmoGrp){ _cmoGrp = ''; sel.value = ''; }
+  h.textContent = 'المنصرف ← الدخل العام ← المصروف المنزلي ← المجموعة (شهر ' + mn + '). المحوّل للمصروف المنزلي كله أو جزء منه، ومنه كله أو جزء يروح للمجموعة. اللي ما اتحوّلش يفضل في الدخل العام، واللي ما راحش للمجموعة يفضل في المصروف المنزلي.';
+}
 function cmoTotals(){
   const lbl = {cash: '💵 إجمالي النقدي', bank: '🏦 إجمالي الشهادات والحسابات', int: '🪙 إجمالي الفوائد المتاحة', pension: '💳 إجمالي المعاش المتاح'};
   const items = cmoItems(_cmoKind), tot = cgRound(items.reduce((a,x)=> a + cmoAvailE(_cmoKind, x), 0)), amt = Number((document.getElementById('cmoAmt') || {}).value) || 0;
@@ -5002,12 +5050,12 @@ function cmoAvail(){
 }
 function cmoRender(){
   [...document.querySelectorAll('#cmoKinds button')].forEach((b,i)=> b.classList.toggle('active', ['cash','bank','int','pension'][i] === _cmoKind));
-  [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest));
+  [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other','gen'][i] === _cmoDest));
   const sel = document.getElementById('cmoItem'), keepSel = sel.value; sel.innerHTML = '';
   { const its = cmoItems(_cmoKind); if(its.length > 1 && !_cmoEditId){ const o = document.createElement('option'); o.value = '__all__'; o.textContent = '⭐ الإجمالي كله — متاح ' + fmt(cgRound(its.reduce((a,x)=> a + cmoAvailE(_cmoKind, x), 0))) + ' (يتوزّع تلقائي)'; sel.appendChild(o); }
     its.forEach(x=>{ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + (cmoLocked(_cmoKind, x) && cmoAvailE(_cmoKind, x) <= 0 ? ' — رصيده ٠ (اتحوّل وصُرف في موعده)' : ' — متاح ' + fmt(cmoAvailE(_cmoKind, x))); sel.appendChild(o); }); }
   if(keepSel && [...sel.options].some(o=> o.value === keepSel)) sel.value = keepSel;
-  cmoAvail(); cmoTotals(); cmoLog(); cmoZkRender();
+  cmoAvail(); cmoTotals(); cmoLog(); cmoZkRender(); cmoGenRender();
   { const bar = document.getElementById('cmoEditBar'), bt = document.getElementById('cmoSaveBtn'); if(bar) bar.style.display = _cmoEditId ? '' : 'none'; if(bt) bt.textContent = _cmoEditId ? '💾 حفظ التعديل' : '💸 صرف'; }
 }
 function cmoDayLbl(d){
@@ -5032,7 +5080,7 @@ function cmoLog(){
       d.innerHTML = '<span class="cmo-ic"></span><div class="cmo-mid"><b></b><small></small></div><span class="cmo-amt"></span><div class="cmo-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button></div>';
       d.children[0].textContent = ic[r.kind] || '💸';
       d.children[1].children[0].textContent = r.name;
-      d.children[1].children[1].textContent = (GI_DEST[r.dest] || GI_DEST.other).ic + ' ' + (GI_DEST[r.dest] || GI_DEST.other).n + (r.zkY ? ' (زكاة ' + toArabicDigits(r.zkY) + ')' : '') + (r.note ? ' · ' + r.note : '');
+      d.children[1].children[1].textContent = cmoDestLbl(r) + (r.zkY ? ' (زكاة ' + toArabicDigits(r.zkY) + ')' : '') + (r.note ? ' · ' + r.note : '');
       d.children[2].textContent = fmt(r.amount);
       d.children[3].children[0].onclick = ()=> cmOutEdit(r.id);
       d.children[3].children[1].onclick = ()=> openConfirm('حذف الصرف', 'هل تريد حذف الصرف ده؟ المبلغ هيرجع لمكانه.', ()=>{ cmOutDel(r.id); });
@@ -5040,21 +5088,33 @@ function cmoLog(){
     });
   });
 }
-function cmoAfter(){ save(); try{ renderZM(); }catch(e){} try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderGI(); }catch(e){} try{ renderZakat(); }catch(e){} cmoRender(); }
-function cmoApply(x, amt, note, dateStr, keepId){
+function cmoAfter(){ save(); try{ renderZM(); }catch(e){} try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderGI(); }catch(e){} try{ renderZakat(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderDetail(); }catch(e){} try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} cmoRender(); }
+function cmoApply(x, amt, note, dateStr, keepId, stlArg, stgArg){
   const date = dateStr || cmoToday(), dt = new Date(date + 'T12:00:00'), t = {y: dt.getFullYear(), m: dt.getMonth(), k: dt.getFullYear() + '-' + dt.getMonth()}, id = keepId || uid();
   const rec = {id: id, kind: _cmoKind, itemId: x.id, name: x.name, amount: amt, dest: _cmoDest, note: note, date: date, ym: t.k};
+  const gen = _cmoDest === 'gen', effD = gen ? (_cmoSub === 'gi' ? 'gi' : 'income') : _cmoDest;
+  const stgOf = function(lim){ return Number(stgArg) > 0 ? Math.min(cgRound(Number(stgArg)), lim) : lim; };
+  let stl = amt, stg = 0; if(gen){ stl = _cmoSub === 'gi' ? 0 : (Number(stlArg) > 0 ? Math.min(cgRound(Number(stlArg)), amt) : amt); stg = _cmoSub === 'grp' ? stgOf(stl) : 0; }
+  if(gen){ ensureYear(t.y); rec.sub = _cmoSub; rec.stl = stl; rec.stg = stg; if(_cmoSub === 'grp') rec.grp = _cmoGrp; }
   if(_cmoKind === 'cash' || _cmoKind === 'bank'){ x.amount = cgRound((Number(x.amount) || 0) - amt); if(_cmoKind === 'bank'){ if(!Array.isArray(x.chg)) x.chg = []; x.chg.push({id: id, t: dt.getTime(), delta: -amt}); } }
   else if(_cmoKind === 'int' && x.intKeep === true){ x.intSpent = cgRound((Number(x.intSpent) || 0) + amt); rec.keep = true; }
-  else { ensureYear(t.y); giRecAt(t.y, t.m).out.push({id: id, dest: _cmoDest, amount: amt, note: x.name + (note ? ' · ' + note : ''), counted: true, date: date}); rec.gi = true; }
+  else { ensureYear(t.y); giRecAt(t.y, t.m).out.push({id: id, dest: effD, amount: amt, note: x.name + (note ? ' · ' + note : ''), counted: true, date: date}); rec.gi = true; }
   const label = giLabel(x.name + (note ? ' · ' + note : ''));
+  if(gen && rec.gi){ stl = amt; rec.stl = amt; if(_cmoSub === 'grp'){ stg = stgOf(amt); rec.stg = stg; } }   // فوايد غير متضافة/معاش: المبلغ أصلًا في الدخل العام فبيتصرف كله للوجهة
+  if(gen && !rec.gi){   // مال من النقدي/البنك/الفوايد المتضافة: يدخل الدخل العام الشهري كمصدر، وبعدها كله أو جزء منه يستقر في الوجهة المختارة
+    const gr = giRecAt(t.y, t.m), nm = x.name + (note ? ' · ' + note : '');
+    gr.src.push({id: id + 's', name: nm, amount: amt, counted: true, date: opsMs(date)});
+    if(stl > 0) gr.out.push({id: id, dest: effD, amount: stl, note: nm, counted: true, date: date});
+    rec.gs = true;
+  }
   if(_cmoDest === 'zakat' && _cmoZkYear){   // سداد زكاة سنة ماضية من رأس المال الحالي
     const zy = Number(_cmoZkYear), nm = label + ' · سداد من رأس مال ' + t.y, z = zkGetAt(zy, t.m);
     z.adds.push({id: id, name: nm, amount: amt, date: date}); z.payments.push({id: id + 'p', amount: amt, note: nm, date: date});
     rec.zkY = zy; rec.zkM = t.m; rec.zy = zy; rec.zm = t.m;
   }
   else if(_cmoDest === 'zakat'){ const z = zkGetAt(t.y, t.m); z.adds.push({id: id, name: label, amount: amt, date: date}); rec.zy = t.y; rec.zm = t.m; }
-  else if(_cmoDest === 'income'){ ensureYear(t.y); const mon = data[t.y][t.m]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: id, name: label, amount: amt, counted: true, date: opsMs(date)}); }
+  else if(effD === 'income' && stl > 0){ ensureYear(t.y); const mon = data[t.y][t.m]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: id, name: label, amount: stl, counted: true, date: opsMs(date)}); }
+  if(gen && _cmoSub === 'grp' && stg > 0){ ensureYear(t.y); const gn = cmoGrpNode(t.y, t.m, _cmoGrp); if(gn){ gn.children.push({id: id + 'g', type: 'expense', name: label, amount: stg, counted: true, date: opsMs(date), createdAt: Date.now(), icon: '🧾'}); } }
   if(!Array.isArray(data.moneyOut)) data.moneyOut = [];
   data.moneyOut.push(rec);
 }
@@ -5063,23 +5123,25 @@ function cmoUndo(rec){   // يرجّع أثر الصرف كله (الرصيد + 
   if(rec.keep){ if(x) x.intSpent = Math.max(0, cgRound((Number(x.intSpent) || 0) - rec.amount)); }
   else if(rec.gi){ if(ym.length === 2){ const gr = giRecAt(ym[0], ym[1]); gr.out = gr.out.filter(o=> o.id !== id); } }
   else if(x){ x.amount = cgRound((Number(x.amount) || 0) + rec.amount); if(Array.isArray(x.chg)) x.chg = x.chg.filter(function(c){ return c.id !== id; }); }
+  if(rec.gs && ym.length === 2){ const gr = giRecAt(ym[0], ym[1]); gr.src = gr.src.filter(o=> o.id !== id + 's'); gr.out = gr.out.filter(o=> o.id !== id); }
   if(rec.dest === 'zakat'){
     const z = rec.zy !== undefined ? zkGetAt(rec.zy, rec.zm) : (rec.zkY !== undefined ? zkGetAt(rec.zkY, rec.zkM) : zkGet());
     z.adds = z.adds.filter(a=> a.id !== id); z.payments = z.payments.filter(a=> a.id !== id + 'p');
   }
   else if(rec.dest === 'income' && ym.length === 2){ const mon = data[ym[0]] && data[ym[0]][ym[1]]; if(mon && Array.isArray(mon.incomeSources)) mon.incomeSources = mon.incomeSources.filter(z=> z.id !== id); }
+  else if(rec.dest === 'gen' && ym.length === 2){ const mon = data[ym[0]] && data[ym[0]][ym[1]]; if(mon){ if(Array.isArray(mon.incomeSources)) mon.incomeSources = mon.incomeSources.filter(z=> z.id !== id); [id, id + 'g'].forEach(function(k){ const f = findNode(mon.groups || [], k); if(f && f.node.type === 'expense') f.arr.splice(f.index, 1); }); } }
 }
 function cmOutEdit(id){
   const rec = (data.moneyOut || []).find(r=> r.id === id); if(!rec) return;
   if(capIsPast() && rec.zkY === undefined){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; }
-  _cmoEditId = id; _cmoKind = rec.kind; _cmoDest = rec.dest; _cmoZkYear = rec.zkY ? String(rec.zkY) : '';
+  _cmoEditId = id; _cmoKind = rec.kind; _cmoDest = rec.dest; _cmoSub = rec.sub || 'home'; _cmoGrp = rec.grp || ''; _cmoZkYear = rec.zkY ? String(rec.zkY) : '';
   cmoRender();
   const sel = document.getElementById('cmoItem'); if([...sel.options].some(o=> o.value === rec.itemId)) sel.value = rec.itemId; cmoAvail(); cmoTotals();
-  document.getElementById('cmoAmt').value = rec.amount; document.getElementById('cmoNote').value = rec.note || ''; document.getElementById('cmoDate').value = rec.date || cmoToday();
+  document.getElementById('cmoAmt').value = rec.amount; document.getElementById('cmoNote').value = rec.note || ''; document.getElementById('cmoDate').value = rec.date || cmoToday(); cmoGenRender(); { const sv = document.getElementById('cmoSettle'); if(sv) sv.value = (rec.stl > 0 && rec.stl < rec.amount) ? rec.stl : ''; const sg = document.getElementById('cmoSettle2'); if(sg) sg.value = (rec.stg > 0 && rec.stg < rec.stl) ? rec.stg : ''; }
   cmoTotals(); cmoLog();
   try{ document.querySelector('#cmOutOverlay .modal-box').scrollTo({top: 0, behavior: 'smooth'}); }catch(e){}
 }
-function cmoCancelEdit(){ _cmoEditId = null; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; document.getElementById('cmoDate').value = cmoToday(); cmoRender(); }
+function cmoCancelEdit(){ _cmoEditId = null; try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; document.getElementById('cmoDate').value = cmoToday(); cmoRender(); }
 function cmOutSave(){
   if(capIsPast() && !_cmoZkYear && !_cmoEditId){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; }
   const sel = document.getElementById('cmoItem'), all = sel.value === '__all__', editing = !!_cmoEditId;
@@ -5089,6 +5151,13 @@ function cmOutSave(){
   if(!list.length){ showToast('اختار البند اللي هتصرف منه', false); return; }
   if(amt <= 0){ showToast('اكتب مبلغ الصرف', false); return; }
   if(dstr > td){ showToast('تاريخ الصرف مينفعش يكون في المستقبل', false); return; }
+  if(_cmoDest === 'gen' && _cmoSub === 'grp'){ const dy = cmoDateYM(); if(!cmoGrpNode(dy.y, dy.m, _cmoGrp)){ showToast('اختار مجموعة المصروف المنزلي اللي المبلغ يستقر فيها', false); return; } }
+  const stlIn = Number((document.getElementById('cmoSettle') || {}).value) || 0;
+  if(_cmoDest === 'gen' && _cmoSub !== 'gi' && stlIn > amt + 0.001){ showToast('المبلغ المستقر مينفعش يزيد عن المبلغ المنصرف', false); return; }
+  const stgIn = Number((document.getElementById('cmoSettle2') || {}).value) || 0;
+  let restS = (_cmoDest === 'gen' && _cmoSub !== 'gi') ? (stlIn > 0 ? stlIn : amt) : 0;
+  if(_cmoDest === 'gen' && _cmoSub === 'grp' && stgIn > restS + 0.001){ showToast('المبلغ اللي يروح للمجموعة مينفعش يزيد عن المحوّل للمصروف المنزلي (' + fmt(restS) + ')', false); return; }
+  let restG = (_cmoDest === 'gen' && _cmoSub === 'grp') ? (stgIn > 0 ? stgIn : restS) : 0;
   if(dstr.slice(0, 7) !== td.slice(0, 7) && list.some(x=> _cmoKind === 'pension' || (_cmoKind === 'int' && x.intKeep !== true))){ showToast('الفوائد غير المتضافة والمعاش بيتصرفوا من دخل الشهر الحالي — اختار تاريخ في الشهر ده', false); return; }
   const av = cgRound(list.reduce((a, x)=> a + cmoAvailE(_cmoKind, x), 0));
   if(av <= 0.001 && list.every(x=> cmoLocked(_cmoKind, x))){ showToast(_cmoKind === 'pension' ? 'رصيد المعاش صفر — اتحوّل وصُرف في موعد استحقاقه' : 'رصيد الفوائد صفر — اتحوّلت وصُرفت في موعد استحقاقها', false); return; }
@@ -5097,13 +5166,13 @@ function cmOutSave(){
     const old = (data.moneyOut || []).find(r=> r.id === _cmoEditId), oi = (data.moneyOut || []).findIndex(r=> r.id === _cmoEditId);
     if(!old || oi < 0){ _cmoEditId = null; cmoRender(); return; }
     cmoUndo(old); data.moneyOut.splice(oi, 1);
-    cmoApply(list[0], cgRound(amt), note, dstr, old.id);
+    cmoApply(list[0], cgRound(amt), note, dstr, old.id, restS, restG);
     _cmoEditId = null; _cmoZkYear = (_cmoDest === 'zakat') ? _cmoZkYear : '';
     document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; document.getElementById('cmoDate').value = cmoToday();
     cmoAfter(); showToast('اتعدّل الصرف ✅', true); return;
   }
   let rest = amt;
-  list.forEach(x=>{ if(rest <= 0.0001) return; const take = Math.min(cmoAvailOf(_cmoKind, x), rest); if(take > 0){ cmoApply(x, cgRound(take), note, dstr); rest = cgRound(rest - take); } });
+  list.forEach(x=>{ if(rest <= 0.0001) return; const take = Math.min(cmoAvailOf(_cmoKind, x), rest); if(take > 0){ const sp = Math.min(take, restS); restS = cgRound(restS - sp); const gp = Math.min(sp, restG); restG = cgRound(restG - gp); cmoApply(x, cgRound(take), note, dstr, undefined, sp, gp); rest = cgRound(rest - take); } });
   document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; document.getElementById('cmoDate').value = cmoToday();
   cmoAfter(); showToast(_cmoZkYear ? 'تم سداد زكاة ' + toArabicDigits(_cmoZkYear) + ' من رأس مال ' + toArabicDigits(new Date().getFullYear()) + ' ✅' : 'تم الصرف إلى ' + (GI_DEST[_cmoDest] || GI_DEST.other).n + ' ✅', true);
 }
@@ -5881,7 +5950,7 @@ function renderGIPage(){
   });
 }
 function gpEditSrc(x){ openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a,dt,cn)=>{ x.name = n || x.name; x.amount = a; if(dt) x.date = dt; if(cn !== undefined) x.counted = cn; save(); renderGISources(); renderGI(); }, x.date || Date.now(), x.counted !== false); }
-function gpDelSrc(x){ openConfirm('حذف مصدر الدخل', 'هل تريد حذف "' + x.name + '"؟', ()=>{ const rr = giRec(); rr.src = rr.src.filter(z=> z.id !== x.id); save(); renderGISources(); renderGI(); }); }
+function gpDelSrc(x){ openConfirm('حذف مصدر الدخل', 'هل تريد حذف "' + x.name + '"؟', ()=>{ { const mr = (data.moneyOut || []).find(z=> z.dest === 'gen' && !z.gi && (z.id + 's') === x.id); if(mr){ cmoUndo(mr); data.moneyOut = data.moneyOut.filter(z=> z.id !== mr.id); try{ cmoRender(); renderDetail(); }catch(e){} } } const rr = giRec(); rr.src = rr.src.filter(z=> z.id !== x.id); save(); renderGISources(); renderGI(); }); }
 function closeGI(){ document.getElementById('giOverlay').classList.remove('open'); }
 function addGISource(){
   const n = document.getElementById('giSrcName').value.trim(), amt = Number(document.getElementById('giSrcAmt').value) || 0;
@@ -5893,7 +5962,7 @@ function addGISource(){
 }
 
 // الصرف من الدخل العام: إلى المصروف المنزلي أو زكاتي
-const GI_DEST = { income:{n:'المصروف المنزلي', ic:'💰'}, zakat:{n:'زكاتي', ic:'🕌'}, other:{n:'أخرى', ic:'📦'} };
+const GI_DEST = { income:{n:'المصروف المنزلي', ic:'💰'}, zakat:{n:'زكاتي', ic:'🕌'}, other:{n:'أخرى', ic:'📦'}, grp:{n:'مجموعة من المصروف المنزلي', ic:'📁'} };
 let _giDest = 'income', _giFilter = null;
 function setGIFilter(f){
   _giFilter = (f === _giFilter) ? null : f;
@@ -5960,12 +6029,15 @@ function editGIOut(id, note, amt){
   rec.note = note; rec.amount = amt;
   const mon = data[currentYear][currentMonth];
   const inc = (mon.incomeSources || []).find(x=> x.id === id); if(inc){ inc.name = giLabel(note); inc.amount = amt; }
+  { const f = findNode(mon.groups || [], id); if(f && f.node.type === 'expense'){ f.node.name = giLabel(note); f.node.amount = amt; } }
   const z = zkGet(), za = z.adds.find(x=> x.id === id); if(za){ za.name = giLabel(note); za.amount = amt; }
   const zp = z.payments.find(x=> x.id === id); if(zp){ zp.note = giLabel(note); zp.amount = amt; }
   giAfter();
 }
 function deleteGIOut(id){
+  { const mr = (data.moneyOut || []).find(z=> z.id === id && z.dest === 'gen' && !z.gi); if(mr){ cmoUndo(mr); data.moneyOut = data.moneyOut.filter(z=> z.id !== id); } }
   const r = giRec(), mon = data[currentYear][currentMonth];
+  [id, id + 'g'].forEach(function(k){ const f = findNode(mon.groups || [], k); if(f && f.node.type === 'expense') f.arr.splice(f.index, 1); });
   r.out = r.out.filter(x=> x.id !== id);
   mon.incomeSources = (mon.incomeSources || []).filter(x=> x.id !== id);
   const z = zkGet(); z.adds = z.adds.filter(x=> x.id !== id); z.payments = z.payments.filter(x=> x.id !== id);
