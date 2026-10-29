@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7914">
+<meta name="app-version" content="2026-10-29.7916">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1790,6 +1790,49 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #incomeSourcesOverlay .inc-acts{display:flex; gap:6px;}
 #incomeSourcesOverlay .inc-acts button{border:0; cursor:pointer; width:38px; height:36px; padding:0; border-radius:12px; font-size:15px; background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.18), 0 8px 10px var(--mcsh);}
 #incomeSourcesOverlay .inc-acts button:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2);}
+/* ===== صفحة «صرف من الدخل العام» كاملة وبتصميم 3D ===== */
+#giOutOverlay{--mchl:rgba(255,255,255,.95); --mcsh:rgba(30,41,59,.13); --mcbtn:#ffffff; --mcbtn2:#e6ebf3;}
+:root[data-theme="dark"] #giOutOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #giOutOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;} }
+#giOutOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; overflow-y:auto; position:relative; padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(28px + env(safe-area-inset-bottom,0px));}
+#giOutOverlay .gio-title{margin:4px 0 14px; padding-inline-start:46px; font-size:calc(16px * var(--fs,1)); font-weight:900; line-height:1.4;}
+#giOutOverlay .gi-sumrow{gap:10px; margin:6px 2px 16px; flex-wrap:wrap;}
+#giOutOverlay .gi-sumrow > span{--tb:#e4f6ee; --te:#b6dccd; flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:13px 6px 11px; border-radius:20px; line-height:1.3; text-align:center; font-size:calc(13px * var(--fs,1)); font-weight:800; color:#4b5563; border:0; background:linear-gradient(160deg,#ffffff,var(--tb)) !important; box-shadow:0 5px 0 var(--te), 0 11px 16px rgba(0,0,0,.10), inset 0 1px 0 #fff; transition:transform .1s, box-shadow .1s;}
+#giOutOverlay .gi-sumrow > span b{display:block; font-size:calc(21px * var(--fs,1)); font-weight:900; color:#1c2430; direction:ltr;}
+#giOutOverlay .gi-sumrow .v-green{--tb:#dcf6ea; --te:#a9dcc5;}
+#giOutOverlay .gi-sumrow .v-pink{--tb:#ffe4ef; --te:#f0b8cf;}
+#giOutOverlay .gi-sumrow .v-violet{--tb:#ece3ff; --te:#cbbaf3;}
+#giOutOverlay .gi-sumrow .v-gold{--tb:#fff0bf; --te:#e7cd78;}
+#giOutOverlay .gi-sumrow .v-blue{--tb:#e3eeff; --te:#b9cdf0;}
+#giOutOverlay .gi-sumrow > .gi-chip.on{outline:3px solid #6d3fd6; outline-offset:-1px; transform:translateY(3px); box-shadow:0 2px 0 var(--te), 0 5px 8px rgba(0,0,0,.12), inset 0 1px 0 #fff;}
+#giOutOverlay #giOutUncRow > span{flex:1 1 100%; font-size:calc(12.5px * var(--fs,1)); color:#4a3500; --tb:#fff4cc; --te:#e7cd78;}
+#giOutOverlay > .modal-box > .gi-dest{gap:8px; margin:8px 2px 16px;}
+#giOutOverlay > .modal-box > .gi-dest button{border:0; padding:14px 4px; border-radius:18px; font-size:calc(13.5px * var(--fs,1)); line-height:1.35; background:var(--card); color:var(--text); box-shadow:inset 0 2px 0 var(--mchl), 0 5px 0 rgba(0,0,0,.12), 0 11px 16px var(--mcsh); transition:transform .1s, box-shadow .1s;}
+#giOutOverlay > .modal-box > .gi-dest button.active{color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); transform:translateY(4px); border-color:transparent;}
+#giOutOverlay #giDestInc.active{background:linear-gradient(180deg,#58e3ab,#12b27a); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #0b7a55;}
+#giOutOverlay #giDestZk.active{background:linear-gradient(180deg,#ffd966,#f5a800); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), 0 1px 0 #b87400; color:#3b2a00; text-shadow:none;}
+#giOutOverlay #giDestOth.active{background:linear-gradient(180deg,#6cb4ff,#2f7bff); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #0a4fd1;}
+#giOutOverlay .field{margin:0 2px 14px;}
+#giOutOverlay .field > label{display:block; margin:0 6px 7px; font-weight:800;}
+#giOutOverlay .field input{width:100%; box-sizing:border-box; border:0; padding:15px 16px; border-radius:18px; font-family:inherit; font-size:calc(16px * var(--fs,1)); font-weight:800; color:var(--text); background:var(--card); box-shadow:inset 0 3px 6px rgba(0,0,0,.14), inset 0 -1px 0 var(--mchl), 0 1px 0 var(--mchl);}
+#giOutOverlay .check-row{margin:4px 2px 14px; padding:13px 14px; border-radius:18px; align-items:flex-start; line-height:1.5; font-weight:700; background:linear-gradient(160deg,var(--mchl) 0%,transparent 60%),var(--card); box-shadow:inset 0 1px 0 var(--mchl), 0 5px 0 rgba(0,0,0,.10), 0 11px 16px var(--mcsh);}
+#giOutOverlay .check-row input{width:22px; height:22px; flex:0 0 22px; margin-top:2px;}
+#giOutOverlay .modal-actions{display:flex; gap:12px; margin:8px 2px 4px;}
+#giOutOverlay .modal-actions button{flex:1; border:0; padding:16px 8px; border-radius:20px; font-family:inherit; font-weight:900; font-size:calc(16px * var(--fs,1)); cursor:pointer; transition:transform .1s, box-shadow .1s;}
+#giOutOverlay .btn-cancel{background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); color:var(--text); box-shadow:inset 0 2px 0 var(--mchl), 0 6px 0 rgba(0,0,0,.14), 0 12px 16px var(--mcsh);}
+#giOutOverlay .btn-save{color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#9b78f0,#6d3fd6); box-shadow:inset 0 2px 0 rgba(255,255,255,.45), 0 6px 0 #4a24a3, 0 12px 18px rgba(74,36,163,.35);}
+#giOutOverlay .modal-actions button:active{transform:translateY(5px); box-shadow:0 1px 0 rgba(0,0,0,.25);}
+#giOutOverlay .gio-logh{margin:24px 4px 6px; font-size:calc(18px * var(--fs,1)); font-weight:900;}
+#giOutOverlay .gio-logh small{font-weight:700; color:var(--muted); font-size:.75em;}
+#giOutOverlay .gi-rows{max-height:none; overflow:visible; margin:6px 0 10px;}
+#giOutOverlay .date-sep{display:block; margin:18px 2px 10px; padding:11px 16px; border-radius:18px; font-size:calc(16px * var(--fs,1)); font-weight:900; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(160deg,#ff8fb8,#d6336c); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 6px 0 #a3204d, 0 13px 18px rgba(163,32,77,.28);}
+#giOutOverlay .gi-row{display:flex; align-items:center; gap:10px; margin:0 2px 14px; padding:13px 12px; border:0; border-radius:20px; background:linear-gradient(160deg,var(--mchl) 0%,transparent 60%),var(--card); box-shadow:inset 0 1px 0 var(--mchl), 0 6px 0 rgba(0,0,0,.10), 0 13px 18px var(--mcsh);}
+#giOutOverlay .gi-row.unc{opacity:.74;}
+#giOutOverlay .gi-row > span:first-child{width:42px; height:42px; flex:0 0 42px; display:flex; align-items:center; justify-content:center; font-size:21px; border-radius:14px; background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.12);}
+#giOutOverlay .gi-row > b{flex:1; min-width:0; font-size:calc(15.5px * var(--fs,1)); font-weight:900; overflow-wrap:anywhere;}
+#giOutOverlay .gi-row > span:nth-child(3){font-size:calc(17px * var(--fs,1)); font-weight:900; color:#d6336c; white-space:nowrap; direction:ltr;}
+#giOutOverlay .gi-row > button{border:0; cursor:pointer; width:38px; height:36px; padding:0; border-radius:12px; font-size:15px; background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.18), 0 8px 10px var(--mcsh);}
+#giOutOverlay .gi-row > button:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2);}
 /* ===== صفحة «صرف من الأموال» كاملة وبتصميم 3D + سجل الصرف بالأيام ===== */
 #cmOutOverlay{--mchl:rgba(255,255,255,.95); --mcsh:rgba(30,41,59,.13); --mcbtn:#ffffff; --mcbtn2:#e6ebf3;}
 :root[data-theme="dark"] #cmOutOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;}
@@ -2232,19 +2275,21 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 
 <div class="modal-overlay" id="giOutOverlay">
   <div class="modal-box">
-    <h3>🧾 صرف من الدخل العام</h3>
-    <div class="gi-sumrow"><span>الدخل العام: <b id="giOutInc">0</b></span><span id="giChipAll" class="gi-chip" onclick="setGIFilter(null)">المنصرف: <b id="giOutTot">0</b></span></div>
-    <div class="gi-sumrow"><span id="giChipInc" class="gi-chip" onclick="setGIFilter('income')">إلى المصروف المنزلي: <b id="giOutToInc">0</b></span><span id="giChipZk" class="gi-chip" onclick="setGIFilter('zakat')">إلى زكاتي: <b id="giOutToZk">0</b></span><span id="giChipOth" class="gi-chip" onclick="setGIFilter('other')">إلى أخرى: <b id="giOutToOth">0</b></span></div>
+    <button type="button" class="fs-close" onclick="closeGIOut()" aria-label="رجوع">✕</button>
+    <h3 class="gio-title">🧾 صرف من الدخل العام</h3>
+    <div class="gi-sumrow"><span class="v-green">الدخل العام <b id="giOutInc">0</b></span><span id="giChipAll" class="gi-chip v-pink" onclick="setGIFilter(null)">المنصرف <b id="giOutTot">0</b></span></div>
+    <div class="gi-sumrow"><span id="giChipInc" class="gi-chip v-violet" onclick="setGIFilter('income')">إلى المصروف المنزلي <b id="giOutToInc">0</b></span><span id="giChipZk" class="gi-chip v-gold" onclick="setGIFilter('zakat')">إلى زكاتي <b id="giOutToZk">0</b></span><span id="giChipOth" class="gi-chip v-blue" onclick="setGIFilter('other')">إلى أخرى <b id="giOutToOth">0</b></span></div>
     <div class="gi-dest"><button type="button" id="giDestInc" class="active" onclick="setGIDest('income')">💰 المصروف المنزلي</button><button type="button" id="giDestZk" onclick="setGIDest('zakat')">🕌 زكاتي</button><button type="button" id="giDestOth" onclick="setGIDest('other')">📦 أخرى</button></div>
-    <div class="field"><label>المبلغ</label><input type="number" id="giOutAmt" placeholder="0"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="giOutAmt" placeholder="0" inputmode="decimal" step="any"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="giOutNote" placeholder="مثال: مصاريف المنزل"></div>
     <div class="check-row"><input type="checkbox" id="giOutCounted" checked><label for="giOutCounted" style="margin:0;">احتسب ضمن المنصرف العام (لو مش متعلّم: بيتسجل بس من غير ما يتخصم أو يتحول)</label></div>
-    <div class="gi-sumrow" id="giOutUncRow" style="display:none;"><span id="giOutUnc"></span></div>
-    <div class="gi-rows" id="giOutList"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeGIOut()">إغلاق</button>
       <button class="btn-save" onclick="addGIOut()">＋ صرف</button>
     </div>
+    <div class="gi-sumrow" id="giOutUncRow" style="display:none; margin-top:16px;"><span id="giOutUnc"></span></div>
+    <h4 class="gio-logh">🧾 سجل الصرف <small>(كل يوم بتاريخه)</small></h4>
+    <div class="gi-rows" id="giOutList"></div>
   </div>
 </div>
 
