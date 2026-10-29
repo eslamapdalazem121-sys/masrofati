@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7905">
+<meta name="app-version" content="2026-10-29.7907">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1806,6 +1806,22 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #cmAddLog .cmo-day{background:linear-gradient(160deg,#3ed89c,#12b27a) !important; box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 6px 0 #0b7a55, 0 13px 18px rgba(11,122,85,.28) !important;}
 #cmAddLog .cmo-amt{color:#12b27a !important;}
 #cmAddLog .cmo-empty{text-align:center; color:var(--muted); font-weight:700; padding:16px;}
+/* عنوان المجموعة: الاسم والمبلغ والفوائد جنب بعض، والعدد والأزرار في سطر تحتهم */
+#capMoneyOverlay .cap-grp, #capGoldOverlay .cap-grp{display:grid; grid-template-columns:auto auto 1fr auto auto auto; align-items:center; column-gap:8px; row-gap:9px;}
+#capMoneyOverlay .cap-grp > b, #capGoldOverlay .cap-grp > b{grid-column:3 / -1; grid-row:1; display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 12px; min-width:0;}
+#capMoneyOverlay .cap-grp b .gt, #capGoldOverlay .cap-grp b .gt{display:inline-block; margin:0; overflow-wrap:break-word;}
+#capMoneyOverlay .cap-grp b .gs, #capGoldOverlay .cap-grp b .gs{display:contents;}
+#capMoneyOverlay .cap-grp b .gi, #capGoldOverlay .cap-grp b .gi{font-size:calc(13px * var(--fs,1)); font-weight:800; color:var(--muted);}
+#capMoneyOverlay .cap-grp > small, #capGoldOverlay .cap-grp > small{grid-column:4; grid-row:2; white-space:nowrap;}
+#capMoneyOverlay .cap-grp > button, #capGoldOverlay .cap-grp > button{grid-row:2;}
+#capMoneyOverlay .cap-grp > button:nth-of-type(1), #capGoldOverlay .cap-grp > button:nth-of-type(1){grid-column:5;}
+#capMoneyOverlay .cap-grp > button:nth-of-type(2), #capGoldOverlay .cap-grp > button:nth-of-type(2){grid-column:6;}
+#capMoneyOverlay .cap-grp > span:first-child, #capGoldOverlay .cap-grp > span:first-child{grid-row:1; grid-column:1;}
+#capMoneyOverlay .cap-grp > span:nth-child(2), #capGoldOverlay .cap-grp > span:nth-child(2){grid-row:1; grid-column:2;}
+/* كارت البند: الكلام عريض والأزرار في سطر تحته */
+.gi-row.mc .mc-top{display:grid; grid-template-columns:auto 1fr; align-items:center; column-gap:11px; row-gap:11px;}
+.gi-row.mc .mc-top .mc-acts{grid-column:1 / -1; width:100%; gap:9px;}
+.gi-row.mc .mc-top .mc-acts button{flex:1 1 0; width:auto; height:40px;}
 
 .mc-empty{margin:6px 2px 14px; padding:18px 12px; border-radius:20px; text-align:center; font-size:calc(14px * var(--fs,1)); font-weight:800; color:var(--muted); border:2px dashed var(--border); background:var(--card);}
 /* الوضع الداكن */
