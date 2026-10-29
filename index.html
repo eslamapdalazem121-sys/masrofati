@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7907">
+<meta name="app-version" content="2026-10-29.7910">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4967,10 +4967,15 @@ function cmoEntryAmt(x){
   const spent = (data.moneyOut || []).filter(o=> o.gi && o.itemId === x.id && o.ym === t.k).reduce((a,o)=> a + (Number(o.amount) || 0), 0);
   return Math.max(0, cgRound((e ? Number(e.amount) || 0 : 0) - spent));
 }
+// الفايدة اللي بتتحوّل للدخل العام والمعاش بيتحوّلوا ويتصرفوا من الدخل العام في موعد استحقاقهم، فرصيدهم هنا صفر ومينفعش يتصرفوا تاني من هذه الصفحة
+// (الفايدة المتضافة لرصيد البنك بس هي اللي ليها رصيد متاح للصرف)
+function cmoLocked(kind, x){ return kind === 'pension' || (kind === 'int' && x.intKeep !== true); }
+function cmoLockedMsg(kind){ return (kind === 'pension' ? '💳 رصيد المعاش صفر — المعاش بيتحوّل ويتصرف من الدخل العام في موعد استحقاقه، فمينفعش يتصرف تاني من هنا.' : '🪙 رصيد الفوائد صفر — الفايدة بتتحوّل وتتصرف من الدخل العام في موعد استحقاقها، فمينفعش تتصرف تاني من هنا. (الفوايد المتضافة لرصيد البنك بس هي اللي بتتصرف من هنا)'); }
 function cmoAvailOf(kind, x){
   if(kind === 'cash' || kind === 'bank') return Math.max(0, Number(x.amount) || 0);
-  if(kind === 'int' && x.intKeep === true){ const n = new Date(); return Math.max(0, cgRound(bankIntSince(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)) - (Number(x.intSpent) || 0))); }
-  return cmoEntryAmt(x);
+  if(cmoLocked(kind, x)) return 0;
+  if(kind === 'int'){ const n = new Date(); return Math.max(0, cgRound(bankIntSince(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)) - (Number(x.intSpent) || 0))); }
+  return 0;
 }
 function cmoItems(kind){ return capRaw().filter(x=> capCatOf(x) === 'money' && (kind === 'int' ? (capSubOf(x) === 'bank' && (bankMonthly(x) > 0 || (Array.isArray(x.chg) && x.chg.length > 0))) : capSubOf(x) === kind)); }
 function openCmOut(){ _cmoEditId = null; document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'cash'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); document.getElementById('cmOutOverlay').classList.add('open'); }
@@ -4987,12 +4992,12 @@ function cmoTotals(){
 }
 function cmoAvail(){
   const sel = document.getElementById('cmoItem'), x = capRaw().find(z=> z.id === sel.value), el = document.getElementById('cmoAvail');
-  if(sel.value === '__all__'){ el.textContent = 'هيتصرف من البنود بالترتيب لحد ما المبلغ يخلص، وكل بند هيتسجّل لوحده في السجل.'; return; }
+  if(sel.value === '__all__'){ el.textContent = cmoItems(_cmoKind).every(z=> cmoLocked(_cmoKind, z)) ? cmoLockedMsg(_cmoKind) : 'هيتصرف من البنود بالترتيب لحد ما المبلغ يخلص، وكل بند هيتسجّل لوحده في السجل.'; return; }
   if(!x){ el.textContent = _cmoKind === 'int' ? 'مفيش بنوك عليها فوايد' : 'مفيش بنود هنا. ضيف بند من «أموال» الأول.'; return; }
   const av = cmoAvailE(_cmoKind, x);
+  if(cmoLocked(_cmoKind, x) && av <= 0){ el.textContent = cmoLockedMsg(_cmoKind); return; }
   let t = 'المتاح للصرف: ' + fmt(av);
-  if((_cmoKind === 'int' && x.intKeep !== true) || _cmoKind === 'pension') t += ' (من الدخل العام لهذا الشهر، بعد ما استحق وتحوّل)';
-  else if(_cmoKind === 'int') t += ' (فوايد متضافة لرصيد البنك)';
+  if(_cmoKind === 'int') t += ' (فوايد متضافة لرصيد البنك)';
   el.textContent = t;
 }
 function cmoRender(){
@@ -5000,7 +5005,7 @@ function cmoRender(){
   [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other'][i] === _cmoDest));
   const sel = document.getElementById('cmoItem'), keepSel = sel.value; sel.innerHTML = '';
   { const its = cmoItems(_cmoKind); if(its.length > 1 && !_cmoEditId){ const o = document.createElement('option'); o.value = '__all__'; o.textContent = '⭐ الإجمالي كله — متاح ' + fmt(cgRound(its.reduce((a,x)=> a + cmoAvailE(_cmoKind, x), 0))) + ' (يتوزّع تلقائي)'; sel.appendChild(o); }
-    its.forEach(x=>{ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + ' — متاح ' + fmt(cmoAvailE(_cmoKind, x)); sel.appendChild(o); }); }
+    its.forEach(x=>{ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + (cmoLocked(_cmoKind, x) && cmoAvailE(_cmoKind, x) <= 0 ? ' — رصيده ٠ (اتحوّل وصُرف في موعده)' : ' — متاح ' + fmt(cmoAvailE(_cmoKind, x))); sel.appendChild(o); }); }
   if(keepSel && [...sel.options].some(o=> o.value === keepSel)) sel.value = keepSel;
   cmoAvail(); cmoTotals(); cmoLog(); cmoZkRender();
   { const bar = document.getElementById('cmoEditBar'), bt = document.getElementById('cmoSaveBtn'); if(bar) bar.style.display = _cmoEditId ? '' : 'none'; if(bt) bt.textContent = _cmoEditId ? '💾 حفظ التعديل' : '💸 صرف'; }
@@ -5086,6 +5091,7 @@ function cmOutSave(){
   if(dstr > td){ showToast('تاريخ الصرف مينفعش يكون في المستقبل', false); return; }
   if(dstr.slice(0, 7) !== td.slice(0, 7) && list.some(x=> _cmoKind === 'pension' || (_cmoKind === 'int' && x.intKeep !== true))){ showToast('الفوائد غير المتضافة والمعاش بيتصرفوا من دخل الشهر الحالي — اختار تاريخ في الشهر ده', false); return; }
   const av = cgRound(list.reduce((a, x)=> a + cmoAvailE(_cmoKind, x), 0));
+  if(av <= 0.001 && list.every(x=> cmoLocked(_cmoKind, x))){ showToast(_cmoKind === 'pension' ? 'رصيد المعاش صفر — اتحوّل وصُرف في موعد استحقاقه' : 'رصيد الفوائد صفر — اتحوّلت وصُرفت في موعد استحقاقها', false); return; }
   if(amt > av + 0.001){ showToast('المبلغ أكبر من المتاح (' + fmt(av) + ')', false); return; }
   if(editing){
     const old = (data.moneyOut || []).find(r=> r.id === _cmoEditId), oi = (data.moneyOut || []).findIndex(r=> r.id === _cmoEditId);
