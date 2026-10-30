@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7932">
+<meta name="app-version" content="2026-10-31.7933">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1976,6 +1976,30 @@ html{ overscroll-behavior:none; }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .gi-row.mc .mc-pill.soon{background:#3d2a08; color:#ffcf7a;} :root:not([data-theme="light"]) .gi-row.mc .mc-pill.soon.d0{background:#0f3a2b; color:#7ff0bd;} }
 #cmChipBank.due-soon, #cmChipPen.due-soon{outline:3px solid #ff9f1c; outline-offset:-3px; animation:mcSoonChip 1.6s ease-in-out infinite;}
 @media (prefers-reduced-motion: reduce){ .gi-row.mc.mc-soon::after, .gi-row.mc .mc-pill.soon .mc-bell, #cmChipBank.due-soon, #cmChipPen.due-soon{animation:none;} }
+/* ===== الإعدادات: كل بند بطاقة 3D قابلة للطي + مجموعات ===== */
+#settingsOverlay .set-acc{margin:0 0 14px !important; padding:0 !important; border:0 !important; border-radius:22px; overflow:hidden; background:linear-gradient(160deg,rgba(255,255,255,.6) 0%,transparent 55%),var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 5px 0 rgba(0,0,0,.10), 0 12px 18px rgba(30,41,59,.12);}
+:root[data-theme="dark"] #settingsOverlay .set-acc{background:linear-gradient(160deg,rgba(255,255,255,.07) 0%,transparent 55%),var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 5px 0 rgba(0,0,0,.4), 0 12px 18px rgba(0,0,0,.4);}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #settingsOverlay .set-acc{background:linear-gradient(160deg,rgba(255,255,255,.07) 0%,transparent 55%),var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 5px 0 rgba(0,0,0,.4), 0 12px 18px rgba(0,0,0,.4);} }
+#settingsOverlay .set-h{display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box; border:0; background:transparent; color:var(--text); font-family:inherit; padding:13px 14px; cursor:pointer; text-align:start; -webkit-tap-highlight-color:transparent;}
+#settingsOverlay .set-h:active{background:rgba(127,127,127,.09);}
+#settingsOverlay .set-ic{width:42px; height:42px; flex:0 0 42px; display:flex; align-items:center; justify-content:center; font-size:21px; border-radius:14px; background:linear-gradient(145deg,var(--accent,#16a870),var(--accent-dark,var(--accent,#0d8a5a))); box-shadow:inset 0 2px 0 rgba(255,255,255,.45), 0 4px 0 rgba(0,0,0,.2); text-shadow:0 1px 2px rgba(0,0,0,.25);}
+#settingsOverlay .set-tw{flex:1; min-width:0;}
+#settingsOverlay .set-t{display:block; font-size:calc(16px * var(--fs,1)); font-weight:900; line-height:1.35;}
+#settingsOverlay .set-s{display:flex; align-items:center; gap:6px; margin-top:2px; font-size:calc(12.5px * var(--fs,1)); font-weight:700; color:var(--muted); overflow-wrap:anywhere;}
+#settingsOverlay .set-dot{display:inline-block; width:14px; height:14px; border-radius:50%; box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 2px 0 rgba(0,0,0,.2);}
+#settingsOverlay .set-ar{flex:0 0 auto; font-size:13px; color:var(--muted); transition:transform .2s;}
+#settingsOverlay .set-acc.open > .set-h .set-ar{transform:rotate(-90deg);}
+#settingsOverlay .set-b{display:none; padding:6px 16px 16px; border-top:1px dashed var(--border,#ccd);}
+#settingsOverlay .set-acc.open > .set-b{display:block; animation:setOpen .22s ease;}
+@keyframes setOpen{from{opacity:0; transform:translateY(-6px)}to{opacity:1; transform:none}}
+#settingsOverlay .set-grp{display:flex; align-items:center; gap:8px; margin:22px 4px 10px; font-size:calc(14px * var(--fs,1)); font-weight:900; color:var(--muted);}
+#settingsOverlay .set-grp::after{content:''; flex:1; height:2px; border-radius:2px; background:var(--border,#ccd); opacity:.7;}
+#settingsOverlay .set-tools{display:flex; gap:10px; margin:0 0 4px;}
+#settingsOverlay .set-tools button{flex:1; border:0; cursor:pointer; padding:11px 8px; border-radius:16px; font-family:inherit; font-weight:800; font-size:calc(13px * var(--fs,1)); color:var(--text); background:var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 4px 0 rgba(0,0,0,.12), 0 9px 13px rgba(30,41,59,.1);}
+#settingsOverlay .set-tools button:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.15);}
+#settingsOverlay #colorsToggleCard{margin:0 0 14px !important;}
+#settingsOverlay #colorsSectionBody{margin:0 0 6px;}
+@media (prefers-reduced-motion: reduce){ #settingsOverlay .set-acc.open > .set-b{animation:none;} }
 </style>
 </head>
 <body>
@@ -10289,6 +10313,89 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     var bk = document.getElementById('bkHistory'); if(bk) make(bk.previousElementSibling, 'bk', '.bk-row', 'نسخة');
     var od = document.getElementById('opsListDayD'); if(od) make(od.parentNode.querySelector('.ops-h'), 'opsDay', '.gi-row', 'عملية');
     var om = document.getElementById('opsListMonthB'); if(om) make(om.parentNode.querySelector('.ops-h'), 'opsMonth', '.gi-row', 'عملية');
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+<script>
+/* الإعدادات: كل بند بطاقة 3D قابلة للطي (الخط لوحده، الصوت لوحده، الإشعارات لوحدها…) مع ملخص القيمة الحالية، ومقسّمة لمجموعات */
+(function(){
+  var KEY = 'mb_set_open_v1', st = {};
+  try{ st = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ st = {}; }
+  var META = {
+    'الخط': ['🔤', 'font'], 'حجم الخط والأيقونات': ['🔠', 'size'], 'شكل الأرقام': ['🔢', 'digits'], 'عمق البطاقات (3D)': ['🧊', 'depth'],
+    'الإشعارات': ['🔔', 'notify'], 'صوت النقر': ['🔊', 'click'], 'ترتيب وتحريك العناصر': ['↕️', 'move'],
+    'الوضع': ['🌓', 'theme'], 'اللون الأساسي': ['🎨', 'accent'], 'تفتيح / تغميق الألوان': ['🔆', 'bright'], 'ألوان البطاقات (كل بطاقة على حدا)': ['🖌️', 'cardcolors'],
+    'النسخ الاحتياطي': ['💾', 'backup'], 'قفل التطبيق': ['🔒', 'lock'], 'شارك التطبيق مع غيرك': ['🔗', 'share'], 'الحساب والمزامنة بين الأجهزة': ['☁️', 'cloud'], 'تثبيت التطبيق واختصار الشاشة الرئيسية': ['📲', 'install']
+  };
+  var STATIC = {cardcolors: 'لون مخصّص لكل بطاقة وكل شهر', backup: 'حفظ واسترجاع بياناتك', share: 'رابط التطبيق للمشاركة', cloud: 'تسجيل الدخول والمزامنة', install: 'اختصار على الشاشة الرئيسية'};
+  var accs = [];
+  function norm(t){ return t.replace(/[\u2190-\u27BF\u2B00-\u2BFF\uFE0F\u200D]|[\uD83C-\uD83E][\uDC00-\uDFFF]/g, '').replace(/\s+/g, ' ').trim(); }
+  function digits(n){ try{ return typeof toArabicDigits === 'function' ? toArabicDigits(n) : String(n); }catch(e){ return String(n); } }
+  function activeTxt(id){ var c = document.getElementById(id), a = c && c.querySelector('.active'); return a ? a.textContent.replace(/\(.*\)/, '').trim() : ''; }
+  function build(sec){
+    var h4 = sec.querySelector(':scope > h4'); if(!h4 || sec.getAttribute('data-acc')) return null;
+    var title = norm(h4.textContent), m = META[title] || ['⚙️', 'x'], key = m[1];
+    var head = document.createElement('button'); head.type = 'button'; head.className = 'set-h'; head.setAttribute('aria-expanded', 'false');
+    head.innerHTML = '<span class="set-ic"></span><span class="set-tw"><b class="set-t"></b><small class="set-s"></small></span><span class="set-ar">◀</span>';
+    head.children[0].textContent = m[0]; head.querySelector('.set-t').textContent = title;
+    var body = document.createElement('div'); body.className = 'set-b';
+    sec.removeChild(h4); while(sec.firstChild) body.appendChild(sec.firstChild);
+    sec.appendChild(head); sec.appendChild(body); sec.classList.add('set-acc'); sec.setAttribute('data-acc', key);
+    var open = !!st[key]; sec.classList.toggle('open', open); head.setAttribute('aria-expanded', open ? 'true' : 'false');
+    head.addEventListener('click', function(){ setOpen(sec, !sec.classList.contains('open'), true); });
+    var o = {sec: sec, key: key, title: title, sum: head.querySelector('.set-s')}; accs.push(o); return o;
+  }
+  function setOpen(sec, on, save){
+    sec.classList.toggle('open', on); var h = sec.querySelector(':scope > .set-h'); if(h) h.setAttribute('aria-expanded', on ? 'true' : 'false');
+    var k = sec.getAttribute('data-acc'); st[k] = !!on; if(save){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+  }
+  function sumText(o, s){
+    var k = o.key; s = s || (typeof settings !== 'undefined' ? settings : {});
+    if(STATIC[k]) return STATIC[k];
+    if(k === 'font') return s.font || '';
+    if(k === 'size') return digits(Math.round((Number(s.fontScale) || 1) * 100)) + '٪';
+    if(k === 'digits') return s.digits === 'en' ? 'English 123' : 'عربي ١٢٣';
+    if(k === 'depth') return activeTxt('optDepth');
+    if(k === 'notify') return s.notify ? 'مفعّلة (رسالة + صوت + ضوء)' : 'متوقفة';
+    if(k === 'click') return s.clickOn === false ? 'متوقف' : 'شغّال · ' + activeTxt('optClickType');
+    if(k === 'move') return activeTxt('optMove');
+    if(k === 'theme') return activeTxt('optTheme');
+    if(k === 'lock'){ try{ return lockConfig && lockConfig.enabled ? 'مفعّل' : 'غير مفعّل'; }catch(e){ return 'حماية التطبيق'; } }
+    if(k === 'bright'){ var b = document.getElementById('brightnessLabel'); return b ? b.textContent : ''; }
+    return '';
+  }
+  function update(s){
+    accs.forEach(function(o){
+      if(o.key === 'accent'){ var a = document.querySelector('#optAccent .color-dot.active'), bg = a ? a.style.background : ''; o.sum.innerHTML = ''; if(bg){ var d = document.createElement('i'); d.className = 'set-dot'; d.style.background = bg; o.sum.appendChild(d); } var t = document.createElement('span'); t.textContent = 'لون التطبيق الأساسي'; o.sum.appendChild(t); return; }
+      o.sum.textContent = sumText(o, s);
+    });
+  }
+  function group(label){ var g = document.createElement('div'); g.className = 'set-grp'; g.textContent = label; return g; }
+  function init(){
+    var ov = document.getElementById('settingsOverlay'); if(!ov) return;
+    var body = ov.querySelector('.settings-page-body'); if(!body) return;
+    var secs = Array.prototype.slice.call(ov.querySelectorAll('.settings-section'));
+    var by = {}; secs.forEach(function(sec){ var o = build(sec); if(o) by[o.title] = sec; });
+    var colorsCard = document.getElementById('colorsToggleCard'), colorsBody = document.getElementById('colorsSectionBody');
+    var order = [
+      ['🎨 المظهر', [by['الخط'], by['حجم الخط والأيقونات'], by['شكل الأرقام'], by['عمق البطاقات (3D)'], colorsCard, colorsBody]],
+      ['🔔 الصوت والإشعارات', [by['الإشعارات'], by['صوت النقر']]],
+      ['🧩 السلوك', [by['ترتيب وتحريك العناصر']]],
+      ['🛡️ البيانات والأمان', [by['النسخ الاحتياطي'], by['قفل التطبيق'], by['شارك التطبيق مع غيرك'], by['الحساب والمزامنة بين الأجهزة'], by['تثبيت التطبيق واختصار الشاشة الرئيسية']]]
+    ];
+    var rest = Array.prototype.slice.call(body.children), used = [];
+    var tools = document.createElement('div'); tools.className = 'set-tools';
+    tools.innerHTML = '<button type="button">⤢ فتح الكل</button><button type="button">⤡ طي الكل</button>';
+    tools.children[0].onclick = function(){ accs.forEach(function(o){ setOpen(o.sec, true, false); st[o.key] = true; }); try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} try{ setColorsSection(true); }catch(e){} };
+    tools.children[1].onclick = function(){ accs.forEach(function(o){ setOpen(o.sec, false, false); st[o.key] = false; }); try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} try{ setColorsSection(false); }catch(e){} };
+    body.insertBefore(tools, body.firstChild);
+    var frag = document.createDocumentFragment();
+    order.forEach(function(g){ var els = g[1].filter(function(e){ return !!e; }); if(!els.length) return; frag.appendChild(group(g[0])); els.forEach(function(e){ frag.appendChild(e); used.push(e); }); });
+    rest.forEach(function(e){ if(used.indexOf(e) < 0 && e.parentNode === body && e !== tools) frag.appendChild(e); });
+    body.appendChild(frag);
+    update();
+    if(typeof refreshSettingsUI === 'function'){ var orig = refreshSettingsUI; window.refreshSettingsUI = function(s){ var r = orig.apply(this, arguments); try{ update(s); }catch(e){} return r; }; }
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
