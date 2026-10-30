@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-29.7916">
+<meta name="app-version" content="2026-10-30.7917">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1758,8 +1758,8 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 :root[data-theme="dark"] #incomeSourcesOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #incomeSourcesOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;} }
 #incomeSourcesOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; overflow-y:auto; position:relative; padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(28px + env(safe-area-inset-bottom,0px));}
-#incomeSourcesOverlay .inc-title{margin:4px 0 14px; padding-inline-start:46px; font-size:calc(22px * var(--fs,1)); font-weight:900; line-height:1.3;}
-#incomeSourcesOverlay .inc-title small{display:block; font-size:calc(13px * var(--fs,1)); font-weight:700; color:var(--muted);}
+#incomeSourcesOverlay .inc-title{margin:4px 0 14px; padding-inline-start:46px; font-size:calc(16px * var(--fs,1)); font-weight:900; line-height:1.3;}
+#incomeSourcesOverlay .inc-title small{display:block; font-size:calc(11.5px * var(--fs,1)); font-weight:700; color:var(--muted);}
 #incomeSourcesOverlay .inc-hero{position:relative; margin:0 2px 18px; padding:18px 18px 16px; border-radius:28px; color:#fff; background:linear-gradient(145deg,#22d49a 0%,#12a56f 45%,#0b7a53 100%); box-shadow:0 2px 0 rgba(255,255,255,.4) inset, 0 -8px 0 rgba(0,0,0,.16) inset, 0 8px 0 #0a5e41, 0 18px 26px rgba(14,140,92,.35);}
 #incomeSourcesOverlay .inc-hero > small{display:block; font-size:calc(14px * var(--fs,1)); font-weight:700; opacity:.92;}
 #incomeSourcesOverlay .inc-hero > b{display:block; font-size:calc(38px * var(--fs,1)); font-weight:900; line-height:1.15; margin:2px 0 12px; direction:ltr; text-align:right; text-shadow:0 3px 0 rgba(0,0,0,.18);}
@@ -1790,6 +1790,12 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #incomeSourcesOverlay .inc-acts{display:flex; gap:6px;}
 #incomeSourcesOverlay .inc-acts button{border:0; cursor:pointer; width:38px; height:36px; padding:0; border-radius:12px; font-size:15px; background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.18), 0 8px 10px var(--mcsh);}
 #incomeSourcesOverlay .inc-acts button:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2);}
+/* ===== سجلات قابلة للطي (دوس على العنوان يظهر ويخفي) ===== */
+.lg-head{display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;}
+.lg-head .lg-t{flex:1; min-width:0;}
+.lg-head .lg-cnt{font-size:calc(12.5px * var(--fs,1)); font-weight:800; color:var(--muted); white-space:nowrap;}
+.lg-head .plus-badge{position:relative; top:auto; right:auto; left:auto; flex-shrink:0;}
+.lg-hidden{display:none !important;}
 /* ===== صفحة «صرف من الدخل العام» كاملة وبتصميم 3D ===== */
 #giOutOverlay{--mchl:rgba(255,255,255,.95); --mcsh:rgba(30,41,59,.13); --mcbtn:#ffffff; --mcbtn2:#e6ebf3;}
 :root[data-theme="dark"] #giOutOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45); --mcbtn:#2c313a; --mcbtn2:#222731;}
@@ -9845,6 +9851,57 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   try{ var so = document.getElementById('settingsOverlay'); if(so && window.MutationObserver) new MutationObserver(refreshChips).observe(so, {attributes: true, attributeFilter: ['class']}); }catch(e){}
   /* تلميح مرة واحدة */
   try{ if(!localStorage.getItem(HINT) && allowed()){ setTimeout(function(){ toast('اضغط مطوّلًا على أي بطاقة أو صف وحرّكه لتغيير ترتيبه ↕️ (ولو عايز تقفل ده: من الإعدادات)', true); try{ localStorage.setItem(HINT, '1'); }catch(e){} }, 2200); } }catch(e){}
+})();
+</script>
+<script>
+/* سجلات قابلة للطي: كل سجل في التطبيق عنوانه بيظهر ويخفي القايمة بدوسة (والتطبيق بيفتكر آخر حالة) */
+(function(){
+  var KEY = 'masrofati_lg_open_v1', st = {};
+  try{ st = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ st = {}; }
+  function digits(n){ try{ return typeof toArabicDigits === 'function' ? toArabicDigits(n) : String(n); }catch(e){ return String(n); } }
+  function make(head, key, rowSel, unit, wrap){
+    if(!head || head.getAttribute('data-lg')) return;
+    var bodies = [], n = head.nextElementSibling;
+    while(n){ bodies.push(n); n = n.nextElementSibling; }
+    if(!bodies.length) return;
+    head.setAttribute('data-lg', key);
+    var cnt = document.createElement('span'); cnt.className = 'lg-cnt';
+    var pb = document.createElement('span'); pb.className = 'plus-badge in-card pb-sm pb-teal';
+    if(wrap !== false){
+      var t = document.createElement('span'); t.className = 'lg-t';
+      while(head.firstChild) t.appendChild(head.firstChild);
+      head.appendChild(t); head.appendChild(cnt);
+    }
+    head.appendChild(pb);
+    head.classList.add('lg-head'); head.setAttribute('role', 'button'); head.setAttribute('tabindex', '0');
+    function count(){
+      if(!rowSel || wrap === false) return;
+      var c = 0; bodies.forEach(function(b){ c += b.querySelectorAll(rowSel).length; });
+      cnt.textContent = c ? digits(c) + ' ' + (unit || 'عملية') : '';
+    }
+    function apply(){
+      var open = !!st[key];
+      bodies.forEach(function(b){ b.classList.toggle('lg-hidden', !open); });
+      pb.textContent = open ? '\u2212' : '+'; pb.classList.toggle('is-open', open);
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    function tog(){ st[key] = !st[key]; try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} apply(); }
+    head.addEventListener('click', tog);
+    head.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); tog(); } });
+    if(window.MutationObserver) bodies.forEach(function(b){ try{ new MutationObserver(count).observe(b, {childList: true}); }catch(e){} });
+    count(); apply();
+  }
+  function q(sel){ return document.querySelector(sel); }
+  function init(){
+    make(q('#incomeSourcesOverlay .inc-logh'), 'inc', '.inc-row', 'مصدر');
+    make(q('#cmOutOverlay .cmo-logh'), 'cmo', '.cmo-row', 'عملية');
+    make(q('#giOutOverlay .gio-logh'), 'gio', '.gi-row', 'عملية');
+    var zp = document.getElementById('zpList'); if(zp) make(zp.previousElementSibling, 'zp', null, null, false);
+    var bk = document.getElementById('bkHistory'); if(bk) make(bk.previousElementSibling, 'bk', '.bk-row', 'نسخة');
+    var od = document.getElementById('opsListDayD'); if(od) make(od.parentNode.querySelector('.ops-h'), 'opsDay', '.gi-row', 'عملية');
+    var om = document.getElementById('opsListMonthB'); if(om) make(om.parentNode.querySelector('.ops-h'), 'opsMonth', '.gi-row', 'عملية');
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
 </body>
