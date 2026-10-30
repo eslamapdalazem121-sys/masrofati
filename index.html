@@ -2,10 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-30.7919">
+<meta name="app-version" content="2026-10-30.7921">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1790,6 +1790,11 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #incomeSourcesOverlay .inc-acts{display:flex; gap:6px;}
 #incomeSourcesOverlay .inc-acts button{border:0; cursor:pointer; width:38px; height:36px; padding:0; border-radius:12px; font-size:15px; background:linear-gradient(145deg,var(--mcbtn),var(--mcbtn2)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.18), 0 8px 10px var(--mcsh);}
 #incomeSourcesOverlay .inc-acts button:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.2);}
+/* ===== تثبيت الصفحات: بلا تكبير/تصغير بالقرصة أو الدبل تاب ===== */
+html,body{touch-action:pan-x pan-y; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
+/* ثبات الصفحة: الموبايل بيكبّر الصفحة كلها لو خانة الكتابة أصغر من 16px، فنخليها 16px على الشاشات اللمس */
+@media (pointer:coarse){ input, select, textarea{ font-size:max(16px, 1em) !important; } input[type=range], input[type=checkbox], input[type=radio], input[type=color]{ font-size:inherit !important; } }
+html{ overscroll-behavior:none; }
 /* ===== الإشعارات (رسالة + صوت + ضوء) ===== */
 #nfBox{margin-top:12px;}
 #nfBox.off{opacity:.45;}
@@ -9905,6 +9910,20 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   try{ var so = document.getElementById('settingsOverlay'); if(so && window.MutationObserver) new MutationObserver(refreshChips).observe(so, {attributes: true, attributeFilter: ['class']}); }catch(e){}
   /* تلميح مرة واحدة */
   try{ if(!localStorage.getItem(HINT) && allowed()){ setTimeout(function(){ toast('اضغط مطوّلًا على أي بطاقة أو صف وحرّكه لتغيير ترتيبه ↕️ (ولو عايز تقفل ده: من الإعدادات)', true); try{ localStorage.setItem(HINT, '1'); }catch(e){} }, 2200); } }catch(e){}
+})();
+</script>
+<script>
+/* منع التكبير/التصغير (آيفون بيتجاهل user-scalable) */
+(function(){
+  ['gesturestart','gesturechange','gestureend'].forEach(function(t){ document.addEventListener(t, function(e){ e.preventDefault(); }, {passive:false}); });
+  document.addEventListener('touchmove', function(e){ if(e.touches && e.touches.length > 1 && e.cancelable) e.preventDefault(); }, {passive:false});
+  var last = 0;
+  document.addEventListener('touchend', function(e){
+    var n = Date.now(), t = e.target;
+    if(n - last < 320 && e.cancelable && !(t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]'))) e.preventDefault();
+    last = n;
+  }, {passive:false});
+  document.addEventListener('wheel', function(e){ if(e.ctrlKey) e.preventDefault(); }, {passive:false});
 })();
 </script>
 <script>
