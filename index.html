@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-30.7918">
+<meta name="app-version" content="2026-10-30.7919">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3804,6 +3804,11 @@ function opsMs(v){
   const t = /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? new Date(v + 'T12:00:00').getTime() : new Date(v).getTime();
   return isNaN(t) ? undefined : t;
 }
+// ترتيب تنازلي: الأحدث بتاريخه فوق، ولو نفس اليوم الأحدث إدخالًا فوق
+function sortDescByDate(arr, get){
+  get = get || function(x){ return x && x.date; };
+  return arr.map(function(x, i){ return [x, i]; }).sort(function(a, b){ return ((opsMs(get(b[0])) || 0) - (opsMs(get(a[0])) || 0)) || (b[1] - a[1]); }).map(function(z){ return z[0]; });
+}
 function opsFlat(){
   const f = {}, go = new Set(), skip = id => String(id).indexOf('lg') === 0 || String(id).indexOf('ai:') === 0;
   const gi = data.genIncome || {};
@@ -5007,7 +5012,7 @@ function renderCapMoney(){
   document.getElementById('cmChipAll').classList.toggle('on', !_cmFilter);
   document.getElementById('cmChipCash').classList.toggle('on', _cmFilter === 'cash');
   document.getElementById('cmChipBank').classList.toggle('on', _cmFilter === 'bank');
-  const arr = capList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter));
+  const arr = sortDescByDate(capList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
   const mcBase = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
   box.innerHTML = arr.length ? '' : '<div class="mc-empty">لا توجد بنود بعد</div>';
   arr.forEach(x=> box.appendChild(mcCard(x, {acts: true, total: mcBase})));
@@ -5884,7 +5889,7 @@ function renderCapGold(){
     ur.appendChild(mkChip(lb, sumG(arr), _cgFu === key, ()=> setCgFu(key), live ? fmt(sumNow(arr)) : fmt(cgInt(giSum(arr))), fmt(cgRound(sumG(arr))) + ' جم', key === 'jewel' ? 'v-pink' : 'v-green', true));
   });
   // القايمة بعد الفلترة
-  const arr = all.filter(x=> {
+  const arr = sortDescByDate(all).filter(x=> {
     const k = Number(x.karat) || 0, okK = !_cgFk || (_cgFk === 'other' ? !(k === 24 || k === 21 || k === 18) : k === _cgFk);
     return okK && (!_cgFu || cgUseOf(x) === _cgFu);
   });
@@ -6071,7 +6076,7 @@ function renderGIPage(){
   const box = document.getElementById('gpSrc'); box.innerHTML = '';
   document.getElementById('gpSrcCnt').textContent = r.src.length ? toArabicDigits(r.src.length) + ' بند' : '';
   if(!r.src.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه مفيش مصادر دخل. دوس «＋ إضافة دخل» أو سجّل فوائد ومعاشات في «أموال» وهتظهر هنا لوحدها.'; box.appendChild(e); }
-  r.src.slice().sort((a,b)=> (Number(a.date) || 0) - (Number(b.date) || 0)).forEach(x=>{
+  sortDescByDate(r.src).forEach(x=>{
     const dt = x.date ? formatDate(x.date) : '';
     if(x.auto){
       const pend = x.counted === false, day = x.date ? toArabicDigits(new Date(x.date).getDate()) : '';
@@ -6086,7 +6091,7 @@ function renderGIPage(){
   const ob = document.getElementById('gpOutList'); ob.innerHTML = '';
   document.getElementById('gpOutCnt').textContent = r.out.length ? toArabicDigits(r.out.length) + ' عملية' : '';
   if(!r.out.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه ماصرفتش من الدخل العام في الشهر ده.'; ob.appendChild(e); }
-  r.out.slice().sort((a,b)=> (Number(a.date) || 0) - (Number(b.date) || 0)).forEach(x=>{
+  sortDescByDate(r.out).forEach(x=>{
     const dd = GI_DEST[x.dest] || GI_DEST.income;
     ob.appendChild(gpRow({cls: 'out' + (x.counted === false ? ' unc' : ''), ic: dd.ic, name: 'إلى ' + dd.n, sub: (x.note ? x.note + ' \u200f·\u200f ' : '') + (x.date ? formatDate(x.date) : ''), amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب', c: 'n'}] : []}));
   });
@@ -6134,7 +6139,7 @@ function renderGIOut(){
   ['giChipAll','giChipInc','giChipZk','giChipOth'].forEach((id,k)=> document.getElementById(id).classList.toggle('on', (k === 0 && !_giFilter) || (k === 1 && _giFilter === 'income') || (k === 2 && _giFilter === 'zakat') || (k === 3 && _giFilter === 'other')));
   const shown = _giFilter ? r.out.filter(x=> x.dest === _giFilter) : r.out;
   if(_giFilter && !shown.length) box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;">لا يوجد صرف إلى ' + (GI_DEST[_giFilter] || GI_DEST.income).n + ' بعد</div>';
-  const sorted = shown.map((x,i)=> [x,i]).sort((a,b)=> String(a[0].date||'').localeCompare(String(b[0].date||'')) || a[1] - b[1]).map(z=> z[0]);
+  const sorted = sortDescByDate(shown);
   let last = null;
   sorted.forEach(x=>{
     if(x.date !== last){ last = x.date; const h = document.createElement('div'); h.className = 'date-sep'; h.textContent = '📅 ' + giDateTxt(x.date); box.appendChild(h); }
@@ -6279,7 +6284,7 @@ function openZakatModal(mode){
 function openZakatTotal(){ openZakatModal('adds'); }
 function openZakatPaid(){ openZakatModal('payments'); }
 function renderZakatList(){
-  const z = zkGet(), arr = z[_zkMode], box = document.getElementById('zkList');
+  const z = zkGet(), arr = sortDescByDate(z[_zkMode]), box = document.getElementById('zkList');
   document.getElementById('zkSumVal').textContent = fmt(zkSum(arr));
   box.innerHTML = arr.length ? '' : '<div style="color:var(--muted);font-size:12px;text-align:center;">لا توجد بنود بعد</div>';
   arr.forEach(x=>{
@@ -6741,7 +6746,7 @@ function compareChildrenDateDesc(a, b){
   if(aIsGroup && bIsGroup) return 0;
   if(aIsGroup) return -1;
   if(bIsGroup) return 1;
-  return (b.date||0) - (a.date||0);
+  return ((b.date||0) - (a.date||0)) || ((b.createdAt||0) - (a.createdAt||0));
 }
 
 function renderGroupEl(g, depth, indexInParent, siblingCount){
@@ -7508,7 +7513,7 @@ function renderIncomeSourcesList(){
   keys.sort((a, b)=> a === '' ? 1 : b === '' ? -1 : b.localeCompare(a));
   set('incDays', toArabicDigits(keys.filter(k=> k !== '').length));
   keys.forEach(k=>{
-    const rows = by[k], tot = rows.reduce((a, x)=> x.counted === false ? a : a + (Number(x.amount) || 0), 0);
+    const rows = by[k].slice().reverse(), tot = rows.reduce((a, x)=> x.counted === false ? a : a + (Number(x.amount) || 0), 0);
     const h = document.createElement('div'); h.className = 'inc-day';
     h.innerHTML = '<span class="inc-dl"></span><b class="inc-dt"></b>';
     h.children[0].textContent = '📅 ' + incDayLbl(k);
