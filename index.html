@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-30.7921">
+<meta name="app-version" content="2026-10-31.7930">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -8402,8 +8402,9 @@ async function checkImportFromLink(){
 const FIREBASE_CONFIG = {"apiKey": "AIzaSyDl0dVhveN-6H3umRNcTtQ4PJDTa53Fa_w", "authDomain": "masrofati-fcc92.firebaseapp.com", "projectId": "masrofati-fcc92", "storageBucket": "masrofati-fcc92.firebasestorage.app", "messagingSenderId": "737593709536", "appId": "1:737593709536:web:d7d3b0e20bb21351a6d185"};
 const FB_BASE = 'https://www.gstatic.com/firebasejs/10.12.0/';
 const CLOUD_KEYS = {updated:'budget_data_updated_at', synced:'budget_cloud_synced_at', skip:'budget_cloud_skip_login', lastOk:'budget_cloud_last_ok'};
-const cloud = {sdk:null, app:null, auth:null, db:null, user:null, authKnown:false, loading:null, unsub:null, pushTimer:null,
-               applying:false, busy:false, again:false, pendingChoice:null, lastError:''};
+const cloud = {sdk:null, app:null, auth:null, user:null, authKnown:false, loading:null, pollTimer:null, pushTimer:null,
+               retryTimer:null, retryN:0, initTries:0, willRetry:false,
+               applying:false, busy:false, again:false, pendingChoice:null, lastError:'', lastDetail:''};
 function cloudNum(k){ try{ return Number(localStorage.getItem(k)) || 0; }catch(e){ return 0; } }
 function cloudSetKey(k, v){ try{ localStorage.setItem(k, String(v)); }catch(e){} }
 function cloudTimeout(p, ms, label){
@@ -8437,16 +8438,32 @@ function cloudErrorMessage(e){
     'auth/user-not-found':'مفيش حساب بالإيميل ده — ادوس «حساب جديد»',
     'auth/too-many-requests':'محاولات كتير — استنى شوية وجرّب تاني',
     'auth/user-disabled':'الحساب ده متوقّف',
-    'auth/network-request-failed':'مفيش إنترنت دلوقتي',
+    'auth/network-request-failed':'مش قادر أوصل للإنترنت دلوقتي',
     'auth/operation-not-allowed':'تسجيل الدخول بالإيميل مش مفعّل في Firebase (Authentication ← Sign-in method ← Email/Password)',
     'auth/unauthorized-domain':'دومين الموقع مش مضاف في Firebase (Authentication ← Settings ← Authorized domains)',
     'permission-denied':'قواعد الأمان في Firestore مش مسموحة — راجع خطوة الـ Rules',
-    'unavailable':'مفيش اتصال بالسحابة دلوقتي',
+    'unavailable':'مش قادر أوصل للسحابة دلوقتي',
+    'app/network':'مش قادر أوصل للسحابة دلوقتي',
+    'server':'خدمة جوجل مشغولة دلوقتي',
+    'quota':'السحابة مشغولة دلوقتي أو الحصة اليومية خلصت',
+    'unauthenticated':'جلسة الحساب انتهت — سجّل خروج من الإعدادات وادخل تاني',
     'not-found':'قاعدة بيانات Firestore لسه ما اتعملتش (Build ← Firestore Database ← Create database)',
     'failed-precondition':'قاعدة بيانات Firestore لسه ما اتعملتش (Build ← Firestore Database ← Create database)',
-    'app/timeout':'النت بطيء — جرّب تاني'
+    'api-disabled':'خدمة Firestore مش مفعّلة في مشروع Firebase (Build ← Firestore Database ← Create database)',
+    'app/too-big':'بياناتك أكبر من الحد المسموح في السحابة',
+    'app/bad-remote':'النسخة اللي في السحابة مش قابلة للقراءة',
+    'app/timeout':'النت بطيء دلوقتي'
   };
-  return map[code] || (code ? ('مشكلة: ' + code) : 'حصلت مشكلة، جرّب تاني');
+  return map[code] || (code ? ('مشكلة في السحابة (' + code + ')') : 'حصلت مشكلة، جرّب تاني');
+}
+// الأخطاء اللي بتتحل لوحدها بإعادة المحاولة (نت/سيرفر)، عكس قواعد الأمان وقاعدة البيانات اللي لازم تتصلح من Firebase
+function cloudIsTransient(e){
+  const c = (e && e.code) || '';
+  return c === 'app/network' || c === 'app/timeout' || c === 'server' || c === 'quota' || c === 'unavailable' || c === 'auth/network-request-failed';
+}
+function cloudErrorDetail(e){
+  const c = (e && e.code) || '';
+  return c ? (c + (e.status ? ' · ' + e.status : '')) : '';
 }
 
 // ---- تحميل مكتبة Firebase عند الحاجة (من غير ما نعطّل التطبيق لو مفيش نت) ----
@@ -8454,29 +8471,86 @@ function cloudLoadSdk(){
   if(cloud.sdk) return Promise.resolve(cloud.sdk);
   if(cloud.loading) return cloud.loading;
   cloud.loading = (async ()=>{
-    const [appM, authM, fsM] = await cloudTimeout(Promise.all([
+    // من مكتبة Firebase بنحمّل الحساب (Auth) بس. قراءة وكتابة البيانات بتتم بطلبات HTTPS عادية (REST)،
+    // لأن اتصال Firestore المفتوح (WebChannel) بيتقطع على شبكات كتير ويطلّع «مفيش اتصال بالسحابة» والنت شغال.
+    const [appM, authM] = await cloudTimeout(Promise.all([
       import(FB_BASE + 'firebase-app.js'),
-      import(FB_BASE + 'firebase-auth.js'),
-      import(FB_BASE + 'firebase-firestore.js')
-    ]), 20000, 'sdk-timeout');
+      import(FB_BASE + 'firebase-auth.js')
+    ]), 45000, 'sdk-timeout');
     const app = appM.initializeApp(FIREBASE_CONFIG);
     cloud.app = app;
     cloud.auth = authM.getAuth(app);
-    cloud.db = fsM.getFirestore(app);
-    cloud.sdk = {appM, authM, fsM};
+    cloud.sdk = {appM, authM};
     return cloud.sdk;
   })();
   cloud.loading.then(()=>{ cloud.loading = null; }, ()=>{ cloud.loading = null; });
   return cloud.loading;
 }
-function cloudRef(){
-  const {fsM} = cloud.sdk;
-  return fsM.doc(cloud.db, 'users', cloud.user.uid, 'data', 'main');
+
+// ---- قراءة وكتابة مستند المزامنة بطلبات HTTPS عادية (REST) بدل اتصال Firestore المفتوح ----
+const FS_DB = 'projects/' + FIREBASE_CONFIG.projectId + '/databases/(default)';
+const FS_DOCS = 'https://firestore.googleapis.com/v1/' + FS_DB + '/documents/';
+function cloudDocUrl(){ return FS_DOCS + 'users/' + encodeURIComponent(cloud.user.uid) + '/data/main'; }
+function cloudHttpError(status, text){
+  let j = null; try{ j = JSON.parse(text); }catch(e){}
+  const er = (j && j.error) || (Array.isArray(j) && j[0] && j[0].error) || {};
+  const msg = String(er.message || '');
+  let code = 'http-' + status;
+  if(status === 404) code = /^Document\b/i.test(msg) ? 'doc-missing' : 'not-found';
+  else if(status === 403) code = /has not been used|is disabled|SERVICE_DISABLED/i.test(text) ? 'api-disabled' : 'permission-denied';
+  else if(status === 401) code = 'unauthenticated';
+  else if(status === 429) code = 'quota';
+  else if(status >= 500) code = 'server';
+  else if(status === 413 || (status === 400 && /too large|exceeds the maximum/i.test(msg))) code = 'app/too-big';
+  return Object.assign(new Error(msg || ('HTTP ' + status)), {code, status});
 }
-function cloudStatusText(){
+async function cloudRequest(method, url, body, ms){
+  const user = cloud.user;
+  if(!user) throw Object.assign(new Error('no-user'), {code:'app/no-user'});
+  let token = await cloudTimeout(user.getIdToken(), 20000);
+  for(let attempt = 0; attempt < 2; attempt++){
+    const ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+    const timer = setTimeout(()=>{ try{ if(ctl) ctl.abort(); }catch(e){} }, ms);
+    let status = 0, text = '';
+    try{
+      const res = await fetch(url, {
+        method, cache:'no-store',
+        headers: body ? {'Authorization':'Bearer ' + token, 'Content-Type':'application/json'} : {'Authorization':'Bearer ' + token},
+        body: body ? JSON.stringify(body) : undefined,
+        signal: ctl ? ctl.signal : undefined
+      });
+      status = res.status;
+      text = await res.text();
+    }catch(e){
+      throw Object.assign(new Error('network'), {code: (ctl && ctl.signal.aborted) ? 'app/timeout' : 'app/network'});
+    }finally{ clearTimeout(timer); }
+    if(status === 401 && attempt === 0){ token = await cloudTimeout(user.getIdToken(true), 20000); continue; }
+    if(status < 200 || status >= 300) throw cloudHttpError(status, text);
+    try{ return text ? JSON.parse(text) : {}; }catch(e){ throw Object.assign(new Error('bad-json'), {code:'server'}); }
+  }
+}
+function cloudParseDoc(doc){
+  const f = (doc && doc.fields) || {};
+  const n = v => v ? (Number(v.integerValue !== undefined ? v.integerValue : v.doubleValue) || 0) : 0;
+  return {blob: (f.blob && f.blob.stringValue) || '', updatedAt: n(f.updatedAt), device: (f.device && f.device.stringValue) || ''};
+}
+// بيرجّع null لو المستند لسه ما اتعملش. maskOnly = قراءة وقت التحديث بس (طلب صغير جدًا للفحص الدوري).
+async function cloudGetDoc(maskOnly){
+  try{
+    const doc = await cloudRequest('GET', cloudDocUrl() + (maskOnly ? '?mask.fieldPaths=updatedAt' : ''), null, maskOnly ? 15000 : 60000);
+    return cloudParseDoc(doc);
+  }catch(e){
+    if(e && e.code === 'doc-missing') return null;
+    throw e;
+  }
+}
+function cloudStatusText(withDetail){
   if(!cloud.user) return '☁️ مش مسجّل دخول — من الإعدادات تقدر تتزامن';
   if(!navigator.onLine) return '☁️ مفيش نت — تعديلاتك محفوظة وهتتزامن لما النت يرجع';
-  if(cloud.lastError) return '⚠️ ' + cloud.lastError;
+  if(cloud.lastError){
+    return '⚠️ ' + cloud.lastError + (cloud.willRetry ? ' — بحاول تاني لوحدي، وبياناتك محفوظة على الجهاز' : '') +
+           (withDetail && cloud.lastDetail ? ' (' + cloud.lastDetail + ')' : '');
+  }
   return '☁️ متزامن ✅';
 }
 function cloudSetStatus(text, ok){
@@ -8508,11 +8582,22 @@ async function cloudApplyRemote(remote){
   cloudSetKey(CLOUD_KEYS.synced, t);
 }
 async function cloudPush(){
-  const blob = await encodeTransferCode();
-  if(blob.length > 900000) throw Object.assign(new Error('too-big'), {code:'app/too-big'});
+  // نقرا وقت التعديل قبل ما نجهّز البيانات: لو اتعدّل حاجة أثناء الرفع، يفضل «التعديل أحدث من المرفوع» وتترفع في اللفة الجاية
   let t = cloudNum(CLOUD_KEYS.updated);
   if(!t){ t = Date.now(); cloudSetKey(CLOUD_KEYS.updated, t); }
-  await cloudTimeout(cloud.sdk.fsM.setDoc(cloudRef(), {blob, updatedAt:t, device:cloudDeviceLabel(), schema:1}), 20000);
+  const blob = await encodeTransferCode();
+  if(blob.length > 900000) throw Object.assign(new Error('too-big'), {code:'app/too-big'});
+  // نداء commit (POST) هو نفسه اللي مكتبة Firebase بتستخدمه؛ من غير updateMask ولا شرط = استبدال/إنشاء المستند كله (زي setDoc)
+  const body = {writes:[{update:{
+    name: FS_DB + '/documents/users/' + cloud.user.uid + '/data/main',
+    fields:{
+      blob:{stringValue:blob},
+      updatedAt:{integerValue:String(t)},
+      device:{stringValue:cloudDeviceLabel()},
+      schema:{integerValue:'1'}
+    }
+  }}]};
+  await cloudRequest('POST', 'https://firestore.googleapis.com/v1/' + FS_DB + '/documents:commit', body, 60000);
   cloudSetKey(CLOUD_KEYS.synced, t);
 }
 function cloudDeviceLabel(){
@@ -8567,25 +8652,39 @@ async function cloudReconcile(remote){
 }
 async function cloudSync(reason){
   if(!cloud.user || !cloud.sdk) return;
-  if(!navigator.onLine){ cloudSetStatus(null, false); return; }
+  if(!navigator.onLine){ cloudSetStatus(null, false); if(reason === 'manual') showToast('مفيش نت دلوقتي', false); return; }
   if(cloud.busy){ cloud.again = true; return; }
   cloud.busy = true;
+  if(reason === 'manual') cloud.retryN = 0;
+  clearTimeout(cloud.retryTimer);
   try{
     cloudSetStatus('🔄 بيتزامن…', false);
-    const snap = await cloudTimeout(cloud.sdk.fsM.getDoc(cloudRef()), 20000);
-    const remote = snap.exists() ? snap.data() : null;
+    const remote = await cloudGetDoc(false);
     const result = await cloudReconcile(remote);
-    cloud.lastError = '';
+    cloud.lastError = ''; cloud.lastDetail = ''; cloud.willRetry = false; cloud.retryN = 0;
     if(result !== 'asked'){ cloudSetKey(CLOUD_KEYS.lastOk, Date.now()); }
     cloudSetStatus(null, result !== 'asked');
+    if(reason === 'manual' && result !== 'asked') showToast('اتزامنت ✅', true);
   }catch(e){
     cloud.lastError = cloudErrorMessage(e);
+    cloud.lastDetail = cloudErrorDetail(e);
+    cloud.willRetry = cloudIsTransient(e);
+    if(cloud.willRetry) cloudScheduleRetry();
     cloudSetStatus(null, false);
+    if(reason === 'manual') showToast(cloud.lastError, false);
   } finally {
     cloud.busy = false;
     updateCloudUI();
     if(cloud.again){ cloud.again = false; cloudSchedulePush(); }
   }
+}
+// لو المزامنة فشلت بسبب النت أو السيرفر: نعيد المحاولة لوحدنا بفواصل بتطول (٨ ثواني ← ٢٠ ← ٤٥ ← ٩٠ ← ٢.٥ دقيقة)
+function cloudScheduleRetry(){
+  clearTimeout(cloud.retryTimer);
+  const steps = [8000, 20000, 45000, 90000, 150000];
+  const d = steps[Math.min(cloud.retryN, steps.length - 1)];
+  cloud.retryN++;
+  cloud.retryTimer = setTimeout(()=>{ if(cloud.user && navigator.onLine) cloudSync('retry'); }, d);
 }
 function cloudSchedulePush(){
   if(!cloud.user) return;
@@ -8597,19 +8696,28 @@ window.__onDataSaved = function(){
   cloudSetKey(CLOUD_KEYS.updated, Date.now());
   cloudSchedulePush();
 };
-function cloudStartListening(){
-  if(cloud.unsub || !cloud.user || !cloud.sdk) return;
+// فحص خفيف كل ٣٠ ثانية والتطبيق مفتوح (بيسأل عن وقت آخر تحديث بس — بايتات قليلة)، ولو فيه جديد بيزامن كامل.
+// ده بديل البث اللحظي: ما بيحتاجش اتصال مفتوح، فبيشتغل على أي شبكة.
+async function cloudPoll(){
+  if(!cloud.user || cloud.busy || cloud.pendingChoice || cloud.lastError || !navigator.onLine) return;
+  if(document.visibilityState !== 'visible') return;
   try{
-    cloud.unsub = cloud.sdk.fsM.onSnapshot(cloudRef(), (snap)=>{
-      if(!snap.exists() || (snap.metadata && snap.metadata.hasPendingWrites)) return;
-      const remote = snap.data();
-      if((Number(remote.updatedAt) || 0) === cloudNum(CLOUD_KEYS.synced)) return; // صدى رفعنا إحنا
-      cloudSync('live');
-    }, ()=>{ /* أخطاء البث بتتعالج في المزامنة العادية */ });
-  }catch(e){}
+    const meta = await cloudGetDoc(true);
+    const rt = meta ? meta.updatedAt : 0;
+    const lt = cloudNum(CLOUD_KEYS.updated), st = cloudNum(CLOUD_KEYS.synced);
+    if(rt !== st || lt > st) cloudSync('poll');
+  }catch(e){
+    cloudSync('poll'); // الفشل بيتسجّل في الحالة وبيبدأ إعادة المحاولة التلقائية
+  }
 }
-function cloudStopListening(){
-  if(cloud.unsub){ try{ cloud.unsub(); }catch(e){} cloud.unsub = null; }
+function cloudStartPolling(){
+  if(cloud.pollTimer || !cloud.user) return;
+  cloud.pollTimer = setInterval(cloudPoll, 30000);
+}
+function cloudStopPolling(){
+  clearInterval(cloud.pollTimer); cloud.pollTimer = null;
+  clearTimeout(cloud.retryTimer); clearTimeout(cloud.pushTimer);
+  cloud.willRetry = false; cloud.retryN = 0;
 }
 
 // ---- الحساب ----
@@ -8617,8 +8725,12 @@ async function cloudInit(){
   try{
     await cloudLoadSdk();
   }catch(e){
-    cloud.authKnown = true; // مفيش مكتبة (أوفلاين أول مرة) — التطبيق يكمل محليًا
+    cloud.authKnown = true; // مفيش مكتبة (أوفلاين أول مرة أو نت ضعيف) — التطبيق يكمل محليًا
     updateCloudUI();
+    if(cloud.initTries < 6){ // ونحاول نحمّلها تاني لوحدنا بعد شوية
+      cloud.initTries++;
+      setTimeout(()=>{ if(!cloud.sdk && navigator.onLine) cloudInit(); }, 10000 * cloud.initTries);
+    }
     return;
   }
   if(cloud.authSubscribed) return;
@@ -8626,8 +8738,8 @@ async function cloudInit(){
   cloud.sdk.authM.onAuthStateChanged(cloud.auth, (user)=>{
     cloud.user = user || null;
     cloud.authKnown = true;
-    if(user){ cloudStartListening(); cloudSync('login'); }
-    else { cloudStopListening(); cloudSetStatus(null, false); }
+    if(user){ cloudStartPolling(); cloudSync('login'); }
+    else { cloudStopPolling(); cloudSetStatus(null, false); }
     updateCloudUI();
     cloudMaybeShowGate();
   });
@@ -8664,14 +8776,14 @@ async function cloudAuthAction(prefix, kind){
   }
 }
 async function cloudSignOut(){
-  try{ cloudStopListening(); if(cloud.sdk) await cloud.sdk.authM.signOut(cloud.auth); }catch(e){}
-  cloud.user = null; cloud.lastError = '';
+  try{ cloudStopPolling(); if(cloud.sdk) await cloud.sdk.authM.signOut(cloud.auth); }catch(e){}
+  cloud.user = null; cloud.lastError = ''; cloud.lastDetail = '';
   cloudSetKey(CLOUD_KEYS.synced, 0);
   cloudSetStatus(null, false);
   updateCloudUI();
   showToast('خرجت من الحساب — بياناتك فضلت على الجهاز', true);
 }
-function cloudSyncNowClick(){ cloud.lastError = ''; cloudSync('manual'); }
+function cloudSyncNowClick(){ cloud.lastError = ''; cloud.lastDetail = ''; cloudSync('manual'); }
 
 // ---- الواجهة ----
 function updateCloudUI(){
@@ -8685,7 +8797,7 @@ function updateCloudUI(){
   const st = document.getElementById('cloudStatusLine');
   if(st){
     const last = cloudNum(CLOUD_KEYS.lastOk);
-    st.textContent = cloudStatusText() + (last && cloud.user ? ' — آخر مزامنة: ' + formatBackupTime(last) : '');
+    st.textContent = cloudStatusText(true) + (last && cloud.user ? ' — آخر مزامنة: ' + formatBackupTime(last) : '');
   }
   const hint = document.getElementById('cloudSdkHint');
   if(hint) hint.style.display = (!cloud.sdk && !cloud.user) ? 'block' : 'none';
@@ -8709,6 +8821,11 @@ window.__afterStart = function(){
   cloudInit();
   window.addEventListener('online', ()=>{ if(cloud.sdk && cloud.user) cloudSync('online'); else if(!cloud.sdk) cloudInit(); else cloudMaybeShowGate(); updateCloudUI(); });
   window.addEventListener('offline', ()=>{ cloudSetStatus(null, false); updateCloudUI(); });
+  // لما ترجع للتطبيق: لو فيه خطأ قديم نجرّب فورًا، وإلا نشوف لو فيه تحديث جاي من جهاز تاني
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState !== 'visible' || !cloud.user || !cloud.sdk) return;
+    if(cloud.lastError) cloudSync('visible'); else cloudPoll();
+  });
 };
 // ===== CLOUD END =====
 
