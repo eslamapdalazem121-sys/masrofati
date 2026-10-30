@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7930">
+<meta name="app-version" content="2026-10-31.7932">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1961,6 +1961,21 @@ html{ overscroll-behavior:none; }
   :root:not([data-theme="light"]) .mc-gc .gc-v{filter:brightness(1.6) saturate(1.1);}
   :root:not([data-theme="light"]) .gi-row.mc .mc-sl b,:root:not([data-theme="light"]) .gi-row.mc .mc-c.rate b{color:var(--mc1);}
 }
+/* ===== تنبيه قرب الاستحقاق: إشارة ضوئية على بطاقة الشهادة / المعاش + سطر "غدًا استحقاق…" ===== */
+@keyframes mcSoonGlow{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes mcSoonBell{0%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}75%{transform:rotate(0)}}
+@keyframes mcSoonGreen{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes mcSoonChip{0%,100%{outline-color:rgba(255,159,28,.35)}50%{outline-color:rgba(255,159,28,1)}}
+.gi-row.mc.mc-soon::after{content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; box-shadow:inset 0 0 0 3px #ff9f1c, inset 0 0 26px 3px rgba(255,159,28,.5); animation:mcSoonGlow 1.6s ease-in-out infinite;}
+.gi-row.mc.mc-soon.d0::after{box-shadow:inset 0 0 0 3px #12b27a, inset 0 0 26px 3px rgba(18,178,122,.55);}
+.gi-row.mc .mc-pill.soon{display:flex; align-items:flex-start; gap:8px; margin-top:10px; background:linear-gradient(180deg,#fff0d1,#ffd98a); color:#7a4300;}
+.gi-row.mc .mc-pill.soon.d0{background:linear-gradient(180deg,#d9f7ea,#a8ebcf); color:#0b6b49;}
+.gi-row.mc .mc-pill.soon .mc-bell{display:inline-block; transform-origin:50% 0; animation:mcSoonBell 2.2s ease-in-out infinite;}
+:root[data-theme="dark"] .gi-row.mc .mc-pill.soon{background:#3d2a08; color:#ffcf7a;}
+:root[data-theme="dark"] .gi-row.mc .mc-pill.soon.d0{background:#0f3a2b; color:#7ff0bd;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .gi-row.mc .mc-pill.soon{background:#3d2a08; color:#ffcf7a;} :root:not([data-theme="light"]) .gi-row.mc .mc-pill.soon.d0{background:#0f3a2b; color:#7ff0bd;} }
+#cmChipBank.due-soon, #cmChipPen.due-soon{outline:3px solid #ff9f1c; outline-offset:-3px; animation:mcSoonChip 1.6s ease-in-out infinite;}
+@media (prefers-reduced-motion: reduce){ .gi-row.mc.mc-soon::after, .gi-row.mc .mc-pill.soon .mc-bell, #cmChipBank.due-soon, #cmChipPen.due-soon{animation:none;} }
 </style>
 </head>
 <body>
@@ -2669,6 +2684,11 @@ html{ overscroll-behavior:none; }
           <label for="nfVibe" style="margin:0;">📳 اهتزاز مع الإشعار</label>
         </div>
         <button type="button" class="opt-chip" onclick="nfTest()">▶️ تجربة الإشعار</button>
+        <div class="nf-sub" style="margin-top:14px;">⏰ تنبيه قبل الاستحقاق <small>(شهادات / فوائد / معاش)</small></div>
+        <div class="opt-row" id="optNfLead" data-nosound>
+          <button type="button" class="opt-chip" data-val="1" onclick="nfSet('nfLead',1)">قبلها بيوم</button>
+          <button type="button" class="opt-chip" data-val="2" onclick="nfSet('nfLead',2)">قبلها بيومين</button>
+        </div>
         <div class="nf-sub" style="margin-top:14px;">⚙️ التحكم لكل بند <small>(دوس على عنوان العمود يشغّل/يوقّف الكل)</small></div>
         <div id="nfMatrix"></div>
         <p class="nf-note">💬 رسالة = إشعار على الموبايل + شريط فوق الشاشة · 🔊 صوت = نغمة · 💡 ضوء = وميض على حواف الشاشة. لمبة الإشعار (LED) وصوت الإشعار نفسه وهو التطبيق مقفول بيتحكم فيهم الموبايل من إعدادات إشعارات التطبيق.</p>
@@ -3262,7 +3282,7 @@ function shade(hex, percent){
 var DIGITS_MODE = 'ar';
 function dateLocale(){ return DIGITS_MODE === 'en' ? 'ar-EG-u-nu-latn' : 'ar-EG'; }
 let settings = {
-  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click',
+  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click',
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -4676,6 +4696,28 @@ function nextDueOf(kind){
   }
   return best;
 }
+// ===== قرب الاستحقاق: بيوم أو يومين (الشهادات / الفوائد / المعاش) =====
+function dueLead(){ return Number(settings && settings.nfLead) === 1 ? 1 : 2; }
+function dueSoonOf(x){
+  try{
+    const sub = capSubOf(x); if(capCatOf(x) !== 'money' || (sub !== 'bank' && sub !== 'pension')) return null;
+    const now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), lead = dueLead(), bank = sub === 'bank'; let best = null;
+    for(let k = 0; k <= 1; k++){
+      const dt = new Date(now.getFullYear(), now.getMonth() + k, 1), y = dt.getFullYear(), m = dt.getMonth();
+      if(bank ? !bankActive(x, y, m) : !penActive(x, y, m)) continue;
+      const due = bank ? bankDueOf(x, y, m) : penDueOf(x, y, m), days = Math.round((due.getTime() - t0) / 864e5);
+      if(days < 0 || days > lead) continue;
+      const amt = bank ? bankMonthlyAt(x, due) : (Number(x.amount) || 0); if(!(amt > 0)) continue;
+      if(!best || days < best.days) best = {x: x, sub: sub, days: days, due: due, amt: amt, key: y + '-' + m};
+    }
+    return best;
+  }catch(e){ return null; }
+}
+function dueSoonTxt(o){
+  const when = o.days === 0 ? 'اليوم' : (o.days === 1 ? 'غدًا' : 'بعد غد');
+  const ds = o.due.toLocaleDateString(dateLocale(), {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+  return when + ' استحقاق ' + (o.sub === 'bank' ? 'فايدة شهادة «' : 'معاش «') + o.x.name + '» بتاريخ ' + ds + ' — ' + fmt(cgRound(o.amt));
+}
 function nextDueTxt(kind){
   const n = nextDueOf(kind);
   return n ? '⏭ أقرب موعد قادم: ' + n.due.toLocaleDateString(dateLocale(), {day:'numeric', month:'long', year:'numeric'}) + ' — ' + n.name + ' ' + fmt(cgRound(n.amt)) : '';
@@ -4989,6 +5031,8 @@ function mcCard(x, o){
     vl.textContent = 'المبلغ';
     tg.textContent = 'نقدي' + (dt ? ' · ' + dt : '');
   }
+  { const ds = (sub === 'bank' || sub === 'pension') ? dueSoonOf(x) : null;
+    if(ds){ d.classList.add('mc-soon', 'd' + ds.days); const sp = mcPill(d, 'soon d' + ds.days, ''); sp.innerHTML = '<span class="mc-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(ds); d.insertBefore(sp, grid); } }
   if(!grid.children.length) grid.remove();
   if(o.total > 0 && sub !== 'pension'){
     let p = Math.round((Number(x.amount) || 0) / o.total * 100); p = Math.max(0, Math.min(100, p));
@@ -5017,6 +5061,7 @@ function renderCapMoney(){
   document.getElementById('cmChipAll').classList.toggle('on', !_cmFilter);
   document.getElementById('cmChipCash').classList.toggle('on', _cmFilter === 'cash');
   document.getElementById('cmChipBank').classList.toggle('on', _cmFilter === 'bank');
+  try{ const mo = capList().filter(x=> capCatOf(x) === 'money'); document.getElementById('cmChipBank').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'bank' && dueSoonOf(x))); document.getElementById('cmChipPen').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'pension' && dueSoonOf(x))); }catch(e){}
   const arr = sortDescByDate(capList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
   const mcBase = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
   box.innerHTML = arr.length ? '' : '<div class="mc-empty">لا توجد بنود بعد</div>';
@@ -10051,6 +10096,7 @@ var NF_CATS = [
   ['za','🕌','زكاتي'], ['zp','🤲','منصرف الزكاة'], ['zm','🕌','زكاة المال'],
   ['cap','💼','رأس المال (أموال / ذهب)'], ['cgp','🗂️','مجموعات رأس المال'],
   ['bank','🏦','استحقاق فايدة بنك'], ['pension','💳','استحقاق معاش'],
+  ['bankup','⏰','قبل استحقاق شهادة / فايدة'], ['penup','⏰','قبل استحقاق معاش'],
   ['zdue','🔔','موعد الزكاة'], ['backup','🗄️','نسخة احتياطية']
 ];
 var NF_DEF_OFF = {backup: {s:false, l:false}};
@@ -10138,6 +10184,7 @@ function nfRender(s){
   var v = typeof s.nfVol === 'number' ? s.nfVol : 80, ve = document.getElementById('nfVol'); if(ve) ve.value = v;
   var vl = document.getElementById('nfVolLabel'); if(vl) vl.textContent = v + '%';
   var vb = document.getElementById('nfVibe'); if(vb) vb.checked = s.nfVibe !== false;
+  var lr = document.getElementById('optNfLead'); if(lr) Array.prototype.forEach.call(lr.children, function(el){ el.classList.toggle('active', el.dataset.val === (Number(s.nfLead) === 1 ? '1' : '2')); });
   var m = document.getElementById('nfMatrix'); if(!m) return;
   m.innerHTML = '';
   var hd = document.createElement('div'); hd.className = 'nf-row nf-head'; hd.innerHTML = '<span class="nf-n"></span><span class="nf-h">💬 رسالة</span><span class="nf-h">🔊 صوت</span><span class="nf-h">💡 ضوء</span>';
@@ -10175,6 +10222,14 @@ function dueAlertScan(){
         if(fire) nfEvent(bank ? 'bank' : 'pension', (bank ? '🏦 استحقت فايدة «' : '💳 استحق معاش «') + x.name + '» — ' + fmt(amt), k);
       });
     });
+    try{   // قبل الاستحقاق بيوم أو يومين (يوم الاستحقاق نفسه بيتنبّه له الكود اللي فوق)
+      (Array.isArray(data.capital) ? data.capital : []).forEach(function(x){
+        if(!x || capCatOf(x) !== 'money') return; var sub = capSubOf(x); if(sub !== 'bank' && sub !== 'pension') return;
+        var o = dueSoonOf(x); if(!o || o.days < 1) return;
+        var k = 'up:' + x.id + ':' + o.key + ':' + o.days; if(seen[k]) return; seen[k] = 1; changed = true;
+        if(fire) nfEvent(sub === 'bank' ? 'bankup' : 'penup', '🔔 ' + dueSoonTxt(o), k);
+      });
+    }catch(e){}
     try{
       var zi = zkDueInfo();
       if(zi && zi.state === 'due' && zi.key){ var zk = 'zd:' + zi.key; if(!seen[zk]){ seen[zk] = 1; changed = true; if(fire) nfEvent('zdue', '🔔 وجب موعد زكاة المال — لازم تخرجها', zk); } }
