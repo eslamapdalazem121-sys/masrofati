@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7933">
+<meta name="app-version" content="2026-10-31.7934">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -408,7 +408,7 @@ h1{
 }
 #settingsOverlay.open{align-items:stretch; justify-content:stretch; padding:0; z-index:300; background:var(--bg); backdrop-filter:none;}
 #settingsOverlay .modal-box.settings-page, #backupOverlay .modal-box.settings-page{
-  position:fixed; inset:0; width:100vw; max-width:100vw; height:100vh; max-height:100vh;
+  position:fixed; inset:0; width:auto; max-width:none; height:auto; max-height:none;
   border-radius:0; margin:0; padding:0; border:none; box-shadow:none; background:var(--bg);
   display:flex; flex-direction:column; overflow:hidden; box-sizing:border-box;
 }
@@ -2000,6 +2000,12 @@ html{ overscroll-behavior:none; }
 #settingsOverlay #colorsToggleCard{margin:0 0 14px !important;}
 #settingsOverlay #colorsSectionBody{margin:0 0 6px;}
 @media (prefers-reduced-motion: reduce){ #settingsOverlay .set-acc.open > .set-b{animation:none;} }
+/* ===== الإعدادات: شريط الحفظ ظاهر دايمًا + حفظ تلقائي ===== */
+#settingsOverlay .settings-page-foot{flex-direction:column; align-items:stretch; gap:8px; position:relative; z-index:5; box-shadow:0 -6px 16px rgba(0,0,0,.08);}
+#settingsOverlay .set-saved{text-align:center; font-size:calc(12.5px * var(--fs,1)); font-weight:800; color:var(--muted); transition:color .2s;}
+#settingsOverlay .set-saved.on{color:#12a56f;}
+#settingsOverlay .settings-page-foot .set-save-btn{flex:none; width:100%; min-height:52px; padding:14px; border-radius:18px; font-size:calc(17px * var(--fs,1)); font-weight:900; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#3ed89c,#12b27a); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 6px 0 #0b7a55, 0 12px 16px rgba(11,122,85,.3);}
+#settingsOverlay .settings-page-foot .set-save-btn:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 2px 0 #0b7a55;}
 </style>
 </head>
 <body>
@@ -2961,8 +2967,8 @@ html{ overscroll-behavior:none; }
 <!--INSTALL_END-->
     </div>
     <div class="settings-page-foot">
-      <button class="btn-cancel" onclick="cancelSettings()">إلغاء</button>
-      <button class="btn-save" onclick="saveSettings()">💾 حفظ</button>
+      <div class="set-saved" id="setSaved">✅ أي تغيير بتعمله بيتحفظ تلقائيًا</div>
+      <button class="btn-save set-save-btn" onclick="saveSettings()">💾 حفظ وإغلاق</button>
     </div>
   </div>
 </div>
@@ -3337,6 +3343,7 @@ const DEPTH_LEVELS = {
   strong: {thick:6, lift:16, gloss:1}
 };
 function applySettings(s){
+  if(s === _draftSettings) autoSaveSettings();   // أي تغيير في الإعدادات بيتحفظ لوحده
   const root = document.documentElement;
   const newMode = s.digits === 'en' ? 'en' : 'ar';
   if(newMode !== DIGITS_MODE){ DIGITS_MODE = newMode; setTimeout(refreshDigitsView, 0); }
@@ -3638,15 +3645,30 @@ function previewSetting(key, val){
   applySettings(_draftSettings);
   refreshSettingsUI(_draftSettings);
 }
-function saveSettings(){
-  settings = Object.assign({}, _draftSettings || settings);
+var _asT = null;
+function commitSettings(){
+  clearTimeout(_asT);
+  if(!_draftSettings) return;
+  settings = cloneSettings(_draftSettings);
   try{ localStorage.setItem('budget_settings_v1', JSON.stringify(settings)); }catch(e){}
+}
+function autoSaveSettings(){
+  clearTimeout(_asT);
+  _asT = setTimeout(function(){
+    commitSettings();
+    var el = document.getElementById('setSaved');
+    if(el){ el.textContent = '✅ اتحفظ'; el.classList.add('on'); clearTimeout(window._ssT); window._ssT = setTimeout(function(){ el.textContent = '✅ أي تغيير بتعمله بيتحفظ تلقائيًا'; el.classList.remove('on'); }, 1600); }
+  }, 250);
+}
+function saveSettings(){
+  commitSettings();
   applySettings(settings);
   closeSettingsModal();
-  showToast('تم حفظ إعدادات المظهر', true);
+  showToast('تم حفظ الإعدادات', true);
 }
-function cancelSettings(){
-  applySettings(settings); // رجوع لآخر إعدادات محفوظة
+function cancelSettings(){   // قفل الإعدادات (✕) مابقاش بيتجاهل التغييرات: كلها اتحفظت
+  commitSettings();
+  applySettings(settings);
   closeSettingsModal();
 }
 
