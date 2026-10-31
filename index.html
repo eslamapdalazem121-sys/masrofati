@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7950">
+<meta name="app-version" content="2026-10-31.7951">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4913,6 +4913,12 @@ function cmYearHeader(icon, title, yr){
   d.children[3].textContent = toArabicDigits(yr + 1) + ' ▸'; d.children[3].onclick = ()=> cmShiftYear(1);
   return d;
 }
+function cmPastNote(box, yr){   // بتشوف سنة غير الحالية: الأرقام من جدول الشهور بتاعها مش من أرصدة النهارده
+  const ny = new Date().getFullYear(); if(yr === ny) return;
+  const n = cmNote((yr < ny ? '📅 دي فوائد سنة ' : '📅 دي المتوقع لسنة ') + toArabicDigits(yr) + ' من جدول الشهور تحت (مش أرصدة النهارده). ');
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = '↩ رجوع لسنة ' + toArabicDigits(ny); b.style.cssText = 'margin-inline-start:8px; font-weight:800; font-size:12px; cursor:pointer;';
+  b.onclick = function(){ _cmYear = 0; renderCapMoney(); }; n.appendChild(b); box.appendChild(n);
+}
 function cmNote(txt){ const n = document.createElement('div'); n.className = 'hint'; n.style.cssText = 'font-size:12px;color:var(--muted);font-weight:700;margin:4px 6px 8px;'; n.textContent = txt; return n; }
 // أقرب موعد قادم (بيبص لقدام حتى السنة الجاية)
 function nextDueOf(kind){
@@ -5144,13 +5150,17 @@ function renderPensionPanel(){
   const months = MONTHS.map((mn, m)=> ({mn, m, items: pens.filter(x=> penActive(x, yr, m)).map(x=>{ const due = penDueOf(x, yr, m); return {x, day: due.getDate(), amt: Number(x.amount) || 0, reached: due <= now}; }).sort((a,b)=> a.day - b.day)}));
   const received = months.reduce((t,mo)=> t + mo.items.filter(e=> e.reached).reduce((a,e)=> a + e.amt, 0), 0);
   const expectedYear = months.reduce((t,mo)=> t + mo.items.reduce((a,e)=> a + e.amt, 0), 0);
+  const isCur = yr === now.getFullYear();
+  let monthlyY = 0; for(let m = 11; m >= 0; m--){ if(months[m].items.length){ monthlyY = months[m].items.reduce((t,e)=> t + e.amt, 0); break; } }
   const mk = (txt)=>{ const d = document.createElement('div'); d.className = 'cap-grp'; d.style.cursor = 'default'; d.innerHTML = '<span>💳</span><b></b>'; d.children[1].textContent = txt; return d; };
   box.appendChild(cmYearHeader('💳', 'المعاشات', yr));
   const sum = (a, b, ca, cb)=>{ const r = document.createElement('div'); r.className = 'gi-sumrow t3d'; r.innerHTML = '<span><small></small><b></b></span><span><small></small><b></b></span>'; [a, b].forEach((p, i)=>{ r.children[i].children[0].textContent = p[0]; r.children[i].children[1].textContent = p[1]; r.children[i].classList.add(i ? cb : ca); }); box.appendChild(r); };
-  sum(['💳 المعاش الشهري', fmt(cgRound(monthlyAll))], ['📆 السنة المتوقعة', fmt(cgRound(expectedYear))], 'v-gold', 'v-green');
-  { const nt = nextDueTxt('pension'); if(nt) box.appendChild(cmNote(nt)); }
+  if(isCur) sum(['💳 المعاش الشهري', fmt(cgRound(monthlyAll))], ['📆 السنة المتوقعة', fmt(cgRound(expectedYear))], 'v-gold', 'v-green');
+  else sum(['💳 المعاش الشهري (آخر شهر)', fmt(cgRound(monthlyY))], ['📆 معاشات سنة ' + toArabicDigits(yr), fmt(cgRound(expectedYear))], 'v-gold', 'v-green');
+  cmPastNote(box, yr);
+  if(isCur){ const nt = nextDueTxt('pension'); if(nt) box.appendChild(cmNote(nt)); }
   box.appendChild(cmNote('↻ المعاشات بتستمر تلقائيًا كل سنة بنفس المبلغ والموعد لحد ما تعدّلها أو تحذفها.'));
-  if(pens.length){
+  if(pens.length && isCur){
     const pH = mk('المعاشات المسجلة'); box.appendChild(pH);
     const acc = document.createElement('div'); acc.className = 'gi-rows'; acc.style.cssText = 'max-height:none; overflow:visible;'; cmTblToggle(pH, acc, 'penacc');
     pens.forEach(x=> acc.appendChild(mcCard(x, {})));
@@ -5235,12 +5245,16 @@ function renderBankInterest(){
   const months = MONTHS.map((mn, m)=> ({mn, m, items: banks.filter(x=> bankActive(x, yr, m)).map(x=>{ const due = bankDueOf(x, yr, m); return {x, day: due.getDate(), amt: bankMonthlyAt(x, due), reached: due <= now}; }).sort((a,b)=> a.day - b.day)}));
   const received = months.reduce((t,mo)=> t + mo.items.filter(e=> e.reached).reduce((a,e)=> a + e.amt, 0), 0);
   const expectedYear = months.reduce((t,mo)=> t + mo.items.reduce((a,e)=> a + e.amt, 0), 0);
+  const isCur = yr === now.getFullYear();   // الكروت اللي بتبص للنهارده (القادمة / الشهر الحالي / الأرصدة) بتظهر في السنة الحالية بس
+  let monthlyY = 0; for(let m = 11; m >= 0; m--){ const its = months[m].items.filter(e=> bankPer(e.x) === 1); if(its.length){ monthlyY = its.reduce((t,e)=> t + e.amt, 0); break; } }
   const mk = (cls, txt)=>{ const d = document.createElement('div'); d.className = cls; d.innerHTML = '<span>📆</span><b></b>'; d.children[1].textContent = txt; d.style.cursor = 'default'; return d; };
   box.appendChild(cmYearHeader('📆', 'الفوائد البنكية', yr));
-  try{ const nc = bankNextCard(); if(nc) box.appendChild(nc); }catch(e){ console.error(e); }
+  if(isCur){ try{ const nc = bankNextCard(); if(nc) box.appendChild(nc); }catch(e){ console.error(e); } }
   const sum = (a, b, ca, cb)=>{ const r = document.createElement('div'); r.className = 'gi-sumrow t3d'; r.innerHTML = '<span><small></small><b></b></span><span><small></small><b></b></span>'; [a, b].forEach((p, i)=>{ r.children[i].children[0].textContent = p[0]; r.children[i].children[1].textContent = p[1]; r.children[i].classList.add(i ? cb : ca); }); box.appendChild(r); };
-  sum(['📆 الفائدة السنوية', fmt(cgInt(annualAll))], ['🗓 الفائدة الشهرية', fmt(cgInt(monthlyAll))], 'v-blue', 'v-green');
-  { const nt = nextDueTxt('bank'); if(nt) box.appendChild(cmNote(nt)); }
+  if(isCur) sum(['📆 الفائدة السنوية', fmt(cgInt(annualAll))], ['🗓 الفائدة الشهرية', fmt(cgInt(monthlyAll))], 'v-blue', 'v-green');
+  else sum(['📆 فوائد سنة ' + toArabicDigits(yr), fmt(cgInt(expectedYear))], ['🗓 الفائدة الشهرية (آخر شهر)', fmt(cgInt(monthlyY))], 'v-blue', 'v-green');
+  cmPastNote(box, yr);
+  if(isCur){ const nt = nextDueTxt('bank'); if(nt) box.appendChild(cmNote(nt)); }
   box.appendChild(cmNote('↻ الفوائد بتستمر تلقائيًا كل سنة بنفس النسبة والمواعيد لحد ما تعدّلها أو تحذفها.'));
   // فوائد كل مجموعة / بنك على حدة (بتزيد في موعد كل فائدة من الشهر)
   {
@@ -5249,7 +5263,7 @@ function renderBankInterest(){
     const loose = banks.filter(b=> !grps.some(g=> g.id === b.grp) && bankMonthly(b) > 0);
     if(loose.length) sets.push({name: 'بدون مجموعة', color: '#6b7280', items: loose});
     const act = sets.filter(z=> z.items.length);
-    if(act.length){
+    if(act.length && isCur){
       const totGot = cgInt(act.reduce((t, z)=> t + grpIntStats(z.items, nowC).got, 0));
       const gH = mk('cap-grp', 'فوائد البنوك لشهر ' + MONTHS[mC] + ' — ' + fmt(totGot)); box.appendChild(gH);
       const gWrap = document.createElement('div'); cmTblToggle(gH, gWrap, 'bankgrp');
@@ -5276,7 +5290,7 @@ function renderBankInterest(){
     }
   }
   // الحسابات
-  if(banks.length){
+  if(banks.length && isCur){
     const aH = mk('cap-grp', 'الشهادات'); box.appendChild(aH);
     const acc = document.createElement('div'); acc.className = 'gi-rows'; acc.style.cssText = 'max-height:none; overflow:visible;'; cmTblToggle(aH, acc, 'bankacc');
     banks.forEach(x=> acc.appendChild(mcCard(x, {})));
