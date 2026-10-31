@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.7971">
+<meta name="app-version" content="2026-11-01.7972">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -3984,7 +3984,59 @@ function load(){
   try{ bankChgMigrate(); }catch(e){}
   try{ bankPiasterMigrate(); }catch(e){}
   try{ autoIncSync(); }catch(e){}
+  try{ grpCarrySync(true); }catch(e){}
   try{ _opsSnap = opsFlat(); _opsOwner = data; }catch(e){}
+}
+
+// ===== ترحيل المجموعات: مجموعات الشهر الماضي بتتنقل للشهر الحالي والقادم (مرة واحدة لكل شهر) =====
+// بتتنقل المجموعات والمجموعات الفرعية بس (فاضية من غير مصروفات). اللي اسمه موجود قبل كده ما بيتكررش،
+// وبعد الترحيل الشهر بيتعلّم (grpCarried) فلو حذفت مجموعة منه ما بترجعش لوحدها، والتعديل بعد كده بإيدك.
+function grpCarryClone(g, toY, toM){
+  const c = {};
+  Object.keys(g).forEach(function(k){
+    if(k === 'children' || k === 'items' || k === 'id' || k === 'date') return;
+    const v = g[k];
+    c[k] = (v && typeof v === 'object') ? JSON.parse(JSON.stringify(v)) : v;
+  });
+  c.id = uid(); c.type = 'group';
+  c.date = new Date(toY, toM, 1, 12, 0, 0).getTime();
+  c.children = (g.children || []).filter(function(ch){ return ch && ch.type === 'group'; }).map(function(ch){ return grpCarryClone(ch, toY, toM); });
+  return c;
+}
+function grpCarryMerge(srcArr, dstArr, toY, toM){
+  let n = 0;
+  (srcArr || []).forEach(function(g){
+    if(!g || g.type !== 'group') return;
+    const ex = dstArr.find(function(x){ return x && x.type === 'group' && x.name === g.name; });
+    if(!ex){ dstArr.push(grpCarryClone(g, toY, toM)); n++; }
+    else { if(!Array.isArray(ex.children)) ex.children = []; n += grpCarryMerge(g.children, ex.children, toY, toM); }
+  });
+  return n;
+}
+function grpCarrySync(atLoad){
+  if(!data || typeof data !== 'object') return 0;
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+  const py = m === 0 ? y - 1 : y, pm = m === 0 ? 11 : m - 1;
+  const ny = m === 11 ? y + 1 : y, nm = m === 11 ? 0 : m + 1;
+  let changed = false, total = 0;
+  [[py, pm, y, m], [y, m, ny, nm]].forEach(function(st){
+    const src = data[st[0]] && data[st[0]][st[1]], dst = data[st[2]] && data[st[2]][st[3]];
+    if(!src || !dst || dst.grpCarried === true) return;
+    if(!Array.isArray(dst.groups)) dst.groups = [];
+    total += grpCarryMerge(src.groups, dst.groups, st[2], st[3]);
+    dst.grpCarried = true; changed = true;
+  });
+  if(!changed) return 0;
+  try{ _opsSnap = opsFlat(); }catch(e){}   // الترحيل مش عملية جديدة تتسجّل في سجل العمليات
+  if(atLoad){
+    try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }catch(e){}
+    try{ scheduleDbPush(); }catch(e){}
+  } else {
+    save();
+    try{ if(currentMonth !== null) renderDetail(); else renderMonths(); }catch(e){}
+  }
+  if(total > 0) setTimeout(function(){ try{ showToast('📁 اترحّل ' + toArabicDigits(total) + ' مجموعة من الشهر الماضي للشهر الحالي والقادم', true); }catch(e){} }, 900);
+  return total;
 }
 
 function setCurrentYear(y){
@@ -10575,6 +10627,7 @@ checkLockOnStartup();
 try{ goldLiveRefresh(false); }catch(e){}
 window.addEventListener('online', function(){ try{ goldLiveRefresh(false); }catch(e){} });
 document.addEventListener('visibilitychange', function(){ try{ if(document.visibilityState === 'visible') autoIncRefresh(); }catch(e){} });
+document.addEventListener('visibilitychange', function(){ try{ if(document.visibilityState === 'visible' && _appStarted) grpCarrySync(false); }catch(e){} });
 document.addEventListener('visibilitychange', function(){ try{ if(document.visibilityState === 'visible') goldLiveRefresh(false); }catch(e){} });
 setInterval(function(){ try{ if(document.visibilityState === 'visible' && navigator.onLine) goldLiveRefresh(false); }catch(e){} }, 60 * 1000);
 setInterval(function(){ try{ if(document.visibilityState === 'visible' && navigator.onLine && goldScreenOpen()) goldTick(); }catch(e){} }, 6 * 1000);
