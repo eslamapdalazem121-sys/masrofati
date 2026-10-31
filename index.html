@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7945">
+<meta name="app-version" content="2026-10-31.7946">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1513,6 +1513,16 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 .mc-addsub:active{transform:translateY(3px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 1px 0 #a3204d;}
 :root[data-theme="dark"] .gi-row.mc.mc-sub{--mce:#5a2040; --mct:#3a2030;}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .gi-row.mc.mc-sub{--mce:#5a2040; --mct:#3a2030;} }
+
+/* إصلاح صفحة أموال: الصفوف الطويلة (اسم البنك في قايمة المعاش) كانت بتوسّع النموذج برّه الشاشة */
+#capMoneyOverlay .modal-box{overflow-x:hidden; max-width:100vw;}
+#cmForm, #cmForm > *{max-width:100%; min-width:0; box-sizing:border-box;}
+#cmForm .date-row{flex-wrap:wrap; min-width:0;}
+#cmForm .date-row label{white-space:normal; min-width:0; flex:1 1 100%; line-height:1.5;}
+#cmForm .date-row select, #cmForm .date-row input{flex:1 1 100%; width:100%; min-width:0; max-width:100%; box-sizing:border-box; text-overflow:ellipsis;}
+#cmForm .date-row.grp-new input{flex:1 1 0;} #cmForm .date-row.grp-new .mini-btn{flex:none;}
+#cmForm .hint, #cmForm .check-row{max-width:100%; overflow-wrap:anywhere; white-space:normal;}
+#cmForm select{max-width:100%; text-overflow:ellipsis;}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
