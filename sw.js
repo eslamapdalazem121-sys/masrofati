@@ -1,5 +1,5 @@
 /* Service Worker — مصروفاتي B (العمل بدون إنترنت) */
-const VERSION = '2026-10-31.7952';
+const VERSION = '2026-10-31.7970';
 const CACHE_PREFIX = 'masrofati-b-v';
 const CACHE = CACHE_PREFIX + VERSION;
 const SHELL = [
@@ -98,5 +98,20 @@ self.addEventListener('notificationclick', (event) => {
     const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const c of list) { if ('focus' in c) return c.focus(); }
     if (self.clients.openWindow) return self.clients.openWindow('./');
+  })());
+});
+
+// إشعارات السيرفر (FCM) حتى والتطبيق مقفول. لو التطبيق مفتوح قدامك بنسيبه هو اللي ينبّه.
+self.addEventListener('push', (event) => {
+  let p = {};
+  try { p = event.data ? event.data.json() : {}; } catch (e) { try { p = { data: { body: event.data.text() } }; } catch (e2) {} }
+  const d = (p && p.data) || p || {};
+  const title = d.title || (p.notification && p.notification.title) || 'مصروفاتي B';
+  const body = d.body || (p.notification && p.notification.body) || '';
+  if (!body) return;
+  event.waitUntil((async () => {
+    const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (list.some((c) => c.visibilityState === 'visible')) return;
+    await self.registration.showNotification(title, { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: d.tag || d.id || 'push', lang: 'ar', dir: 'rtl', vibrate: [200, 100, 200] });
   })());
 });

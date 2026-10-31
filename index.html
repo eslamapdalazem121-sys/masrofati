@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7952">
+<meta name="app-version" content="2026-10-31.7970">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2349,6 +2349,11 @@ html{ overscroll-behavior:none; }
       <div class="field"><label>الفوائد والاستحقاق</label>
         <div class="acc-seg" id="certFreq"><button type="button" class="active" data-v="monthly" onclick="certPick('monthly')">🗓 شهري</button><button type="button" data-v="quarterly" onclick="certPick('quarterly')">🧾 كل ٣ شهور</button><button type="button" data-v="annual" onclick="certPick('annual')">📆 سنوي</button></div></div>
       <div class="field"><label for="certDate">📅 تاريخ الشراء (منه بيتحدد يوم الاستحقاق)</label><input type="date" id="certDate" onchange="certCalc()"></div>
+      <div class="field"><label for="certTerm">⏳ مدة الشهادة</label>
+        <select id="certTerm" onchange="certTermChange()"><option value="0">بدون مدة محددة (مفتوحة)</option><option value="6">٦ شهور</option><option value="12">سنة</option><option value="24">سنتين</option><option value="36">٣ سنين</option><option value="60">٥ سنين</option><option value="84">٧ سنين</option><option value="custom">مدة أخرى (بالشهور)…</option></select>
+        <input type="number" id="certTermCustom" placeholder="عدد الشهور" inputmode="numeric" min="1" max="600" style="display:none; margin-top:8px;" oninput="certCalc()">
+        <div class="hint" id="certEndHint" style="margin-top:6px;"></div></div>
+      <div class="check-row" id="certRenewRow" style="display:none;"><input type="checkbox" id="certRenew" onchange="certCalc()"><label for="certRenew" style="margin:0;">🔄 تجديد تلقائي عند الانتهاء (الشهادة بتكمل لمدة جديدة والفوائد ما بتقفش)</label></div>
       <div class="acc-sum" id="certSum"></div>
       <div class="check-row"><input type="checkbox" id="certIntOut" checked><label for="certIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد الشهادة)</label></div>
       <div class="check-row"><input type="checkbox" id="certZk" checked><label for="certZk" style="margin:0;">🕌 تدخل في حساب زكاة المال</label></div>
@@ -2903,6 +2908,15 @@ html{ overscroll-behavior:none; }
         <div class="nf-sub" style="margin-top:14px;">⚙️ التحكم لكل بند <small>(دوس على عنوان العمود يشغّل/يوقّف الكل)</small></div>
         <div id="nfMatrix"></div>
         <p class="nf-note">💬 رسالة = إشعار على الموبايل + شريط فوق الشاشة · 🔊 صوت = نغمة · 💡 ضوء = وميض على حواف الشاشة. لمبة الإشعار (LED) وصوت الإشعار نفسه وهو التطبيق مقفول بيتحكم فيهم الموبايل من إعدادات إشعارات التطبيق.</p>
+        <div class="nf-sub" style="margin-top:14px;">☁️ إشعارات والتطبيق مقفول <small>(Firebase + سيرفر صغير على GitHub)</small></div>
+        <p class="nf-note" id="pushStatus"></p>
+        <input type="text" id="pushVapid" dir="ltr" placeholder="مفتاح VAPID (Web Push certificate)" autocomplete="off" style="width:100%; box-sizing:border-box; margin:6px 0;">
+        <div class="opt-row" data-nosound>
+          <button type="button" class="opt-chip" onclick="pushEnable()">☁️ تفعيل</button>
+          <button type="button" class="opt-chip" onclick="pushSyncNow()">🔁 مزامنة الآن</button>
+          <button type="button" class="opt-chip" onclick="pushTest()">🧪 إشعار تجريبي</button>
+          <button type="button" class="opt-chip" onclick="pushDisable()">⛔ إيقاف</button>
+        </div>
       </div>
     </div>
 
@@ -5017,8 +5031,54 @@ function bankMonthly(x){
 function bankAnnualAny(x){ return Number(x.rate) > 0 ? bankAnnual(x) : cgInt(bankMonthly(x) * 12); }
 function bankDay(x){ return new Date(x.date || Date.now()).getDate(); }
 function bankDueOf(x, y, m){ return new Date(y, m, Math.min(bankDay(x), new Date(y, m + 1, 0).getDate())); }
+// ===== مدة الشهادة وتجديدها: x.term (شهور) · x.autoRenew (تجديد تلقائي) · x.ext (عدد مرات التجديد اليدوي) =====
+// شهادة من غير مدة = مفتوحة زي ما كانت. شهادة بمدة وبدون تجديد تلقائي: الفوائد بتقف بعد يوم الانتهاء (وآخر فايدة بتتصرف يوم الانتهاء نفسه).
+function certTermM(x){ const t = Math.round(Number(x && x.term) || 0); return x && x.isCert && t > 0 ? t : 0; }
+function certAddM(d0, n){ const t = new Date(d0.getFullYear(), d0.getMonth() + n + 1, 0).getDate(); return new Date(d0.getFullYear(), d0.getMonth() + n, Math.min(d0.getDate(), t)); }
+function certStart(x){ const d = new Date(x.date || Date.now()); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function certCycleEnd(x, k){ return certAddM(certStart(x), certTermM(x) * k); }
+function certExt(x){ return Math.max(0, Math.round(Number(x && x.ext) || 0)); }
+function certEndStop(x){ const t = certTermM(x); if(!t || x.autoRenew === true) return null; return certCycleEnd(x, 1 + certExt(x)); }
+function certMatInfo(x, now){
+  const t = certTermM(x); if(!t) return null; now = now || new Date();
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), auto = x.autoRenew === true; let k = 1 + (auto ? 0 : certExt(x)), end;
+  if(auto){ for(let i = 0; i < 600; i++){ end = certCycleEnd(x, k); if(end.getTime() >= t0) break; k++; } }
+  else end = certCycleEnd(x, k);
+  const days = Math.round((end.getTime() - t0) / 864e5);
+  return {x: x, end: end, days: days, ended: days < 0, auto: auto, cycle: k, term: t};
+}
+function certAlertOf(x){ try{ const i = certMatInfo(x); if(!i || i.auto) return null; return (i.days <= 30 && i.days >= -30) ? i : null; }catch(e){ return null; } }
+function certLeftTxt(n){
+  if(n <= 0) return n === 0 ? 'اليوم' : 'عدّى ' + toArabicDigits(-n) + ' يوم';
+  if(n === 1) return 'غدًا'; if(n === 2) return 'بعد غد'; if(n < 60) return 'باقي ' + toArabicDigits(n) + ' يوم';
+  const mo = Math.round(n / 30.44); if(mo < 24) return 'باقي حوالي ' + toArabicDigits(mo) + ' شهر';
+  const yr = Math.floor(mo / 12), rm = mo % 12; return 'باقي حوالي ' + toArabicDigits(yr) + ' سنة' + (rm ? ' و' + toArabicDigits(rm) + ' شهر' : '');
+}
+function certTermTxt(t){ if(t % 12 === 0){ const y = t / 12; return y === 1 ? 'سنة' : (y === 2 ? 'سنتين' : toArabicDigits(y) + ' سنين'); } return toArabicDigits(t) + ' شهر'; }
+function certDateTxt(d){ return d.toLocaleDateString(dateLocale(), {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'}); }
+function certMatTxt(i){
+  const ds = certDateTxt(i.end);
+  if(i.ended) return '⌛ انتهت الشهادة يوم ' + ds + ' — الفوائد وقفت. جدّدها لو عايزها تكمل';
+  if(i.auto) return '🔄 تجديد تلقائي — الدورة ' + toArabicDigits(i.cycle) + ' (' + certTermTxt(i.term) + ') بتنتهي ' + ds + ' (' + certLeftTxt(i.days) + ') وبعدها بتتجدد لنفس المدة';
+  return '📅 بتنتهي ' + ds + ' (' + certLeftTxt(i.days) + ') — بعدها الفوائد بتقف' + (i.cycle > 1 ? ' · اتجدّدت ' + toArabicDigits(i.cycle - 1) + (i.cycle === 2 ? ' مرة' : ' مرات') : '');
+}
+function certAlertTxt(i){
+  const nm = i.x.certName || i.x.name, ds = certDateTxt(i.end), amt = fmt(cgRound(Number(i.x.amount) || 0));
+  if(i.ended) return '⌛ انتهت شهادة «' + nm + '» يوم ' + ds + ' — الفوائد وقفت. جدّدها أو اسحب قيمتها (' + amt + ')';
+  const when = i.days === 0 ? 'اليوم' : (i.days === 1 ? 'غدًا' : (i.days === 2 ? 'بعد غد' : 'بعد ' + toArabicDigits(i.days) + ' يوم'));
+  return '📜 ' + when + ' بتنتهي شهادة «' + nm + '» (' + ds + ') — قيمتها ' + amt + '. جدّدها أو اسحبها';
+}
+function certRenew(id){
+  const x = capRaw().find(z=> z.id === id); if(!x || !x.isCert || !certTermM(x)) return;
+  const t = certTermM(x), i = certMatInfo(x); if(!i) return;
+  if(!confirm('تجديد شهادة «' + (x.certName || x.name) + '» لمدة جديدة (' + certTermTxt(t) + ')؟ الفوائد هتكمل بنفس القيمة والنسبة.')) return;
+  x.autoRenew = false; x.ext = certExt(x) + 1;
+  for(let n = 0; n < 600 && certMatInfo(x).ended; n++) x.ext++;
+  save(); capRerender();
+  showToast('🔄 اتجدّدت «' + (x.certName || x.name) + '» — بتنتهي ' + certMatInfo(x).end.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long', year: 'numeric'}), true);
+}
 function bankFirstDue(x){ const d0 = new Date(x.date || Date.now()), nx = new Date(d0.getFullYear(), d0.getMonth() + bankPer(x), 1); return bankDueOf(x, nx.getFullYear(), nx.getMonth()); }
-function bankActive(x, y, m){ const d = bankDueOf(x, y, m); if(bankAnnualPay(x)){ const d0 = new Date(x.date || Date.now()); if((((y - d0.getFullYear()) * 12 + (m - d0.getMonth())) % bankPer(x)) !== 0) return false; } return d >= bankFirstDue(x) && bankMonthlyAt(x, d) > 0; }
+function bankActive(x, y, m){ const d = bankDueOf(x, y, m); if(x.isCert){ const es = certEndStop(x); if(es && d > es) return false; } if(bankAnnualPay(x)){ const d0 = new Date(x.date || Date.now()); if((((y - d0.getFullYear()) * 12 + (m - d0.getMonth())) % bankPer(x)) !== 0) return false; } return d >= bankFirstDue(x) && bankMonthlyAt(x, d) > 0; }
 function bankRemain(x){ return bankMonthly(x) * 12; }
 // ===== إنشاء حساب بنكي: اسم الحساب + البنك + توفير/جاري + نسبة الفائدة + شهرية/سنوية =====
 let _accEditId = null, _accType = 'savings', _accFreq = 'monthly', _accSub = false;
@@ -5092,7 +5152,24 @@ function certPick(v){
   Array.prototype.forEach.call(document.getElementById('certFreq').children, function(b){ b.classList.toggle('active', b.dataset.v === v); });
   certCalc();
 }
+function certTermVal(){ const sel = document.getElementById('certTerm'); if(!sel) return 0; if(sel.value === 'custom') return Math.max(0, Math.round(Number(document.getElementById('certTermCustom').value) || 0)); return Number(sel.value) || 0; }
+function certTermChange(){
+  const sel = document.getElementById('certTerm'), cu = document.getElementById('certTermCustom');
+  cu.style.display = sel.value === 'custom' ? '' : 'none';
+  if(sel.value === 'custom'){ try{ cu.focus(); }catch(e){} }
+  certCalc();
+}
+function certTermUI(){
+  const t = certTermVal(), hint = document.getElementById('certEndHint'), row = document.getElementById('certRenewRow');
+  row.style.display = t > 0 ? '' : 'none';
+  if(!(t > 0)){ hint.textContent = 'من غير مدة: الشهادة مفتوحة والفوائد بتفضل مستمرة لحد ما تعدّلها أو تحذفها.'; return; }
+  const dv = document.getElementById('certDate').value, d0 = new Date(dv ? dv + 'T12:00:00' : Date.now()), end = certAddM(new Date(d0.getFullYear(), d0.getMonth(), d0.getDate()), t);
+  const amt = Number(document.getElementById('certAmt').value) || 0, rate = Number(document.getElementById('certRate').value) || 0, tot = amt > 0 && rate > 0 ? cgInt(amt * rate / 100 * t / 12) : 0;
+  const ren = document.getElementById('certRenew').checked;
+  hint.textContent = '📅 بتنتهي يوم ' + certDateTxt(end) + (ren ? ' — وبعدها بتتجدد تلقائيًا لنفس المدة.' : ' — بعدها الفوائد بتقف وهتتنبّه قبلها بـ ٣٠ و٧ و١ يوم.') + (tot > 0 ? ' · فوائد المدة (' + certTermTxt(t) + '): ' + fmt(tot) : '');
+}
 function certCalc(){
+  try{ certTermUI(); }catch(e){}
   const amt = Number(document.getElementById('certAmt').value) || 0, rate = Number(document.getElementById('certRate').value) || 0, el = document.getElementById('certSum');
   const dv = document.getElementById('certDate').value, d0 = new Date(dv ? dv + 'T12:00:00' : Date.now()), day = toArabicDigits(d0.getDate());
   if(!(rate > 0)){ el.textContent = 'اكتب نسبة الفائدة عشان تظهر الفايدة المتوقعة'; return; }
@@ -5115,6 +5192,10 @@ function openCapCert(x){
   document.getElementById('certDate').value = dateToInputValue(x && x.date ? x.date : Date.now());
   document.getElementById('certIntOut').checked = !(x && x.intKeep === true);
   document.getElementById('certZk').checked = !(x && x.noZk === true);
+  { const tm = x ? certTermM(x) : 0, ts = document.getElementById('certTerm'), tc = document.getElementById('certTermCustom');
+    ts.value = String(tm); if(ts.value !== String(tm)){ ts.value = 'custom'; tc.value = tm; } else tc.value = '';
+    tc.style.display = ts.value === 'custom' ? '' : 'none';
+    document.getElementById('certRenew').checked = !!(x && tm > 0 && x.autoRenew === true); }
   document.getElementById('certSaveBtn').textContent = x ? '💾 حفظ التعديل' : '📜 إنشاء الشهادة';
   certPick(x && (x.payFreq === 'annual' || x.payFreq === 'quarterly') ? x.payFreq : 'monthly');
   document.getElementById('capCertOverlay').classList.add('open');
@@ -5126,13 +5207,20 @@ function saveCapCert(){
   if(!cn){ showToast('اكتب اسم الشهادة', false); return; }
   if(amt <= 0){ showToast('اكتب قيمة الشهادة', false); return; }
   if(rate <= 0){ showToast('اكتب نسبة الفائدة', false); return; }
+  const term = certTermVal(); if(document.getElementById('certTerm').value === 'custom' && !(term >= 1 && term <= 600)){ showToast('اكتب مدة الشهادة بالشهور (من ١ لـ ٦٠٠)', false); return; }
   const accId = document.getElementById('certAcc').value, acc = capList().find(z=> z.id === accId);
   const rec = {name: acc && acc.bank ? cn + ' · ' + acc.bank : cn, certName: cn, accId: accId || undefined, payFreq: _certFreq, rate: rate, amount: amt, cat: 'money', sub: 'bank', isCert: true,
     date: inputValueToDate(document.getElementById('certDate').value, Date.now())};
   if(!document.getElementById('certIntOut').checked) rec.intKeep = true;
   if(!document.getElementById('certZk').checked) rec.noZk = true;
+  if(term > 0){ rec.term = term; if(document.getElementById('certRenew').checked) rec.autoRenew = true; }
   const edit = !!_certEditId;
-  if(edit){ const x = capList().find(z=> z.id === _certEditId); if(x){ delete x.intKeep; delete x.noZk; delete x.accId; Object.assign(x, rec); } }
+  if(edit){ const x = capList().find(z=> z.id === _certEditId); if(x){
+    const pt = certTermM(x), pd = new Date(x.date || Date.now()).toDateString(); let ext0 = certExt(x);
+    if(pt && x.autoRenew === true){ const i0 = certMatInfo(x); if(i0) ext0 = i0.cycle - 1; }   // كانت بتتجدد تلقائيًا: الدورات اللي عدّت بتتحسب كتجديدات
+    delete x.intKeep; delete x.noZk; delete x.accId; delete x.term; delete x.autoRenew; delete x.ext; Object.assign(x, rec);
+    if(rec.term && !rec.autoRenew && rec.term === pt && new Date(rec.date).toDateString() === pd && ext0 > 0) x.ext = ext0;
+  } }
   else capList().push(Object.assign({id: uid()}, rec));
   save(); closeCapCert(); _cmFilter = 'bank'; renderCapMoney(); renderCap();
   showToast(edit ? 'تم حفظ التعديل' : 'تم إنشاء الشهادة', true);
@@ -5484,7 +5572,7 @@ function mcCard(x, o){
       if(x.isSub){ const pp = capList().find(z=> z.id === x.accId); tg.textContent = '🗂 حساب فرعي' + (pp ? ' لـ «' + (pp.accName || pp.name) + '»' : '') + ' · ' + tg.textContent; }
     } else if(x.isCert){
       const per = bankPer(x), lk = capList().find(z=> z.id === x.accId);
-      tg.textContent = '📜 شهادة · ' + (per === 12 ? 'فايدة سنوية كل ' + toArabicDigits(bankDay(x)) + ' ' + MONTHS[new Date(x.date || Date.now()).getMonth()] : (per === 3 ? 'فايدة كل ٣ شهور (يوم ' + toArabicDigits(bankDay(x)) + ')' : 'فايدة شهرية كل يوم ' + toArabicDigits(bankDay(x)))) + (lk ? ' · 🏦 ' + lk.name : '') + (dt ? ' · اشتُريت ' + dt : '');
+      tg.textContent = '📜 شهادة · ' + (per === 12 ? 'فايدة سنوية كل ' + toArabicDigits(bankDay(x)) + ' ' + MONTHS[new Date(x.date || Date.now()).getMonth()] : (per === 3 ? 'فايدة كل ٣ شهور (يوم ' + toArabicDigits(bankDay(x)) + ')' : 'فايدة شهرية كل يوم ' + toArabicDigits(bankDay(x)))) + (lk ? ' · 🏦 ' + lk.name : '') + (dt ? ' · اشتُريت ' + dt : '') + (certTermM(x) ? ' · ⏳ ' + certTermTxt(certTermM(x)) + (x.autoRenew === true ? ' 🔄' : '') : '');
     } else tg.textContent = (mon > 0 ? 'فايدة كل يوم ' + toArabicDigits(bankDay(x)) + ' من الشهر' : 'حساب بدون فوائد') + (dt ? ' · بداية ' + dt : '');
     if(bankAnnualPay(x) && bankAnnualAny(x) > 0){
       const per = bankPer(x);
@@ -5527,6 +5615,21 @@ function mcCard(x, o){
   if(x.isAcc){   // المعاشات اللي بتتحط في الحساب الأساسي ده
     const lp = capRaw().filter(function(p){ return p && capCatOf(p) === 'money' && capSubOf(p) === 'pension' && p.payAcc === x.id; });
     if(lp.length) mcPill(d, 'ok', '💳 المعاش بيتحط هنا كل شهر: ' + lp.map(function(p){ return '«' + p.name + '» ' + fmt(Number(p.amount) || 0) + ' (يوم ' + toArabicDigits(penDay(p)) + ')'; }).join(' · '));
+  }
+  if(x.isCert && certTermM(x) && !cmPastView()){
+    const ci = certMatInfo(x);
+    if(ci){
+      mcPill(d, ci.ended ? 'wait' : 'ok', certMatTxt(ci));
+      const ca = certAlertOf(ci.x);
+      if(ca){
+        d.classList.add('mc-soon', 'd1');
+        const sp = mcPill(d, 'soon d1', ''); sp.innerHTML = '<span class="mc-bell">🔔</span><span></span>'; sp.children[1].textContent = certAlertTxt(ca);
+      }
+      if(o.acts && !ci.auto && ci.days <= 30){
+        const rb = document.createElement('button'); rb.type = 'button'; rb.className = 'mc-addsub'; rb.textContent = '🔄 جدّد الشهادة لمدة ' + certTermTxt(ci.term);
+        rb.addEventListener('click', function(e){ e.stopPropagation(); certRenew(x.id); }); d.appendChild(rb);
+      }
+    }
   }
   { const ds = (sub === 'bank' || sub === 'pension') && !cmPastView() ? dueSoonOf(x) : null;
     if(ds){ d.classList.add('mc-soon', 'd' + ds.days); const sp = mcPill(d, 'soon d' + ds.days, ''); sp.innerHTML = '<span class="mc-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(ds); d.insertBefore(sp, grid); } }
@@ -5634,6 +5737,8 @@ function mbCard(b, base){
   body.appendChild(addSub);
   { let best = null; b.accs.concat(b.subs, b.certs, b.pens || []).forEach(function(x){ let ds = null; try{ ds = cmPastView() ? null : dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
     if(best){ const sp = document.createElement('div'); sp.className = 'mb-soon'; sp.innerHTML = '<span class="mb-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(best); card.insertBefore(sp, body); } }
+  { let cb = null; b.certs.forEach(function(x){ let i = null; try{ i = cmPastView() ? null : certAlertOf(x); }catch(e){} if(i && (!cb || i.days < cb.days)) cb = i; });
+    if(cb){ const sp = document.createElement('div'); sp.className = 'mb-soon'; sp.innerHTML = '<span class="mb-bell">🔔</span><span></span>'; sp.children[1].textContent = certAlertTxt(cb); card.insertBefore(sp, body); } }
   bind(head, body, badge, K);
   return card;
 }
@@ -5649,7 +5754,7 @@ function renderCapMoney(){
   document.getElementById('cmChipCash').classList.toggle('on', _cmFilter === 'cash');
   document.getElementById('cmChipBank').classList.toggle('on', _cmFilter === 'bank');
   { const inBank = _cmFilter === 'bank' || (_cmFormOpen && _cmSub === 'bank'), gr = document.getElementById('cmGrpRow'), ar = document.getElementById('cmAccRow'); if(gr) gr.style.display = inBank ? 'none' : ''; if(ar) ar.style.display = inBank ? '' : 'none'; }
-  try{ const mo = pastV ? [] : capList().filter(x=> capCatOf(x) === 'money'); document.getElementById('cmChipBank').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'bank' && dueSoonOf(x))); document.getElementById('cmChipPen').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'pension' && dueSoonOf(x))); }catch(e){}
+  try{ const mo = pastV ? [] : capList().filter(x=> capCatOf(x) === 'money'); document.getElementById('cmChipBank').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'bank' && (dueSoonOf(x) || certAlertOf(x)))); document.getElementById('cmChipPen').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'pension' && dueSoonOf(x))); }catch(e){}
   const srcL = cmSrcList(), arr = sortDescByDate(srcL.filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
   const mcBase = srcL.filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
   box.innerHTML = arr.length ? '' : '<div class="mc-empty">' + (pastV ? 'مفيش بنود في سنة ' + toArabicDigits(cmYear()) : 'لا توجد بنود بعد') + '</div>';
@@ -10723,7 +10828,7 @@ var NF_CATS = [
   ['za','🕌','زكاتي'], ['zp','🤲','منصرف الزكاة'], ['zm','🕌','زكاة المال'],
   ['cap','💼','رأس المال (أموال / ذهب)'], ['cgp','🗂️','مجموعات رأس المال'],
   ['bank','🏦','استحقاق فايدة بنك'], ['pension','💳','استحقاق معاش'],
-  ['bankup','⏰','قبل استحقاق شهادة / فايدة'], ['penup','⏰','قبل استحقاق معاش'],
+  ['bankup','⏰','قبل استحقاق شهادة / فايدة'], ['certend','📜','قرب انتهاء الشهادة / تجديدها'], ['penup','⏰','قبل استحقاق معاش'],
   ['zdue','🔔','موعد الزكاة'], ['backup','🗄️','نسخة احتياطية']
 ];
 var NF_DEF_OFF = {backup: {s:false, l:false}};
@@ -10855,6 +10960,15 @@ function dueAlertScan(){
         var o = dueSoonOf(x); if(!o || o.days < 1) return;
         var k = 'up:' + x.id + ':' + o.key + ':' + o.days; if(seen[k]) return; seen[k] = 1; changed = true;
         if(fire) nfEvent(sub === 'bank' ? 'bankup' : 'penup', '🔔 ' + dueSoonTxt(o), k);
+      });
+    }catch(e){}
+    try{   // قرب انتهاء الشهادة (٣٠ / ٧ / ١ يوم / يوم الانتهاء) ثم «انتهت» — مرة واحدة لكل دورة
+      (Array.isArray(data.capital) ? data.capital : []).forEach(function(x){
+        if(!x || !x.isCert || !certTermM(x)) return; var i = certMatInfo(x); if(!i || i.auto) return;
+        if(i.ended){ if(i.days < -30) return; var ke = 'ce:' + x.id + ':' + i.cycle + ':end'; if(seen[ke]) return; seen[ke] = 1; changed = true; if(fire) nfEvent('certend', certAlertTxt(i), ke); return; }
+        var lead = [0, 1, 7, 30].filter(function(L){ return i.days <= L; })[0]; if(lead === undefined) return;
+        var kc = 'ce:' + x.id + ':' + i.cycle + ':' + lead; if(seen[kc]) return; seen[kc] = 1; changed = true;
+        if(fire) nfEvent('certend', '🔔 ' + certAlertTxt(i), kc);
       });
     }catch(e){}
     try{
@@ -11051,6 +11165,136 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     wrap('addCapMoney', function(){ return _cmEditId; });
   }, 0); });
 })();
+</script>
+<script>
+/* ===== إشعارات والتطبيق مقفول (FCM) =====
+   التطبيق بيحسب مواعيد الإشعارات الجاية (فوايد / معاش / انتهاء شهادة / زكاة) ويحطها في Firestore: users/{uid}/data/push
+   وسيرفر صغير (GitHub Actions) بيبعتها في ميعادها عن طريق FCM، وملف sw.js بيعرضها حتى لو التطبيق مقفول. */
+const PUSH_LS = {vapid:'masrofati_push_vapid', token:'masrofati_push_token', on:'masrofati_push_on', sig:'masrofati_push_sig', n:'masrofati_push_n', at:'masrofati_push_at'};
+function pushLs(k, v){ try{ if(v === undefined) return localStorage.getItem(PUSH_LS[k]) || ''; if(v === null) localStorage.removeItem(PUSH_LS[k]); else localStorage.setItem(PUSH_LS[k], String(v)); }catch(e){} return ''; }
+function pushHash(str){ let h = 5381; for(let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return String(h); }
+function pushStatus(txt){ const el = document.getElementById('pushStatus'); if(el) el.textContent = txt; }
+function pushRender(){
+  try{
+    const inp = document.getElementById('pushVapid'); if(inp && !inp.value) inp.value = pushLs('vapid');
+    let t;
+    if(pushLs('on') !== '1') t = '⚪ مش مفعّلة. محتاج حساب سحابة (مسجّل دخول) + مفتاح VAPID من Firebase (Project settings ← Cloud Messaging ← Web Push certificates) + تشغيل السيرفر الصغير (شرح في ملف push-server).';
+    else t = '✅ مفعّلة على الجهاز ده' + (pushLs('n') ? ' — ' + toArabicDigits(pushLs('n')) + ' إشعار قادم متجدول' : '') + (pushLs('at') ? ' (آخر مزامنة ' + new Date(Number(pushLs('at'))).toLocaleString(dateLocale(), {day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'}) + ')' : '') + '. الإشعارات بتتبعت الساعة ٩ صباحًا، وبيوصلك حتى لو التطبيق مقفول.';
+    if(!(settings && settings.notify)) t += ' ⚠️ فعّل «تفعيل الإشعارات» من فوق الأول.';
+    pushStatus(t);
+  }catch(e){}
+}
+function pushBuildEvents(extra){
+  const out = [], now = new Date(), nowMs = now.getTime();
+  if(!settings || !settings.notify) return out;
+  const msgOn = cat => { try{ return nfCfg(cat).m; }catch(e){ return true; } };
+  const at = d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0, 0).getTime();
+  const shift = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const iso = d => zkIso(d), nearEnd = nowMs + 45 * 864e5, farEnd = nowMs + 400 * 864e5;
+  const add = (id, t, body, cat, lim) => { if(t > nowMs && t <= (lim || nearEnd) && msgOn(cat)) out.push({id: id, t: t, b: body}); };
+  const lead = dueLead();
+  capRaw().forEach(function(x){
+    if(!x || capCatOf(x) !== 'money') return; const sub = capSubOf(x);
+    if(sub === 'bank' || sub === 'pension'){
+      const bank = sub === 'bank';
+      for(let k = 0; k <= 2; k++){
+        const dt = new Date(now.getFullYear(), now.getMonth() + k, 1), y = dt.getFullYear(), m = dt.getMonth();
+        try{
+          if(bank ? !bankActive(x, y, m) : !penActive(x, y, m)) continue;
+          const dd = bank ? bankDueOf(x, y, m) : penDueOf(x, y, m), amt = bank ? bankMonthlyAt(x, dd) : (Number(x.amount) || 0); if(!(amt > 0)) continue;
+          if(x.intKeep !== true || !bank) add('pd:' + x.id + ':' + iso(dd), at(dd), (bank ? '🏦 استحقت فايدة «' : '💳 استحق معاش «') + x.name + '» — ' + fmt(amt), bank ? 'bank' : 'pension');
+          add('up:' + x.id + ':' + iso(dd), at(shift(dd, -lead)), '🔔 ' + dueSoonTxt({x: x, sub: sub, days: lead, due: dd, amt: amt}), bank ? 'bankup' : 'penup');
+        }catch(e){}
+      }
+    }
+    if(x.isCert && certTermM(x) && x.autoRenew !== true){
+      try{
+        const i = certMatInfo(x); if(!i || i.ended) return;
+        [30, 7, 1, 0].forEach(function(L){ add('ce:' + x.id + ':' + iso(i.end) + ':' + L, at(shift(i.end, -L)), '🔔 ' + certAlertTxt({x: x, end: i.end, days: L, ended: false}), 'certend', farEnd); });
+        add('ce:' + x.id + ':' + iso(i.end) + ':end', at(shift(i.end, 1)), certAlertTxt({x: x, end: i.end, days: -1, ended: true}), 'certend', farEnd);
+      }catch(e){}
+    }
+  });
+  try{
+    const zi = zkDueInfo();
+    if(zi && zi.next && zi.state !== 'unset'){
+      [30, 7].forEach(function(L){ add('zw:' + iso(zi.next) + ':' + L, at(shift(zi.next, -L)), '🔔 باقي ' + toArabicDigits(L) + ' يوم على موعد زكاة المال', 'zdue', farEnd); });
+      add('zd:' + iso(zi.next), at(zi.next), '🔔 وجب موعد زكاة المال — لازم تخرجها', 'zdue', farEnd);
+    }
+  }catch(e){}
+  if(extra) out.push(extra);
+  out.sort(function(a, b){ return a.t - b.t; });
+  return out.slice(0, 150);
+}
+function pushUserDocUrl(){ return FS_DOCS + 'users/' + encodeURIComponent(cloud.user.uid) + '/data/push'; }
+async function pushReadTokens(){
+  try{
+    const doc = await cloudRequest('GET', pushUserDocUrl() + '?mask.fieldPaths=tokens', null, 20000);
+    const arr = doc && doc.fields && doc.fields.tokens && doc.fields.tokens.arrayValue && doc.fields.tokens.arrayValue.values;
+    return (arr || []).map(v => v.stringValue).filter(Boolean);
+  }catch(e){ if(e && e.code === 'doc-missing') return []; throw e; }
+}
+async function pushWrite(tokens, events){
+  const fields = {
+    tokens: {arrayValue: {values: tokens.map(t => ({stringValue: t}))}},
+    events: {arrayValue: {values: events.map(e => ({mapValue: {fields: {id: {stringValue: e.id}, t: {integerValue: String(e.t)}, b: {stringValue: e.b}}}}))}},
+    updatedAt: {integerValue: String(Date.now())}
+  };
+  const body = {writes: [{update: {name: FS_DB + '/documents/users/' + cloud.user.uid + '/data/push', fields: fields}, updateMask: {fieldPaths: ['tokens', 'events', 'updatedAt']}}]};
+  await cloudRequest('POST', 'https://firestore.googleapis.com/v1/' + FS_DB + '/documents:commit', body, 30000);
+}
+let _pushBusy = false;
+async function pushSync(force, extra){
+  if(pushLs('on') !== '1' || !cloud.user || _pushBusy || !navigator.onLine) return false;
+  const token = pushLs('token'); if(!token) return false;
+  const ev = pushBuildEvents(extra), sig = pushHash(cloud.user.uid + '|' + token + '|' + JSON.stringify(ev));
+  if(!force && sig === pushLs('sig')) return true;
+  _pushBusy = true;
+  try{
+    const toks = (await pushReadTokens()).filter(t => t !== token); toks.push(token);
+    await pushWrite(toks.slice(-8), ev);
+    pushLs('sig', sig); pushLs('n', ev.length); pushLs('at', Date.now()); pushRender(); return true;
+  }catch(e){ pushStatus('⚠️ تعذّرت المزامنة (' + ((e && (e.code || e.message)) || 'خطأ') + ')' + ((e && e.code === 'permission-denied') ? ' — قواعد Firestore مش بتسمح بالكتابة في users/{uid}/data' : '')); return false; }
+  finally{ _pushBusy = false; }
+}
+async function pushEnable(){
+  try{
+    const vapid = (document.getElementById('pushVapid').value || '').trim();
+    if(!vapid){ showToast('الصق مفتاح VAPID الأول', false); return; }
+    if(typeof Notification === 'undefined' || !('serviceWorker' in navigator)){ showToast('الإشعارات مش متاحة هنا — استخدم التطبيق المثبّت', false); return; }
+    if(!cloud.user){ showToast('سجّل دخول بحساب السحابة الأول (من الإعدادات)', false); return; }
+    let perm = Notification.permission; if(perm !== 'granted'){ try{ perm = await Notification.requestPermission(); }catch(e){ perm = 'denied'; } }
+    if(perm !== 'granted'){ pushStatus('⚠️ الإذن مرفوض — فعّل الإشعارات للتطبيق من إعدادات الموبايل'); return; }
+    pushStatus('⏳ بجهّز الإشعارات…');
+    await cloudLoadSdk();
+    const reg = await navigator.serviceWorker.ready;
+    const mm = await import(FB_BASE + 'firebase-messaging.js');
+    if(!(await mm.isSupported())){ pushStatus('⚠️ المتصفح ده مش بيدعم الإشعارات من السحابة'); return; }
+    const token = await mm.getToken(mm.getMessaging(cloud.app), {vapidKey: vapid, serviceWorkerRegistration: reg});
+    if(!token){ pushStatus('⚠️ ما قدرتش آخد تصريح الإشعارات'); return; }
+    pushLs('vapid', vapid); pushLs('token', token); pushLs('on', '1'); pushLs('sig', null);
+    const ok = await pushSync(true);
+    if(ok){ pushRender(); showToast('☁️ إشعارات التطبيق المقفول اتفعّلت', true); }
+  }catch(e){ pushStatus('⚠️ فشل التفعيل: ' + ((e && (e.code || e.message)) || 'خطأ') + ' — اتأكد من مفتاح VAPID ومن إن Firebase Cloud Messaging API مفعّلة'); }
+}
+async function pushDisable(){
+  try{
+    const token = pushLs('token');
+    if(cloud.user && token){ try{ const toks = (await pushReadTokens()).filter(t => t !== token); await pushWrite(toks, toks.length ? pushBuildEvents() : []); }catch(e){} }
+    try{ const mm = await import(FB_BASE + 'firebase-messaging.js'); await mm.deleteToken(mm.getMessaging(cloud.app)); }catch(e){}
+    ['token', 'on', 'sig', 'n', 'at'].forEach(k => pushLs(k, null)); pushRender(); showToast('⛔ اتوقّفت', true);
+  }catch(e){ pushStatus('⚠️ ' + ((e && e.message) || 'خطأ')); }
+}
+async function pushSyncNow(){ if(pushLs('on') !== '1'){ showToast('فعّلها الأول', false); return; } const ok = await pushSync(true); if(ok) showToast('🔁 تمت المزامنة', true); }
+async function pushTest(){
+  if(pushLs('on') !== '1'){ showToast('فعّلها الأول', false); return; }
+  const ok = await pushSync(true, {id: 'test:' + Date.now(), t: Date.now() + 30000, b: '🧪 إشعار تجريبي — لو وصلك والتطبيق مقفول يبقى كل حاجة شغالة ✅'});
+  if(ok) pushStatus('🧪 اتجدول. اقفل التطبيق — هيوصلك مع أقرب تشغيل للسيرفر (ممكن لحد ١٥–٣٠ دقيقة، أو شغّله يدويًا من Actions ← Run workflow).');
+}
+document.addEventListener('visibilitychange', function(){ if(pushLs('on') === '1') pushSync(false); });
+setInterval(function(){ if(pushLs('on') === '1' && document.visibilityState === 'visible') pushSync(false); }, 10 * 60 * 1000);
+setTimeout(function(){ pushRender(); if(pushLs('on') === '1') pushSync(false); }, 6000);
+setInterval(function(){ if(pushLs('on') === '1' && !_pushBusy && cloud.user && !pushLs('sig')) pushSync(false); }, 30000);
 </script>
 </body>
 </html>
