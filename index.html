@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7949">
+<meta name="app-version" content="2026-10-31.7950">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4210,7 +4210,7 @@ function autoIncSync(){
           const bank = capSubOf(x) === 'bank';
           if(bank ? !bankActive(x, y, m) : !penActive(x, y, m)) return;
           if(!bank && !penToGen(x, y, m)) return;   // المعاش مش متحوّل للدخل العام (اختيارك، أو بيتحط في رصيد حساب بنكي بدله)
-          const due = (bank ? bankDueOf(x, y, m) : penDueOf(x, y, m)).getTime(), amt = bank ? bankMonthlyAt(x, bankDueOf(x, y, m)) : (Number(x.amount) || 0);
+          const due = (bank ? bankDueOf(x, y, m) : penDueOf(x, y, m)).getTime(), amt = bank ? bankMonthlyAt(x, bankDueOf(x, y, m)) : penAmtAt(x, penDueOf(x, y, m));
           if(!(amt > 0)) return;
           want['ai:' + x.id] = {id: 'ai:' + x.id, name: x.name, amount: amt, date: due, counted: due <= eod, auto: bank ? 'bank' : 'pension'};
         });
@@ -4744,7 +4744,7 @@ function capPastBar(){
   if(!capIsPast()){ if(bar) bar.remove(); return; }
   const sn = capSnapObj(currentYear);
   if(!bar){ bar = document.createElement('div'); bar.id = 'capPastBar'; bar.style.cssText = 'max-width:640px;margin:6px auto 10px;padding:10px 14px;border-radius:14px;background:rgba(80,90,110,.12);border:1px solid rgba(80,90,110,.35);font-weight:800;line-height:1.7;text-align:center;font-size:calc(13px * var(--fs,1));'; wrap.parentNode.insertBefore(bar, wrap); }
-  bar.textContent = '📁 سنة ' + toArabicDigits(currentYear) + ' — للرجوع فقط: رأس المال والزكاة بحساباتها (مثبّت' + (sn.est ? ' — تقدير من تواريخ الإضافة، راجع الأرقام' : ' بتاريخ ' + gFmt(new Date(sn.ts))) + '). أي تعديل بيتعمل من السنة الحالية.';
+  bar.textContent = '📁 سنة ' + toArabicDigits(currentYear) + ' — رأس المال والزكاة بحساباتها (مثبّت' + (sn.est ? ' — تقدير من تواريخ الإضافة، راجع الأرقام' : ' بتاريخ ' + gFmt(new Date(sn.ts))) + '). أي تعديل في بنود «أموال» (حساب / فايدة / مبلغ) من هنا بيأثر على السنة دي بس، ومن السنة الحالية بيسري من يوم التعديل.';
 }
 function renderCap(){
   try{ capPastBar(); }catch(e){}
@@ -4769,7 +4769,7 @@ function openCapChoose(){ document.getElementById('capChooseOverlay').classList.
 function closeCapChoose(){ document.getElementById('capChooseOverlay').classList.remove('open'); }
 function capDel(id){ data.capital = capRaw().filter(z=> z.id !== id); save(); renderCap(); }
 window.addEventListener('load', function(){
-  ['capDel', 'capGrpZkToggle', 'capItemZkToggle', 'saveCapGold', 'addCapMoney', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
+  ['capDel', 'capGrpZkToggle', 'capItemZkToggle', 'saveCapGold', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
     const f = window[n]; if(typeof f !== 'function') return;
     window[n] = function(){ if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; } return f.apply(this, arguments); };
   });
@@ -4964,7 +4964,21 @@ function bankAmtAt(x, due){
   (Array.isArray(x.chg) ? x.chg : []).forEach(function(c){ if(c.t > t) p -= Number(c.delta) || 0; });
   return p;
 }
-function bankMonthlyAt(x, due){
+// ===== تعديل بند في «أموال»: بيسري من يوم التعديل (اللي فات يفضل زي ما هو)، وتعديل سنة عدّت بيأثر على السنة دي بس =====
+// x.rv = سجل نسخ: {f, u, p, it}  → «it» = البند بقيمه (فايدة/مبلغ/صرف) في الفترة [f, u). p=1: قيم قبل تعديل (لحد يوم التعديل)، p=2: تعديل خاص بسنة معيّنة.
+function capVerAt(x, due){
+  const rv = (x && Array.isArray(x.rv)) ? x.rv : []; if(!rv.length) return null;
+  const t = (due instanceof Date) ? due.getTime() : Number(due); let y = null, h = null;
+  rv.forEach(function(v){
+    if(!v || !v.it || !(t >= (Number(v.f) || 0) && t < Number(v.u))) return;
+    if(Number(v.p) === 2){ y = v; }                                           // تعديل سنة بعينها: الأحدث يكسب
+    else if(!h || Number(v.u) < Number(h.u)) h = v;                           // قبل أقرب تعديل
+  });
+  return y || h;
+}
+function bankMonthlyAt(x, due){ const v = capVerAt(x, due); return bankMonthlyAtCore(v ? v.it : x, due); }
+function penAmtAt(x, due){ const v = capVerAt(x, due); return Number((v ? v.it : x).amount) || 0; }
+function bankMonthlyAtCore(x, due){
   if(bankAnnualPay(x)) return Number(x.rate) > 0 ? cgInt(bankAmtAt(x, due) * Number(x.rate) / 100 * bankPer(x) / 12) : 0;   // فايدة كل 3 شهور / سنوية: المبلغ المستحق في كل موعد
   const ch = Array.isArray(x.chg) ? x.chg : [], cur = Number(x.amount) || 0;
   if(!ch.length) return bankMonthly(x);
@@ -10959,6 +10973,55 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     if(typeof refreshSettingsUI === 'function'){ var orig = refreshSettingsUI; window.refreshSettingsUI = function(s){ var r = orig.apply(this, arguments); try{ update(s); }catch(e){} return r; }; }
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+<script>
+/* تعديل بند في أموال: يسري من يوم التعديل، وتعديل سنة عدّت يأثر على السنة دي بس */
+(function(){
+  var TRACK = ['amount', 'rate', 'monthlyInt', 'remInt'];
+  window.capItemClone = function(x){ var c = JSON.parse(JSON.stringify(x)); delete c.rv; return c; };
+  window.capAfterEdit = function(id, before){
+    var x = capList().find(function(z){ return z.id === id; }); if(!x) return false;
+    if(!TRACK.some(function(k){ return String(x[k]) !== String(before[k]); })) return false;
+    var sub = capSubOf(x), now = new Date(), T = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), past = capIsPast(), Y = currentYear;
+    if(sub === 'bank' || sub === 'pension'){
+      if(!past){
+        if(!Array.isArray(x.rv)) x.rv = [];
+        x.rv.push({f: 0, u: T, p: 1, it: before});                 // اللي فات يفضل بقيمه القديمة
+      } else {
+        var r = capRaw().find(function(z){ return z.id === id; });
+        if(r){ if(!Array.isArray(r.rv)) r.rv = []; r.rv.push({f: new Date(Y, 0, 1).getTime(), u: new Date(Y + 1, 0, 1).getTime(), p: 2, it: capItemClone(x)}); }
+      }
+    }
+    if(past){ try{ var sn = data.capSnap && data.capSnap[Y]; if(sn){ sn.totals = capTotalsCalc(sn.list); sn.edited = Date.now(); } }catch(e){} }
+    return true;
+  };
+  function wrap(name, idGetter){
+    var f = window[name]; if(typeof f !== 'function') return;
+    window[name] = function(){
+      var id = idGetter(), before = null;
+      if(id){ var x = capList().find(function(z){ return z.id === id; }); if(x) before = capItemClone(x); }
+      var res = f.apply(this, arguments), done = false;
+      try{ if(id && before) done = capAfterEdit(id, before); }catch(e){ console.error('capAfterEdit', e); }
+      if(done){
+        try{ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
+        try{ showToast(capIsPast() ? 'التعديل أثّر على سنة ' + toArabicDigits(currentYear) + ' بس' : 'التعديل ساري من النهارده، والشهور اللي فاتت زي ما هي', true); }catch(e){}
+      }
+      return res;
+    };
+  }
+  window.addEventListener('load', function(){ setTimeout(function(){
+    wrap('saveCapAcc', function(){ return _accEditId; });
+    wrap('saveCapCert', function(){ return _certEditId; });
+    var f0 = window.addCapMoney;
+    if(typeof f0 === 'function'){
+      window.addCapMoney = function(){
+        if(capIsPast() && !_cmEditId){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — الإضافة من السنة الحالية (التعديل هنا مسموح)', false); return; }
+        return f0.apply(this, arguments);
+      };
+    }
+    wrap('addCapMoney', function(){ return _cmEditId; });
+  }, 0); });
 })();
 </script>
 </body>
