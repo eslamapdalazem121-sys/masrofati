@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7948">
+<meta name="app-version" content="2026-10-31.7949">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -5477,7 +5477,10 @@ function mcCard(x, o){
       else mcPill(d, 'wait', '⏳ أول موعد ' + penStart(x).toLocaleDateString(dateLocale(), {day:'numeric', month:'long'}));
     }
     if(x.payAcc){ const pa = penDepAcc(x); if(pa) mcPill(d, 'ok', '🏦 بيتحط كل شهر في رصيد «' + pa.name + '»'); else mcPill(d, 'wait', penToGen(x, now.getFullYear(), now.getMonth()) ? '⚠️ حساب البنك المحدد اتحذف — المعاش بيتحول للدخل العام' : '⚠️ حساب البنك المحدد اتحذف — المعاش مش بيتحوّل للدخل العام'); }
-    { const gN = penToGen(x, now.getFullYear(), now.getMonth()); if(!gN) mcPill(d, 'wait', '🚫 المعاش ده مش بيتحوّل للدخل العام'); else if(x.payAcc && penDepAcc(x)) mcPill(d, 'ok', '💵 بيتحوّل للدخل العام كمان'); const ka = penKeepAvail(x); if(ka > 0 || penKeptNow(x)) mcPill(d, ka > 0 ? 'ok' : 'wait', '💰 رصيد المعاش المتاح للصرف: ' + fmt(ka)); }
+    { const fT = penFutureFrom(), fD = new Date(fT), gN = penToGen(x, now.getFullYear(), now.getMonth()), gF = penGenAt(x, fT, fD.getFullYear(), fD.getMonth()), hasAcc = !!(x.payAcc && penDepAcc(x)), later = (gN !== gF) ? ' (من الموعد القادم — الشهور اللي فاتت زي ما هي)' : '';
+      // الحالة المعروضة هي اللي هتسري من الموعد القادم، مش حالة الشهر اللي عدّى
+      if(!gF) mcPill(d, 'wait', '🚫 المعاش ده مش بيتحوّل للدخل العام' + later); else mcPill(d, 'ok', (hasAcc ? '💵 بيتحوّل للدخل العام كمان' : '💵 بيتحوّل للدخل العام') + later);
+      const ka = penKeepAvail(x), keptF = !gF && !hasAcc; if(ka > 0 || keptF) mcPill(d, ka > 0 ? 'ok' : 'wait', '💰 رصيد المعاش المتاح للصرف: ' + fmt(ka) + (ka <= 0 ? ' (بيتجمّع من أول موعد بعد التغيير)' : '')); }
   } else {
     vl.textContent = 'المبلغ';
     tg.textContent = 'نقدي' + (dt ? ' · ' + dt : '');
