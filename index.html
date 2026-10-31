@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7970">
+<meta name="app-version" content="2026-11-01.7971">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2280,7 +2280,7 @@ html{ overscroll-behavior:none; }
       <span id="cmChipAll" class="gi-chip v-violet wide" onclick="setCmFilter(null)"><small>💼 إجمالي الأموال</small><b id="cmTotal">0</b></span>
       <span id="cmChipCash" class="gi-chip v-green" onclick="setCmFilter('cash')"><small>💵 نقدي</small><b id="cmCash">0</b></span>
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
-      <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاش شهري</small><b id="cmPen">0</b></span>
+      <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاش شهري</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(10.5px * var(--fs,1));font-weight:800;color:#6b5a2a;line-height:1.3;"></em></span>
     </div>
     <button type="button" class="gp-btn r" id="cmOutBtn" data-id="blk:out" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openCmOut()">💸 صرف من الأموال</button>
     <div id="cmInterest" data-id="blk:int" style="display:none;"></div>
@@ -4747,12 +4747,13 @@ function capTotalsCalc(arr, asOf){
   const penPaid = cgRound(penItems.reduce((a,x)=> a + (penActive(x, eod0.getFullYear(), eod0.getMonth()) && penDueOf(x, eod0.getFullYear(), eod0.getMonth()) <= eod0 && (penToGen(x, eod0.getFullYear(), eod0.getMonth()) || penDepOn(x, eod0.getFullYear(), eod0.getMonth())) ? (Number(x.amount) || 0) : 0), 0));
   const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(bankItems) + bankAdded;
   const pension = giSum(penItems) - penPaid;   // معاش شهري: مش داخل في إجمالي رأس المال
+  const penMonthly = giSum(penItems);           // قيمة المعاش الشهرية كاملة (اللي بتظهر في المربع) حتى بعد ما يتحوّل أو يتحط في الحساب
   const grams = go.reduce((a,x)=> a + (Number(x.grams)||0), 0);
   const goldBuy = cgInt(giSum(go)), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
   const zi = mo.filter(capZkIn), ziBank = zi.filter(x=> capSubOf(x) === 'bank');
   const zkCash = giSum(zi.filter(x=> capSubOf(x) === 'cash'));
   const zkBank = giSum(ziBank) + cgInt(ziBank.filter(x=> x.intKeep === true).reduce((a,x)=> a + Math.max(0, bankIntSince(x, eod0) - (Number(x.intSpent) || 0)), 0));
-  return {zkCash, zkBank, zkMoney: zkCash + zkBank, money: cash + bank, cash, bank, pension, bankAdded, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
+  return {zkCash, zkBank, zkMoney: zkCash + zkBank, money: cash + bank, cash, bank, pension, penMonthly, bankAdded, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
 function capPastBar(){
   const wrap = document.querySelector('.zk-wrap.yr-cap'); if(!wrap || !wrap.parentNode) return;
@@ -5434,6 +5435,16 @@ function renderBankInterest(){
 function penDepFrom(x){ return x && x.payFrom ? new Date(x.payFrom) : null; }
 function penDepAcc(x){ if(!x || !x.payAcc) return null; return capRaw().find(function(z){ return z && z.id === x.payAcc && z.isAcc && capCatOf(z) === 'money'; }) || null; }
 function penDepOn(x, y, m){ const f = penDepFrom(x); return !!(f && penDepAcc(x) && penDueOf(x, y, m).getTime() >= f.getTime()); }
+// الاستحقاقات من أول موعد المعاش لحد النهارده (كل واحدة {y, m, due})
+function penBackList(dateMs){
+  const x = {date: dateMs}, st = penStart(x), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime(), out = [];
+  let y = st.getFullYear(), m = st.getMonth(), g = 0;
+  while((y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) && g++ < 1200){
+    const due = penDueOf(x, y, m); if(due.getTime() >= st.getTime() && due.getTime() <= eod) out.push({y: y, m: m, due: due});
+    m++; if(m > 11){ m = 0; y++; }
+  }
+  return out;
+}
 var _cmPenGenTouched = false;
 // هل معاش الشهر ده بيتحوّل للدخل العام؟ الاختيار الصريح (penGen) هو الأساس، والمعاش القديم بيفضل زي ما كان (اللي ليه حساب بنكي مش بيتحوّل)
 function penGenAt(x, due, y, m){   // القاعدة وقت موعد معيّن: آخر تغيير سجّلته قبل الموعد ده. المواعيد اللي قبل أول تغيير بتفضل على القاعدة القديمة
@@ -5444,6 +5455,15 @@ function penGenAt(x, due, y, m){   // القاعدة وقت موعد معيّن:
 }
 function penToGen(x, y, m){ return penGenAt(x, penDueOf(x, y, m).getTime(), y, m); }
 function penFutureFrom(){ const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1).getTime(); }   // التغيير بيسري من بكره، واللي استحق لحد النهارده يفضل زي ما هو
+// سطر الحالة تحت قيمة المعاش في المربع: استحق الشهر ده ولا لسه (ويوم كام)
+function cmPenStatus(){
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth(), eod = new Date(y, m, now.getDate(), 23, 59, 59, 999);
+  const pens = capList().filter(function(x){ return capCatOf(x) === 'money' && capSubOf(x) === 'pension' && penActive(x, y, m); });
+  if(!pens.length) return '';
+  const later = pens.map(function(x){ return penDueOf(x, y, m); }).filter(function(d){ return d > eod; }).sort(function(a, b){ return a - b; });
+  if(later.length) return '⏳ يستحق يوم ' + toArabicDigits(later[0].getDate());
+  return '✅ استحق الشهر ده';
+}
 // معاش مش بيتحوّل للدخل العام ومش بيتحط في حساب بنكي: بيتجمّع رصيده كل شهر في موعده ويتصرف من «صرف من الأموال»
 function penKeptNow(x){ const n = new Date(); return !penToGen(x, n.getFullYear(), n.getMonth()) && !penDepOn(x, n.getFullYear(), n.getMonth()); }
 function penKeepAvail(x){
@@ -5464,6 +5484,12 @@ function penDepositSync(){
     const list = capRaw(), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
     list.forEach(function(x){
       if(!x || capCatOf(x) !== 'money' || capSubOf(x) !== 'pension') return;
+      // ربط قديم كان بيبدأ من يوم الربط بس (فالشهور اللي استحقت قبله ما كانتش بتتضاف): نكمّل من أول موعد لمرة واحدة، لو العدد معقول (١٢ شهر أو أقل)
+      if(x.payAcc && x.payFrom && !x.depBack && penDepAcc(x)){
+        x.depBack = 1; ch = true;
+        const st = penStart(x).getTime(), nb = penBackList(x.date).length;
+        if(st < Number(x.payFrom) && nb > 0 && nb <= 12) x.payFrom = st;
+      }
       const f = penDepFrom(x), acc = penDepAcc(x), amt = cgInt(x.amount); if(!f || !acc || !(amt > 0)) return;
       if(!x.depDone || typeof x.depDone !== 'object') x.depDone = {};
       let y = f.getFullYear(), m = f.getMonth(), g = 0;
@@ -5486,8 +5512,17 @@ function cmPayHint(){
   { const pg = document.getElementById('cmPenGen'); if(pg && !_cmPenGenTouched && !_cmEditId) pg.checked = !sel.value; }   // اختيار حساب بنكي جديد بيشيل علامة التحويل للدخل العام تلقائيًا (تقدر ترجّعها)
   const pen = _cmSub === 'pension', has = !!sel.value;
   h.style.display = pen ? '' : 'none';
-  h.textContent = !pen ? '' : (has ? 'المعاش بيتضاف لرصيد الحساب الأساسي ده كل شهر في يوم الاستحقاق، وبيظهر جوه بطاقة البنك مع الشهادات والحسابات الفرعية. وتحويله للدخل العام بيتحدد من العلامة اللي تحت. الشهور اللي فاتت قبل التفعيل ما بتتغيرش.' : (sel.options.length > 1 ? 'من غير حساب: المعاش بيتحول للدخل العام زي ما كان.' : 'اعمل حساب بنكي الأول من «البنوك» علشان تقدر تحط المعاش في رصيده.'));
+  let back = '';   // معاينة: الشهور اللي استحقت من أول موعد وهتتضاف لرصيد الحساب أول ما تحفظ
+  if(pen && has){
+    const old = _cmEditId ? capList().find(function(z){ return z.id === _cmEditId; }) : null;
+    if(!(old && old.payAcc)){
+      const amt = cgInt(Number((document.getElementById('cmAmt') || {}).value) || 0), list = penBackList(inputValueToDate((document.getElementById('cmDate') || {}).value, Date.now()));
+      if(list.length && amt > 0) back = '✅ هيتضاف لرصيد الحساب أول ما تحفظ: ' + toArabicDigits(list.length) + (list.length === 1 ? ' شهر' : ' شهور') + ' = ' + fmt(list.length * amt) + ' (' + (list.length === 1 ? MONTHS[list[0].m] : 'من ' + MONTHS[list[0].m] + ' لحد ' + MONTHS[list[list.length - 1].m]) + ')، وبعدها كل شهر في يوم الاستحقاق.' + (list.length > 12 ? ' ⚠️ ده عدد كبير، هسألك قبل الحفظ.' : '') + ' ';
+    }
+  }
+  h.textContent = !pen ? '' : (has ? back + 'المعاش بيتضاف لرصيد الحساب الأساسي ده كل شهر في يوم الاستحقاق، وبيظهر جوه بطاقة البنك مع الشهادات والحسابات الفرعية. وتحويله للدخل العام بيتحدد من العلامة اللي تحت.' : (sel.options.length > 1 ? 'من غير حساب: المعاش بيتحول للدخل العام زي ما كان.' : 'اعمل حساب بنكي الأول من «البنوك» علشان تقدر تحط المعاش في رصيده.'));
 }
+;['cmAmt', 'cmDate'].forEach(function(id){ const e = document.getElementById(id); if(e){ e.addEventListener('input', function(){ try{ cmPayHint(); }catch(_){} }); e.addEventListener('change', function(){ try{ cmPayHint(); }catch(_){} }); } });
 function cmPayAccFill(val){
   const sel = document.getElementById('cmPayAcc'); if(!sel) return;
   const accs = capRaw().filter(function(z){ return z && z.isAcc && capCatOf(z) === 'money'; });
@@ -5603,7 +5638,7 @@ function mcCard(x, o){
       if(penActive(x, y, m)) mcPill(d, due <= now ? 'ok' : 'wait', due <= now ? '✅ استُلم معاش ' + MONTHS[m] + ': ' + fmt(amt) : '⏳ المعاش القادم يوم ' + toArabicDigits(due.getDate()) + ' ' + MONTHS[m]);
       else mcPill(d, 'wait', '⏳ أول موعد ' + penStart(x).toLocaleDateString(dateLocale(), {day:'numeric', month:'long'}));
     }
-    if(x.payAcc){ const pa = penDepAcc(x); if(pa) mcPill(d, 'ok', '🏦 بيتحط كل شهر في رصيد «' + pa.name + '»'); else mcPill(d, 'wait', penToGen(x, now.getFullYear(), now.getMonth()) ? '⚠️ حساب البنك المحدد اتحذف — المعاش بيتحول للدخل العام' : '⚠️ حساب البنك المحدد اتحذف — المعاش مش بيتحوّل للدخل العام'); }
+    if(x.payAcc){ const pa = penDepAcc(x); if(pa){ const dk = (x.depDone && typeof x.depDone === 'object') ? Object.keys(x.depDone) : [], dt0 = dk.reduce(function(t, k){ return t + (Number(x.depDone[k] && x.depDone[k].a) || 0); }, 0); mcPill(d, 'ok', '🏦 بيتحط كل شهر في رصيد «' + pa.name + '»' + (dk.length ? ' — اتضاف حتى الآن ' + toArabicDigits(dk.length) + (dk.length === 1 ? ' شهر' : ' شهور') + ' = ' + fmt(dt0) : '')); } else mcPill(d, 'wait', penToGen(x, now.getFullYear(), now.getMonth()) ? '⚠️ حساب البنك المحدد اتحذف — المعاش بيتحول للدخل العام' : '⚠️ حساب البنك المحدد اتحذف — المعاش مش بيتحوّل للدخل العام'); }
     { const fT = penFutureFrom(), fD = new Date(fT), gN = penToGen(x, now.getFullYear(), now.getMonth()), gF = penGenAt(x, fT, fD.getFullYear(), fD.getMonth()), hasAcc = !!(x.payAcc && penDepAcc(x)), later = (gN !== gF) ? ' (من الموعد القادم — الشهور اللي فاتت زي ما هي)' : '';
       // الحالة المعروضة هي اللي هتسري من الموعد القادم، مش حالة الشهر اللي عدّى
       if(!gF) mcPill(d, 'wait', '🚫 المعاش ده مش بيتحوّل للدخل العام' + later); else mcPill(d, 'ok', (hasAcc ? '💵 بيتحوّل للدخل العام كمان' : '💵 بيتحوّل للدخل العام') + later);
@@ -5748,7 +5783,8 @@ function renderCapMoney(){
   document.getElementById('cmTotal').textContent = fmt(t.money);
   document.getElementById('cmCash').textContent = fmt(t.cash);
   document.getElementById('cmBank').textContent = fmt(t.bank);
-  document.getElementById('cmPen').textContent = fmt(t.pension);
+  document.getElementById('cmPen').textContent = fmt(t.penMonthly !== undefined ? t.penMonthly : t.pension);   // قيمة المعاش الشهرية كاملة (مش اللي لسه ما اتحوّلش)
+  try{ const se = document.getElementById('cmPenSub'); if(se){ se.textContent = pastV ? '' : cmPenStatus(); se.style.display = se.textContent ? '' : 'none'; } }catch(e){}
   document.getElementById('cmChipPen').classList.toggle('on', _cmFilter === 'pension');
   document.getElementById('cmChipAll').classList.toggle('on', !_cmFilter);
   document.getElementById('cmChipCash').classList.toggle('on', _cmFilter === 'cash');
@@ -6117,7 +6153,7 @@ function openCapMoney(){
   document.getElementById('capMoneyOverlay').classList.add('open');
 }
 function closeCapMoney(){ document.getElementById('capMoneyOverlay').classList.remove('open'); }
-function addCapMoney(){
+function addCapMoney(backChoice){
   const n = document.getElementById('cmName').value.trim(), amt = Number(document.getElementById('cmAmt').value) || 0;
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
   const rec = {name: n, amount: amt, cat: 'money', sub: _cmSub, date: inputValueToDate(document.getElementById('cmDate').value, Date.now())};
@@ -6127,10 +6163,24 @@ function addCapMoney(){
   { const zc = document.getElementById('cmZk'); if(zc && !zc.checked) rec.noZk = true; }
   if(_cmSub === 'bank'){ rec.rate = Number(document.getElementById('cmRate').value) || 0; const rv = document.getElementById('cmRem').value; rec.monthlyInt = (_cmRemTouched && rv !== '') ? Number(rv) || 0 : undefined; { const io = document.getElementById('cmIntOut'); rec.intKeep = (io && !io.checked) ? true : undefined; } }
   const wasEdit = !!_cmEditId;
-  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ const oldPay = x.payAcc; delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; let penH0 = null, penOld = true, penF = penFutureFrom(); if(_cmSub === 'pension'){ penH0 = Array.isArray(x.penGenH) ? x.penGenH.slice() : []; if(!penH0.length && (x.penGen === true || x.penGen === false)) penH0.push({f: 0, v: x.penGen}); penOld = penGenAt(Object.assign({}, x, {penGenH: penH0}), penF, new Date(penF).getFullYear(), new Date(penF).getMonth()); } delete x.penGen; if(_cmSub === 'pension'){ delete x.payAcc; if(payNew && !oldPay) rec.payFrom = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime(); } Object.assign(x, rec); if(_cmSub === 'pension'){ if(wantGen !== penOld || penH0.length){ const last = penH0[penH0.length - 1]; if(wantGen !== penOld){ if(last && last.f === penF) last.v = wantGen; else penH0.push({f: penF, v: wantGen}); } x.penGenH = penH0; } } } }
-  else { if(payNew) rec.payFrom = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime(); if(_cmSub === 'pension') rec.penGenH = [{f: 0, v: wantGen}]; capList().push(Object.assign({id: uid()}, rec)); }
+  // ربط معاش بحساب لأول مرة: الشهور اللي استحقت من أول موعد بتتضاف لرصيد الحساب فورًا (لو أكتر من ١٢ شهر بنسأل الأول)
+  const oldX = wasEdit ? capList().find(z=> z.id === _cmEditId) : null;
+  const newLink = _cmSub === 'pension' && !!payNew && !(oldX && oldX.payAcc);
+  const back = newLink ? penBackList(rec.date) : [];
+  if(newLink && back.length > 12 && backChoice === undefined){
+    openConfirm('المعاش ده استحق ' + toArabicDigits(back.length) + ' شهر', 'من أول موعد (' + formatDate(rec.date) + ') لحد النهارده استحق ' + toArabicDigits(back.length) + ' شهر = ' + fmt(back.length * cgInt(amt)) + '. تضيفهم كلهم لرصيد الحساب؟',
+      ()=> addCapMoney('all'), 'ضيفهم كلهم', 'لا، من النهارده بس', ()=> addCapMoney('none'));
+    return;
+  }
+  const today0 = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
+  const linkFrom = (backChoice === 'none') ? today0 : penStart({date: rec.date}).getTime();
+  const nAdded = (newLink && backChoice !== 'none') ? back.length : 0;
+  if(newLink){ rec.payFrom = linkFrom; rec.depBack = 1; }
+  if(wasEdit){ const x = oldX; if(x){ const oldPay = x.payAcc; delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; let penH0 = null, penOld = true, penF = penFutureFrom(); if(_cmSub === 'pension'){ penH0 = Array.isArray(x.penGenH) ? x.penGenH.slice() : []; if(!penH0.length && (x.penGen === true || x.penGen === false)) penH0.push({f: 0, v: x.penGen}); penOld = penGenAt(Object.assign({}, x, {penGenH: penH0}), penF, new Date(penF).getFullYear(), new Date(penF).getMonth()); } delete x.penGen; if(_cmSub === 'pension'){ delete x.payAcc; } Object.assign(x, rec); if(_cmSub === 'pension'){ if(wantGen !== penOld || penH0.length){ const last = penH0[penH0.length - 1]; if(wantGen !== penOld){ if(last && last.f === penF) last.v = wantGen; else penH0.push({f: penF, v: wantGen}); } x.penGenH = penH0; } } } }
+  else { if(_cmSub === 'pension') rec.penGenH = [{f: 0, v: wantGen}]; capList().push(Object.assign({id: uid()}, rec)); }
   try{ if(penDepositSync()) save(); }catch(e){}
-  save(); cmReset(); renderCapMoney(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : (_cmSub === 'pension' ? 'المعاشات' : 'النقدي')), true);
+  save(); cmReset(); renderCapMoney(); renderCap();
+  showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : (_cmSub === 'pension' ? 'المعاشات' : 'النقدي')) + (nAdded ? ' — واتضاف ' + toArabicDigits(nAdded) + (nAdded === 1 ? ' شهر' : ' شهور') + ' (' + fmt(nAdded * cgInt(amt)) + ') لرصيد الحساب' : ''), true);
 }
 
 // ---- ذهب: اسم القطعة، العيار، الوزن، ثمن الجرام، إجمالي الثمن، التاريخ، زينة/ادخار
