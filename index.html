@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7951">
+<meta name="app-version" content="2026-10-31.7952">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2137,6 +2137,8 @@ html{ overscroll-behavior:none; }
 #capCertOverlay .acc-card select{width:100%;}
 #capAccOverlay .acc-seg button{padding:13px 4px;}
 #capCertOverlay .acc-seg button{padding:13px 4px; font-size:calc(13px * var(--fs,1));}
+/* سنة قديمة (للرجوع فقط): مفيش أزرار تعديل/إضافة جوه القايمة */
+#cmList.cm-ro .mc-acts, #cmList.cm-ro .mc-addsub{display:none !important;}
 </style>
 </head>
 <body>
@@ -4699,7 +4701,7 @@ function capSnapObj(y){
   if(!sn){   // سنة عدّت من غير لقطة: تقدير من تواريخ إضافة البنود (اللي اتباع أو اتحذف قبل كده مش ظاهر) وبيتثبّت
     const end = new Date(y, 11, 31, 23, 59, 59, 999).getTime();
     const list = JSON.parse(JSON.stringify(capRaw().filter(function(x){ return !((opsMs(x.date) || 0) > end); })));
-    sn = {list: list, totals: capTotalsCalc(list), ts: Date.now(), est: true};
+    sn = {list: list, totals: capTotalsCalc(list, end), ts: Date.now(), est: true};
     data.capSnap[y] = sn;
     try{ localStorage.setItem('budget_data_v1', JSON.stringify(data)); }catch(e){}
   }
@@ -4722,9 +4724,9 @@ function capZkIn(x){   // هل البند داخل في حساب الزكاة؟ 
   return true;
 }
 function capTotals(){ return capIsPast() ? capSnapObj(currentYear).totals : capTotalsCalc(capRaw()); }
-function capTotalsCalc(arr){
+function capTotalsCalc(arr, asOf){
   const mo = arr.filter(x=> capCatOf(x) === 'money'), go = arr.filter(x=> capCatOf(x) === 'gold');
-  const now0 = new Date(), eod0 = new Date(now0.getFullYear(), now0.getMonth(), now0.getDate(), 23, 59, 59, 999);
+  const now0 = asOf ? new Date(asOf) : new Date(), eod0 = new Date(now0.getFullYear(), now0.getMonth(), now0.getDate(), 23, 59, 59, 999);
   const bankItems = mo.filter(x=> capSubOf(x) === 'bank'), penItems = mo.filter(x=> capSubOf(x) === 'pension');
   // الفوايد اللي مش بتتحوّل بتتضاف للرصيد، واللي بتتحوّل وتتصرف ما بتتضافش. والمعاش المحوّل بيتخصم
   const bankAdded = cgInt(bankItems.filter(x=> x.intKeep === true).reduce((a,x)=> a + Math.max(0, bankIntSince(x, eod0) - (Number(x.intSpent) || 0)), 0));   // فوايد ما اتحوّلتش: بتتضاف لرصيد البنك
@@ -4845,7 +4847,7 @@ const _capCollapsed = new Set();
 function capGroupize(box, cat){
   const groups = capGroups(cat); if(!groups.length) return;
   try{ ensureGrpColors(); }catch(e){}
-  const rows = Array.from(box.querySelectorAll(':scope > .gi-row')), items = capList();
+  const rows = Array.from(box.querySelectorAll(':scope > .gi-row')), items = cat === 'money' ? cmSrcList() : capList();
   const byId = id => items.find(x=> x.id === id);
   box.innerHTML = '';
   const bucket = {}; rows.forEach(r=>{ const k = groups.some(g=> g.id === r.dataset.grp) ? r.dataset.grp : ''; (bucket[k] = bucket[k] || []).push(r); });
@@ -4904,6 +4906,15 @@ function cmTblToggle(h, list, key){
 let _cmSub = 'cash', _cmFormOpen = false, _cmFilter = null, _cmEditId = null, _cmRemTouched = false, _cmYear = null;
 function cmYear(){ return _cmYear || currentYear; }
 function cmShiftYear(d){ _cmYear = cmYear() + d; renderCapMoney(); }
+// بنود وإجماليات صفحة «أموال» بتتبع السنة اللي بتتصفحها: سنة قديمة = اللي كان موجود فيها بس (لقطة السنة)، مش بنود ٢٠٢٦
+function cmPastView(){ const ry = new Date().getFullYear(); return !!_cmYear && _cmYear !== currentYear && _cmYear < ry; }
+function cmSnapAt(y){   // لقطة سنة قديمة للتصفح: المثبّتة لو موجودة، وإلا تقدير من تواريخ الإضافة (من غير ما يتثبّت ولا يتحفظ)
+  const sn = data.capSnap && data.capSnap[y]; if(sn && Array.isArray(sn.list)) return sn;
+  const end = new Date(y, 11, 31, 23, 59, 59, 999).getTime(), list = JSON.parse(JSON.stringify(capRaw().filter(function(x){ return !((opsMs(x.date) || 0) > end); })));
+  return {list: list, totals: capTotalsCalc(list, end), est: true};
+}
+function cmSrcList(){ const y = cmYear(), ry = new Date().getFullYear(); if(!_cmYear || _cmYear === currentYear) return capList(); return y < ry ? cmSnapAt(y).list : capRaw(); }
+function cmSrcTotals(){ const y = cmYear(), ry = new Date().getFullYear(); if(!_cmYear || _cmYear === currentYear) return capTotals(); return y < ry ? cmSnapAt(y).totals : capTotalsCalc(capRaw()); }
 // عنوان الجدول مع التنقل بين السنين (البيانات بتستمر لكل سنة لحد ما تعدلها)
 function cmYearHeader(icon, title, yr){
   const d = document.createElement('div'); d.className = 'cap-grp'; d.style.cursor = 'default';
@@ -4914,10 +4925,10 @@ function cmYearHeader(icon, title, yr){
   return d;
 }
 function cmPastNote(box, yr){   // بتشوف سنة غير الحالية: الأرقام من جدول الشهور بتاعها مش من أرصدة النهارده
-  const ny = new Date().getFullYear(); if(yr === ny) return;
+  const ny = new Date().getFullYear(); if(yr === currentYear) return;
   const n = cmNote((yr < ny ? '📅 دي فوائد سنة ' : '📅 دي المتوقع لسنة ') + toArabicDigits(yr) + ' من جدول الشهور تحت (مش أرصدة النهارده). ');
-  const b = document.createElement('button'); b.type = 'button'; b.textContent = '↩ رجوع لسنة ' + toArabicDigits(ny); b.style.cssText = 'margin-inline-start:8px; font-weight:800; font-size:12px; cursor:pointer;';
-  b.onclick = function(){ _cmYear = 0; renderCapMoney(); }; n.appendChild(b); box.appendChild(n);
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = '↩ رجوع لسنة ' + toArabicDigits(currentYear || ny); b.style.cssText = 'margin-inline-start:8px; font-weight:800; font-size:12px; cursor:pointer;';
+  b.onclick = function(){ _cmYear = null; renderCapMoney(); }; n.appendChild(b); box.appendChild(n);
 }
 function cmNote(txt){ const n = document.createElement('div'); n.className = 'hint'; n.style.cssText = 'font-size:12px;color:var(--muted);font-weight:700;margin:4px 6px 8px;'; n.textContent = txt; return n; }
 // أقرب موعد قادم (بيبص لقدام حتى السنة الجاية)
@@ -5144,7 +5155,7 @@ function pensionDue(y, m, d){
 function renderPensionPanel(){
   if(_cmFilter !== 'pension') return;
   const box = document.getElementById('cmInterest');
-  const pens = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'pension');
+  const pens = cmSrcList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'pension');
   box.style.display = 'block'; box.innerHTML = '';
   const yr = cmYear(), now = new Date(), monthlyAll = pens.reduce((t,x)=> t + (Number(x.amount) || 0), 0);
   const months = MONTHS.map((mn, m)=> ({mn, m, items: pens.filter(x=> penActive(x, yr, m)).map(x=>{ const due = penDueOf(x, yr, m); return {x, day: due.getDate(), amt: Number(x.amount) || 0, reached: due <= now}; }).sort((a,b)=> a.day - b.day)}));
@@ -5236,7 +5247,7 @@ function bankNextCard(){
 }
 function renderBankInterest(){
   const box = document.getElementById('cmInterest');
-  const banks = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank');
+  const banks = cmSrcList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'bank');
   if(_cmFilter !== 'bank'){ box.style.display = 'none'; return; }
   box.style.display = 'block'; box.innerHTML = '';
   const yr = cmYear(), now = new Date();
@@ -5517,7 +5528,7 @@ function mcCard(x, o){
     const lp = capRaw().filter(function(p){ return p && capCatOf(p) === 'money' && capSubOf(p) === 'pension' && p.payAcc === x.id; });
     if(lp.length) mcPill(d, 'ok', '💳 المعاش بيتحط هنا كل شهر: ' + lp.map(function(p){ return '«' + p.name + '» ' + fmt(Number(p.amount) || 0) + ' (يوم ' + toArabicDigits(penDay(p)) + ')'; }).join(' · '));
   }
-  { const ds = (sub === 'bank' || sub === 'pension') ? dueSoonOf(x) : null;
+  { const ds = (sub === 'bank' || sub === 'pension') && !cmPastView() ? dueSoonOf(x) : null;
     if(ds){ d.classList.add('mc-soon', 'd' + ds.days); const sp = mcPill(d, 'soon d' + ds.days, ''); sp.innerHTML = '<span class="mc-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(ds); d.insertBefore(sp, grid); } }
   if(!grid.children.length) grid.remove();
   if(o.total > 0 && sub !== 'pension'){
@@ -5621,14 +5632,14 @@ function mbCard(b, base){
   const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.textContent = '➕ حساب فرعي بفايدته ومبلغه';
   addSub.addEventListener('click', function(e){ e.stopPropagation(); openCapSub(first.id); });
   body.appendChild(addSub);
-  { let best = null; b.accs.concat(b.subs, b.certs, b.pens || []).forEach(function(x){ let ds = null; try{ ds = dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
+  { let best = null; b.accs.concat(b.subs, b.certs, b.pens || []).forEach(function(x){ let ds = null; try{ ds = cmPastView() ? null : dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
     if(best){ const sp = document.createElement('div'); sp.className = 'mb-soon'; sp.innerHTML = '<span class="mb-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(best); card.insertBefore(sp, body); } }
   bind(head, body, badge, K);
   return card;
 }
 function renderCapMoney(){
   ensureGrpColors();
-  const t = capTotals(), box = document.getElementById('cmList');
+  const t = cmSrcTotals(), box = document.getElementById('cmList'), pastV = cmPastView();
   document.getElementById('cmTotal').textContent = fmt(t.money);
   document.getElementById('cmCash').textContent = fmt(t.cash);
   document.getElementById('cmBank').textContent = fmt(t.bank);
@@ -5638,14 +5649,17 @@ function renderCapMoney(){
   document.getElementById('cmChipCash').classList.toggle('on', _cmFilter === 'cash');
   document.getElementById('cmChipBank').classList.toggle('on', _cmFilter === 'bank');
   { const inBank = _cmFilter === 'bank' || (_cmFormOpen && _cmSub === 'bank'), gr = document.getElementById('cmGrpRow'), ar = document.getElementById('cmAccRow'); if(gr) gr.style.display = inBank ? 'none' : ''; if(ar) ar.style.display = inBank ? '' : 'none'; }
-  try{ const mo = capList().filter(x=> capCatOf(x) === 'money'); document.getElementById('cmChipBank').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'bank' && dueSoonOf(x))); document.getElementById('cmChipPen').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'pension' && dueSoonOf(x))); }catch(e){}
-  const arr = sortDescByDate(capList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
-  const mcBase = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
-  box.innerHTML = arr.length ? '' : '<div class="mc-empty">لا توجد بنود بعد</div>';
+  try{ const mo = pastV ? [] : capList().filter(x=> capCatOf(x) === 'money'); document.getElementById('cmChipBank').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'bank' && dueSoonOf(x))); document.getElementById('cmChipPen').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'pension' && dueSoonOf(x))); }catch(e){}
+  const srcL = cmSrcList(), arr = sortDescByDate(srcL.filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
+  const mcBase = srcL.filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
+  box.innerHTML = arr.length ? '' : '<div class="mc-empty">' + (pastV ? 'مفيش بنود في سنة ' + toArabicDigits(cmYear()) : 'لا توجد بنود بعد') + '</div>';
+  box.classList.toggle('cm-ro', pastV);
+  if(pastV){ const bn = document.createElement('div'); bn.className = 'hint'; bn.style.cssText = 'margin:2px 6px 12px;padding:10px 14px;border-radius:14px;font-weight:800;line-height:1.7;text-align:center;background:rgba(80,90,110,.12);border:1px solid rgba(80,90,110,.35);color:var(--text);'; bn.textContent = '📁 بتشوف سنة ' + toArabicDigits(cmYear()) + ' (للرجوع فقط) — اللي كان موجود فيها بس (الأرصدة تقديرية من تواريخ الإضافة). ';
+    const rb = document.createElement('button'); rb.type = 'button'; rb.textContent = '↩ رجوع'; rb.style.cssText = 'margin-inline-start:8px;font-weight:800;font-size:12px;cursor:pointer;'; rb.onclick = function(){ _cmYear = null; renderCapMoney(); }; bn.appendChild(rb); box.appendChild(bn); }
   const accIds = new Set(arr.filter(x=> x.isAcc).map(x=> x.id)), certsOf = {}, pensOf = {};
   arr.forEach(x=>{ if((x.isCert || x.isSub) && x.accId && accIds.has(x.accId)) (certsOf[x.accId] = certsOf[x.accId] || []).push(x); });
   // المعاش المربوط بحساب بنكي بيظهر جوه بطاقة البنك (في فلتر «معاش» مفيش بطاقات بنوك فبيظهر لوحده زي ما كان)
-  sortDescByDate(capList().filter(x=> x && capCatOf(x) === 'money' && capSubOf(x) === 'pension' && x.payAcc && accIds.has(x.payAcc))).forEach(x=>{ (pensOf[x.payAcc] = pensOf[x.payAcc] || []).push(x); });
+  sortDescByDate(srcL.filter(x=> x && capCatOf(x) === 'money' && capSubOf(x) === 'pension' && x.payAcc && accIds.has(x.payAcc))).forEach(x=>{ (pensOf[x.payAcc] = pensOf[x.payAcc] || []).push(x); });
   const banks = {};
   arr.forEach(x=>{ if(x.isAcc){ const k = mbKey(x); (banks[k] = banks[k] || {key: k, bank: String(x.bank || '').trim(), accs: [], subs: [], certs: [], pens: [], done: false}).accs.push(x); } });
   arr.forEach(x=>{
@@ -5657,7 +5671,7 @@ function renderCapMoney(){
       b.accs.forEach(a=> (pensOf[a.id] || []).forEach(p=> b.pens.push(p)));
       box.appendChild(mbCard(b, mcBase)); return;
     }
-    box.appendChild(mcCard(x, {acts: true, total: mcBase}));
+    box.appendChild(mcCard(x, {acts: !pastV, total: mcBase}));
   });
   capGroupize(box, 'money');
   renderBankInterest();
@@ -5682,7 +5696,7 @@ function cmAddedAmt(x){   // المبلغ اللي اتضاف أصلًا (الر
 }
 function renderCmAddLog(){
   const box = document.getElementById('cmAddLog'); if(!box) return;
-  const arr = capList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)).map(x=> ({x: x, d: x.date ? dateToInputValue(x.date) : '', a: cmAddedAmt(x)}));
+  const arr = cmSrcList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)).map(x=> ({x: x, d: x.date ? dateToInputValue(x.date) : '', a: cmAddedAmt(x)}));
   arr.sort((p, q)=> String(q.d).localeCompare(String(p.d)));
   const tot = cgRound(arr.reduce((t, o)=> t + o.a, 0));
   box.innerHTML = '';
