@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7940">
+<meta name="app-version" content="2026-10-31.7941">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1501,6 +1501,13 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 .gi-row.mc.mc-sub{--mc1:#ff9ec4; --mc2:#e0457f; --mc3:#a3204d; --mcs:rgba(224,69,127,.15); --mce:#f0b8cf; --mct:#ffe8f1; --mcb1:#ff86b4; --mcb2:#d6336c; --mcbt:#fff; border-radius:20px;}
 .gi-row.mc.mc-sub .mc-ic{border-radius:14px;}
 .gi-row.mc.mc-sub .mc-name{font-size:calc(16.5px * var(--fs,1));}
+.mc-banktot{margin:13px 0 0; margin-inline-start:7px; padding:10px 14px; border-radius:16px; color:#5a3b00; background:linear-gradient(180deg,#fff3cf,#ffdf8a); box-shadow:inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 0 rgba(0,0,0,.08), 0 4px 0 #c99a1d, 0 9px 12px rgba(150,110,10,.25);}
+.mc-banktot .mc-bt-r{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.mc-banktot .mc-bt-t{font-weight:800; font-size:calc(13.5px * var(--fs,1));}
+.mc-banktot .mc-bt-v{flex:none; direction:ltr; font-size:calc(21px * var(--fs,1)); font-weight:900; line-height:1.2;}
+.mc-banktot .mc-bt-d{display:block; margin-top:4px; font-size:calc(12px * var(--fs,1)); font-weight:700; opacity:.85;}
+:root[data-theme="dark"] .mc-banktot{color:#ffe7a3; background:linear-gradient(180deg,#5b4410,#3f2f08); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 3px 0 rgba(0,0,0,.45);}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .mc-banktot{color:#ffe7a3; background:linear-gradient(180deg,#5b4410,#3f2f08); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 3px 0 rgba(0,0,0,.45);} }
 .mc-addsub{display:block; width:calc(100% - 7px); margin:10px 0 0; margin-inline-start:7px; padding:10px; border:0; cursor:pointer; border-radius:14px; font-family:inherit; font-weight:900; font-size:calc(13.5px * var(--fs,1)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#ff9ec4,#e0457f); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a3204d, 0 9px 12px rgba(224,69,127,.28);}
 .mc-addsub:active{transform:translateY(3px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 1px 0 #a3204d;}
 :root[data-theme="dark"] .gi-row.mc.mc-sub{--mce:#5a2040; --mct:#3a2030;}
@@ -4790,6 +4797,10 @@ function capGroupize(box, cat){
   box.innerHTML = '';
   const bucket = {}; rows.forEach(r=>{ const k = groups.some(g=> g.id === r.dataset.grp) ? r.dataset.grp : ''; (bucket[k] = bucket[k] || []).push(r); });
   const section = (key, title, rs, gid)=>{
+    if(!gid){   // البنود اللي من غير مجموعة بتظهر مباشرة من غير بطاقة «بدون مجموعة»
+      const w0 = document.createElement('div'); w0.className = 'cap-grp-wrap'; w0.dataset.gkey = '';
+      rs.forEach(r=> w0.appendChild(r)); box.appendChild(w0); return;
+    }
     const sumA = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).amount) || 0), 0), sumG = rs.reduce((t,r)=> t + (Number((byId(r.dataset.id) || {}).grams) || 0), 0);
     const ck = cat + ':' + (gid || '_none'), closed = _capCollapsed.has(ck);
     const h = document.createElement('div'); h.className = 'cap-grp'; h.style.cursor = 'pointer';
@@ -5363,6 +5374,13 @@ var _cmCertOpen = (function(){ try{ var o = JSON.parse(localStorage.getItem('mas
 function cmCertSave(){ try{ localStorage.setItem('masrofati_certopen_v1', JSON.stringify(_cmCertOpen)); }catch(e){} }
 function cmAccCerts(card, acc, certs, base, box){
   const open0 = !!_cmCertOpen[acc.id] && certs.length > 0, tot = cgInt(certs.reduce((t, c)=> t + (Number(c.amount) || 0), 0));
+  { const mainA = Number(acc.amount) || 0, subA = certs.filter(function(c){ return !c.isCert; }).reduce(function(t, c){ return t + (Number(c.amount) || 0); }, 0), certA = certs.filter(function(c){ return c.isCert; }).reduce(function(t, c){ return t + (Number(c.amount) || 0); }, 0);
+    const bt = document.createElement('div'); bt.className = 'mc-banktot';
+    bt.innerHTML = '<div class="mc-bt-r"><span class="mc-bt-t">🏦 إجمالي الموجود في البنك</span><b class="mc-bt-v"></b></div><small class="mc-bt-d"></small>';
+    bt.querySelector('.mc-bt-v').textContent = fmt(mainA + subA + certA);
+    const pr = ['أساسي ' + fmt(mainA)]; if(subA > 0) pr.push('فرعي ' + fmt(subA)); if(certA > 0) pr.push('شهادات ' + fmt(certA));
+    bt.querySelector('.mc-bt-d').textContent = pr.length > 1 ? pr.join(' + ') : 'الحساب الأساسي بس (مفيش فرعي أو شهادات)';
+    card.appendChild(bt); }
   const bar = document.createElement('div'); bar.className = 'mc-certbar'; bar.setAttribute('role', 'button');
   bar.innerHTML = '<span class="plus-badge pb-violet pb-sm in-card"></span><span class="mc-cb-t"></span><b class="mc-cb-v"></b>';
   const badge = bar.children[0];
