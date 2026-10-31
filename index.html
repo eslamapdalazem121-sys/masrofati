@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7944">
+<meta name="app-version" content="2026-10-31.7945">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1883,6 +1883,7 @@ html{ overscroll-behavior:none; }
 .gi-row.mbk .k-main{--kA:#5aa7ff; --kB:#2563eb; --kE:#173f9c; --kS:rgba(37,99,235,.3);}
 .gi-row.mbk .k-sub{--kA:#38d3a6; --kB:#0f9d78; --kE:#0a6a52; --kS:rgba(15,157,120,.3);}
 .gi-row.mbk .k-cert{--kA:#a78bfa; --kB:#6d3fd6; --kE:#43238f; --kS:rgba(109,63,214,.3);}
+.gi-row.mbk .k-pen{--kA:#ffbf3a; --kB:#d98200; --kE:#8f5600; --kS:rgba(217,130,0,.3);}
 .gi-row.mbk .mb-ki{flex:none; width:42px; height:42px; border-radius:14px; display:grid; place-items:center; font-size:22px; background:rgba(255,255,255,.25); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.15);}
 .gi-row.mbk .mb-kt{flex:1; min-width:0;}
 .gi-row.mbk .mb-kt b{display:block; font-size:calc(15.5px * var(--fs,1)); font-weight:900;}
@@ -2287,7 +2288,7 @@ html{ overscroll-behavior:none; }
       <div class="check-row"><input type="checkbox" id="cmIntOut" checked><label for="cmIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد البنك)</label></div>
     </div>
     <div class="date-row" id="cmGrpWrap"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
-    <div class="date-row" id="cmPayAccWrap" style="display:none;"><label for="cmPayAcc">🏦 حساب البنك اللي المعاش يتحط في رصيده</label><select id="cmPayAcc" onchange="cmPayHint()"></select></div>
+    <div class="date-row" id="cmPayAccWrap" style="display:none;"><label for="cmPayAcc">🏦 البنك اللي المعاش يتحط في حسابه الأساسي</label><select id="cmPayAcc" onchange="cmPayHint()"></select></div>
     <div class="hint" id="cmPayAccHint" style="display:none;"></div>
     <div class="check-row" id="cmZkRow"><input type="checkbox" id="cmZk" checked><label for="cmZk" style="margin:0;">🕌 يدخل في حساب زكاة المال (شيل العلامة لو عايز تستبعده)</label></div>
     <div class="field"><label id="cmDateLbl">📅 التاريخ</label><input type="date" id="cmDate"></div>
@@ -5322,14 +5323,14 @@ function cmPayHint(){
   const h = document.getElementById('cmPayAccHint'), sel = document.getElementById('cmPayAcc'); if(!h || !sel) return;
   const pen = _cmSub === 'pension', has = !!sel.value;
   h.style.display = pen ? '' : 'none';
-  h.textContent = !pen ? '' : (has ? 'المعاش بيتضاف لرصيد الحساب ده كل شهر في يوم الاستحقاق، ومش بيتحسب في الدخل العام. الشهور اللي فاتت قبل التفعيل ما بتتغيرش.' : (sel.options.length > 1 ? 'من غير حساب: المعاش بيتحول للدخل العام زي ما كان.' : 'اعمل حساب بنكي الأول من «البنوك» علشان تقدر تحط المعاش في رصيده.'));
+  h.textContent = !pen ? '' : (has ? 'المعاش بيتضاف لرصيد الحساب الأساسي ده كل شهر في يوم الاستحقاق، ومش بيتحسب في الدخل العام، وبيظهر جوه بطاقة البنك مع الشهادات والحسابات الفرعية. الشهور اللي فاتت قبل التفعيل ما بتتغيرش.' : (sel.options.length > 1 ? 'من غير حساب: المعاش بيتحول للدخل العام زي ما كان.' : 'اعمل حساب بنكي الأول من «البنوك» علشان تقدر تحط المعاش في رصيده.'));
 }
 function cmPayAccFill(val){
   const sel = document.getElementById('cmPayAcc'); if(!sel) return;
   const accs = capRaw().filter(function(z){ return z && z.isAcc && capCatOf(z) === 'money'; });
   sel.innerHTML = '';
   const o0 = document.createElement('option'); o0.value = ''; o0.textContent = accs.length ? 'بدون حساب (المعاش يتحول للدخل العام)' : 'مفيش حسابات بنكية لسه'; sel.appendChild(o0);
-  accs.forEach(function(a){ const o = document.createElement('option'); o.value = a.id; o.textContent = '🏦 ' + a.name + ' — ' + fmt(a.amount); sel.appendChild(o); });
+  accs.forEach(function(a){ const o = document.createElement('option'); o.value = a.id; o.textContent = '🏦 ' + (a.bank ? a.bank + ' — الحساب الأساسي «' + (a.accName || a.name) + '»' : a.name) + ' — ' + fmt(a.amount); sel.appendChild(o); });
   sel.value = (val === undefined) ? (accs.length ? accs[0].id : '') : (val || '');
   if(sel.value !== (val === undefined ? (accs.length ? accs[0].id : '') : (val || ''))) sel.value = '';
   cmPayHint();
@@ -5443,6 +5444,10 @@ function mcCard(x, o){
     vl.textContent = 'المبلغ';
     tg.textContent = 'نقدي' + (dt ? ' · ' + dt : '');
   }
+  if(x.isAcc){   // المعاشات اللي بتتحط في الحساب الأساسي ده
+    const lp = capRaw().filter(function(p){ return p && capCatOf(p) === 'money' && capSubOf(p) === 'pension' && p.payAcc === x.id; });
+    if(lp.length) mcPill(d, 'ok', '💳 المعاش بيتحط هنا كل شهر: ' + lp.map(function(p){ return '«' + p.name + '» ' + fmt(Number(p.amount) || 0) + ' (يوم ' + toArabicDigits(penDay(p)) + ')'; }).join(' · '));
+  }
   { const ds = (sub === 'bank' || sub === 'pension') ? dueSoonOf(x) : null;
     if(ds){ d.classList.add('mc-soon', 'd' + ds.days); const sp = mcPill(d, 'soon d' + ds.days, ''); sp.innerHTML = '<span class="mc-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(ds); d.insertBefore(sp, grid); } }
   if(!grid.children.length) grid.remove();
@@ -5512,6 +5517,7 @@ function mbCard(b, base){
   card.querySelector('.mb-name').textContent = b.bank || first.accName || first.name;
   { const pr = [b.accs.length > 1 ? toArabicDigits(b.accs.length) + ' حسابات أساسية' : 'حساب أساسي'];
     if(b.subs.length) pr.push('🗂 فرعي ' + toArabicDigits(b.subs.length)); if(b.certs.length) pr.push('📜 شهادات ' + toArabicDigits(b.certs.length));
+    if(b.pens && b.pens.length) pr.push('💳 معاش ' + toArabicDigits(b.pens.length));
     card.querySelector('.mb-sub').textContent = pr.join(' · '); }
   card.querySelector('.mb-tv').textContent = fmt(tot);
   { const pr = ['أساسي ' + fmt(mainT)]; if(b.subs.length) pr.push('فرعي ' + fmt(subT)); if(b.certs.length) pr.push('شهادات ' + fmt(certT));
@@ -5539,10 +5545,14 @@ function mbCard(b, base){
   kind('k-main', '🏦', b.accs.length > 1 ? 'الحسابات الأساسية' : 'الحساب الأساسي', b.accs.length === 1 ? (b.accs[0].accName || '') : toArabicDigits(b.accs.length) + ' حسابات', mainT, b.accs, K + '|m');
   if(b.subs.length) kind('k-sub', '🗂', b.subs.length > 1 ? 'الحسابات الفرعية' : 'الحساب الفرعي', b.subs.length === 1 ? (b.subs[0].accName || '') : toArabicDigits(b.subs.length) + ' حسابات', subT, b.subs, K + '|s');
   if(b.certs.length) kind('k-cert', '📜', 'الشهادات', toArabicDigits(b.certs.length) + (b.certs.length === 1 ? ' شهادة' : ' شهادات'), certT, b.certs, K + '|c');
+  if(b.pens && b.pens.length){   // المعاش المربوط بحساب البنك ده: القيمة اللي على اليسار = المعاش الشهري (بيتضاف لرصيد الحساب الأساسي كل شهر، فمش بيتجمع على إجمالي البنك تاني)
+    const penM = b.pens.reduce(function(t, p){ return t + (Number(p.amount) || 0); }, 0);
+    kind('k-pen', '💳', 'المعاش', (b.pens.length === 1 ? 'معاش واحد' : toArabicDigits(b.pens.length) + ' معاشات') + ' · شهريًا في الحساب الأساسي', penM, b.pens, K + '|p');
+  }
   const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.textContent = '➕ حساب فرعي بفايدته ومبلغه';
   addSub.addEventListener('click', function(e){ e.stopPropagation(); openCapSub(first.id); });
   body.appendChild(addSub);
-  { let best = null; b.accs.concat(b.subs, b.certs).forEach(function(x){ let ds = null; try{ ds = dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
+  { let best = null; b.accs.concat(b.subs, b.certs, b.pens || []).forEach(function(x){ let ds = null; try{ ds = dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
     if(best){ const sp = document.createElement('div'); sp.className = 'mb-soon'; sp.innerHTML = '<span class="mb-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(best); card.insertBefore(sp, body); } }
   bind(head, body, badge, K);
   return card;
@@ -5563,15 +5573,19 @@ function renderCapMoney(){
   const arr = sortDescByDate(capList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
   const mcBase = capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
   box.innerHTML = arr.length ? '' : '<div class="mc-empty">لا توجد بنود بعد</div>';
-  const accIds = new Set(arr.filter(x=> x.isAcc).map(x=> x.id)), certsOf = {};
+  const accIds = new Set(arr.filter(x=> x.isAcc).map(x=> x.id)), certsOf = {}, pensOf = {};
   arr.forEach(x=>{ if((x.isCert || x.isSub) && x.accId && accIds.has(x.accId)) (certsOf[x.accId] = certsOf[x.accId] || []).push(x); });
+  // المعاش المربوط بحساب بنكي بيظهر جوه بطاقة البنك (في فلتر «معاش» مفيش بطاقات بنوك فبيظهر لوحده زي ما كان)
+  sortDescByDate(capList().filter(x=> x && capCatOf(x) === 'money' && capSubOf(x) === 'pension' && x.payAcc && accIds.has(x.payAcc))).forEach(x=>{ (pensOf[x.payAcc] = pensOf[x.payAcc] || []).push(x); });
   const banks = {};
-  arr.forEach(x=>{ if(x.isAcc){ const k = mbKey(x); (banks[k] = banks[k] || {key: k, bank: String(x.bank || '').trim(), accs: [], subs: [], certs: [], done: false}).accs.push(x); } });
+  arr.forEach(x=>{ if(x.isAcc){ const k = mbKey(x); (banks[k] = banks[k] || {key: k, bank: String(x.bank || '').trim(), accs: [], subs: [], certs: [], pens: [], done: false}).accs.push(x); } });
   arr.forEach(x=>{
     if((x.isCert || x.isSub) && x.accId && accIds.has(x.accId)) return;   // الشهادة والحساب الفرعي بيظهروا جوه بطاقة بنكهم
+    if(capSubOf(x) === 'pension' && x.payAcc && accIds.has(x.payAcc)) return;   // والمعاش المربوط بحساب كمان
     if(x.isAcc){
       const b = banks[mbKey(x)]; if(b.done) return; b.done = true;
       b.accs.forEach(a=> (certsOf[a.id] || []).forEach(c=> (c.isCert ? b.certs : b.subs).push(c)));
+      b.accs.forEach(a=> (pensOf[a.id] || []).forEach(p=> b.pens.push(p)));
       box.appendChild(mbCard(b, mcBase)); return;
     }
     box.appendChild(mcCard(x, {acts: true, total: mcBase}));
