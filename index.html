@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-10-31.7942">
+<meta name="app-version" content="2026-10-31.7944">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1858,6 +1858,42 @@ html{ overscroll-behavior:none; }
 #nfGlow.go{animation:nfGlowKf 1.5s ease-out 1;}
 @keyframes nfGlowKf{0%{opacity:0}12%{opacity:1}28%{opacity:.15}46%{opacity:1}64%{opacity:.15}80%{opacity:.9}100%{opacity:0}}
 @media (prefers-reduced-motion: reduce){ #nfGlow.go{animation-duration:.6s;} }
+/* ===== بطاقة البنك 3D: اسم البنك + إجمالي الرصيد، وبالضغط تظهر بطاقات الأساسي / الفرعي / الشهادات ===== */
+.gi-row.mbk{display:block; position:relative; margin:0 2px 20px; padding:16px 14px 14px; border-radius:28px; font-size:calc(14px * var(--fs,1)); color:#0b3a46;
+  --mbA:#ecfdfc; --mbB:#b4ebee; --mbE:#0a6a80; --mbS:rgba(10,95,115,.28);
+  background:linear-gradient(160deg,var(--mbA) 0%,var(--mbB) 100%); border:2px solid rgba(255,255,255,.75);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.9), inset 0 -6px 0 rgba(10,95,115,.14), 0 8px 0 var(--mbE), 0 18px 24px var(--mbS);}
+.gi-row.mbk .mb-head{display:flex; align-items:center; gap:12px; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;}
+.gi-row.mbk .mb-ic{flex:none; width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-size:28px; background:radial-gradient(circle at 32% 26%,#b9fbf6 0%,#19b9c6 45%,#0a6a80 100%); box-shadow:inset 0 3px 0 rgba(255,255,255,.7), inset 0 -4px 0 rgba(0,0,0,.2), 0 4px 0 #064a5c, 0 9px 12px rgba(6,74,92,.35);}
+.gi-row.mbk .mb-nm{flex:1; min-width:0;}
+.gi-row.mbk .mb-name{display:block; font-size:calc(20px * var(--fs,1)); font-weight:900; line-height:1.3; overflow-wrap:anywhere; color:#06303b;}
+.gi-row.mbk .mb-sub{display:block; margin-top:2px; font-size:calc(12.5px * var(--fs,1)); font-weight:700; color:#2f6672;}
+.gi-row.mbk .plus-badge{position:relative; top:auto; right:auto; left:auto; flex:none;}
+.gi-row.mbk .mb-tot{margin-top:14px; padding:12px 16px; border-radius:20px; text-align:center; color:#fff; background:linear-gradient(135deg,#1a5f86,#0a2f52); box-shadow:inset 0 2px 0 rgba(255,255,255,.28), inset 0 -4px 0 rgba(0,0,0,.25), 0 5px 0 #06233c, 0 12px 16px rgba(10,47,82,.35);}
+.gi-row.mbk .mb-tot small{display:block; font-size:calc(13px * var(--fs,1)); font-weight:800; opacity:.92;}
+.gi-row.mbk .mb-tv{display:block; direction:ltr; margin:2px 0; font-size:calc(34px * var(--fs,1)); font-weight:900; line-height:1.2; text-shadow:0 2px 0 rgba(0,0,0,.28);}
+.gi-row.mbk .mb-bd{font-size:calc(12.5px * var(--fs,1)) !important; opacity:.85 !important;}
+.gi-row.mbk .mb-bd:empty{display:none;}
+.gi-row.mbk .mb-soon{display:flex; gap:8px; align-items:flex-start; margin-top:12px; padding:9px 13px; border-radius:14px; font-weight:800; font-size:calc(13px * var(--fs,1)); line-height:1.5; color:#7a4300; background:linear-gradient(180deg,#fff0d1,#ffd98a); box-shadow:inset 0 2px 0 rgba(255,255,255,.7), 0 3px 0 rgba(0,0,0,.1);}
+.gi-row.mbk .mb-bell{display:inline-block; transform-origin:50% 0; animation:mcSoonBell 2.2s ease-in-out infinite;}
+.gi-row.mbk .mb-body{margin-top:14px;}
+.gi-row.mbk .mb-kind{margin:0 0 14px;}
+.gi-row.mbk .mb-kh{display:flex; align-items:center; gap:10px; padding:11px 13px; border-radius:20px; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,var(--kA),var(--kB)); box-shadow:inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.18), 0 5px 0 var(--kE), 0 11px 14px var(--kS); transition:transform .08s, box-shadow .08s;}
+.gi-row.mbk .mb-kh:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 1px 0 var(--kE);}
+.gi-row.mbk .k-main{--kA:#5aa7ff; --kB:#2563eb; --kE:#173f9c; --kS:rgba(37,99,235,.3);}
+.gi-row.mbk .k-sub{--kA:#38d3a6; --kB:#0f9d78; --kE:#0a6a52; --kS:rgba(15,157,120,.3);}
+.gi-row.mbk .k-cert{--kA:#a78bfa; --kB:#6d3fd6; --kE:#43238f; --kS:rgba(109,63,214,.3);}
+.gi-row.mbk .mb-ki{flex:none; width:42px; height:42px; border-radius:14px; display:grid; place-items:center; font-size:22px; background:rgba(255,255,255,.25); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.15);}
+.gi-row.mbk .mb-kt{flex:1; min-width:0;}
+.gi-row.mbk .mb-kt b{display:block; font-size:calc(15.5px * var(--fs,1)); font-weight:900;}
+.gi-row.mbk .mb-kt small{display:block; font-size:calc(12px * var(--fs,1)); font-weight:700; opacity:.9; overflow-wrap:anywhere;}
+.gi-row.mbk .mb-kv{flex:none; direction:ltr; font-size:calc(18px * var(--fs,1)); font-weight:900;}
+.gi-row.mbk .mb-kd{margin-top:16px;}
+.gi-row.mbk .mb-kd > .gi-row.mc{margin:0 0 16px;}
+.gi-row.mbk .mc-addsub{width:100%; margin:4px 0 0;}
+:root[data-theme="dark"] .gi-row.mbk{color:#d6f3f6; --mbA:#14303a; --mbB:#0d2229; --mbE:#04141a; --mbS:rgba(0,0,0,.5); border-color:rgba(255,255,255,.12); box-shadow:inset 0 2px 0 rgba(255,255,255,.1), 0 8px 0 var(--mbE), 0 18px 24px var(--mbS);}
+:root[data-theme="dark"] .gi-row.mbk .mb-name{color:#e7fbfd;} :root[data-theme="dark"] .gi-row.mbk .mb-sub{color:#8fc3cc;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .gi-row.mbk{color:#d6f3f6; --mbA:#14303a; --mbB:#0d2229; --mbE:#04141a; --mbS:rgba(0,0,0,.5); border-color:rgba(255,255,255,.12); box-shadow:inset 0 2px 0 rgba(255,255,255,.1), 0 8px 0 var(--mbE), 0 18px 24px var(--mbS);} :root:not([data-theme="light"]) .gi-row.mbk .mb-name{color:#e7fbfd;} :root:not([data-theme="light"]) .gi-row.mbk .mb-sub{color:#8fc3cc;} }
 /* ===== سجلات قابلة للطي (دوس على العنوان يظهر ويخفي) ===== */
 .lg-head{display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;}
 .lg-head .lg-t{flex:1; min-width:0;}
@@ -2250,7 +2286,9 @@ html{ overscroll-behavior:none; }
       <div class="hint">الفائدة بتتصرف شهريًا في نفس يوم «تاريخ بداية الوديعة»، وأول فائدة بعد شهر من البداية.</div>
       <div class="check-row"><input type="checkbox" id="cmIntOut" checked><label for="cmIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد البنك)</label></div>
     </div>
-    <div class="date-row"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
+    <div class="date-row" id="cmGrpWrap"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
+    <div class="date-row" id="cmPayAccWrap" style="display:none;"><label for="cmPayAcc">🏦 حساب البنك اللي المعاش يتحط في رصيده</label><select id="cmPayAcc" onchange="cmPayHint()"></select></div>
+    <div class="hint" id="cmPayAccHint" style="display:none;"></div>
     <div class="check-row" id="cmZkRow"><input type="checkbox" id="cmZk" checked><label for="cmZk" style="margin:0;">🕌 يدخل في حساب زكاة المال (شيل العلامة لو عايز تستبعده)</label></div>
     <div class="field"><label id="cmDateLbl">📅 التاريخ</label><input type="date" id="cmDate"></div>
     <div class="modal-actions">
@@ -4146,6 +4184,7 @@ function opsIn(kind){
 // ===== دخل عام تلقائي من «أموال»: الفوائد البنكية + المعاشات (بأسمائها، كل واحدة في موعد استحقاقها) =====
 function autoIncSync(){
   let changed = false;
+  try{ changed = penDepositSync(); }catch(e){}
   try{
     if(!data || typeof data !== 'object') return false;
     const items = (Array.isArray(data.capital) ? data.capital : []).filter(x=> x && capCatOf(x) === 'money' && (capSubOf(x) === 'pension' || (capSubOf(x) === 'bank' && x.intKeep !== true)));
@@ -4158,6 +4197,7 @@ function autoIncSync(){
         items.forEach(x=>{
           const bank = capSubOf(x) === 'bank';
           if(bank ? !bankActive(x, y, m) : !penActive(x, y, m)) return;
+          if(!bank && penDepOn(x, y, m)) return;   // المعاش بيتحط في رصيد حساب بنكي بدل الدخل العام
           const due = (bank ? bankDueOf(x, y, m) : penDueOf(x, y, m)).getTime(), amt = bank ? bankMonthlyAt(x, bankDueOf(x, y, m)) : (Number(x.amount) || 0);
           if(!(amt > 0)) return;
           want['ai:' + x.id] = {id: 'ai:' + x.id, name: x.name, amount: amt, date: due, counted: due <= eod, auto: bank ? 'bank' : 'pension'};
@@ -5251,6 +5291,54 @@ function renderBankInterest(){
   box.appendChild(list);
   if(!banks.length){ const e = document.createElement('div'); e.className = 'mc-empty'; e.textContent = 'مفيش شهادات بنكية لسه'; box.appendChild(e); }
 }
+// ===== المعاش بيتحط في رصيد حساب بنكي: كل شهر في يوم الاستحقاق بيزيد رصيد الحساب (بدل ما يتحول للدخل العام) =====
+function penDepFrom(x){ return x && x.payFrom ? new Date(x.payFrom) : null; }
+function penDepAcc(x){ if(!x || !x.payAcc) return null; return capRaw().find(function(z){ return z && z.id === x.payAcc && z.isAcc && capCatOf(z) === 'money'; }) || null; }
+function penDepOn(x, y, m){ const f = penDepFrom(x); return !!(f && penDepAcc(x) && penDueOf(x, y, m).getTime() >= f.getTime()); }
+function penDepositSync(){
+  let ch = false;
+  try{
+    const list = capRaw(), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+    list.forEach(function(x){
+      if(!x || capCatOf(x) !== 'money' || capSubOf(x) !== 'pension') return;
+      const f = penDepFrom(x), acc = penDepAcc(x), amt = cgInt(x.amount); if(!f || !acc || !(amt > 0)) return;
+      if(!x.depDone || typeof x.depDone !== 'object') x.depDone = {};
+      let y = f.getFullYear(), m = f.getMonth(), g = 0;
+      while((y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) && g++ < 240){
+        const due = penDueOf(x, y, m).getTime(), k = y + '-' + m;
+        if(due >= f.getTime() && due <= eod && !x.depDone[k]){
+          acc.amount = cgInt((Number(acc.amount) || 0) + amt);
+          if(!Array.isArray(acc.chg)) acc.chg = [];
+          acc.chg.push({id: 'pd:' + x.id + ':' + k, t: due, delta: amt, dep: true});
+          x.depDone[k] = {a: amt, t: due, to: acc.id}; ch = true;
+        }
+        m++; if(m > 11){ m = 0; y++; }
+      }
+    });
+  }catch(e){ console.error('penDepositSync', e); }
+  return ch;
+}
+function cmPayHint(){
+  const h = document.getElementById('cmPayAccHint'), sel = document.getElementById('cmPayAcc'); if(!h || !sel) return;
+  const pen = _cmSub === 'pension', has = !!sel.value;
+  h.style.display = pen ? '' : 'none';
+  h.textContent = !pen ? '' : (has ? 'المعاش بيتضاف لرصيد الحساب ده كل شهر في يوم الاستحقاق، ومش بيتحسب في الدخل العام. الشهور اللي فاتت قبل التفعيل ما بتتغيرش.' : (sel.options.length > 1 ? 'من غير حساب: المعاش بيتحول للدخل العام زي ما كان.' : 'اعمل حساب بنكي الأول من «البنوك» علشان تقدر تحط المعاش في رصيده.'));
+}
+function cmPayAccFill(val){
+  const sel = document.getElementById('cmPayAcc'); if(!sel) return;
+  const accs = capRaw().filter(function(z){ return z && z.isAcc && capCatOf(z) === 'money'; });
+  sel.innerHTML = '';
+  const o0 = document.createElement('option'); o0.value = ''; o0.textContent = accs.length ? 'بدون حساب (المعاش يتحول للدخل العام)' : 'مفيش حسابات بنكية لسه'; sel.appendChild(o0);
+  accs.forEach(function(a){ const o = document.createElement('option'); o.value = a.id; o.textContent = '🏦 ' + a.name + ' — ' + fmt(a.amount); sel.appendChild(o); });
+  sel.value = (val === undefined) ? (accs.length ? accs[0].id : '') : (val || '');
+  if(sel.value !== (val === undefined ? (accs.length ? accs[0].id : '') : (val || ''))) sel.value = '';
+  cmPayHint();
+}
+function cmPayUI(c){
+  const pen = c === 'pension', g = document.getElementById('cmGrpWrap'), p = document.getElementById('cmPayAccWrap');
+  if(g) g.style.display = pen ? 'none' : ''; if(p) p.style.display = pen ? '' : 'none';
+  if(pen && !_cmEditId) cmPayAccFill(); else cmPayHint();
+}
 function cmSubUI(c){
   _cmSub = c;
   document.getElementById('cmForm').style.display = _cmFormOpen ? '' : 'none';
@@ -5261,6 +5349,7 @@ function cmSubUI(c){
   document.getElementById('cmNameLbl').textContent = c === 'bank' ? 'اسم البنك / الحساب' : (c === 'pension' ? 'اسم المعاش' : 'الاسم');
   document.getElementById('cmBankFields').style.display = c === 'bank' ? 'block' : 'none';
   document.getElementById('cmDateLbl').textContent = c === 'bank' ? '📅 تاريخ بداية الوديعة (منه بيتحدد يوم الفائدة)' : (c === 'pension' ? '📅 تاريخ الاستحقاق (أول موعد، وبيتكرر في نفس اليوم كل شهر)' : '📅 التاريخ');
+  cmPayUI(c);
   document.getElementById('cmName').placeholder = c === 'bank' ? 'مثال: البنك الأهلي' : (c === 'pension' ? 'مثال: معاش التأمينات' : 'مثال: كاش بالبيت');
 }
 function setCmSub(c){
@@ -5277,6 +5366,7 @@ function cmReset(){
   document.getElementById('cmDate').value = dateToInputValue(Date.now());
   document.getElementById('cmSaveBtn').textContent = '＋ إضافة';
   fillGrpSel('cmGrp', 'money', '');
+  try{ cmPayAccFill(); }catch(e){}
 }
 // ===== بطاقات الأموال 3D: نقدي / بنوك وشهادات / معاش =====
 function mcCell(grid, cls, lb, big, sm){
@@ -5295,6 +5385,7 @@ function cmEditItem(x){
   document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = x.intKeep !== true; } { const zc = document.getElementById('cmZk'); if(zc) zc.checked = x.noZk !== true; }
   document.getElementById('cmDate').value = dateToInputValue(x.date || Date.now());
   fillGrpSel('cmGrp', 'money', x.grp || '');
+  if(capSubOf(x) === 'pension') cmPayAccFill(x.payAcc || '');
   document.getElementById('cmSaveBtn').textContent = '💾 حفظ التعديل';
   document.getElementById('cmName').scrollIntoView({block:'center'});
 }
@@ -5347,6 +5438,7 @@ function mcCard(x, o){
       if(penActive(x, y, m)) mcPill(d, due <= now ? 'ok' : 'wait', due <= now ? '✅ استُلم معاش ' + MONTHS[m] + ': ' + fmt(amt) : '⏳ المعاش القادم يوم ' + toArabicDigits(due.getDate()) + ' ' + MONTHS[m]);
       else mcPill(d, 'wait', '⏳ أول موعد ' + penStart(x).toLocaleDateString(dateLocale(), {day:'numeric', month:'long'}));
     }
+    if(x.payAcc){ const pa = penDepAcc(x); if(pa) mcPill(d, 'ok', '🏦 بيتحط كل شهر في رصيد «' + pa.name + '»'); else mcPill(d, 'wait', '⚠️ حساب البنك المحدد اتحذف — المعاش بيتحول للدخل العام'); }
   } else {
     vl.textContent = 'المبلغ';
     tg.textContent = 'نقدي' + (dt ? ' · ' + dt : '');
@@ -5408,6 +5500,53 @@ function cmAccCerts(card, acc, certs, base, box){
   });
   paint();
 }
+// ===== بطاقة البنك: اسم البنك + إجمالي الرصيد، وبالضغط تظهر بطاقات (الأساسي / الفرعي / الشهادات) وكل واحدة بالضغط عليها تظهر تفاصيلها =====
+function mbKey(x){ const b = String(x.bank || '').trim().toLowerCase(); return b || ('id:' + x.id); }
+function mbCard(b, base){
+  const first = b.accs[0], card = document.createElement('div');
+  card.className = 'gi-row mbk'; card.dataset.id = first.id; card.dataset.grp = first.grp || '';
+  const sum = function(a){ return a.reduce(function(t, x){ return t + (Number(x.amount) || 0); }, 0); };
+  const mainT = sum(b.accs), subT = sum(b.subs), certT = sum(b.certs), tot = mainT + subT + certT;
+  card.innerHTML = '<div class="mb-head" role="button" tabindex="0"><span class="mb-ic">🏦</span><div class="mb-nm"><b class="mb-name"></b><small class="mb-sub"></small></div><span class="plus-badge pb-teal in-card pb-sm"></span></div>' +
+    '<div class="mb-tot"><small>💰 إجمالي الموجود في البنك</small><b class="mb-tv"></b><small class="mb-bd"></small></div><div class="mb-body"></div>';
+  card.querySelector('.mb-name').textContent = b.bank || first.accName || first.name;
+  { const pr = [b.accs.length > 1 ? toArabicDigits(b.accs.length) + ' حسابات أساسية' : 'حساب أساسي'];
+    if(b.subs.length) pr.push('🗂 فرعي ' + toArabicDigits(b.subs.length)); if(b.certs.length) pr.push('📜 شهادات ' + toArabicDigits(b.certs.length));
+    card.querySelector('.mb-sub').textContent = pr.join(' · '); }
+  card.querySelector('.mb-tv').textContent = fmt(tot);
+  { const pr = ['أساسي ' + fmt(mainT)]; if(b.subs.length) pr.push('فرعي ' + fmt(subT)); if(b.certs.length) pr.push('شهادات ' + fmt(certT));
+    card.querySelector('.mb-bd').textContent = pr.length > 1 ? pr.join(' + ') : ''; }
+  const body = card.querySelector('.mb-body'), head = card.querySelector('.mb-head'), badge = head.querySelector('.plus-badge');
+  function bind(h, box, bd, key, on){
+    let open = !!_cmCertOpen[key];
+    function paint(){ box.style.display = open ? '' : 'none'; setBadgeState(bd, open); h.setAttribute('aria-expanded', open ? 'true' : 'false'); if(on) on(open); }
+    function tg(e){ if(e){ e.stopPropagation(); } open = !open; if(open) _cmCertOpen[key] = 1; else delete _cmCertOpen[key]; cmCertSave(); paint(); }
+    h.addEventListener('click', tg); h.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); tg(e); } });
+    paint();
+  }
+  function kind(cls, ic, title, sub, amt, items, key){
+    const k = document.createElement('div'); k.className = 'mb-kind ' + cls;
+    k.innerHTML = '<div class="mb-kh" role="button" tabindex="0"><span class="mb-ki"></span><div class="mb-kt"><b></b><small></small></div><b class="mb-kv"></b><span class="plus-badge pb-sm in-card"></span></div><div class="mb-kd"></div>';
+    k.querySelector('.mb-ki').textContent = ic; k.querySelector('.mb-kt b').textContent = title;
+    const sm = k.querySelector('.mb-kt small'); if(sub) sm.textContent = sub; else sm.remove();
+    k.querySelector('.mb-kv').textContent = fmt(amt);
+    const kd = k.querySelector('.mb-kd');
+    items.forEach(function(x){ const c = mcCard(x, {acts: true, total: base}); kd.appendChild(c); });
+    body.appendChild(k);
+    bind(k.querySelector('.mb-kh'), kd, k.querySelector('.plus-badge'), key);
+  }
+  const K = b.key;
+  kind('k-main', '🏦', b.accs.length > 1 ? 'الحسابات الأساسية' : 'الحساب الأساسي', b.accs.length === 1 ? (b.accs[0].accName || '') : toArabicDigits(b.accs.length) + ' حسابات', mainT, b.accs, K + '|m');
+  if(b.subs.length) kind('k-sub', '🗂', b.subs.length > 1 ? 'الحسابات الفرعية' : 'الحساب الفرعي', b.subs.length === 1 ? (b.subs[0].accName || '') : toArabicDigits(b.subs.length) + ' حسابات', subT, b.subs, K + '|s');
+  if(b.certs.length) kind('k-cert', '📜', 'الشهادات', toArabicDigits(b.certs.length) + (b.certs.length === 1 ? ' شهادة' : ' شهادات'), certT, b.certs, K + '|c');
+  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.textContent = '➕ حساب فرعي بفايدته ومبلغه';
+  addSub.addEventListener('click', function(e){ e.stopPropagation(); openCapSub(first.id); });
+  body.appendChild(addSub);
+  { let best = null; b.accs.concat(b.subs, b.certs).forEach(function(x){ let ds = null; try{ ds = dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
+    if(best){ const sp = document.createElement('div'); sp.className = 'mb-soon'; sp.innerHTML = '<span class="mb-bell">🔔</span><span></span>'; sp.children[1].textContent = dueSoonTxt(best); card.insertBefore(sp, body); } }
+  bind(head, body, badge, K);
+  return card;
+}
 function renderCapMoney(){
   ensureGrpColors();
   const t = capTotals(), box = document.getElementById('cmList');
@@ -5426,10 +5565,16 @@ function renderCapMoney(){
   box.innerHTML = arr.length ? '' : '<div class="mc-empty">لا توجد بنود بعد</div>';
   const accIds = new Set(arr.filter(x=> x.isAcc).map(x=> x.id)), certsOf = {};
   arr.forEach(x=>{ if((x.isCert || x.isSub) && x.accId && accIds.has(x.accId)) (certsOf[x.accId] = certsOf[x.accId] || []).push(x); });
+  const banks = {};
+  arr.forEach(x=>{ if(x.isAcc){ const k = mbKey(x); (banks[k] = banks[k] || {key: k, bank: String(x.bank || '').trim(), accs: [], subs: [], certs: [], done: false}).accs.push(x); } });
   arr.forEach(x=>{
-    if((x.isCert || x.isSub) && x.accId && accIds.has(x.accId)) return;   // الشهادة والحساب الفرعي بيظهروا تحت حسابهم
-    const card = mcCard(x, {acts: true, total: mcBase}); box.appendChild(card);
-    if(x.isAcc) cmAccCerts(card, x, certsOf[x.id] || [], mcBase, box);
+    if((x.isCert || x.isSub) && x.accId && accIds.has(x.accId)) return;   // الشهادة والحساب الفرعي بيظهروا جوه بطاقة بنكهم
+    if(x.isAcc){
+      const b = banks[mbKey(x)]; if(b.done) return; b.done = true;
+      b.accs.forEach(a=> (certsOf[a.id] || []).forEach(c=> (c.isCert ? b.certs : b.subs).push(c)));
+      box.appendChild(mbCard(b, mcBase)); return;
+    }
+    box.appendChild(mcCard(x, {acts: true, total: mcBase}));
   });
   capGroupize(box, 'money');
   renderBankInterest();
@@ -5448,6 +5593,7 @@ var _cmAddLogOpen = false;
 function toggleCmAddLog(){ _cmAddLogOpen = !_cmAddLogOpen; renderCmAddLog(); }
 function cmAddedAmt(x){   // المبلغ اللي اتضاف أصلًا (الرصيد الحالي + اللي اتصرف منه بعد كده)
   let a = Number(x.amount) || 0;
+  if(Array.isArray(x.chg)) a -= x.chg.filter(function(c){ return c && c.dep; }).reduce(function(t, c){ return t + (Number(c.delta) || 0); }, 0);
   if(!capIsPast() && capSubOf(x) !== 'pension') a += (data.moneyOut || []).filter(r=> r.itemId === x.id && !r.gi && !r.keep).reduce((t, r)=> t + (Number(r.amount) || 0), 0);
   return cgRound(a);
 }
@@ -5770,12 +5916,14 @@ function addCapMoney(){
   const n = document.getElementById('cmName').value.trim(), amt = Number(document.getElementById('cmAmt').value) || 0;
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
   const rec = {name: n, amount: amt, cat: 'money', sub: _cmSub, date: inputValueToDate(document.getElementById('cmDate').value, Date.now())};
-  const gv = document.getElementById('cmGrp').value; if(gv) rec.grp = gv;
+  const gv = document.getElementById('cmGrp').value; if(gv && _cmSub !== 'pension') rec.grp = gv;
+  let payNew = ''; if(_cmSub === 'pension'){ const pv = (document.getElementById('cmPayAcc') || {}).value; if(pv){ rec.payAcc = pv; payNew = pv; } }
   { const zc = document.getElementById('cmZk'); if(zc && !zc.checked) rec.noZk = true; }
   if(_cmSub === 'bank'){ rec.rate = Number(document.getElementById('cmRate').value) || 0; const rv = document.getElementById('cmRem').value; rec.monthlyInt = (_cmRemTouched && rv !== '') ? Number(rv) || 0 : undefined; { const io = document.getElementById('cmIntOut'); rec.intKeep = (io && !io.checked) ? true : undefined; } }
   const wasEdit = !!_cmEditId;
-  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; Object.assign(x, rec); } }
-  else capList().push(Object.assign({id: uid()}, rec));
+  if(wasEdit){ const x = capList().find(z=> z.id === _cmEditId); if(x){ const oldPay = x.payAcc; delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; if(_cmSub === 'pension'){ delete x.payAcc; if(payNew && !oldPay) rec.payFrom = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime(); } Object.assign(x, rec); } }
+  else { if(payNew) rec.payFrom = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime(); capList().push(Object.assign({id: uid()}, rec)); }
+  try{ if(penDepositSync()) save(); }catch(e){}
   save(); cmReset(); renderCapMoney(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : (_cmSub === 'pension' ? 'المعاشات' : 'النقدي')), true);
 }
 
