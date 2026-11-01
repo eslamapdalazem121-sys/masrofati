@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.8172">
+<meta name="app-version" content="2026-11-01.8174">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -9395,6 +9395,17 @@ window.addEventListener('offline', ()=>{
 });
 window.addEventListener('online', ()=>{ showToast('✅ الإنترنت رجع', true); });
 if(navigator.serviceWorker){ navigator.serviceWorker.addEventListener('controllerchange', updateOfflineStatus); }
+// تنبيه تحديث مضمون: لو خدمة التخزين اتبدّلت بنسخة جديدة والتطبيق مفتوح (كان فيه نسخة شغّالة قبلها) نظهر رسالة
+(function(){
+  try{
+    if(!navigator.serviceWorker) return;
+    const hadCtl = !!navigator.serviceWorker.controller; let shown = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(!hadCtl || shown) return; shown = true;
+      try{ showToast('🔄 نزلت نسخة جديدة من التطبيق — اقفله وافتحه تاني عشان تشتغل', true); }catch(e){}
+    });
+  }catch(e){}
+})();
 // ===== OFFLINE END =====
 
 // ===== LOCK RECOVERY START (تلميح بدون نت + نسيت النقش) =====
