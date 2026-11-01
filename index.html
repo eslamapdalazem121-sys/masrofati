@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.7978">
+<meta name="app-version" content="2026-11-01.8071">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2331,7 +2331,7 @@ html{ overscroll-behavior:none; }
       <div class="field"><label for="accAmt">الرصيد الافتتاحي (اختياري)</label><input type="number" id="accAmt" placeholder="0" inputmode="decimal" oninput="accCalc()"></div>
       <div class="field"><label for="accDate">📅 تاريخ فتح الحساب (منه بيتحدد يوم الفائدة)</label><input type="date" id="accDate" onchange="accCalc()"></div>
       <div class="acc-sum" id="accSum"></div>
-      <div class="check-row"><input type="checkbox" id="accIntOut" checked><label for="accIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد الحساب)</label></div>
+      <div class="check-row"><input type="checkbox" id="accIntOut" checked><label for="accIntOut" id="accIntOutLbl" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد الحساب)</label></div>
       <div class="check-row"><input type="checkbox" id="accZk" checked><label for="accZk" style="margin:0;">🕌 يدخل في حساب زكاة المال</label></div>
     </div>
     <button type="button" class="acc-save" id="accSaveBtn" onclick="saveCapAcc()">🏦 فتح الحساب</button>
@@ -4332,9 +4332,9 @@ function certIntDepositSync(){
   try{
     const list = capRaw(), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999), sod = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     list.forEach(function(x){
-      if(!x || capCatOf(x) !== 'money' || capSubOf(x) !== 'bank' || x.isCert !== true) return;
+      if(!x || capCatOf(x) !== 'money' || capSubOf(x) !== 'bank' || (x.isCert !== true && x.isSub !== true && x.isAcc !== true)) return;
       if(x.intKeep !== true){ if(certIntUndo(x, list)) ch = true; return; }
-      const acc = x.accId ? list.find(function(z){ return z && z.id === x.accId && z.isCert !== true && capCatOf(z) === 'money' && capSubOf(z) === 'bank'; }) : null;
+      const acc = x.isAcc === true ? x : (x.accId ? list.find(function(z){ return z && z.id === x.accId && z.id !== x.id && z.isCert !== true && z.isSub !== true && capCatOf(z) === 'money' && capSubOf(z) === 'bank'; }) : null);
       if(!acc) return;
       const dues = certIntDues(x, eod); if(!dues.length) return;
       if(!Array.isArray(acc.chg)) acc.chg = [];
@@ -5275,6 +5275,7 @@ function openCapAcc(x, opt){
   document.getElementById('accAmt').value = x && x.amount ? x.amount : '';
   document.getElementById('accDate').value = dateToInputValue(x && x.date ? x.date : Date.now());
   document.getElementById('accIntOut').checked = !(x && x.intKeep === true);
+  { const il = document.getElementById('accIntOutLbl'); if(il) il.textContent = _accSub ? 'تحويل الفايدة وصرفها من الدخل العام الشهري (لو شلت العلامة: الفايدة بتتضاف كل شهر لرصيد الحساب الأساسي)' : 'تحويل الفايدة وصرفها من الدخل العام الشهري (لو شلت العلامة: الفايدة بتتضاف كل شهر لرصيد الحساب)'; }
   document.getElementById('accZk').checked = !(x && x.noZk === true);
   document.getElementById('accSaveBtn').textContent = x ? '💾 حفظ التعديل' : (_accSub ? '🗂 إنشاء الحساب الفرعي' : '🏦 فتح الحساب');
   accPick('type', x && x.accType === 'current' ? 'current' : 'savings');
@@ -5283,7 +5284,7 @@ function openCapAcc(x, opt){
   try{ document.querySelector('#capAccOverlay .modal-box').scrollTop = 0; }catch(e){}
 }
 function closeCapAcc(){ document.getElementById('capAccOverlay').classList.remove('open'); _accEditId = null; _accSub = false; }
-function saveCapAcc(){
+function saveCapAcc(backChoice){
   const an = document.getElementById('accName').value.trim(), par = _accSub ? capList().find(z=> z.id === document.getElementById('accParent').value) : null;
   const bk = _accSub ? (par ? par.bank || '' : '') : document.getElementById('accBank').value.trim();
   const amt = Number(document.getElementById('accAmt').value) || 0, rate = Number(document.getElementById('accRate').value) || 0;
@@ -5297,8 +5298,25 @@ function saveCapAcc(){
   if(!document.getElementById('accIntOut').checked) rec.intKeep = true;
   if(!document.getElementById('accZk').checked) rec.noZk = true;
   const edit = !!_accEditId;
-  if(edit){ const x = capList().find(z=> z.id === _accEditId); if(x){ delete x.intKeep; delete x.noZk; Object.assign(x, rec); } }
-  else capList().push(Object.assign({id: uid()}, rec));
+  if(rec.intKeep === true){   // لو لسه معلّم إن الفايدة بتتضاف للحساب (الأساسي أو التابع له) نسأل عن الفوايد اللي استحقت قبل كده
+    const oldA = edit ? capList().find(z=> z.id === _accEditId) : null, newlyKeep = !(oldA && oldA.intKeep === true && (!_accSub || oldA.accId === par.id));
+    if(newlyKeep && backChoice === undefined){
+      const tmp = Object.assign({}, oldA || {}, rec); let dues = [];
+      try{ const n0 = new Date(), sod0 = new Date(n0.getFullYear(), n0.getMonth(), n0.getDate()).getTime(); dues = certIntDues(tmp, new Date(n0.getFullYear(), n0.getMonth(), n0.getDate(), 23, 59, 59, 999)).filter(d=> d.t < sod0 && d.a > 0); }catch(e){}
+      if(dues.length){
+        const sum = dues.reduce((t, d)=> t + d.a, 0);
+        openConfirm('فوايد استحقت قبل كده', (_accSub ? 'الحساب الفرعي ده' : 'الحساب ده') + ' استحق له قبل النهارده ' + toArabicDigits(dues.length) + (dues.length === 1 ? ' فايدة' : ' فوايد') + ' = ' + fmt(sum) + '. تضيفهم كمان ' + (_accSub ? 'لرصيد الحساب الأساسي' : 'لرصيد الحساب') + '؟ (لو لأ، الفايدة هتتضاف من النهارده بس وللشهور الجاية)',
+          ()=> saveCapAcc('all'), 'ضيفهم كلهم', 'لا، من النهارده بس', ()=> saveCapAcc('none'));
+        return;
+      }
+    }
+  }
+  let savedX = null;
+  if(edit){ const x = capList().find(z=> z.id === _accEditId); if(x){ delete x.intKeep; delete x.noZk; Object.assign(x, rec); savedX = x; } }
+  else { capList().push(Object.assign({id: uid()}, rec)); savedX = capList()[capList().length - 1]; }
+  if(savedX && (savedX.isSub === true || savedX.isAcc === true) && rec.intKeep === true && savedX.intBack === undefined) savedX.intBack = (backChoice === 'all') ? 'all' : 'none';
+  if(savedX && (savedX.isSub === true || savedX.isAcc === true) && rec.intKeep === true && backChoice !== undefined && !savedX.intDepDone) savedX.intBack = (backChoice === 'all') ? 'all' : 'none';
+  try{ autoIncSync(); }catch(e){}
   save(); closeCapAcc(); _cmFilter = 'bank'; renderCapMoney(); renderCap();
   showToast(edit ? 'تم حفظ التعديل' : (par ? 'تم إنشاء الحساب الفرعي تحت «' + (par.accName || par.name) + '»' : 'تم فتح الحساب في ' + bk), true);
 }
