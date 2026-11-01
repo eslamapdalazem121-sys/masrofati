@@ -4425,7 +4425,7 @@ function certIntDepositSync(){
           if(pool > 0){
             const ld = dues[dues.length - 1];
             acc.amount = cgInt((Number(acc.amount) || 0) + pool);
-            acc.chg.push({id: 'cd:' + x.id + ':init', t: ld.t, delta: pool, dep: true});
+            acc.chg.push({id: 'cd:' + x.id + ':init', t: ld.t, e: Math.max(ld.t, Date.now()), delta: pool, dep: true});
             x.intDepDone[ld.k] = {a: pool, t: ld.t, to: acc.id, init: 1};
           }
           return;
@@ -4435,7 +4435,7 @@ function certIntDepositSync(){
       dues.forEach(function(d){
         if(x.intDepDone[d.k] || !(d.a > 0)) return;
         acc.amount = cgInt((Number(acc.amount) || 0) + d.a);
-        acc.chg.push({id: 'cd:' + x.id + ':' + d.k, t: d.t, delta: d.a, dep: true});
+        acc.chg.push({id: 'cd:' + x.id + ':' + d.k, t: d.t, e: Math.max(d.t, Date.now()), delta: d.a, dep: true});
         x.intSpent = cgInt((Number(x.intSpent) || 0) + d.a);
         x.intDepDone[d.k] = {a: d.a, t: d.t, to: acc.id}; ch = true;
       });
@@ -5228,7 +5228,11 @@ function bankAnnualPay(x){ return bankPer(x) > 1; }   // فايدة بتتصرف
 // تاريخ رصيد الحساب: كل صرف من الحساب بيتسجّل (x.chg) وبيأثر على الفوايد اللي لسه ما استحقتش بس، مش على اللي استحقت قبله
 function bankAmtAt(x, due){
   let p = Number(x.amount) || 0; const t = (due instanceof Date) ? due.getTime() : Number(due);
-  (Array.isArray(x.chg) ? x.chg : []).forEach(function(c){ if(c.t > t) p -= Number(c.delta) || 0; });
+  (Array.isArray(x.chg) ? x.chg : []).forEach(function(c){
+    // فايدة شهادة اتضافت للحساب (id بيبدأ بـ cd:): بتبدأ تتحسب عليها فايدة من ميعاد الفايدة «الجاي» بعد وقت إضافتها (c.e)، مش في نفس لحظتها ولا في ميعاد فات
+    if(c && typeof c.id === 'string' && c.id.indexOf('cd:') === 0){ if((Number(c.e) || c.t) >= t) p -= Number(c.delta) || 0; }
+    else if(c.t > t) p -= Number(c.delta) || 0;
+  });
   return p;
 }
 // ===== تعديل بند في «أموال»: بيسري من يوم التعديل (اللي فات يفضل زي ما هو)، وتعديل سنة عدّت بيأثر على السنة دي بس =====
