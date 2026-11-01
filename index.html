@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.8171">
+<meta name="app-version" content="2026-11-01.8172">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -252,6 +252,12 @@ h1{
 }
 .field select:focus, .field input:focus{outline:none; border-color:var(--accent);}
 .check-row{display:flex; align-items:center; gap:8px; font-size:calc(13px * var(--fs,1)); margin:12px 0 4px; color:var(--muted);}
+.edmode{margin:-4px 2px 14px; padding:11px 13px; border-radius:16px; background:rgba(47,123,255,.10); border:1.5px dashed rgba(47,123,255,.55); font-size:calc(13px * var(--fs,1)); line-height:1.6; color:var(--text);}
+.edmode > b{display:block; font-weight:800; margin-bottom:4px;}
+.edmode label{display:flex; align-items:flex-start; gap:9px; padding:7px 4px; margin:0; cursor:pointer; font-weight:700; font-size:inherit; color:var(--text);}
+.edmode label small{display:block; font-weight:600; color:var(--muted); font-size:calc(11.5px * var(--fs,1));}
+.edmode input[type=radio]{flex:0 0 20px; width:20px; height:20px; margin:2px 0 0; accent-color:#2f7bff;}
+.edmode label.sel{background:rgba(47,123,255,.14); border-radius:12px;}
 .modal-actions{display:flex; gap:10px; margin-top:16px;}
 .modal-actions button{flex:1; padding:13px; border-radius:12px; border:none; font-size:calc(14px * var(--fs,1)); font-weight:700; cursor:pointer; font-family:inherit;}
 .btn-cancel{background:var(--border); color:var(--text);}
@@ -2297,8 +2303,10 @@ html{ overscroll-behavior:none; }
     <div id="cmForm" style="display:none;">
     <div class="field"><label id="cmNameLbl">الاسم</label><input type="text" id="cmName" placeholder="مثال: كاش بالبيت"></div>
     <div class="field"><label id="cmAmtLbl">المبلغ</label><input type="number" id="cmAmt" placeholder="0" oninput="cmCalcInt()"></div>
+    <div class="edmode" id="cmAmtMode" style="display:none;"></div>
     <div class="bank-box" id="cmBankFields" style="display:none;">
       <div class="date-row"><label for="cmRate">نسبة الفائدة السنوية %</label><input type="number" id="cmRate" placeholder="مثال: 5" step="any" oninput="cmCalcInt()"></div>
+      <div class="edmode" id="cmRateMode" style="display:none;"></div>
       <div class="gi-sumrow" style="margin:8px 0 0;"><span>الفائدة السنوية: <b id="cmAnnual">0</b></span><span>الفائدة الشهرية: <b id="cmMonthly">0</b></span></div>
       <div class="date-row"><label for="cmRem">تعديل الفائدة الشهرية (اختياري)</label><input type="number" id="cmRem" placeholder="تلقائي" step="any" oninput="_cmRemTouched = this.value !== ''; cmCalcInt()"></div>
       <div class="hint">الفائدة بتتصرف شهريًا في نفس يوم «تاريخ بداية الوديعة»، وأول فائدة بعد شهر من البداية.</div>
@@ -2330,9 +2338,11 @@ html{ overscroll-behavior:none; }
       <div class="field"><label>نوع الحساب</label>
         <div class="acc-seg" id="accType"><button type="button" class="active" data-v="savings" onclick="accPick('type','savings')">💰 حساب توفير</button><button type="button" data-v="current" onclick="accPick('type','current')">🧾 حساب جاري</button></div></div>
       <div class="field"><label for="accRate">نسبة الفائدة على الحساب (٪ في السنة)</label><input type="number" id="accRate" placeholder="مثال: 10 (سيبها فاضية لو مفيش فايدة)" step="any" inputmode="decimal" oninput="accCalc()"></div>
+      <div class="edmode" id="accRateMode" style="display:none;"></div>
       <div class="field"><label>الفائدة بتتصرف</label>
         <div class="acc-seg" id="accFreq"><button type="button" class="active" data-v="monthly" onclick="accPick('freq','monthly')">🗓 فائدة شهرية</button><button type="button" data-v="annual" onclick="accPick('freq','annual')">📆 فائدة سنوية</button></div></div>
       <div class="field"><label for="accAmt">الرصيد الافتتاحي (اختياري)</label><input type="number" id="accAmt" placeholder="0" inputmode="decimal" oninput="accCalc()"></div>
+      <div class="edmode" id="accAmtMode" style="display:none;"></div>
       <div class="field"><label for="accDate">📅 تاريخ فتح الحساب (منه بيتحدد يوم الفائدة)</label><input type="date" id="accDate" onchange="accCalc()"></div>
       <div class="acc-sum" id="accSum"></div>
       <div class="check-row"><input type="checkbox" id="accIntOut" checked><label for="accIntOut" id="accIntOutLbl" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد الحساب)</label></div>
@@ -2350,7 +2360,9 @@ html{ overscroll-behavior:none; }
       <div class="field"><label for="certName">اسم الشهادة</label><input type="text" id="certName" placeholder="مثال: شهادة ٣ سنين"></div>
       <div class="field"><label for="certAcc">🏦 حساب البنك</label><select id="certAcc"></select><div class="hint" id="certAccHint" style="margin-top:6px;"></div></div>
       <div class="field"><label for="certAmt">قيمة الشهادة</label><input type="number" id="certAmt" placeholder="0" inputmode="decimal" oninput="certCalc()"></div>
+      <div class="edmode" id="certAmtMode" style="display:none;"></div>
       <div class="field"><label for="certRate">نسبة الفائدة (٪ في السنة)</label><input type="number" id="certRate" placeholder="مثال: 18" step="any" inputmode="decimal" oninput="certCalc()"></div>
+      <div class="edmode" id="certRateMode" style="display:none;"></div>
       <div class="field"><label>الفوائد والاستحقاق</label>
         <div class="acc-seg" id="certFreq"><button type="button" class="active" data-v="monthly" onclick="certPick('monthly')">🗓 شهري</button><button type="button" data-v="quarterly" onclick="certPick('quarterly')">🧾 كل ٣ شهور</button><button type="button" data-v="annual" onclick="certPick('annual')">📆 سنوي</button></div></div>
       <div class="field"><label for="certDate">📅 تاريخ الشراء (منه بيتحدد يوم الاستحقاق)</label><input type="date" id="certDate" onchange="certCalc()"></div>
@@ -11636,43 +11648,136 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
 })();
 </script>
 <script>
-/* تعديل بند في أموال: يسري من يوم التعديل، وتعديل سنة عدّت يأثر على السنة دي بس */
+/* تعديل بند في أموال: يسري من يوم التعديل، وتعديل سنة عدّت يأثر على السنة دي بس.
+   وفي الحساب البنكي / الحساب الفرعي / الشهادة: تحت النسبة وتحت الرصيد (لما تتغيّر) ٣ اختيارات: من الشهور الماضية / من الشهر الحالي / من الشهور القادمة */
 (function(){
-  var TRACK = ['amount', 'rate', 'monthlyInt', 'remInt'];
+  var TRACK = ['amount', 'rate', 'monthlyInt', 'remInt'], RATE_KEYS = ['rate', 'monthlyInt', 'remInt'];
   window.capItemClone = function(x){ var c = JSON.parse(JSON.stringify(x)); delete c.rv; return c; };
-  window.capAfterEdit = function(id, before){
+  function chg(a, b, keys){ return keys.some(function(k){ return String(a[k]) !== String(b[k]); }); }
+  function monthStart(off){ var n = new Date(); return new Date(n.getFullYear(), n.getMonth() + off, 1).getTime(); }
+  function monthName(off){ var n = new Date(); return MONTHS[new Date(n.getFullYear(), n.getMonth() + off, 1).getMonth()]; }
+  function boundOf(mode, T){ return mode === 'past' ? 0 : (mode === 'cur' ? monthStart(0) : (mode === 'next' ? monthStart(1) : T)); }
+  function sig(it){ return JSON.stringify([Number(it.amount) || 0, Number(it.rate) || 0, (it.monthlyInt === undefined || it.monthlyInt === null) ? '' : it.monthlyInt, (it.remInt === undefined || it.remInt === null) ? '' : it.remInt, it.payFreq || '', it.chg || []]); }
+  // سجل النسخ بعد تعديل حساب/شهادة: كل فترة ليها قيمها (النسبة والمبلغ ممكن يبدأوا من تواريخ مختلفة). groups = [{keys, b}] — b = أول وقت بتسري منه القيمة الجديدة (٠ = من الأول)
+  window.capRebuildRv = function(x, before, groups){
+    var old = Array.isArray(x.rv) ? x.rv : [];
+    var p2 = old.filter(function(v){ return v && Number(v.p) === 2; });
+    var p1 = old.filter(function(v){ return v && v.it && Number(v.p) !== 2; }).sort(function(a, b){ return Number(a.u) - Number(b.u); });
+    function baseAt(t){ for(var i = 0; i < p1.length; i++) if(Number(p1[i].u) > t) return p1[i].it; return before; }
+    var cuts = {}; p1.forEach(function(v){ cuts[Number(v.u)] = 1; }); groups.forEach(function(g){ if(g.b > 0) cuts[g.b] = 1; });
+    var pts = Object.keys(cuts).map(Number).sort(function(a, b){ return a - b; }), out = [], s0 = 0;
+    pts.forEach(function(c){
+      var snap = JSON.parse(JSON.stringify(baseAt(s0)));
+      groups.forEach(function(g){ if(s0 >= g.b) g.keys.forEach(function(k){ if(x[k] === undefined) delete snap[k]; else snap[k] = x[k]; }); });
+      out.push({f: 0, u: c, p: 1, it: snap}); s0 = c;
+    });
+    var nx = sig(x);
+    for(var i = out.length - 1; i >= 0; i--){ var sg = sig(out[i].it); if(sg === nx) out.splice(i, 1); else nx = sg; }   // فترة قيمها زي اللي بعدها: بتتدمج
+    out = out.concat(p2);
+    if(out.length) x.rv = out; else delete x.rv;
+  };
+  function modeTxt(g){
+    if(g.mode === 'past') return 'اتطبّقت على الشهور الماضية كمان';
+    if(g.mode === 'cur') return 'سارية من شهر ' + monthName(0) + ' (الحالي) والشهور القادمة';
+    if(g.mode === 'next') return 'سارية من شهر ' + monthName(1) + ' (الشهر الحالي زي ما هو)';
+    return 'سارية من النهارده (اللي فات زي ما هو)';
+  }
+  window.capAfterEdit = function(id, before, modes){
     var x = capList().find(function(z){ return z.id === id; }); if(!x) return false;
     if(!TRACK.some(function(k){ return String(x[k]) !== String(before[k]); })) return false;
-    var sub = capSubOf(x), now = new Date(), T = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), past = capIsPast(), Y = currentYear;
+    var sub = capSubOf(x), now = new Date(), T = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), past = capIsPast(), Y = currentYear, msg = true;
     if(sub === 'bank' || sub === 'pension'){
       if(!past){
-        if(!Array.isArray(x.rv)) x.rv = [];
-        x.rv.push({f: 0, u: T, p: 1, it: before});                 // اللي فات يفضل بقيمه القديمة
+        if(sub === 'bank'){
+          var md = modes || {}, groups = [], parts = [];
+          if(chg(x, before, RATE_KEYS)){ var g1 = {keys: RATE_KEYS, mode: md.rate || null}; g1.b = boundOf(g1.mode, T); groups.push(g1); if(!modes || md.rate) parts.push('النسبة الجديدة ' + modeTxt(g1)); }
+          if(chg(x, before, ['amount'])){ var g2 = {keys: ['amount'], mode: md.amt || null}; g2.b = boundOf(g2.mode, T); groups.push(g2); if(!modes || md.amt) parts.push('الفايدة على المبلغ الجديد ' + modeTxt(g2)); }
+          capRebuildRv(x, before, groups);
+          msg = parts.length ? parts.join(' · ') : true;
+        } else {
+          if(!Array.isArray(x.rv)) x.rv = [];
+          x.rv.push({f: 0, u: T, p: 1, it: before});                 // اللي فات يفضل بقيمه القديمة
+        }
       } else {
         var r = capRaw().find(function(z){ return z.id === id; });
         if(r){ if(!Array.isArray(r.rv)) r.rv = []; r.rv.push({f: new Date(Y, 0, 1).getTime(), u: new Date(Y + 1, 0, 1).getTime(), p: 2, it: capItemClone(x)}); }
       }
     }
     if(past){ try{ var sn = data.capSnap && data.capSnap[Y]; if(sn){ sn.totals = capTotalsCalc(sn.list); sn.edited = Date.now(); } }catch(e){} }
-    return true;
+    return msg;
   };
-  function wrap(name, idGetter){
+
+  // ===== اختيارات «تتحسب من إمتى؟» تحت النسبة وتحت الرصيد =====
+  var EDM = {};   // prefix → {id, rate0, amt0}
+  var IDS = {acc: ['accRate', 'accAmt'], cert: ['certRate', 'certAmt'], cm: ['cmRate', 'cmAmt']};
+  function defMode(x){   // الافتراضي = نفس السلوك القديم: لو ميعاد الفايدة الشهر ده لسه ما عدّاش بيسري من الشهر الحالي، وإلا من الشهر الجاي
+    try{ var n = new Date(), T = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime(); return bankDueOf(x, n.getFullYear(), n.getMonth()).getTime() >= T ? 'cur' : 'next'; }catch(e){ return 'next'; }
+  }
+  function boxHtml(p, kind, def){
+    var rate = kind === 'R', nm = p + kind;
+    var items = rate ? [
+      ['past', '🕰 من الشهور الماضية كمان', 'النسبة الجديدة تتحسب على كل الفوايد من أول فايدة (بتتغيّر الفوايد اللي فاتت)'],
+      ['cur', '📅 من الشهر الحالي (' + monthName(0) + ') والشهور القادمة', 'الفوايد قبل ' + monthName(0) + ' تفضل زي ما هي'],
+      ['next', '⏭ من الشهور القادمة (من ' + monthName(1) + ')', 'الشهر الحالي ' + monthName(0) + ' وما قبله يفضلوا بالنسبة القديمة']
+    ] : [
+      ['past', '🕰 تتحسب عليه الفايدة من الشهور الماضية كمان', 'الفايدة بتتحسب على المبلغ الجديد من أول فايدة (بتتغيّر الفوايد اللي فاتت)'],
+      ['cur', '📅 تتحسب عليه من الشهر الحالي (' + monthName(0) + ') والشهور القادمة', 'الفوايد قبل ' + monthName(0) + ' تفضل على المبلغ القديم'],
+      ['next', '⏭ تتحسب عليه من الشهور القادمة (من ' + monthName(1) + ')', 'الشهر الحالي ' + monthName(0) + ' وما قبله يفضلوا على المبلغ القديم']
+    ];
+    return '<b>' + (rate ? '🔀 النسبة الجديدة تتحسب من إمتى؟' : '🔀 المبلغ الجديد تتحسب عليه الفايدة من إمتى؟') + '</b>' + items.map(function(it){
+      return '<label' + (it[0] === def ? ' class="sel"' : '') + '><input type="radio" name="' + nm + '" value="' + it[0] + '"' + (it[0] === def ? ' checked' : '') + '><span>' + it[1] + '<small>' + it[2] + '</small></span></label>';
+    }).join('');
+  }
+  function boxes(p){ return {R: document.getElementById(p + 'RateMode'), A: document.getElementById(p + 'AmtMode')}; }
+  window.capModeOpen = function(p, x){
+    var b = boxes(p); if(!b.R || !b.A) return;
+    if(!x || capIsPast() || capSubOf(x) !== 'bank'){ EDM[p] = null; b.R.style.display = 'none'; b.A.style.display = 'none'; return; }
+    var def = defMode(x); EDM[p] = {id: x.id, rate0: Number(x.rate) || 0, amt0: Number(x.amount) || 0};
+    b.R.innerHTML = boxHtml(p, 'R', def); b.A.innerHTML = boxHtml(p, 'A', def);
+    [b.R, b.A].forEach(function(bx){ Array.prototype.forEach.call(bx.querySelectorAll('input[type=radio]'), function(r){ r.addEventListener('change', function(){ Array.prototype.forEach.call(bx.querySelectorAll('label'), function(l){ l.classList.toggle('sel', !!l.querySelector('input').checked); }); }); }); });
+    window.capModeSync(p);
+  };
+  window.capModeSync = function(p){
+    var b = boxes(p), st = EDM[p]; if(!b.R || !b.A) return;
+    if(!st || (p === 'cm' && typeof _cmEditId !== 'undefined' && _cmEditId !== st.id)){ b.R.style.display = 'none'; b.A.style.display = 'none'; return; }
+    var rv = Number((document.getElementById(IDS[p][0]) || {}).value) || 0, av = Number((document.getElementById(IDS[p][1]) || {}).value) || 0;
+    b.R.style.display = Math.abs(rv - st.rate0) > 1e-9 ? '' : 'none';
+    b.A.style.display = Math.abs(av - st.amt0) > 1e-9 ? '' : 'none';
+  };
+  function readModes(p){
+    var st = EDM[p], b = boxes(p); if(!st || !b.R) return null;
+    function pick(bx, nm){ if(bx.style.display === 'none') return null; var r = bx.querySelector('input[name="' + nm + '"]:checked'); return r ? r.value : null; }
+    return {rate: pick(b.R, p + 'R'), amt: pick(b.A, p + 'A')};
+  }
+
+  function wrap(name, idGetter, modeGetter){
     var f = window[name]; if(typeof f !== 'function') return;
     window[name] = function(){
-      var id = idGetter(), before = null;
-      if(id){ var x = capList().find(function(z){ return z.id === id; }); if(x) before = capItemClone(x); }
+      var id = idGetter(), before = null, modes = null;
+      if(id){ var x = capList().find(function(z){ return z.id === id; }); if(x){ before = capItemClone(x); if(modeGetter) modes = modeGetter(); } }
       var res = f.apply(this, arguments), done = false;
-      try{ if(id && before) done = capAfterEdit(id, before); }catch(e){ console.error('capAfterEdit', e); }
+      try{ if(id && before) done = capAfterEdit(id, before, modes); }catch(e){ console.error('capAfterEdit', e); }
       if(done){
         try{ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
-        try{ showToast(capIsPast() ? 'التعديل أثّر على سنة ' + toArabicDigits(currentYear) + ' بس' : 'التعديل ساري من النهارده، والشهور اللي فاتت زي ما هي', true); }catch(e){}
+        try{ showToast(capIsPast() ? 'التعديل أثّر على سنة ' + toArabicDigits(currentYear) + ' بس' : (typeof done === 'string' ? done : 'التعديل ساري من النهارده، والشهور اللي فاتت زي ما هي'), true); }catch(e){}
       }
       return res;
     };
   }
+  function hook(name, after){
+    var f = window[name]; if(typeof f !== 'function') return;
+    window[name] = function(){ var r = f.apply(this, arguments); try{ after.apply(this, arguments); }catch(e){ console.error('hook ' + name, e); } return r; };
+  }
   window.addEventListener('load', function(){ setTimeout(function(){
-    wrap('saveCapAcc', function(){ return _accEditId; });
-    wrap('saveCapCert', function(){ return _certEditId; });
+    hook('openCapAcc', function(x){ capModeOpen('acc', x || null); });
+    hook('openCapCert', function(x){ capModeOpen('cert', x || null); });
+    hook('accCalc', function(){ capModeSync('acc'); });
+    hook('certCalc', function(){ capModeSync('cert'); });
+    hook('cmEditItem', function(x){ if(x && !x.isAcc && !x.isSub && !x.isCert) capModeOpen('cm', x); });
+    hook('cmReset', function(){ EDM.cm = null; capModeSync('cm'); });
+    hook('cmCalcInt', function(){ capModeSync('cm'); });
+    wrap('saveCapAcc', function(){ return _accEditId; }, function(){ return readModes('acc'); });
+    wrap('saveCapCert', function(){ return _certEditId; }, function(){ return readModes('cert'); });
     var f0 = window.addCapMoney;
     if(typeof f0 === 'function'){
       window.addCapMoney = function(){
@@ -11680,7 +11785,7 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
         return f0.apply(this, arguments);
       };
     }
-    wrap('addCapMoney', function(){ return _cmEditId; });
+    wrap('addCapMoney', function(){ return _cmEditId; }, function(){ return _cmSub === 'bank' ? readModes('cm') : null; });
   }, 0); });
 })();
 </script>
