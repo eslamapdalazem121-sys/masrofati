@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.8133">
+<meta name="app-version" content="2026-11-01.8171">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1561,6 +1561,9 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 .gp-btn{border:0;cursor:pointer;color:#fff;font:800 15.5px 'Tajawal','Cairo',sans-serif;padding:15px 8px;border-radius:18px;transition:transform .08s,box-shadow .08s;}
 .gp-btn.g{background:linear-gradient(180deg,#2bd89f,#12a56f);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 6px 0 #0a6644,0 14px 18px rgba(14,140,92,.35);}
 .gp-btn.r{background:linear-gradient(180deg,#ffa94d,#f76707);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 6px 0 #b34700,0 14px 18px rgba(247,103,7,.35);}
+.gp-btn.dp{display:flex;align-items:center;justify-content:center;gap:12px;font-size:calc(19px * var(--fs,1));letter-spacing:.3px;background:linear-gradient(180deg,#5aa9ff,#1c6fe0);text-shadow:0 1px 2px rgba(0,0,0,.3);box-shadow:0 2px 0 rgba(255,255,255,.45) inset,0 6px 0 #0f4aa3,0 14px 18px rgba(28,111,224,.38);}
+.gp-btn.dp .dp-ic{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#fff;color:#1c6fe0;font-size:22px;font-weight:900;line-height:1;text-shadow:none;box-shadow:0 2px 0 rgba(0,0,0,.2);}
+.gp-btn.dp:active{box-shadow:0 2px 0 rgba(255,255,255,.45) inset,0 1px 0 #0f4aa3;}
 .gp-btn:active{transform:translateY(5px);}
 .gp-btn.g:active{box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 1px 0 #0a6644;}
 .gp-btn.r:active{box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 1px 0 #b34700;}
@@ -2282,6 +2285,7 @@ html{ overscroll-behavior:none; }
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
       <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاش شهري</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(10.5px * var(--fs,1));font-weight:800;color:#6b5a2a;line-height:1.3;"></em></span>
     </div>
+    <button type="button" class="gp-btn dp" id="cmDepBtn" data-id="blk:dep" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openDepPick()"><span class="dp-ic">＋</span><span>إيداع</span></button>
     <button type="button" class="gp-btn r" id="cmOutBtn" data-id="blk:out" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openCmOut()">💸 صرف من الأموال</button>
     <button type="button" class="gp-btn g" id="cmXfBtn" data-id="blk:xfer" data-hold-ok="1" style="width:100%;margin:0 0 12px;" onclick="openXfer()">🔁 تحويل بين الحسابات</button>
     <div id="cmInterest" data-id="blk:int" style="display:none;"></div>
@@ -2403,6 +2407,24 @@ html{ overscroll-behavior:none; }
 #xfOverlay .xf-mid{flex:1; min-width:0; line-height:1.6;} #xfOverlay .xf-mid b{display:block; font-weight:900;} #xfOverlay .xf-mid small{color:var(--muted); font-weight:700;}
 #xfOverlay .xf-amt{font-weight:900; white-space:nowrap;}
 #xfOverlay .xf-del{border:0; width:38px; height:38px; border-radius:12px; cursor:pointer; background:#ffe4e4;}
+
+.mc-dep{display:flex; align-items:center; justify-content:center; gap:9px; width:100%; margin:10px 0 0; padding:13px 10px; border:0; cursor:pointer; border-radius:16px; font-family:inherit; font-weight:900; font-size:calc(17px * var(--fs,1)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#3ee0a4,#06a56f); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), 0 5px 0 #047a52, 0 11px 16px rgba(6,165,111,.32);}
+.mc-dep:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 1px 0 #047a52;}
+.mc-dep .mc-dep-ic{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:#fff; color:#06a56f; font-size:19px; line-height:1; text-shadow:none; box-shadow:0 2px 0 rgba(0,0,0,.18);}
+#depOverlay{--xfc:#ffffff; --xfb:rgba(30,41,59,.13);}
+:root[data-theme="dark"] #depOverlay{--xfc:#1b1e24; --xfb:rgba(0,0,0,.45);}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #depOverlay{--xfc:#1b1e24; --xfb:rgba(0,0,0,.45);} }
+#depOverlay .modal-box{position:relative;}
+#depOverlay .dep-title{margin:4px 0 12px; padding-inline-start:46px; font-size:calc(22px * var(--fs,1)); font-weight:900; color:#06a56f;}
+#depOverlay .dep-acc{margin:0 2px 12px; padding:12px 14px; border-radius:18px; font-weight:900; line-height:1.8; background:linear-gradient(160deg,rgba(62,224,164,.22),rgba(6,165,111,.08)),var(--xfc); box-shadow:0 5px 0 rgba(0,0,0,.08), 0 11px 16px var(--xfb);}
+#depOverlay .dep-prev{margin:6px 2px 12px; padding:12px 14px; border-radius:18px; line-height:1.9; font-weight:800; white-space:pre-line; background:var(--xfc); box-shadow:0 4px 0 rgba(0,0,0,.07), 0 9px 14px var(--xfb);}
+#depOverlay .dep-prev.bad{color:#e03131;}
+#depOverlay .dep-logh{margin:22px 4px 8px; font-size:calc(17px * var(--fs,1)); font-weight:900;}
+#depOverlay .dep-empty{text-align:center; color:var(--muted); font-weight:700; padding:14px;}
+#depOverlay .dep-row{display:flex; align-items:center; gap:10px; margin:0 2px 12px; padding:12px; border-radius:18px; background:var(--xfc); box-shadow:0 5px 0 rgba(0,0,0,.08), 0 11px 16px var(--xfb);}
+#depOverlay .dep-mid{flex:1; min-width:0; line-height:1.6;} #depOverlay .dep-mid b{display:block; font-weight:900;} #depOverlay .dep-mid small{color:var(--muted); font-weight:700;}
+#depOverlay .dep-amt{font-weight:900; white-space:nowrap; color:#06a56f;}
+#depOverlay .dep-del{border:0; width:38px; height:38px; border-radius:12px; cursor:pointer; background:#ffe4e4;}
 </style>
 <div class="modal-overlay" id="xfOverlay">
   <div class="modal-box">
@@ -2418,6 +2440,22 @@ html{ overscroll-behavior:none; }
     <div class="modal-actions"><button class="btn-cancel" onclick="closeXfer()">إغلاق</button><button class="btn-save" id="xfSaveBtn" onclick="xfSave()">🔁 تحويل</button></div>
     <h4 class="xf-logh">🧾 سجل التحويلات</h4>
     <div id="xfLog"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="depOverlay">
+  <div class="modal-box">
+    <button type="button" class="fs-close" onclick="closeDeposit()" aria-label="رجوع">✕</button>
+    <h3 class="dep-title">➕ إيداع في الحساب</h3>
+    <div class="field" id="depPickRow" style="display:none;"><label>🏦 اختار الحساب</label><select id="depSel" onchange="depPickChg()"></select></div>
+    <div class="dep-acc" id="depAcc"></div>
+    <div class="field"><label>💰 مبلغ الإيداع</label><input type="number" id="depAmt" placeholder="0" inputmode="decimal" step="any" oninput="depPrev()"></div>
+    <div class="dep-prev" id="depPrev"></div>
+    <div class="field"><label>📅 تاريخ الإيداع (الفايدة بتتحسب عليه من اليوم ده)</label><input type="date" id="depDate"></div>
+    <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="depNote" placeholder="مثال: راتب شهر نوفمبر"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeDeposit()">إغلاق</button><button class="btn-save" onclick="depSave()">➕ إيداع</button></div>
+    <h4 class="dep-logh">🧾 إيداعات الحساب</h4>
+    <div id="depLog"></div>
   </div>
 </div>
 
@@ -5897,6 +5935,7 @@ function mcCard(x, o){
   if(o.acts){
     const acts = d.querySelectorAll('.mc-acts button');
     acts[0].onclick = ()=> cmEditItem(x);
+    if(capSubOf(x) === 'bank' && x.isCert !== true && !cmPastView()){ const bal = d.querySelector('.mc-bal'); if(bal){ const db = document.createElement('button'); db.type = 'button'; db.className = 'mc-dep'; db.innerHTML = '<span class="mc-dep-ic">＋</span><span>إيداع</span>'; db.setAttribute('aria-label', 'إيداع في الحساب'); db.onclick = function(e){ e.stopPropagation(); openDeposit(x); }; bal.parentNode.insertBefore(db, bal.nextSibling); } }
     acts[2].textContent = capZkIn(x) ? '🕌' : '🚫'; acts[2].title = capZkIn(x) ? 'داخل في الزكاة — دوس لاستبعاده' : 'مستبعد من الزكاة — دوس لإدخاله'; acts[2].onclick = ()=> capItemZkToggle(x.id);
     if(!capZkIn(x)) acts[2].style.opacity = '.75';
     acts[1].onclick = ()=> openConfirm('حذف البند', 'هل تريد حذف "' + x.name + '"؟', ()=>{ capDel(x.id); if(_cmEditId === x.id) cmReset(); renderCapMoney(); });
@@ -5934,7 +5973,7 @@ function cmAccCerts(card, acc, certs, base, box){
   let open = open0;
   function paint(){ setBadgeState(badge, open); card.setAttribute('aria-expanded', open ? 'true' : 'false'); }
   card.addEventListener('click', function(e){
-    if(e.target.closest && e.target.closest('.mc-acts, .mc-addsub')) return;
+    if(e.target.closest && e.target.closest('.mc-acts, .mc-addsub, .mc-dep')) return;
     if(!kids.length){ showToast('مفيش شهادات أو حسابات فرعية للحساب ده — دوس «حساب فرعي» أو اعمل شهادة واربطها بيه', false); return; }
     open = !open; if(open) _cmCertOpen[acc.id] = 1; else delete _cmCertOpen[acc.id]; cmCertSave();
     kids.forEach(function(k){ k.style.display = open ? '' : 'none'; });
@@ -6046,7 +6085,7 @@ function renderCapMoney(){
 function applyCmOrder(){   // ترتيب بطاقات صفحة أموال (الإجمالي / صرف / الفوائد / القايمة / سجل الإضافة) زي ما حدده المستخدم
   const box = document.getElementById('cmBox'); if(!box || !Array.isArray(data.cmOrder) || !data.cmOrder.length) return;
   const els = Array.from(box.children).filter(c=> c.dataset && c.dataset.id && c.dataset.id.indexOf('blk:') === 0); if(els.length < 2) return;
-  const ix = id=>{ const i = data.cmOrder.indexOf(id); if(i < 0 && id === 'blk:xfer'){ const o = data.cmOrder.indexOf('blk:out'); if(o >= 0) return o + 0.5; } return i < 0 ? 999 : i; };
+  const ix = id=>{ const i = data.cmOrder.indexOf(id); if(i < 0 && id === 'blk:xfer'){ const o = data.cmOrder.indexOf('blk:out'); if(o >= 0) return o + 0.5; } if(i < 0 && id === 'blk:dep'){ const o = data.cmOrder.indexOf('blk:out'); if(o >= 0) return o - 0.5; } return i < 0 ? 999 : i; };
   const sorted = els.slice().sort((a, b)=> ix(a.dataset.id) - ix(b.dataset.id));
   const ref = els[els.length - 1].nextSibling; sorted.forEach(e=> box.insertBefore(e, ref));
 }
@@ -6062,6 +6101,7 @@ function cmAddedAmt(x){   // المبلغ اللي اتضاف أصلًا (الر
 function renderCmAddLog(){
   const box = document.getElementById('cmAddLog'); if(!box) return;
   const arr = cmSrcList().filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)).map(x=> ({x: x, d: x.date ? dateToInputValue(x.date) : '', a: cmAddedAmt(x)}));
+  { const src = cmSrcList(); (data.moneyDeposits || []).forEach(function(r){ const x = src.find(function(z){ return z && z.id === r.to; }); if(x && (!_cmFilter || capSubOf(x) === _cmFilter) && String(r.date).slice(0, 4) === String(currentYear)) arr.push({x: x, d: r.date, a: Number(r.amount) || 0, dep: r}); }); }
   arr.sort((p, q)=> String(q.d).localeCompare(String(p.d)));
   const tot = cgRound(arr.reduce((t, o)=> t + o.a, 0));
   box.innerHTML = '';
@@ -6080,10 +6120,10 @@ function renderCmAddLog(){
     g.rows.forEach(o=>{
       const x = o.x, sb = SUB[capSubOf(x)] || SUB.cash, gr = x.grp ? groups.find(q=> q.id === x.grp) : null, d = document.createElement('div'); d.className = 'cmo-row';
       d.innerHTML = '<span class="cmo-ic"></span><div class="cmo-mid"><b></b><small></small></div><span class="cmo-amt"></span>' + (capIsPast() ? '' : '<div class="cmo-acts"><button type="button" aria-label="تعديل">✏️</button></div>');
-      d.children[0].textContent = sb[0]; d.children[1].children[0].textContent = x.name;
-      d.children[1].children[1].textContent = sb[1] + (gr ? ' · 📁 ' + gr.name : '') + (capZkIn(x) ? '' : ' · 🚫 خارج الزكاة');
+      d.children[0].textContent = o.dep ? '➕' : sb[0]; d.children[1].children[0].textContent = (o.dep ? 'إيداع · ' : '') + x.name;
+      d.children[1].children[1].textContent = o.dep ? ('إيداع في حساب بنكي' + (o.dep.note ? ' · ' + o.dep.note : '')) : (sb[1] + (gr ? ' · 📁 ' + gr.name : '') + (capZkIn(x) ? '' : ' · 🚫 خارج الزكاة'));
       d.children[2].textContent = '+' + fmt(o.a);
-      if(d.children[3]) d.children[3].children[0].onclick = ()=> cmEditItem(x);
+      if(d.children[3]){ if(o.dep){ d.children[3].children[0].textContent = '🗑'; d.children[3].children[0].onclick = ()=> openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(o.a) + ' ويتخصم من رصيد الحساب؟', ()=> depDel(o.dep.id)); } else d.children[3].children[0].onclick = ()=> cmEditItem(x); }
       body.appendChild(d);
     });
   });
@@ -6505,6 +6545,79 @@ function openCapMoney(){
   _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false}; _cmMonthOpen = new Set(); _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
   renderCapMoney();
   document.getElementById('capMoneyOverlay').classList.add('open');
+}
+// ===== إيداع في حساب بنكي (أساسي / فرعي): بيتسجّل بتاريخه عشان الفايدة تتحسب على الرصيد الجديد من يوم الإيداع بس =====
+var _depId = null;
+function depAccGet(){ return capRaw().find(function(z){ return z && z.id === _depId; }); }
+function depItems(){ return capRaw().filter(function(z){ return z && capCatOf(z) === 'money' && capSubOf(z) === 'bank' && z.isCert !== true; }); }
+function openDepPick(){   // زرار «إيداع» فوق في صفحة أموال: بتختار الحساب وبعدين تودّع
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — الإيداع في السنة الحالية', false); return; }
+  const its = depItems(); if(!its.length){ showToast('اعمل حساب بنكي الأول وبعدين ودّع فيه', false); return; }
+  const sel = document.getElementById('depSel'); sel.innerHTML = '';
+  its.forEach(function(z){ const o = document.createElement('option'); o.value = z.id; o.textContent = (z.isSub ? '🗂 ' : '🏦 ') + z.name + (z.isSub ? ' (فرعي)' : (z.isAcc ? ' (أساسي)' : '')); sel.appendChild(o); });
+  openDeposit(its[0]); document.getElementById('depPickRow').style.display = ''; sel.value = its[0].id;
+}
+function depPickChg(){ _depId = document.getElementById('depSel').value; depPrev(); depLog(); }
+function openDeposit(x){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — الإيداع في السنة الحالية', false); return; }
+  { const pr = document.getElementById('depPickRow'); if(pr) pr.style.display = 'none'; }
+  _depId = x.id;
+  document.getElementById('depAmt').value = ''; document.getElementById('depNote').value = ''; document.getElementById('depDate').value = dateToInputValue(Date.now());
+  depPrev(); depLog(); document.getElementById('depOverlay').classList.add('open');
+  try{ document.querySelector('#depOverlay .modal-box').scrollTop = 0; }catch(e){}
+}
+function closeDeposit(){ document.getElementById('depOverlay').classList.remove('open'); _depId = null; }
+function depPrev(){
+  const x = depAccGet(), el = document.getElementById('depPrev'), hd = document.getElementById('depAcc'); if(!x) return;
+  hd.textContent = '🏦 ' + x.name + (x.isSub ? ' (حساب فرعي)' : (x.isAcc ? ' (حساب أساسي)' : ''));
+  el.classList.remove('bad');
+  const raw = Number(document.getElementById('depAmt').value) || 0, amt = cgInt(raw), cur = Number(x.amount) || 0;
+  let t = 'الرصيد الحالي: ' + fmt(cur);
+  if(raw > 0 && amt <= 0){ t = 'المبلغ لازم يكون جنيه صحيح على الأقل'; el.classList.add('bad'); }
+  else if(amt > 0) t += '\nبعد الإيداع: ' + fmt(cgInt(cur + amt));
+  el.textContent = t;
+}
+function depSave(){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return; }
+  const x = depAccGet(); if(!x){ showToast('الحساب مش موجود', false); return; }
+  const amt = cgInt(Number(document.getElementById('depAmt').value) || 0); if(!(amt > 0)){ showToast('اكتب مبلغ صحيح', false); return; }
+  const date = document.getElementById('depDate').value || dateToInputValue(Date.now());
+  if(date > dateToInputValue(Date.now())){ showToast('تاريخ الإيداع مينفعش يكون في المستقبل', false); return; }
+  const t = new Date(date + 'T12:00:00').getTime(), id = uid(), note = document.getElementById('depNote').value.trim();
+  x.amount = cgInt((Number(x.amount) || 0) + amt);
+  if(!Array.isArray(x.chg)) x.chg = [];
+  x.chg.push({id: id + 'd', t: t, delta: amt, dep: 1});
+  if(!Array.isArray(data.moneyDeposits)) data.moneyDeposits = [];
+  data.moneyDeposits.push({id: id, to: x.id, tn: x.name, amount: amt, date: date, note: note, ts: Date.now()});
+  try{ autoIncSync(); }catch(e){}
+  save(); try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ renderZakat(); }catch(e){}
+  document.getElementById('depAmt').value = ''; document.getElementById('depNote').value = ''; depPrev(); depLog();
+  showToast('تم إيداع ' + fmt(amt) + ' في «' + x.name + '» ✅', true);
+}
+function depDel(id){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return; }
+  const i = (data.moneyDeposits || []).findIndex(function(r){ return r.id === id; }); if(i < 0) return;
+  const r = data.moneyDeposits[i], x = capRaw().find(function(z){ return z && z.id === r.to; });
+  if(x){
+    if((Number(x.amount) || 0) + 0.001 < r.amount){ showToast('رصيد «' + x.name + '» أقل من مبلغ الإيداع — اتصرف منه بعد كده، فمينفعش يتلغي', false); return; }
+    x.amount = cgInt((Number(x.amount) || 0) - r.amount); if(Array.isArray(x.chg)) x.chg = x.chg.filter(function(c){ return c.id !== id + 'd'; });
+  }
+  data.moneyDeposits.splice(i, 1);
+  save(); try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ renderZakat(); }catch(e){}
+  depPrev(); depLog(); showToast('اتلغى الإيداع ورجع الرصيد ✅', true);
+}
+function depLog(){
+  const box = document.getElementById('depLog'); if(!box) return; box.innerHTML = '';
+  const arr = (data.moneyDeposits || []).filter(function(r){ return r.to === _depId; }).slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)) || (b.ts - a.ts); });
+  if(!arr.length){ const e = document.createElement('div'); e.className = 'dep-empty'; e.textContent = 'لسه مفيش إيداعات في الحساب ده'; box.appendChild(e); return; }
+  arr.forEach(function(r){
+    const d = document.createElement('div'); d.className = 'dep-row';
+    d.innerHTML = '<div class="dep-mid"><b></b><small></small></div><span class="dep-amt"></span><button type="button" class="dep-del" aria-label="إلغاء الإيداع">🗑</button>';
+    d.children[0].children[0].textContent = '➕ إيداع'; d.children[0].children[1].textContent = cmoDayLbl(r.date) + (r.note ? ' · ' + r.note : '');
+    d.children[1].textContent = '+' + fmt(r.amount);
+    d.children[2].onclick = function(){ openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(r.amount) + ' ويتخصم من رصيد الحساب؟', function(){ depDel(r.id); }); };
+    box.appendChild(d);
+  });
 }
 function closeCapMoney(){ document.getElementById('capMoneyOverlay').classList.remove('open'); }
 function addCapMoney(backChoice){
