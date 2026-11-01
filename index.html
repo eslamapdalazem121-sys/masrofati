@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.7975">
+<meta name="app-version" content="2026-11-01.7977">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4263,35 +4263,58 @@ function opsIn(kind){
 // ===== GENERAL INCOME JS START =====
 // ===== دخل عام تلقائي من «أموال»: الفوائد البنكية + المعاشات (بأسمائها، كل واحدة في موعد استحقاقها) =====
 // ===== فوايد الشهادة المتضافة (intKeep) بتتحط فعليًا في رصيد الحساب الأساسي المربوط بالشهادة، كل شهر في يوم استحقاقها =====
-// أول مرة: الفوايد اللي استحقت قبل كده (بعد خصم اللي اتصرف منها) بتتحط مرة واحدة. بعد كده كل شهر لوحده.
-// بنزوّد intSpent بنفس المبلغ عشان الفايدة ماتتحسبش مرتين (مرة في رصيد الحساب ومرة كفوايد متضافة).
+// - من النهارده وطالع: كل فايدة بتستحق بتتحط في رصيد الحساب (وبنزوّد intSpent بنفس المبلغ عشان ماتتحسبش مرتين كفوايد متضافة).
+// - الفوايد اللي استحقت قبل التفعيل بتفضل زي ما هي (متجمّعة في «فوائد»)، إلا لو اخترت وقت الحفظ «ضيفهم كلهم» (intBack = 'all').
+// - لو رجّعت الفايدة للدخل العام (شلت intKeep): كل اللي اتحط في الحساب بيتخصم منه ويتشال من السجل، والحساب والإجمالي بيرجعوا زي ما كانوا.
+function certIntDues(x, eod){
+  const dues = [], f = bankFirstDue(x); let y = f.getFullYear(), m = f.getMonth();
+  for(let i = 0; i < 1200; i++){ const due = bankDueOf(x, y, m); if(due > eod) break; if(bankActive(x, y, m)) dues.push({k: y + '-' + m, t: due.getTime(), a: cgInt(bankMonthlyAt(x, due))}); if(++m > 11){ m = 0; y++; } }
+  return dues;
+}
+function certIntUndo(x, list){   // يرجّع اللي اتحط في الحساب من فوايد الشهادة دي (بيتكرر من غير ضرر)
+  let ch = false;
+  const done = (x.intDepDone && typeof x.intDepDone === 'object') ? x.intDepDone : null;
+  if(done){
+    let back = 0;
+    Object.keys(done).forEach(function(k){
+      const r = done[k], a = Number(r && r.a) || 0; if(!(a > 0)) return;
+      const acc = list.find(function(z){ return z && z.id === r.to; });
+      if(acc){ acc.amount = Math.max(0, cgInt((Number(acc.amount) || 0) - a)); }
+      back += a;
+    });
+    list.forEach(function(z){ if(z && Array.isArray(z.chg)){ const n0 = z.chg.length; z.chg = z.chg.filter(function(c){ return !(c && typeof c.id === 'string' && c.id.indexOf('cd:' + x.id + ':') === 0); }); if(z.chg.length !== n0) ch = true; } });
+    if(back > 0) x.intSpent = Math.max(0, cgInt((Number(x.intSpent) || 0) - back));
+    delete x.intDepDone; ch = true;
+  }
+  if(x.intBack !== undefined && x.intKeep !== true){ delete x.intBack; ch = true; }
+  return ch;
+}
 function certIntDepositSync(){
   let ch = false;
   try{
-    const list = capRaw(), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const list = capRaw(), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999), sod = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     list.forEach(function(x){
       if(!x || capCatOf(x) !== 'money' || capSubOf(x) !== 'bank' || x.isCert !== true) return;
-      const dues = [];
-      { const f = bankFirstDue(x); let y = f.getFullYear(), m = f.getMonth();
-        for(let i = 0; i < 1200; i++){ const due = bankDueOf(x, y, m); if(due > eod) break; if(bankActive(x, y, m)) dues.push({k: y + '-' + m, t: due.getTime(), a: cgInt(bankMonthlyAt(x, due))}); if(++m > 11){ m = 0; y++; } } }
-      if(x.intKeep !== true){   // رجعت الفايدة للدخل العام: الشهور اللي فاتت ماتتضافش بأثر رجعي لو اتعلّمت تاني
-        if(x.intDepDone && typeof x.intDepDone === 'object'){ dues.forEach(function(d){ if(!x.intDepDone[d.k]){ x.intDepDone[d.k] = {a: 0, t: d.t, skip: 1}; ch = true; } }); }
-        return;
-      }
+      if(x.intKeep !== true){ if(certIntUndo(x, list)) ch = true; return; }
       const acc = x.accId ? list.find(function(z){ return z && z.id === x.accId && z.isCert !== true && capCatOf(z) === 'money' && capSubOf(z) === 'bank'; }) : null;
-      if(!acc || !dues.length) return;
+      if(!acc) return;
+      const dues = certIntDues(x, eod); if(!dues.length) return;
       if(!Array.isArray(acc.chg)) acc.chg = [];
       if(!x.intDepDone || typeof x.intDepDone !== 'object'){
         x.intDepDone = {}; ch = true;
-        const total = dues.reduce(function(t, d){ return t + d.a; }, 0), pool = Math.max(0, cgInt(total - (Number(x.intSpent) || 0)));
-        dues.forEach(function(d){ x.intDepDone[d.k] = {a: 0, t: d.t, init: 1}; });
-        x.intSpent = cgInt(total);
-        if(pool > 0){
-          acc.amount = cgInt((Number(acc.amount) || 0) + pool);
-          acc.chg.push({id: 'cd:' + x.id + ':init', t: dues[dues.length - 1].t, delta: pool, dep: true});
-          x.intDepDone[dues[dues.length - 1].k] = {a: pool, t: dues[dues.length - 1].t, to: acc.id, init: 1};
+        if(x.intBack === 'all'){   // ضيف كل اللي استحق قبل كده (بعد خصم اللي اتصرف منه) لرصيد الحساب مرة واحدة
+          const total = dues.reduce(function(t, d){ return t + d.a; }, 0), pool = Math.max(0, cgInt(total - (Number(x.intSpent) || 0)));
+          dues.forEach(function(d){ x.intDepDone[d.k] = {a: 0, t: d.t, init: 1}; });
+          x.intSpent = cgInt(total);
+          if(pool > 0){
+            const ld = dues[dues.length - 1];
+            acc.amount = cgInt((Number(acc.amount) || 0) + pool);
+            acc.chg.push({id: 'cd:' + x.id + ':init', t: ld.t, delta: pool, dep: true});
+            x.intDepDone[ld.k] = {a: pool, t: ld.t, to: acc.id, init: 1};
+          }
+          return;
         }
-        return;
+        dues.forEach(function(d){ if(d.t < sod) x.intDepDone[d.k] = {a: 0, t: d.t, init: 1}; });   // اللي استحق قبل النهارده يفضل زي ما هو
       }
       dues.forEach(function(d){
         if(x.intDepDone[d.k] || !(d.a > 0)) return;
@@ -5298,7 +5321,7 @@ function openCapCert(x){
   try{ document.querySelector('#capCertOverlay .modal-box').scrollTop = 0; }catch(e){}
 }
 function closeCapCert(){ document.getElementById('capCertOverlay').classList.remove('open'); _certEditId = null; }
-function saveCapCert(){
+function saveCapCert(backChoice){
   const cn = document.getElementById('certName').value.trim(), amt = Number(document.getElementById('certAmt').value) || 0, rate = Number(document.getElementById('certRate').value) || 0;
   if(!cn){ showToast('اكتب اسم الشهادة', false); return; }
   if(amt <= 0){ showToast('اكتب قيمة الشهادة', false); return; }
@@ -5311,6 +5334,19 @@ function saveCapCert(){
   if(!document.getElementById('certZk').checked) rec.noZk = true;
   if(term > 0){ rec.term = term; if(document.getElementById('certRenew').checked) rec.autoRenew = true; }
   const edit = !!_certEditId;
+  { // لو لسه معلّم إن الفايدة بتتضاف للحساب: نسأل عن الفوايد اللي استحقت قبل كده
+    const oldC = edit ? capList().find(z=> z.id === _certEditId) : null, newlyKeep = rec.intKeep === true && !(oldC && oldC.intKeep === true);
+    if(newlyKeep && acc && backChoice === undefined){
+      const tmp = Object.assign({}, oldC || {}, rec); if(rec.term === undefined) delete tmp.term; if(rec.autoRenew === undefined) delete tmp.autoRenew;
+      let dues = []; try{ const n0 = new Date(), sod0 = new Date(n0.getFullYear(), n0.getMonth(), n0.getDate()).getTime(); dues = certIntDues(tmp, new Date(n0.getFullYear(), n0.getMonth(), n0.getDate(), 23, 59, 59, 999)).filter(d=> d.t < sod0 && d.a > 0); }catch(e){}
+      if(dues.length){
+        const sum = dues.reduce((t, d)=> t + d.a, 0);
+        openConfirm('فوايد استحقت قبل كده', 'الشهادة دي استحق لها قبل النهارده ' + toArabicDigits(dues.length) + (dues.length === 1 ? ' فايدة' : ' فوايد') + ' = ' + fmt(sum) + '. تضيفهم كمان لرصيد الحساب؟ (لو لأ، الفايدة هتتضاف من النهارده بس وللشهور الجاية)',
+          ()=> saveCapCert('all'), 'ضيفهم كلهم', 'لا، من النهارده بس', ()=> saveCapCert('none'));
+        return;
+      }
+    }
+  }
   if(edit){ const x = capList().find(z=> z.id === _certEditId); if(x){
     const pt = certTermM(x), pd = new Date(x.date || Date.now()).toDateString(); let ext0 = certExt(x);
     if(pt && x.autoRenew === true){ const i0 = certMatInfo(x); if(i0) ext0 = i0.cycle - 1; }   // كانت بتتجدد تلقائيًا: الدورات اللي عدّت بتتحسب كتجديدات
@@ -5318,7 +5354,8 @@ function saveCapCert(){
     if(rec.term && !rec.autoRenew && rec.term === pt && new Date(rec.date).toDateString() === pd && ext0 > 0) x.ext = ext0;
   } }
   else capList().push(Object.assign({id: uid()}, rec));
-  try{ certIntDepositSync(); }catch(e){}
+  try{ const cx = edit ? capList().find(z=> z.id === _certEditId) : capList()[capList().length - 1]; if(cx && rec.intKeep === true){ cx.intBack = (backChoice === 'all') ? 'all' : 'none'; } }catch(e){}
+  try{ autoIncSync(); }catch(e){}
   save(); closeCapCert(); _cmFilter = 'bank'; renderCapMoney(); renderCap();
   showToast(edit ? 'تم حفظ التعديل' : 'تم إنشاء الشهادة', true);
 }
