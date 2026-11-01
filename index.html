@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.8071">
+<meta name="app-version" content="2026-11-01.8092">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -5882,8 +5882,9 @@ function cmAccCerts(card, acc, certs, base, box){
   { const mainA = Number(acc.amount) || 0, subA = certs.filter(function(c){ return !c.isCert; }).reduce(function(t, c){ return t + (Number(c.amount) || 0); }, 0), certA = certs.filter(function(c){ return c.isCert; }).reduce(function(t, c){ return t + (Number(c.amount) || 0); }, 0);
     const bt = document.createElement('div'); bt.className = 'mc-banktot';
     bt.innerHTML = '<div class="mc-bt-r"><span class="mc-bt-t">🏦 إجمالي الموجود في البنك</span><b class="mc-bt-v"></b></div><small class="mc-bt-d"></small>';
-    bt.querySelector('.mc-bt-v').textContent = fmt(mainA + subA + certA);
-    const pr = ['أساسي ' + fmt(mainA)]; if(subA > 0) pr.push('فرعي ' + fmt(subA)); if(certA > 0) pr.push('شهادات ' + fmt(certA));
+    const poolA = [acc].concat(certs).reduce(function(t, c){ return t + bankPoolOf(c); }, 0);
+    bt.querySelector('.mc-bt-v').textContent = fmt(mainA + subA + certA + poolA);
+    const pr = ['أساسي ' + fmt(mainA)]; if(subA > 0) pr.push('فرعي ' + fmt(subA)); if(certA > 0) pr.push('شهادات ' + fmt(certA)); if(poolA > 0) pr.push('فوائد متضافة ' + fmt(poolA));
     bt.querySelector('.mc-bt-d').textContent = pr.length > 1 ? pr.join(' + ') : 'الحساب الأساسي بس (مفيش فرعي أو شهادات)';
     const balEl = card.querySelector('.mc-bal'); if(balEl) card.insertBefore(bt, balEl); else card.appendChild(bt); }
   const bar = document.createElement('div'); bar.className = 'mc-certbar'; bar.setAttribute('role', 'button');
@@ -5913,12 +5914,16 @@ function cmAccCerts(card, acc, certs, base, box){
   paint();
 }
 // ===== بطاقة البنك: اسم البنك + إجمالي الرصيد، وبالضغط تظهر بطاقات (الأساسي / الفرعي / الشهادات) وكل واحدة بالضغط عليها تظهر تفاصيلها =====
+function bankPoolOf(x){   // فوايد متضافة للحساب لسه ما اتحطتش في رصيده (بتتحسب في إجمالي البنوك فوق)
+  try{ if(!x || x.intKeep !== true || cmPastView()) return 0; const n = new Date(); return Math.max(0, cgInt(bankIntSince(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)) - (Number(x.intSpent) || 0))); }catch(e){ return 0; }
+}
 function mbKey(x){ const b = String(x.bank || '').trim().toLowerCase(); return b || ('id:' + x.id); }
 function mbCard(b, base){
   const first = b.accs[0], card = document.createElement('div');
   card.className = 'gi-row mbk'; card.dataset.id = first.id; card.dataset.grp = first.grp || '';
   const sum = function(a){ return a.reduce(function(t, x){ return t + (Number(x.amount) || 0); }, 0); };
-  const mainT = sum(b.accs), subT = sum(b.subs), certT = sum(b.certs), tot = mainT + subT + certT;
+  const poolSum = function(a){ return a.reduce(function(t, x){ return t + bankPoolOf(x); }, 0); }, poolT = poolSum(b.accs) + poolSum(b.subs) + poolSum(b.certs);
+  const mainT = sum(b.accs), subT = sum(b.subs), certT = sum(b.certs), tot = mainT + subT + certT + poolT;
   card.innerHTML = '<div class="mb-head" role="button" tabindex="0"><span class="mb-ic">🏦</span><div class="mb-nm"><b class="mb-name"></b><small class="mb-sub"></small></div><span class="plus-badge pb-teal in-card pb-sm"></span></div>' +
     '<div class="mb-tot"><small>💰 إجمالي الموجود في البنك</small><b class="mb-tv"></b><small class="mb-bd"></small></div><div class="mb-body"></div>';
   card.querySelector('.mb-name').textContent = b.bank || first.accName || first.name;
@@ -5927,7 +5932,7 @@ function mbCard(b, base){
     if(b.pens && b.pens.length) pr.push('💳 معاش ' + toArabicDigits(b.pens.length));
     card.querySelector('.mb-sub').textContent = pr.join(' · '); }
   card.querySelector('.mb-tv').textContent = fmt(tot);
-  { const pr = ['أساسي ' + fmt(mainT)]; if(b.subs.length) pr.push('فرعي ' + fmt(subT)); if(b.certs.length) pr.push('شهادات ' + fmt(certT));
+  { const pr = ['أساسي ' + fmt(mainT)]; if(b.subs.length) pr.push('فرعي ' + fmt(subT)); if(b.certs.length) pr.push('شهادات ' + fmt(certT)); if(poolT > 0) pr.push('فوائد متضافة ' + fmt(poolT));
     card.querySelector('.mb-bd').textContent = pr.length > 1 ? pr.join(' + ') : ''; }
   const body = card.querySelector('.mb-body'), head = card.querySelector('.mb-head'), badge = head.querySelector('.plus-badge');
   function bind(h, box, bd, key, on){
