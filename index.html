@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.7977">
+<meta name="app-version" content="2026-11-01.7978">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2283,6 +2283,7 @@ html{ overscroll-behavior:none; }
       <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاش شهري</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(10.5px * var(--fs,1));font-weight:800;color:#6b5a2a;line-height:1.3;"></em></span>
     </div>
     <button type="button" class="gp-btn r" id="cmOutBtn" data-id="blk:out" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openCmOut()">💸 صرف من الأموال</button>
+    <button type="button" class="gp-btn g" id="cmXfBtn" data-id="blk:xfer" data-hold-ok="1" style="width:100%;margin:0 0 12px;" onclick="openXfer()">🔁 تحويل بين الحسابات</button>
     <div id="cmInterest" data-id="blk:int" style="display:none;"></div>
     <div class="gi-rows" id="cmList" data-id="blk:list"></div>
     <div id="cmAddLog" data-id="blk:log"></div>
@@ -2380,6 +2381,43 @@ html{ overscroll-behavior:none; }
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
     <h4 class="cmo-logh">🧾 سجل الصرف <small>(كل يوم بتاريخه)</small></h4>
     <div class="cmo-log" id="cmoLog"></div>
+  </div>
+</div>
+
+<style>
+#xfOverlay{--xfc:#ffffff; --xfb:rgba(30,41,59,.13);}
+:root[data-theme="dark"] #xfOverlay{--xfc:#1b1e24; --xfb:rgba(0,0,0,.45);}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #xfOverlay{--xfc:#1b1e24; --xfb:rgba(0,0,0,.45);} }
+#xfOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; overflow-y:auto; position:relative; padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(28px + env(safe-area-inset-bottom,0px));}
+#xfOverlay .xf-title{margin:4px 0 14px; padding-inline-start:46px; font-size:calc(22px * var(--fs,1)); font-weight:900;}
+#xfOverlay .xf-swap{display:flex; justify-content:center; margin:-4px 0 6px;}
+#xfOverlay .xf-swap button{border:0; width:44px; height:44px; border-radius:50%; font-size:20px; font-weight:900; cursor:pointer; background:linear-gradient(180deg,#6cb4ff,#2f7bff); color:#fff; box-shadow:0 4px 0 #1b56b8, 0 8px 12px rgba(47,123,255,.3);}
+#xfOverlay .xf-swap button:active{transform:translateY(3px); box-shadow:0 1px 0 #1b56b8;}
+#xfOverlay .xf-amtrow{display:flex; gap:8px; align-items:stretch;} #xfOverlay .xf-amtrow input{flex:1;}
+#xfOverlay .xf-amtrow button{border:0; padding:0 16px; border-radius:14px; font-family:inherit; font-weight:900; cursor:pointer; background:#e3eeff; color:#1b56b8;}
+#xfOverlay .xf-prev{margin:6px 2px 12px; padding:12px 14px; border-radius:18px; line-height:1.9; font-weight:800; background:linear-gradient(160deg,rgba(255,255,255,.6),transparent 60%),var(--xfc); box-shadow:0 6px 0 rgba(0,0,0,.08), 0 12px 16px var(--xfb); white-space:pre-line;}
+#xfOverlay .xf-prev.bad{color:#e03131;}
+#xfOverlay .xf-logh{margin:24px 4px 8px; font-size:calc(18px * var(--fs,1)); font-weight:900;}
+#xfOverlay .xf-empty{text-align:center; color:var(--muted); font-weight:700; padding:16px;}
+#xfOverlay .xf-row{display:flex; align-items:center; gap:10px; margin:0 2px 12px; padding:12px; border-radius:18px; background:var(--xfc); box-shadow:0 5px 0 rgba(0,0,0,.08), 0 11px 16px var(--xfb);}
+#xfOverlay .xf-mid{flex:1; min-width:0; line-height:1.6;} #xfOverlay .xf-mid b{display:block; font-weight:900;} #xfOverlay .xf-mid small{color:var(--muted); font-weight:700;}
+#xfOverlay .xf-amt{font-weight:900; white-space:nowrap;}
+#xfOverlay .xf-del{border:0; width:38px; height:38px; border-radius:12px; cursor:pointer; background:#ffe4e4;}
+</style>
+<div class="modal-overlay" id="xfOverlay">
+  <div class="modal-box">
+    <button type="button" class="fs-close" onclick="closeXfer()" aria-label="رجوع">✕</button>
+    <h3 class="xf-title">🔁 تحويل بين الحسابات</h3>
+    <div class="field"><label>التحويل من</label><select id="xfFrom" onchange="xfPrev()"></select></div>
+    <div class="xf-swap"><button type="button" onclick="xfSwap()" aria-label="عكس">⇅</button></div>
+    <div class="field"><label>التحويل إلى</label><select id="xfTo" onchange="xfPrev()"></select></div>
+    <div class="field"><label>المبلغ</label><div class="xf-amtrow"><input type="number" id="xfAmt" placeholder="0" inputmode="decimal" step="any" oninput="xfPrev()"><button type="button" onclick="xfAll()">الكل</button></div></div>
+    <div class="xf-prev" id="xfPrev"></div>
+    <div class="field"><label>📅 تاريخ التحويل</label><input type="date" id="xfDate"></div>
+    <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="xfNote" placeholder="مثال: تغذية الحساب الفرعي"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeXfer()">إغلاق</button><button class="btn-save" id="xfSaveBtn" onclick="xfSave()">🔁 تحويل</button></div>
+    <h4 class="xf-logh">🧾 سجل التحويلات</h4>
+    <div id="xfLog"></div>
   </div>
 </div>
 
@@ -5956,7 +5994,7 @@ function renderCapMoney(){
 function applyCmOrder(){   // ترتيب بطاقات صفحة أموال (الإجمالي / صرف / الفوائد / القايمة / سجل الإضافة) زي ما حدده المستخدم
   const box = document.getElementById('cmBox'); if(!box || !Array.isArray(data.cmOrder) || !data.cmOrder.length) return;
   const els = Array.from(box.children).filter(c=> c.dataset && c.dataset.id && c.dataset.id.indexOf('blk:') === 0); if(els.length < 2) return;
-  const ix = id=>{ const i = data.cmOrder.indexOf(id); return i < 0 ? 999 : i; };
+  const ix = id=>{ const i = data.cmOrder.indexOf(id); if(i < 0 && id === 'blk:xfer'){ const o = data.cmOrder.indexOf('blk:out'); if(o >= 0) return o + 0.5; } return i < 0 ? 999 : i; };
   const sorted = els.slice().sort((a, b)=> ix(a.dataset.id) - ix(b.dataset.id));
   const ref = els[els.length - 1].nextSibling; sorted.forEach(e=> box.insertBefore(e, ref));
 }
@@ -5964,7 +6002,8 @@ var _cmAddLogOpen = false;
 function toggleCmAddLog(){ _cmAddLogOpen = !_cmAddLogOpen; renderCmAddLog(); }
 function cmAddedAmt(x){   // المبلغ اللي اتضاف أصلًا (الرصيد الحالي + اللي اتصرف منه بعد كده)
   let a = Number(x.amount) || 0;
-  if(Array.isArray(x.chg)) a -= x.chg.filter(function(c){ return c && c.dep; }).reduce(function(t, c){ return t + (Number(c.delta) || 0); }, 0);
+  if(Array.isArray(x.chg)) a -= x.chg.filter(function(c){ return c && (c.dep || c.xf); }).reduce(function(t, c){ return t + (Number(c.delta) || 0); }, 0);
+  if(capSubOf(x) !== 'bank'){ (data.moneyXfer || []).forEach(function(r){ if(r.from === x.id) a += Number(r.amount) || 0; if(r.to === x.id) a -= Number(r.amount) || 0; }); }   // التحويل بين البنود مش «إضافة»
   if(!capIsPast() && capSubOf(x) !== 'pension') a += (data.moneyOut || []).filter(r=> r.itemId === x.id && !r.gi && !r.keep).reduce((t, r)=> t + (Number(r.amount) || 0), 0);
   return cgRound(a);
 }
@@ -6320,6 +6359,95 @@ function cmOutDel(id){
   data.moneyOut.splice(i, 1);
   if(_cmoEditId === id) _cmoEditId = null;
   cmoAfter(); showToast('اتحذف الصرف ورجع المبلغ ✅', true);
+}
+// ===== تحويل بين الحسابات (أساسي / فرعي / نقدي): الإجمالي ثابت، والمبلغ بينتقل من بند لبند، والتحويل بيتسجّل ويتلغي =====
+// الشهادات والمعاش مش داخلين (أصل الشهادة مينفعش يتحوّل). حركة الحساب البنكي بتتسجّل في chg علشان فايدته تتحسب على رصيده الجديد.
+function xfItems(){ return capRaw().filter(function(x){ return x && capCatOf(x) === 'money' && (capSubOf(x) === 'cash' || (capSubOf(x) === 'bank' && x.isCert !== true)); }); }
+function xfKind(x){ return capSubOf(x) === 'cash' ? 'cash' : (x.isSub ? 'sub' : 'acc'); }
+function xfTitle(x){ const k = xfKind(x); return (k === 'cash' ? '💵 ' : (k === 'sub' ? '🗂 ' : '🏦 ')) + x.name + (k === 'sub' ? ' (فرعي)' : (k === 'acc' ? ' (أساسي)' : '')); }
+function xfFillSel(sel, keep){
+  sel.innerHTML = '';
+  [['cash', '💵 نقدي'], ['acc', '🏦 حسابات أساسية'], ['sub', '🗂 حسابات فرعية']].forEach(function(g){
+    const its = xfItems().filter(function(x){ return xfKind(x) === g[0]; }); if(!its.length) return;
+    const og = document.createElement('optgroup'); og.label = g[1];
+    its.forEach(function(x){ const o = document.createElement('option'); o.value = x.id; o.textContent = x.name + ' — ' + fmt(Number(x.amount) || 0); og.appendChild(o); });
+    sel.appendChild(og);
+  });
+  if(keep && Array.prototype.some.call(sel.options, function(o){ return o.value === keep; })) sel.value = keep;
+}
+function xfGet(id){ return xfItems().find(function(x){ return x.id === id; }); }
+function xfAmtOf(a, b){   // الحساب البنكي بالجنيه الصحيح بس
+  const raw = Number(document.getElementById('xfAmt').value) || 0;
+  return (a && b && (capSubOf(a) === 'bank' || capSubOf(b) === 'bank')) ? cgInt(raw) : cgRound(raw);
+}
+function xfPrev(){
+  const a = xfGet(document.getElementById('xfFrom').value), b = xfGet(document.getElementById('xfTo').value), el = document.getElementById('xfPrev');
+  el.classList.remove('bad');
+  if(!a || !b){ el.textContent = 'محتاج على الأقل بندين (نقدي أو حسابات) عشان تحوّل بينهم. ضيفهم من «أموال» الأول.'; return; }
+  const raw = Number(document.getElementById('xfAmt').value) || 0, amt = xfAmtOf(a, b), bal = Number(a.amount) || 0;
+  let t = 'المتاح في «' + a.name + '»: ' + fmt(bal) + '\nالرصيد الحالي في «' + b.name + '»: ' + fmt(Number(b.amount) || 0);
+  if(a.id === b.id){ t = 'اختار بندين مختلفين'; el.classList.add('bad'); }
+  else if(raw > 0 && amt <= 0){ t = 'المبلغ لازم يكون جنيه صحيح على الأقل لو التحويل ليه حساب بنكي'; el.classList.add('bad'); }
+  else if(amt > bal + 0.001){ t += '\n⚠️ المبلغ أكبر من المتاح'; el.classList.add('bad'); }
+  else if(amt > 0){ t += '\nبعد التحويل: «' + a.name + '» ← ' + fmt(cgRound(bal - amt)) + ' · «' + b.name + '» ← ' + fmt(cgRound((Number(b.amount) || 0) + amt)); }
+  el.textContent = t;
+}
+function xfSwap(){ const f = document.getElementById('xfFrom'), t = document.getElementById('xfTo'), a = f.value, b = t.value; f.value = b; t.value = a; xfPrev(); }
+function xfAll(){ const a = xfGet(document.getElementById('xfFrom').value); if(!a) return; document.getElementById('xfAmt').value = Number(a.amount) || 0; xfPrev(); }
+function openXfer(){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التحويل من السنة الحالية', false); return; }
+  xfFillSel(document.getElementById('xfFrom'), ''); xfFillSel(document.getElementById('xfTo'), '');
+  const f = document.getElementById('xfFrom'), t = document.getElementById('xfTo');
+  const rich = xfItems().filter(function(x){ return (Number(x.amount) || 0) > 0; })[0]; if(rich) f.value = rich.id;
+  const other = xfItems().filter(function(x){ return x.id !== f.value; })[0]; if(other) t.value = other.id;
+  document.getElementById('xfAmt').value = ''; document.getElementById('xfNote').value = ''; document.getElementById('xfDate').value = dateToInputValue(Date.now());
+  xfPrev(); xfLog(); document.getElementById('xfOverlay').classList.add('open');
+}
+function closeXfer(){ document.getElementById('xfOverlay').classList.remove('open'); }
+function xfLog(){
+  const box = document.getElementById('xfLog'); box.innerHTML = '';
+  const arr = (data.moneyXfer || []).slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)) || (Number(b.ts) || 0) - (Number(a.ts) || 0); }).slice(0, 200);
+  if(!arr.length){ box.innerHTML = '<div class="xf-empty">لسه مفيش تحويلات</div>'; return; }
+  arr.forEach(function(r){
+    const d = document.createElement('div'); d.className = 'xf-row';
+    d.innerHTML = '<div class="xf-mid"><b></b><small></small></div><span class="xf-amt"></span><button type="button" class="xf-del" aria-label="حذف">🗑</button>';
+    d.children[0].children[0].textContent = r.fn + ' ← ' + r.tn;
+    d.children[0].children[1].textContent = '📅 ' + r.date + (r.note ? ' · ' + r.note : '');
+    d.children[1].textContent = fmt(r.amount);
+    d.children[2].onclick = function(){ openConfirm('حذف التحويل', 'هل تريد إلغاء التحويل ده؟ المبلغ هيرجع لمكانه الأصلي.', function(){ xfDel(r.id); }); };
+    box.appendChild(d);
+  });
+}
+function xfSave(){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return; }
+  const a = xfGet(document.getElementById('xfFrom').value), b = xfGet(document.getElementById('xfTo').value);
+  if(!a || !b){ showToast('اختار البندين', false); return; }
+  if(a.id === b.id){ showToast('اختار بندين مختلفين', false); return; }
+  const amt = xfAmtOf(a, b); if(!(amt > 0)){ showToast('اكتب مبلغ صحيح', false); return; }
+  const bal = Number(a.amount) || 0; if(amt > bal + 0.001){ showToast('المبلغ أكبر من المتاح في «' + a.name + '»', false); return; }
+  const date = document.getElementById('xfDate').value || dateToInputValue(Date.now()), t = new Date(date + 'T12:00:00').getTime(), id = uid(), note = document.getElementById('xfNote').value.trim();
+  const isB = function(x){ return capSubOf(x) === 'bank'; };
+  a.amount = (isB(a) ? cgInt : cgRound)(bal - amt); if(isB(a)){ if(!Array.isArray(a.chg)) a.chg = []; a.chg.push({id: id + 'o', t: t, delta: -amt, xf: 1}); }
+  b.amount = (isB(b) ? cgInt : cgRound)((Number(b.amount) || 0) + amt); if(isB(b)){ if(!Array.isArray(b.chg)) b.chg = []; b.chg.push({id: id + 'i', t: t, delta: amt, xf: 1}); }
+  if(!Array.isArray(data.moneyXfer)) data.moneyXfer = [];
+  data.moneyXfer.push({id: id, from: a.id, to: b.id, fn: a.name, tn: b.name, amount: amt, date: date, note: note, ts: Date.now()});
+  save(); try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ renderZakat(); }catch(e){}
+  xfFillSel(document.getElementById('xfFrom'), a.id); xfFillSel(document.getElementById('xfTo'), b.id);
+  document.getElementById('xfAmt').value = ''; document.getElementById('xfNote').value = ''; xfPrev(); xfLog();
+  showToast('اتحوّل ' + fmt(amt) + ' من «' + a.name + '» إلى «' + b.name + '» ✅', true);
+}
+function xfDel(id){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return; }
+  const i = (data.moneyXfer || []).findIndex(function(r){ return r.id === id; }); if(i < 0) return;
+  const r = data.moneyXfer[i], list = capRaw(), a = list.find(function(z){ return z.id === r.from; }), b = list.find(function(z){ return z.id === r.to; });
+  if(b && (Number(b.amount) || 0) + 0.001 < r.amount){ showToast('رصيد «' + b.name + '» أقل من المبلغ — اتصرف منه بعد التحويل، فمينفعش يتلغي', false); return; }
+  const isB = function(x){ return capSubOf(x) === 'bank'; };
+  if(b){ b.amount = (isB(b) ? cgInt : cgRound)((Number(b.amount) || 0) - r.amount); if(Array.isArray(b.chg)) b.chg = b.chg.filter(function(c){ return c.id !== id + 'i'; }); }
+  if(a){ a.amount = (isB(a) ? cgInt : cgRound)((Number(a.amount) || 0) + r.amount); if(Array.isArray(a.chg)) a.chg = a.chg.filter(function(c){ return c.id !== id + 'o'; }); }
+  data.moneyXfer.splice(i, 1);
+  save(); try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ renderZakat(); }catch(e){}
+  const f = document.getElementById('xfFrom'), t = document.getElementById('xfTo'); xfFillSel(f, f.value); xfFillSel(t, t.value); xfPrev(); xfLog();
+  showToast('اتلغى التحويل ورجع المبلغ ✅', true);
 }
 function openCapMoney(){
   _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false}; _cmMonthOpen = new Set(); _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
