@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.8092">
+<meta name="app-version" content="2026-11-01.8133">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4327,6 +4327,34 @@ function certIntUndo(x, list){   // يرجّع اللي اتحط في الحسا
   if(x.intBack !== undefined && x.intKeep !== true){ delete x.intBack; ch = true; }
   return ch;
 }
+function bankPoolRaw(x, eod){   // الفوايد المتضافة اللي لسه برّه رصيد أي حساب: من وقت تفعيل العلامة بس (اللي استحق قبل كده واتحوّل للدخل العام مش بيتحسب)
+  let ex = 0;
+  try{ if(x.intBack !== 'all' && x.intDepDone && typeof x.intDepDone === 'object') certIntDues(x, eod).forEach(function(d){ const r = x.intDepDone[d.k]; if(r && r.init && !(Number(r.a) > 0)) ex += d.a; }); }catch(e){}
+  return Math.max(0, cgInt(bankIntSince(x, eod) - ex - (Number(x.intSpent) || 0)));
+}
+function certDepTarget(x, list){   // الحساب الأساسي اللي فايدة البند دخلة فيه: نفسه (لو أساسي) / المربوط بيه / أو أول حساب أساسي بنفس اسم البنك
+  if(x.isAcc === true) return x;
+  const ok = function(z){ return z && z.id !== x.id && z.isAcc === true && capCatOf(z) === 'money' && capSubOf(z) === 'bank'; };
+  if(x.accId){ const a = list.find(function(z){ return ok(z) && z.id === x.accId; }); if(a) return a; }
+  const bk = String(x.bank || '').trim().toLowerCase(); if(!bk) return null;
+  return list.find(function(z){ return ok(z) && String(z.bank || '').trim().toLowerCase() === bk; }) || null;
+}
+function certPoolSync(){   // تنظيف: لو نسخة سابقة نقلت «فوايد متضافة» لرصيد حساب، بنرجّعها مكانها (بتتحسب من وقت التفعيل بس)
+  let ch = false;
+  try{
+    const list = capRaw();
+    list.forEach(function(x){
+      if(!x || !x.intDepDone || typeof x.intDepDone !== 'object') return;
+      Object.keys(x.intDepDone).forEach(function(k){
+        if(k.indexOf('pool') !== 0) return;
+        const r = x.intDepDone[k], a = Number(r && r.a) || 0, acc = list.find(function(z){ return z && z.id === (r && r.to); });
+        if(acc){ acc.amount = Math.max(0, cgInt((Number(acc.amount) || 0) - a)); if(Array.isArray(acc.chg)) acc.chg = acc.chg.filter(function(c){ return !(c && c.id === 'cd:' + x.id + ':' + k); }); }
+        x.intSpent = Math.max(0, cgInt((Number(x.intSpent) || 0) - a)); delete x.intDepDone[k]; ch = true;
+      });
+    });
+  }catch(e){ console.error('certPoolSync', e); }
+  return ch;
+}
 function certIntDepositSync(){
   let ch = false;
   try{
@@ -4334,7 +4362,7 @@ function certIntDepositSync(){
     list.forEach(function(x){
       if(!x || capCatOf(x) !== 'money' || capSubOf(x) !== 'bank' || (x.isCert !== true && x.isSub !== true && x.isAcc !== true)) return;
       if(x.intKeep !== true){ if(certIntUndo(x, list)) ch = true; return; }
-      const acc = x.isAcc === true ? x : (x.accId ? list.find(function(z){ return z && z.id === x.accId && z.id !== x.id && z.isCert !== true && z.isSub !== true && capCatOf(z) === 'money' && capSubOf(z) === 'bank'; }) : null);
+      const acc = certDepTarget(x, list);
       if(!acc) return;
       const dues = certIntDues(x, eod); if(!dues.length) return;
       if(!Array.isArray(acc.chg)) acc.chg = [];
@@ -4368,6 +4396,7 @@ function certIntDepositSync(){
 function autoIncSync(){
   let changed = false;
   try{ if(certIntDepositSync()) changed = true; }catch(e){}
+  try{ if(certPoolSync()) changed = true; }catch(e){}
   try{ if(penDepositSync()) changed = true; }catch(e){}
   try{
     if(!data || typeof data !== 'object') return false;
@@ -4899,7 +4928,7 @@ function capTotalsCalc(arr, asOf){
   const now0 = asOf ? new Date(asOf) : new Date(), eod0 = new Date(now0.getFullYear(), now0.getMonth(), now0.getDate(), 23, 59, 59, 999);
   const bankItems = mo.filter(x=> capSubOf(x) === 'bank'), penItems = mo.filter(x=> capSubOf(x) === 'pension');
   // الفوايد اللي مش بتتحوّل بتتضاف للرصيد، واللي بتتحوّل وتتصرف ما بتتضافش. والمعاش المحوّل بيتخصم
-  const bankAdded = cgInt(bankItems.filter(x=> x.intKeep === true).reduce((a,x)=> a + Math.max(0, bankIntSince(x, eod0) - (Number(x.intSpent) || 0)), 0));   // فوايد ما اتحوّلتش: بتتضاف لرصيد البنك
+  const bankAdded = cgInt(bankItems.filter(x=> x.intKeep === true).reduce((a,x)=> a + bankPoolRaw(x, eod0), 0));   // فوايد ما اتحوّلتش: بتتضاف لرصيد البنك
   const penPaid = cgRound(penItems.reduce((a,x)=> a + (penActive(x, eod0.getFullYear(), eod0.getMonth()) && penDueOf(x, eod0.getFullYear(), eod0.getMonth()) <= eod0 && (penToGen(x, eod0.getFullYear(), eod0.getMonth()) || penDepOn(x, eod0.getFullYear(), eod0.getMonth())) ? (Number(x.amount) || 0) : 0), 0));
   const cash = giSum(mo.filter(x=> capSubOf(x) === 'cash')), bank = giSum(bankItems) + bankAdded;
   const pension = giSum(penItems) - penPaid;   // معاش شهري: مش داخل في إجمالي رأس المال
@@ -4908,7 +4937,7 @@ function capTotalsCalc(arr, asOf){
   const goldBuy = cgInt(giSum(go)), goldNow = (typeof glBase24 === 'function' && glBase24() > 0) ? go.reduce((a,x)=> a + cgInt((Number(x.grams) || 0) * glSellPpg(x.karat)), 0) : goldBuy;   // الذهب في رأس المال بسعر البيع الحالي (لو السعر متاح) وإلا بسعر الشراء
   const zi = mo.filter(capZkIn), ziBank = zi.filter(x=> capSubOf(x) === 'bank');
   const zkCash = giSum(zi.filter(x=> capSubOf(x) === 'cash'));
-  const zkBank = giSum(ziBank) + cgInt(ziBank.filter(x=> x.intKeep === true).reduce((a,x)=> a + Math.max(0, bankIntSince(x, eod0) - (Number(x.intSpent) || 0)), 0));
+  const zkBank = giSum(ziBank) + cgInt(ziBank.filter(x=> x.intKeep === true).reduce((a,x)=> a + bankPoolRaw(x, eod0), 0));
   return {zkCash, zkBank, zkMoney: zkCash + zkBank, money: cash + bank, cash, bank, pension, penMonthly, bankAdded, penPaid, gold: goldNow, goldBuy, grams, all: cash + bank + goldNow};
 }
 function capPastBar(){
@@ -5915,7 +5944,7 @@ function cmAccCerts(card, acc, certs, base, box){
 }
 // ===== بطاقة البنك: اسم البنك + إجمالي الرصيد، وبالضغط تظهر بطاقات (الأساسي / الفرعي / الشهادات) وكل واحدة بالضغط عليها تظهر تفاصيلها =====
 function bankPoolOf(x){   // فوايد متضافة للحساب لسه ما اتحطتش في رصيده (بتتحسب في إجمالي البنوك فوق)
-  try{ if(!x || x.intKeep !== true || cmPastView()) return 0; const n = new Date(); return Math.max(0, cgInt(bankIntSince(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)) - (Number(x.intSpent) || 0))); }catch(e){ return 0; }
+  try{ if(!x || x.intKeep !== true || cmPastView()) return 0; const n = new Date(); return bankPoolRaw(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)); }catch(e){ return 0; }
 }
 function mbKey(x){ const b = String(x.bank || '').trim().toLowerCase(); return b || ('id:' + x.id); }
 function mbCard(b, base){
@@ -6136,7 +6165,7 @@ function cmoAvailOf(kind, x){
   if(kind === 'cash' || kind === 'bank') return Math.max(0, Number(x.amount) || 0);
   if(kind === 'pension') return penKeepAvail(x);
   if(cmoLocked(kind, x)) return 0;
-  if(kind === 'int'){ const n = new Date(); return Math.max(0, cgInt(bankIntSince(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)) - (Number(x.intSpent) || 0))); }
+  if(kind === 'int'){ const n = new Date(); return bankPoolRaw(x, new Date(n.getFullYear(), n.getMonth(), n.getDate(), 23, 59, 59, 999)); }
   return 0;
 }
 function cmoEditItemId(){ if(!_cmoEditId) return ''; const o = (data.moneyOut || []).find(r=> r.id === _cmoEditId); return o ? o.itemId : ''; }
