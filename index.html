@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.8194">
+<meta name="app-version" content="2026-11-01.8196">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1587,6 +1587,90 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #cmForm .date-row.grp-new input{flex:1 1 0;} #cmForm .date-row.grp-new .mini-btn{flex:none;}
 #cmForm .hint, #cmForm .check-row{max-width:100%; overflow-wrap:anywhere; white-space:normal;}
 #cmForm select{max-width:100%; text-overflow:ellipsis;}
+/* ===== أشهر رأس المال (3D) ===== */
+#capMonthsOverlay{align-items:stretch !important; justify-content:stretch !important; background:var(--bg); backdrop-filter:none;}
+#capMonthsOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; border:0; overflow-y:auto; position:relative; background:linear-gradient(180deg,var(--bg),var(--bg2)); padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(30px + env(safe-area-inset-bottom,0px));}
+.cmv-wrap{max-width:640px; margin:0 auto;}
+.cmv-title{margin:4px 0 12px; padding-left:50px; font-size:calc(22px * var(--fs,1)); font-weight:900; line-height:1.4;}
+.cmv-title small{display:block; font-size:calc(12.5px * var(--fs,1)); font-weight:700; color:var(--muted);}
+.cmv-bar{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 16px;}
+.cmv-bar b{font-size:calc(19px * var(--fs,1)); font-weight:900; text-align:center; flex:1;}
+.cmv-btn{border:0; cursor:pointer; font-family:inherit; font-weight:800; font-size:calc(13px * var(--fs,1)); padding:9px 13px; border-radius:14px; color:var(--text); background:linear-gradient(145deg,var(--card),var(--bg2)); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), 0 4px 0 rgba(0,0,0,.16), 0 9px 12px rgba(0,0,0,.10); transition:transform .12s, box-shadow .12s; white-space:nowrap;}
+.cmv-btn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.16);}
+.cmv-btn:disabled{opacity:.35; pointer-events:none;}
+.cmv-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px 10px; perspective:900px; perspective-origin:50% 25%; padding-bottom:10px;}
+.cmv-card{position:relative; border:0; font-family:inherit; color:#1f2937; cursor:pointer; padding:14px 4px 12px; border-radius:20px; text-align:center; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:linear-gradient(165deg,hsl(var(--h),90%,94%),hsl(var(--h),70%,80%));
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.75), 0 8px 0 hsl(var(--h),45%,60%), 0 18px 22px rgba(0,0,0,.18);
+  transform:rotateX(14deg); transform-origin:50% 100%;
+  animation:cmvIn .6s cubic-bezier(.2,.9,.3,1.15) backwards; animation-delay:calc(var(--i) * 45ms);
+  transition:transform .18s, box-shadow .18s;}
+.cmv-card:active{transform:rotateX(0) translateY(6px); box-shadow:inset 0 2px 0 rgba(255,255,255,.75), 0 2px 0 hsl(var(--h),45%,60%), 0 6px 8px rgba(0,0,0,.18);}
+@keyframes cmvIn{from{opacity:0; transform:rotateX(-75deg) translateY(30px) scale(.85);} to{opacity:1; transform:rotateX(14deg);}}
+.cmv-card .mn{font-size:calc(15.5px * var(--fs,1)); font-weight:900;}
+.cmv-card .am{font-size:calc(14px * var(--fs,1)); font-weight:900; max-width:100%; overflow-wrap:anywhere; line-height:1.3;}
+.cmv-card .sm{font-size:calc(10.5px * var(--fs,1)); font-weight:800; opacity:.72; line-height:1.4;}
+.cmv-card.now{outline:3px solid #12b27a; outline-offset:2px;}
+.cmv-card.off{opacity:.4; filter:grayscale(.65); pointer-events:none;}
+.cmv-card.nod{opacity:.75;}
+:root[data-theme="dark"] .cmv-card{color:#eef0f3; background:linear-gradient(165deg,hsl(var(--h),38%,26%),hsl(var(--h),40%,18%)); box-shadow:inset 0 2px 0 rgba(255,255,255,.12), 0 8px 0 hsl(var(--h),40%,12%), 0 18px 22px rgba(0,0,0,.5);}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .cmv-card{color:#eef0f3; background:linear-gradient(165deg,hsl(var(--h),38%,26%),hsl(var(--h),40%,18%)); box-shadow:inset 0 2px 0 rgba(255,255,255,.12), 0 8px 0 hsl(var(--h),40%,12%), 0 18px 22px rgba(0,0,0,.5);} }
+.cmv-note{font-size:calc(12px * var(--fs,1)); color:var(--muted); font-weight:700; line-height:1.7; margin:12px 4px;}
+.cmv-hero{position:relative; border-radius:26px; padding:18px 16px; margin:0 0 14px; color:#fff; text-align:center; background:linear-gradient(145deg,#8b5cf0,#5b32c8 55%,#43229c); box-shadow:inset 0 3px 0 rgba(255,255,255,.35), 0 8px 0 #34197a, 0 18px 24px rgba(52,25,122,.35);}
+.cmv-hero small{display:block; font-size:calc(13px * var(--fs,1)); font-weight:800; opacity:.85;}
+.cmv-hero b{display:block; font-size:calc(30px * var(--fs,1)); font-weight:900; margin:4px 0; overflow-wrap:anywhere;}
+.cmv-hero .dl{font-size:calc(12.5px * var(--fs,1)); font-weight:800; padding:4px 12px; border-radius:999px; background:rgba(255,255,255,.2); display:inline-block;}
+.cmv-chips{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 6px;}
+.cmv-chip{border-radius:20px; padding:12px 8px; text-align:center; color:#1f2937; font-weight:800; box-shadow:inset 0 2px 0 rgba(255,255,255,.7), 0 5px 0 rgba(0,0,0,.14), 0 11px 14px rgba(0,0,0,.10); cursor:pointer; border:0; font-family:inherit;}
+.cmv-chip.m{background:linear-gradient(160deg,#e4f6ee,#bfe6d6);} .cmv-chip.g{background:linear-gradient(160deg,#fff4cc,#ffe08a);}
+.cmv-chip small{display:block; font-size:calc(12.5px * var(--fs,1)); opacity:.8;} .cmv-chip b{display:block; font-size:calc(19px * var(--fs,1)); font-weight:900; overflow-wrap:anywhere;}
+.cmv-chip:active{transform:translateY(3px);}
+.cmv-sec{margin:18px 2px 8px; padding:11px 14px; border-radius:18px; font-weight:900; font-size:calc(16px * var(--fs,1)); display:flex; justify-content:space-between; gap:8px; align-items:center; color:#1f2937; box-shadow:inset 0 2px 0 rgba(255,255,255,.6), 0 5px 0 rgba(0,0,0,.12), 0 11px 14px rgba(0,0,0,.08);}
+.cmv-sec.m{background:linear-gradient(160deg,#e4f6ee,#bfe6d6);} .cmv-sec.g{background:linear-gradient(160deg,#fff4cc,#ffe08a);}
+.cmv-sub{font-size:calc(12.5px * var(--fs,1)); color:var(--muted); font-weight:800; margin:0 6px 8px; line-height:1.7;}
+.cmv-row{background:var(--card); border-radius:18px; padding:12px 13px; margin:8px 2px; border:1px solid var(--border); box-shadow:0 4px 0 rgba(0,0,0,.08), 0 10px 14px rgba(0,0,0,.07);}
+.cmv-row.nested{margin-inline-start:20px; border-inline-start:4px solid #7c4ddb88;}
+.cmv-row .tp{display:flex; align-items:center; gap:8px;}
+.cmv-row .tp .nm{flex:1; min-width:0; font-weight:900; font-size:calc(15px * var(--fs,1)); overflow-wrap:anywhere;}
+.cmv-row .tp .vl{font-weight:900; font-size:calc(16px * var(--fs,1)); white-space:nowrap;}
+.cmv-row .tg{font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; margin-top:3px; line-height:1.6;}
+.cmv-row .it{margin-top:7px; font-size:calc(12.5px * var(--fs,1)); font-weight:800; padding:5px 10px; border-radius:12px; background:rgba(18,178,122,.13); color:#0e7a55;}
+.cmv-row .it.wait{background:rgba(245,158,11,.15); color:#a86400;}
+:root[data-theme="dark"] .cmv-row .it{color:#5fe0b0;} :root[data-theme="dark"] .cmv-row .it.wait{color:#f6c25a;}
+.cmv-empty{text-align:center; color:var(--muted); font-weight:800; padding:14px; font-size:calc(13px * var(--fs,1));}
+@media (prefers-reduced-motion: reduce){ .cmv-card{animation:none;} }
+/* ===== أموال / ذهب بسياق الشهر ===== */
+.mv-bar{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 12px; padding:9px 10px; border-radius:18px; background:linear-gradient(160deg,#ede7ff,#d3c4fa); color:#2a0f5c; font-weight:900; box-shadow:inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 rgba(60,20,140,.25), 0 9px 14px rgba(60,20,140,.16);}
+.mv-bar .t{flex:1; min-width:0; text-align:center; line-height:1.45; font-size:calc(15px * var(--fs,1));}
+.mv-bar .t small{display:block; font-size:calc(11.5px * var(--fs,1)); font-weight:800; opacity:.8;}
+.mv-bar button{border:0; cursor:pointer; font-family:inherit; font-weight:900; font-size:calc(13px * var(--fs,1)); padding:8px 11px; border-radius:13px; color:#2a0f5c; background:#fff; box-shadow:0 3px 0 rgba(60,20,140,.25);}
+.mv-bar button:active{transform:translateY(2px);} .mv-bar button:disabled{opacity:.35; pointer-events:none;}
+#capMoneyOverlay.mv-ro #cmBox > *:not(h3):not(.fs-close):not(.mv-bar):not(#cmChips):not(#cmInterest):not(#cmList):not(#cmAddLog){display:none !important;}
+#capGoldOverlay.mv-ro .modal-box.gd > *:not(.gd-top):not(.fs-close):not(.mv-bar):not(.gd-hero):not(#cgKaratRow):not(#cgUseRow):not(#cgList){display:none !important;}
+#capGoldOverlay.mv-ro .pc-acts{display:none !important;}
+.cmv-tiles{margin-top:6px !important;}
+/* التاريخ الكبير + 3D */
+.cmv-bigd,.mv-bar .cmv-bigd{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 8px; border-radius:22px; line-height:1.15; color:#fff; background:linear-gradient(145deg,#9d74ff,#5b32c8 58%,#3f1f95); box-shadow:inset 0 3px 0 rgba(255,255,255,.4), inset 0 -4px 0 rgba(0,0,0,.2), 0 7px 0 #34187f, 0 14px 20px rgba(60,20,140,.38);}
+.cmv-bigd .n{font-size:calc(46px * var(--fs,1)); font-weight:900; text-shadow:0 3px 0 rgba(0,0,0,.28);}
+.cmv-bigd .mn2{font-size:calc(15px * var(--fs,1)); font-weight:800; opacity:.92;}
+.cmv-bigd .td{margin-top:4px; padding:2px 11px; border-radius:999px; background:rgba(255,255,255,.28); font-size:calc(12px * var(--fs,1)); font-weight:900;}
+.cmv-dbar{margin:2px 0 14px !important; gap:10px !important;}
+.cmv-dbar .cmv-btn{padding:14px 12px; font-size:calc(15px * var(--fs,1)); box-shadow:inset 0 2px 0 rgba(255,255,255,.8), 0 5px 0 rgba(0,0,0,.18), 0 10px 14px rgba(0,0,0,.12);}
+.cmv-day{box-shadow:inset 0 2px 0 rgba(255,255,255,.7), 0 5px 0 rgba(0,0,0,.16), 0 8px 10px rgba(0,0,0,.1) !important; transition:transform .1s;}
+.cmv-day:active{transform:translateY(3px);}
+.cmv-day.on{box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 5px 0 #34187f, 0 9px 12px rgba(60,20,140,.35) !important; transform:translateY(-2px) scale(1.06);}
+.mv-bar .r2 button{padding:14px 12px; box-shadow:inset 0 2px 0 rgba(255,255,255,.8), 0 5px 0 rgba(60,20,140,.3), 0 9px 12px rgba(60,20,140,.16);}
+.mv-bar .r2 .cmv-bigd{box-shadow:inset 0 3px 0 rgba(255,255,255,.4), 0 6px 0 #34187f, 0 12px 16px rgba(60,20,140,.35);}
+
+.mv-bar{flex-direction:column; align-items:stretch !important; gap:8px !important;}
+.mv-bar .r{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.mv-bar .r2{padding-top:0;} .mv-bar .t small{font-size:calc(13px * var(--fs,1));}
+.cmv-dbar{margin:-6px 0 8px;}
+.cmv-days{display:flex; gap:6px; overflow-x:auto; padding:4px 2px 12px; margin:0 0 6px; scroll-behavior:smooth; -webkit-overflow-scrolling:touch;}
+.cmv-day{flex:0 0 auto; min-width:38px; border:0; cursor:pointer; font-family:inherit; font-weight:900; font-size:calc(14px * var(--fs,1)); padding:8px 6px; border-radius:12px; color:var(--text); background:var(--card); box-shadow:0 3px 0 rgba(0,0,0,.14);}
+.cmv-day.on{background:linear-gradient(145deg,#8b5cf0,#5b32c8); color:#fff;}
+
+
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -2304,7 +2388,7 @@ html{ overscroll-behavior:none; }
     <div class="zk-main" onclick="toggleCapCards()" role="button">
       <span class="zk-ico">💼</span>
       <span class="gi-col"><span>رأس المال</span><span class="yr-amt" id="capAmt">0</span></span>
-      <span class="plus-badge in-card cap-plus" onclick="event.stopPropagation(); openCapChoose()" role="button" aria-label="إضافة رأس مال">+</span>
+      <span class="plus-badge in-card cap-plus" onclick="event.stopPropagation(); openCapMonths()" role="button" aria-label="أشهر رأس المال">+</span>
     </div>
     <div class="zk-row">
       <div class="zk-sq cap-sq cap2 money" onclick="openCapMoney()"><span class="plus-badge" aria-hidden="true">+</span>
@@ -2328,6 +2412,13 @@ html{ overscroll-behavior:none; }
       <span class="gi-col"><span>المصروفات الشهرية</span><span class="yr-amt" id="msAmt">0</span></span>
       <span class="plus-badge in-card ms-plus" onclick="event.stopPropagation(); openMsSummary()" role="button" aria-label="ملخص المصروفات">+</span>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="capMonthsOverlay">
+  <div class="modal-box cmv-page">
+    <button type="button" class="fs-close" onclick="closeCapMonths()" aria-label="رجوع">✕</button>
+    <div id="cmvBody"></div>
   </div>
 </div>
 
@@ -5130,6 +5221,227 @@ function renderCap(){
 function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
 function openCapChoose(){ document.getElementById('capChooseOverlay').classList.add('open'); }
 function closeCapChoose(){ document.getElementById('capChooseOverlay').classList.remove('open'); }
+// ===== أشهر رأس المال: تصفّح شهر بشهر (أموال + ذهب بحساباتهم) — للعرض فقط، من غير ما يغيّر أي بيانات =====
+let _cmvY = null, _cmvM = null, _cmvD = null;
+
+// ===== سياق الشهر: لما تفتح «أموال» أو «ذهب» من شاشة الأشهر، الصفحة الحقيقية بتشتغل على الشهر ده =====
+// الشهر الحالي = شغل عادي بالكامل. شهر عدّى = نفس الصفحة بحسابات آخر الشهر (للاطلاع، من غير ما يتغيّر أي بيان).
+var _mv = null, _mvPending = null, _mvCache = null;
+function mvPast(){
+  if(!_mv) return null;
+  const n = new Date(), dd = cmvDayOf(_mv.y, _mv.m, _mv.d), sel = new Date(_mv.y, _mv.m, dd), today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  if(sel >= today) return null;
+  const k = _mv.y + '-' + _mv.m + '-' + dd; if(_mvCache && _mvCache.k === k) return _mvCache.s;
+  let sn = null; try{ sn = cmvSnap(_mv.y, _mv.m, dd); }catch(e){ console.error(e); }
+  _mvCache = {k: k, s: sn}; return sn;
+}
+function cmvOpenMoney(){ _mvPending = {y: _cmvY, m: _cmvM, d: _cmvD}; openCapMoney(); }
+function cmvOpenGold(){ _mvPending = {y: _cmvY, m: _cmvM, d: _cmvD}; openCapGold(); }
+function mvGo(d){
+  if(!_mv) return;
+  let y = _mv.y, m = _mv.m + d; if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; }
+  if(y < cmvMinYear() || cmvIsFuture(y, m)) return;
+  _mv = {y: y, m: m, d: null}; _mvCache = null; _cmvY = y; _cmvM = m; _cmvD = null;
+  mvRefresh();
+}
+function mvDayGo(dlt){
+  if(!_mv) return;
+  const r = cmvStep(_mv.y, _mv.m, _mv.d, dlt); if(!r) return;
+  _mv = {y: r.y, m: r.m, d: r.d}; _mvCache = null; _cmvY = r.y; _cmvM = r.m; _cmvD = r.d;
+  mvRefresh();
+}
+function mvRefresh(){
+  try{ if(document.getElementById('capMoneyOverlay').classList.contains('open')) renderCapMoney(); }catch(e){ console.error(e); }
+  try{ if(document.getElementById('capGoldOverlay').classList.contains('open')) renderCapGold(); }catch(e){ console.error(e); }
+}
+function mvAfterClose(){
+  if(!_mv) return;
+  const o = function(id){ const e = document.getElementById(id); return !!(e && e.classList.contains('open')); };
+  if(o('capMoneyOverlay') || o('capGoldOverlay')) return;
+  _mv = null; _mvCache = null; mvBarRender();
+  try{ if(o('capMonthsOverlay')) renderCapMonths(); }catch(e){}
+}
+function mvLeave(){ closeCapMoney(); closeCapGold(); }
+function mvBarRender(){
+  [['capMoneyOverlay', 'mvBarM', 'h3'], ['capGoldOverlay', 'mvBarG', '.gd-top']].forEach(function(o){
+    const root = document.getElementById(o[0]); if(!root) return;
+    let bar = document.getElementById(o[1]);
+    if(!_mv){ if(bar) bar.remove(); root.classList.remove('mv-ro'); return; }
+    const past = !!mvPast(); root.classList.toggle('mv-ro', past);
+    if(!bar){ const a = root.querySelector(o[2]); if(!a) return; bar = document.createElement('div'); bar.id = o[1]; bar.className = 'mv-bar'; a.parentNode.insertBefore(bar, a.nextSibling); }
+    bar.innerHTML = '';
+    const dd = cmvDayOf(_mv.y, _mv.m, _mv.d), mnY = cmvMinYear(), canPrev = !(_mv.y < mnY || (_mv.y === mnY && _mv.m === 0)), canNext = !cmvIsFuture(_mv.m === 11 ? _mv.y + 1 : _mv.y, (_mv.m + 1) % 12);
+    const r1 = cmvEl('div', 'r'), r2 = cmvEl('div', 'r r2');
+    const pv = cmvEl('button', '', '▸'); pv.type = 'button'; pv.disabled = !canPrev; pv.onclick = function(){ mvGo(-1); };
+    const nx = cmvEl('button', '', '◂'); nx.type = 'button'; nx.disabled = !canNext; nx.onclick = function(){ mvGo(1); };
+    const tt = cmvEl('div', 't'); tt.appendChild(cmvEl('small', '', past ? '🔒 للاطلاع — الأرقام في آخر اليوم ده' : '✏️ النهارده — شغل عادي'));
+    const bk = cmvEl('button', '', '▦ الأشهر'); bk.type = 'button'; bk.onclick = mvLeave;
+    r1.appendChild(tt);
+    const dp = cmvEl('button', '', '▸ قبله'); dp.type = 'button'; dp.disabled = !cmvStep(_mv.y, _mv.m, dd, -1); dp.onclick = function(){ mvDayGo(-1); };
+    const dn = cmvEl('button', '', 'بعده ◂'); dn.type = 'button'; dn.disabled = !cmvStep(_mv.y, _mv.m, dd, 1); dn.onclick = function(){ mvDayGo(1); };
+    { const bd = cmvEl('b', 'cmv-bigd'); bd.appendChild(cmvEl('span', 'n', toArabicDigits(dd))); bd.appendChild(cmvEl('span', 'mn2', MONTHS[_mv.m] + ' ' + toArabicDigits(_mv.y))); r2.appendChild(dp); r2.appendChild(bd); r2.appendChild(dn); }
+    bar.appendChild(r1); bar.appendChild(r2);
+  });
+}
+function cmvRY(){ return new Date().getFullYear(); }
+function cmvMinYear(){
+  let mn = cmvRY();
+  try{ capRaw().forEach(function(x){ const d = opsMs(x && x.date); if(d){ const yy = new Date(d).getFullYear(); if(yy > 1990 && yy < mn) mn = yy; } }); }catch(e){}
+  try{ Object.keys(data.capSnap || {}).forEach(function(k){ const yy = Number(k); if(yy > 1990 && yy < mn) mn = yy; }); }catch(e){}
+  return mn;
+}
+function cmvSrc(y){ return y < cmvRY() ? cmSnapAt(y).list : capRaw(); }
+function cmvDim(y, m){ return new Date(y, m + 1, 0).getDate(); }
+function cmvDefDay(y, m){ const n = new Date(); return (y === n.getFullYear() && m === n.getMonth()) ? n.getDate() : cmvDim(y, m); }
+function cmvDayOf(y, m, d){ const df = cmvDefDay(y, m); return d != null ? Math.max(1, Math.min(d, df)) : df; }
+function cmvEnd(y, m, d){ return new Date(y, m, cmvDayOf(y, m, d), 23, 59, 59, 999); }
+// يوم قبل/بعد: بيرجّع {y,m,d} أو null لو برّه المدى (قبل أول بيانات أو بعد النهارده)
+function cmvStep(y, m, d, dlt){
+  const t = new Date(y, m, cmvDayOf(y, m, d) + dlt), n = new Date(), today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  if(t > today || t.getFullYear() < cmvMinYear()) return null;
+  return {y: t.getFullYear(), m: t.getMonth(), d: t.getDate()};
+}
+function cmvIsFuture(y, m){ const n = new Date(); return y > n.getFullYear() || (y === n.getFullYear() && m > n.getMonth()); }
+// صورة رأس المال آخر الشهر: البنود اللي اتضافت لحد آخره، وأرصدة الحسابات من غير الإيداعات اللي جت بعده
+function cmvSnap(y, m, d){
+  const E = cmvEnd(y, m, d), et = E.getTime();
+  const list = cmvSrc(y).filter(function(x){ return x && !((opsMs(x.date) || 0) > et); }).map(function(x){
+    if(capCatOf(x) === 'money' && capSubOf(x) === 'bank' && Array.isArray(x.chg) && x.chg.length){
+      const c = Object.assign({}, x); c.amount = Math.round(bankAmtAt(x, E) * 100) / 100;
+      c.chg = x.chg.filter(function(q){ const eff = (q && typeof q.id === 'string' && q.id.indexOf('cd:') === 0) ? (Number(q.e) || q.t) : q.t; return !(eff > et); });   // بنشيل الإيداعات اللي بعد الشهر عشان الفايدة ما تتخصمش مرتين
+      return c;
+    }
+    return x;
+  });
+  let t; try{ t = capTotalsCalc(list, et); }catch(e){ console.error(e); t = {all: 0, money: 0, cash: 0, bank: 0, bankAdded: 0, gold: 0, goldBuy: 0, grams: 0, pension: 0, penMonthly: 0}; }
+  return {y: y, m: m, d: E.getDate(), E: E, list: list, t: t};
+}
+function cmvIntOf(x, y, m, E){
+  try{
+    if(capSubOf(x) !== 'bank' || !bankActive(x, y, m)) return null;
+    const due = bankDueOf(x, y, m), amt = bankMonthlyAt(x, due);
+    if(!(amt > 0)) return null;
+    return {amt: amt, due: due, got: due <= E};
+  }catch(e){ return null; }
+}
+function cmvEl(tag, cls, txt){ const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; }
+function cmvK(n){ n = Math.abs(Number(n) || 0); let s; if(n >= 1e6) s = (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'م'; else if(n >= 1e3) s = Math.round(n / 1e3) + 'ك'; else s = String(Math.round(n)); return toArabicDigits(s); }
+function cmvTop(){ try{ document.querySelector('#capMonthsOverlay .modal-box').scrollTop = 0; }catch(e){} }
+function openCapMonths(){
+  const ry = cmvRY(); let y = Math.min(Number(currentYear) || ry, ry); const mn = cmvMinYear(); if(y < mn) y = mn;
+  _cmvY = y; _cmvM = null; _cmvD = null; renderCapMonths();
+  document.getElementById('capMonthsOverlay').classList.add('open'); cmvTop();
+}
+function closeCapMonths(){ document.getElementById('capMonthsOverlay').classList.remove('open'); }
+function cmvShiftYear(d){ const y = _cmvY + d; if(y < cmvMinYear() || y > cmvRY()) return; _cmvY = y; renderCapMonths(); }
+function cmvOpenMonth(m){ _cmvM = m; _cmvD = null; renderCapMonths(); cmvTop(); }
+function cmvBackGrid(){ _cmvM = null; renderCapMonths(); cmvTop(); }
+function cmvGo(d){
+  let y = _cmvY, m = _cmvM + d; if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; }
+  if(y < cmvMinYear() || cmvIsFuture(y, m)) return;
+  _cmvY = y; _cmvM = m; _cmvD = null; renderCapMonths(); cmvTop();
+}
+function cmvDayGo(dlt){ const r = cmvStep(_cmvY, _cmvM, _cmvD, dlt); if(!r) return; _cmvY = r.y; _cmvM = r.m; _cmvD = r.d; renderCapMonths(); }
+function cmvDaySet(d){ _cmvD = d; renderCapMonths(); }
+function renderCapMonths(){
+  const box = document.getElementById('cmvBody'); if(!box) return; box.innerHTML = '';
+  const wrap = cmvEl('div', 'cmv-wrap'); box.appendChild(wrap);
+  try{ if(_cmvM === null) cmvRenderGrid(wrap); else cmvRenderMonth(wrap); }
+  catch(e){ console.error(e); wrap.appendChild(cmvEl('div', 'cmv-empty', 'حصل خطأ في عرض الشهر — جرّب تاني')); }
+}
+function cmvRenderGrid(wrap){
+  const y = _cmvY, mnY = cmvMinYear(), ry = cmvRY(), now = new Date();
+  const ttl = cmvEl('h3', 'cmv-title', '💼 رأس المال — أشهر السنة'); ttl.appendChild(cmvEl('small', '', 'دوس على أي شهر تفتح أمواله وذهبه'));
+  wrap.appendChild(ttl);
+  const bar = cmvEl('div', 'cmv-bar');
+  const older = cmvEl('button', 'cmv-btn', '▸ ' + toArabicDigits(y - 1)); older.type = 'button'; older.disabled = y <= mnY; older.onclick = function(){ cmvShiftYear(-1); };
+  const newer = cmvEl('button', 'cmv-btn', toArabicDigits(y + 1) + ' ◂'); newer.type = 'button'; newer.disabled = y >= ry; newer.onclick = function(){ cmvShiftYear(1); };
+  bar.appendChild(older); bar.appendChild(cmvEl('b', '', toArabicDigits(y))); bar.appendChild(newer); wrap.appendChild(bar);
+  const grid = cmvEl('div', 'cmv-grid');
+  for(let m = 0; m < 12; m++){
+    const fut = cmvIsFuture(y, m), s = fut ? null : cmvSnap(y, m), has = !!(s && (s.t.all > 0 || s.t.money > 0));
+    const c = cmvEl('button', 'cmv-card' + (fut ? ' off' : '') + (y === now.getFullYear() && m === now.getMonth() ? ' now' : '') + (!fut && !has ? ' nod' : '')); c.type = 'button';
+    c.style.setProperty('--i', m); c.style.setProperty('--h', (m * 30 + 200) % 360);
+    c.appendChild(cmvEl('span', 'mn', MONTHS[m]));
+    c.appendChild(cmvEl('b', 'am', fut ? '—' : (has ? fmt(cgInt(s.t.all)) : '—')));
+    c.appendChild(cmvEl('span', 'sm', fut ? 'لسه' : (has ? '💵 ' + cmvK(s.t.money) + ' · 🪙 ' + cmvK(s.t.gold) : 'مفيش بنود')));
+    if(!fut) c.onclick = (function(mm){ return function(){ cmvOpenMonth(mm); }; })(m);
+    grid.appendChild(c);
+  }
+  wrap.appendChild(grid);
+  wrap.appendChild(cmvEl('div', 'cmv-note', '📅 رأس المال كل شهر = البنود اللي اتضافت لحد آخره وأرصدة الحسابات في نهايته. اللي اتباع أو اتحذف قبل كده مش بيظهر، والذهب بسعر البيع الحالي. العرض ده للتصفح بس ومش بيغيّر أي بيانات.'));
+}
+function cmvRow(x, s, nested){
+  const sub = capSubOf(x), r = cmvEl('div', 'cmv-row' + (nested ? ' nested' : '')), tp = cmvEl('div', 'tp');
+  tp.appendChild(cmvEl('span', '', sub === 'bank' ? (x.isCert ? '📜' : (x.isSub ? '🗂' : '🏦')) : (sub === 'pension' ? '💳' : '💵')));
+  tp.appendChild(cmvEl('span', 'nm', x.name || '—'));
+  tp.appendChild(cmvEl('b', 'vl', fmt(x.amount))); r.appendChild(tp);
+  const tags = [];
+  if(sub === 'bank'){ tags.push(x.isCert ? 'شهادة' : (x.isSub ? 'حساب فرعي' : (x.isAcc ? (x.accType === 'current' ? 'حساب جاري' : 'حساب توفير') : 'بنك'))); if(Number(x.rate) > 0) tags.push('فايدة ' + toArabicDigits(Number(x.rate)) + '٪ سنويًا'); }
+  else if(sub === 'pension') tags.push('معاش شهري — مش داخل في الإجمالي');
+  else tags.push('نقدي');
+  try{ if(x.grp){ const g = capGroups().find(function(q){ return q.id === x.grp; }); if(g) tags.push('📁 ' + g.name); } }catch(e){}
+  const d = opsMs(x.date); if(d) tags.push((sub === 'bank' ? 'من ' : 'بتاريخ ') + gFmt(new Date(d)));
+  r.appendChild(cmvEl('div', 'tg', tags.join(' · ')));
+  if(sub === 'bank'){
+    const ie = cmvIntOf(x, s.y, s.m, s.E);
+    if(ie) r.appendChild(cmvEl('div', 'it' + (ie.got ? '' : ' wait'), (ie.got ? '✅ فايدة ' : '⏳ فايدة ') + MONTHS[s.m] + ': ' + fmt(cgInt(ie.amt)) + ' · يوم ' + toArabicDigits(ie.due.getDate())));
+  }
+  return r;
+}
+function cmvRenderMonth(wrap){
+  const y = _cmvY, m = _cmvM, s = cmvSnap(y, m, _cmvD), t = s.t, now = new Date(), isNow = y === now.getFullYear() && m === now.getMonth() && s.d === now.getDate();
+  const mnY = cmvMinYear(), canPrev = !(y < mnY || (y === mnY && m === 0)), canNext = !cmvIsFuture(m === 11 ? y + 1 : y, (m + 1) % 12);
+  const ttl = cmvEl('h3', 'cmv-title', '🗓 ' + MONTHS[m] + ' ' + toArabicDigits(y));
+  ttl.appendChild(cmvEl('small', '', isNow ? 'النهارده (' + gFmt(s.E) + ')' : 'الأرقام في آخر يوم ' + toArabicDigits(s.d) + ' (' + gFmt(s.E) + ')'));
+  wrap.appendChild(ttl);
+  const bar = cmvEl('div', 'cmv-bar');
+  const pv = cmvEl('button', 'cmv-btn', '▸ الشهر اللي قبله'); pv.type = 'button'; pv.disabled = !canPrev; pv.onclick = function(){ cmvGo(-1); };
+  const gr = cmvEl('button', 'cmv-btn', '▦ كل الأشهر'); gr.type = 'button'; gr.onclick = cmvBackGrid;
+  const nx = cmvEl('button', 'cmv-btn', 'اللي بعده ◂'); nx.type = 'button'; nx.disabled = !canNext; nx.onclick = function(){ cmvGo(1); };
+  // التنقل يوم يوم بس
+  { const db = cmvEl('div', 'cmv-bar cmv-dbar');
+    const dp = cmvEl('button', 'cmv-btn', '▸ قبله'); dp.type = 'button'; dp.disabled = !cmvStep(y, m, s.d, -1); dp.onclick = function(){ cmvDayGo(-1); };
+    const dn = cmvEl('button', 'cmv-btn', 'بعده ◂'); dn.type = 'button'; dn.disabled = !cmvStep(y, m, s.d, 1); dn.onclick = function(){ cmvDayGo(1); };
+    db.appendChild(dp); { const bd = cmvEl('b', 'cmv-bigd'); bd.appendChild(cmvEl('span', 'n', toArabicDigits(s.d))); bd.appendChild(cmvEl('span', 'mn2', MONTHS[m] + ' ' + toArabicDigits(y))); if(isNow) bd.appendChild(cmvEl('span', 'td', 'النهارده')); db.appendChild(bd); } db.appendChild(dn); wrap.appendChild(db);
+    const strip = cmvEl('div', 'cmv-days'), last = cmvDefDay(y, m);
+    for(let dd = 1; dd <= last; dd++){ const c = cmvEl('button', 'cmv-day' + (dd === s.d ? ' on' : ''), toArabicDigits(dd)); c.type = 'button'; c.onclick = (function(x){ return function(){ cmvDaySet(x); }; })(dd); strip.appendChild(c); }
+    wrap.appendChild(strip);
+    setTimeout(function(){ try{ const on = strip.querySelector('.on'); if(on) strip.scrollLeft = on.offsetLeft - strip.clientWidth / 2 + on.clientWidth / 2; }catch(e){} }, 0); }
+  // الإجمالي + الفرق عن الشهر اللي قبله
+  const hero = cmvEl('div', 'cmv-hero'); hero.appendChild(cmvEl('small', '', '💼 رأس المال')); hero.appendChild(cmvEl('b', '', fmt(cgInt(t.all))));
+  let prev = null, prevLbl = 'الشهر اللي قبله'; try{ if(_cmvD != null){ const ps = cmvStep(y, m, s.d, -1); if(ps){ prev = cmvSnap(ps.y, ps.m, ps.d); prevLbl = 'اليوم اللي قبله'; } } else if(m > 0) prev = cmvSnap(y, m - 1); else if(y > mnY) prev = cmvSnap(y - 1, 11); }catch(e){}
+  if(prev && prev.t.all > 0){ const dlt = cgInt(t.all - prev.t.all); hero.appendChild(cmvEl('span', 'dl', dlt === 0 ? '■ بدون تغيير عن ' + prevLbl : (dlt > 0 ? '▲ +' : '▼ −') + fmt(Math.abs(dlt)) + ' عن ' + prevLbl)); }
+  wrap.appendChild(hero);
+  // بطاقتين زي بطاقة رأس المال في الرئيسية: دوس على أي واحدة تفتح صفحتها الحقيقية بحسابات الشهر ده
+  const holder = cmvEl('div', 'zk-wrap yr-cap open cmv-tiles'), trow = cmvEl('div', 'zk-row'); holder.appendChild(trow);
+  const mkRows = function(arr){ const e = cmvEl('span', 'c2-rows'); arr.forEach(function(p){ const r = cmvEl('span', 'r'); r.appendChild(cmvEl('span', '', p[0])); r.appendChild(cmvEl('b', '', p[1])); e.appendChild(r); }); return e; };
+  const mp = t.all > 0 ? Math.round(t.money / t.all * 100) : 0, lab = ' من رأس المال';
+  const tm = cmvEl('div', 'zk-sq cap-sq cap2 money'); tm.setAttribute('role', 'button'); tm.appendChild(cmvEl('span', 'plus-badge'));
+  { const h = cmvEl('span', 'c2-head'); h.appendChild(cmvEl('span', 'c2-ic', '💵')); h.appendChild(cmvEl('span', 'c2-l', 'أموال')); tm.appendChild(h); }
+  tm.appendChild(cmvEl('span', 'c2-v', fmt(t.money)));
+  tm.appendChild(cmvEl('span', 'c2-pill', t.all > 0 ? toArabicDigits(mp) + '٪' + lab : ''));
+  tm.appendChild(mkRows((t.cash > 0 || t.bank > 0) ? [['💵 نقدي', fmt(t.cash)], ['🏦 بنوك', fmt(t.bank)]] : []));
+  tm.onclick = cmvOpenMoney;
+  const tg = cmvEl('div', 'zk-sq cap-sq cap2 gold'); tg.setAttribute('role', 'button'); tg.appendChild(cmvEl('span', 'plus-badge'));
+  { const h = cmvEl('span', 'c2-head'); h.appendChild(cmvEl('span', 'c2-ic', '🪙')); h.appendChild(cmvEl('span', 'c2-l', 'ذهب')); tg.appendChild(h); }
+  tg.appendChild(cmvEl('span', 'c2-v', fmt(t.gold)));
+  tg.appendChild(cmvEl('span', 'c2-pill', t.all > 0 ? toArabicDigits(100 - mp) + '٪' + lab : ''));
+  tg.appendChild(mkRows(t.grams > 0 ? [['⚖️ الوزن', fmt(Math.round(t.grams * 100) / 100) + ' جم']] : []));
+  { const kb = cmvEl('span', 'c2-karat'); if(t.grams > 0){ const ks = goldKaratStats(s.list.filter(function(x){ return capCatOf(x) === 'gold'; })); [24, 21, 18].forEach(function(kk){ const c = cmvEl('span'); c.appendChild(cmvEl('small', '', 'عيار ' + toArabicDigits(kk))); c.appendChild(cmvEl('b', '', fmt(Math.round(ks[kk] * 100) / 100) + ' جم')); kb.appendChild(c); }); } tg.appendChild(kb); }
+  { const live = (typeof glBase24 === 'function' && glBase24() > 0), pl = cgInt(t.gold - t.goldBuy);
+    const pe = cmvEl('span', 'c2-pnl ' + (pl >= 0 ? 'up' : 'down'), (live && t.grams > 0) ? '📈 ' + (pl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(pl) : ''); tg.appendChild(pe); }
+  tg.onclick = cmvOpenGold;
+  trow.appendChild(tm); trow.appendChild(tg); wrap.appendChild(holder);
+  // فوايد الشهر (لو فيه)
+  { let intTot = 0, intGot = 0;
+    s.list.filter(function(x){ return capCatOf(x) === 'money'; }).forEach(function(x){ const ie = cmvIntOf(x, y, m, s.E); if(ie){ intTot += ie.amt; if(ie.got) intGot += ie.amt; } });
+    if(intTot > 0) wrap.appendChild(cmvEl('div', 'cmv-sub', '🏦 فوائد ' + MONTHS[m] + ': ' + fmt(cgInt(intGot)) + ' استحقت' + (intTot - intGot > 0.5 ? ' · ' + fmt(cgInt(intTot - intGot)) + ' لسه' : ''))); }
+  wrap.appendChild(cmvEl('div', 'cmv-note', isNow
+    ? '📅 ده الشهر الحالي — دوس على «أموال» أو «ذهب» تفتح الصفحة كاملة وتشتغل عليها عادي (إضافة / تعديل / صرف / إيداع).'
+    : '📅 دوس على «أموال» أو «ذهب» تفتح صفحة ' + MONTHS[m] + ' ' + toArabicDigits(y) + ' بكل حاجة فيها بحسابات آخر الشهر. الشهور اللي عدّت للاطلاع بس (الإضافة والتعديل من الشهر الحالي). اللي اتباع أو اتحذف قبل كده مش بيظهر، والذهب بسعر البيع الحالي.'));
+}
+
 function capDel(id){ data.capital = capRaw().filter(z=> z.id !== id); save(); renderCap(); }
 window.addEventListener('load', function(){
   ['capDel', 'capGrpZkToggle', 'capItemZkToggle', 'saveCapGold', 'openCmOut', 'deleteCapGrp', 'saveCapGrp', 'addGroup'].forEach(function(n){
@@ -5208,7 +5520,7 @@ const _capCollapsed = new Set();
 function capGroupize(box, cat){
   const groups = capGroups(cat); if(!groups.length) return;
   try{ ensureGrpColors(); }catch(e){}
-  const rows = Array.from(box.querySelectorAll(':scope > .gi-row')), items = cat === 'money' ? cmSrcList() : capList();
+  const rows = Array.from(box.querySelectorAll(':scope > .gi-row')), items = cat === 'money' ? cmSrcList() : goldPieces();
   const byId = id => items.find(x=> x.id === id);
   box.innerHTML = '';
   const bucket = {}; rows.forEach(r=>{ const k = groups.some(g=> g.id === r.dataset.grp) ? r.dataset.grp : ''; (bucket[k] = bucket[k] || []).push(r); });
@@ -5268,14 +5580,14 @@ let _cmSub = 'cash', _cmFormOpen = false, _cmFilter = null, _cmEditId = null, _c
 function cmYear(){ return _cmYear || currentYear; }
 function cmShiftYear(d){ _cmYear = cmYear() + d; renderCapMoney(); }
 // بنود وإجماليات صفحة «أموال» بتتبع السنة اللي بتتصفحها: سنة قديمة = اللي كان موجود فيها بس (لقطة السنة)، مش بنود ٢٠٢٦
-function cmPastView(){ const ry = new Date().getFullYear(); return !!_cmYear && _cmYear !== currentYear && _cmYear < ry; }
+function cmPastView(){ if(mvPast()) return true; const ry = new Date().getFullYear(); return !!_cmYear && _cmYear !== currentYear && _cmYear < ry; }
 function cmSnapAt(y){   // لقطة سنة قديمة للتصفح: المثبّتة لو موجودة، وإلا تقدير من تواريخ الإضافة (من غير ما يتثبّت ولا يتحفظ)
   const sn = data.capSnap && data.capSnap[y]; if(sn && Array.isArray(sn.list)) return sn;
   const end = new Date(y, 11, 31, 23, 59, 59, 999).getTime(), list = JSON.parse(JSON.stringify(capRaw().filter(function(x){ return !((opsMs(x.date) || 0) > end); })));
   return {list: list, totals: capTotalsCalc(list, end), est: true};
 }
-function cmSrcList(){ const y = cmYear(), ry = new Date().getFullYear(); if(!_cmYear || _cmYear === currentYear) return capList(); return y < ry ? cmSnapAt(y).list : capRaw(); }
-function cmSrcTotals(){ const y = cmYear(), ry = new Date().getFullYear(); if(!_cmYear || _cmYear === currentYear) return capTotals(); return y < ry ? cmSnapAt(y).totals : capTotalsCalc(capRaw()); }
+function cmSrcList(){ { const mv = mvPast(); if(mv) return mv.list; } const y = cmYear(), ry = new Date().getFullYear(); if(!_cmYear || _cmYear === currentYear) return capList(); return y < ry ? cmSnapAt(y).list : capRaw(); }
+function cmSrcTotals(){ { const mv = mvPast(); if(mv) return mv.t; } const y = cmYear(), ry = new Date().getFullYear(); if(!_cmYear || _cmYear === currentYear) return capTotals(); return y < ry ? cmSnapAt(y).totals : capTotalsCalc(capRaw()); }
 // عنوان الجدول مع التنقل بين السنين (البيانات بتستمر لكل سنة لحد ما تعدلها)
 function cmYearHeader(icon, title, yr){
   const d = document.createElement('div'); d.className = 'cap-grp'; d.style.cursor = 'default';
@@ -6167,7 +6479,7 @@ function mbCard(b, base){
   return card;
 }
 function renderCapMoney(){
-  ensureGrpColors();
+  ensureGrpColors(); mvBarRender();
   const t = cmSrcTotals(), box = document.getElementById('cmList'), pastV = cmPastView();
   document.getElementById('cmTotal').textContent = fmt(t.money);
   document.getElementById('cmCash').textContent = fmt(t.cash);
@@ -6182,9 +6494,9 @@ function renderCapMoney(){
   try{ const mo = pastV ? [] : capList().filter(x=> capCatOf(x) === 'money'); document.getElementById('cmChipBank').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'bank' && (dueSoonOf(x) || certAlertOf(x)))); document.getElementById('cmChipPen').classList.toggle('due-soon', mo.some(x=> capSubOf(x) === 'pension' && dueSoonOf(x))); }catch(e){}
   const srcL = cmSrcList(), arr = sortDescByDate(srcL.filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
   const mcBase = srcL.filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
-  box.innerHTML = arr.length ? '' : '<div class="mc-empty">' + (pastV ? 'مفيش بنود في سنة ' + toArabicDigits(cmYear()) : 'لا توجد بنود بعد') + '</div>';
+  box.innerHTML = arr.length ? '' : '<div class="mc-empty">' + (pastV ? (mvPast() ? 'مفيش بنود أموال في الشهر ده' : 'مفيش بنود في سنة ' + toArabicDigits(cmYear())) : 'لا توجد بنود بعد') + '</div>';
   box.classList.toggle('cm-ro', pastV);
-  if(pastV){ const bn = document.createElement('div'); bn.className = 'hint'; bn.style.cssText = 'margin:2px 6px 12px;padding:10px 14px;border-radius:14px;font-weight:800;line-height:1.7;text-align:center;background:rgba(80,90,110,.12);border:1px solid rgba(80,90,110,.35);color:var(--text);'; bn.textContent = '📁 بتشوف سنة ' + toArabicDigits(cmYear()) + ' (للرجوع فقط) — اللي كان موجود فيها بس (الأرصدة تقديرية من تواريخ الإضافة). ';
+  if(pastV && !mvPast()){ const bn = document.createElement('div'); bn.className = 'hint'; bn.style.cssText = 'margin:2px 6px 12px;padding:10px 14px;border-radius:14px;font-weight:800;line-height:1.7;text-align:center;background:rgba(80,90,110,.12);border:1px solid rgba(80,90,110,.35);color:var(--text);'; bn.textContent = '📁 بتشوف سنة ' + toArabicDigits(cmYear()) + ' (للرجوع فقط) — اللي كان موجود فيها بس (الأرصدة تقديرية من تواريخ الإضافة). ';
     const rb = document.createElement('button'); rb.type = 'button'; rb.textContent = '↩ رجوع'; rb.style.cssText = 'margin-inline-start:8px;font-weight:800;font-size:12px;cursor:pointer;'; rb.onclick = function(){ _cmYear = null; renderCapMoney(); }; bn.appendChild(rb); box.appendChild(bn); }
   const accIds = new Set(arr.filter(x=> x.isAcc).map(x=> x.id)), certsOf = {}, pensOf = {};
   arr.forEach(x=>{ if((x.isCert || x.isSub) && x.accId && accIds.has(x.accId)) (certsOf[x.accId] = certsOf[x.accId] || []).push(x); });
@@ -6669,6 +6981,7 @@ function xfDel(id){
   showToast('اتلغى التحويل ورجع المبلغ ✅', true);
 }
 function openCapMoney(){
+  _mv = _mvPending; _mvPending = null; _mvCache = null;
   _cmTbl = {bank:false, pension:false, bankgrp:false, bankacc:false}; _cmMonthOpen = new Set(); _cmFormOpen = false; _cmFilter = null; _cmYear = null; cmReset(); cmSubUI(_cmSub);
   renderCapMoney();
   document.getElementById('capMoneyOverlay').classList.add('open');
@@ -6746,7 +7059,7 @@ function depLog(){
     box.appendChild(d);
   });
 }
-function closeCapMoney(){ document.getElementById('capMoneyOverlay').classList.remove('open'); }
+function closeCapMoney(){ document.getElementById('capMoneyOverlay').classList.remove('open'); mvAfterClose(); }
 function addCapMoney(backChoice){
   const n = document.getElementById('cmName').value.trim(), amt = Number(document.getElementById('cmAmt').value) || 0;
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
@@ -6782,7 +7095,7 @@ let _cgEditId = null, _cgUse = 'save', _cgFk = null, _cgFu = null;
 const cgUseOf = x => x.use === 'jewel' ? 'jewel' : 'save';
 const cgRound = v => Math.round(v * 100) / 100;
 const cgInt = v => Math.round(Number(v) || 0);   // ذهب: بدون قروش
-function goldPieces(){ return capList().filter(x=> capCatOf(x) === 'gold'); }
+function goldPieces(){ const mv = mvPast(); return (mv ? mv.list : capList()).filter(x=> capCatOf(x) === 'gold'); }
 function goldKaratStats(arr){
   const o = {24:0, 21:0, 18:0, other:0};
   arr.forEach(x=>{ const k = Number(x.karat) || 0, g = Number(x.grams) || 0; if(k === 24 || k === 21 || k === 18) o[k] += g; else o.other += g; });
@@ -7286,7 +7599,8 @@ function glPanel(){
   glPanelApply();
 }
 function renderCapGold(){
-  const all = goldPieces(), box = document.getElementById('cgList'), t = capTotals();
+  mvBarRender();
+  const mvs = mvPast(), all = goldPieces(), box = document.getElementById('cgList'), t = mvs ? mvs.t : capTotals();
   document.getElementById('cgTotal').textContent = fmt(t.gold);
   document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams)) + ' جم';
   glPanel(); glInfoPanel();
@@ -7353,8 +7667,8 @@ function renderCapGold(){
   });
   capGroupize(box, 'gold');
 }
-function openCapGold(){ try{ setTimeout(goldTick, 50); }catch(e){} _cgFk = null; _cgFu = null; cgReset(); document.getElementById('glAdj').value = _glAdj.adj || ''; document.getElementById('glManual').value = _glAdj.manual || ''; document.getElementById('glSarUsd').value = _glAdj.sarUsd || ''; document.getElementById('glUsdManual').value = _glAdj.usdManual || ''; document.getElementById('glSpread').value = _glAdj.spreadSet ? _glAdj.spread : ''; renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
-function closeCapGold(){ document.getElementById('capGoldOverlay').classList.remove('open'); }
+function openCapGold(){ _mv = _mvPending; _mvPending = null; _mvCache = null; try{ setTimeout(goldTick, 50); }catch(e){} _cgFk = null; _cgFu = null; cgReset(); document.getElementById('glAdj').value = _glAdj.adj || ''; document.getElementById('glManual').value = _glAdj.manual || ''; document.getElementById('glSarUsd').value = _glAdj.sarUsd || ''; document.getElementById('glUsdManual').value = _glAdj.usdManual || ''; document.getElementById('glSpread').value = _glAdj.spreadSet ? _glAdj.spread : ''; renderCapGold(); document.getElementById('capGoldOverlay').classList.add('open'); }
+function closeCapGold(){ document.getElementById('capGoldOverlay').classList.remove('open'); mvAfterClose(); }
 function saveCapGold(){
   const n = document.getElementById('cgName').value.trim(), g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
   if(!n || g <= 0 || pr <= 0){ showToast('اكتب اسم القطعة والوزن وثمن الجرام', false); return; }
