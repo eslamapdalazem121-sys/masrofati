@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-01.8196">
+<meta name="app-version" content="2026-11-02.8198">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -221,6 +221,37 @@ h1{
   align-items:flex-end; justify-content:center;
 }
 .modal-overlay.open{display:flex;}
+
+/* ===== نشاط الحساب (إيداع / صرف / تحويل / فوايد / تعديلات) — صفحة كاملة 3D ===== */
+.plus-badge.aa-pb{display:inline-flex; margin-inline-start:8px; vertical-align:middle; pointer-events:auto; cursor:pointer; -webkit-tap-highlight-color:transparent; width:calc(26px * var(--fs,1)); height:calc(26px * var(--fs,1)); font-size:calc(20px * var(--fs,1));}
+.plus-badge.aa-pb:active{transform:translateY(2px);}
+#aaOverlay{align-items:stretch; justify-content:stretch; background:var(--bg); -webkit-backdrop-filter:none; backdrop-filter:none; z-index:120;}
+#aaOverlay .modal-box{max-width:none; width:100%; height:100%; max-height:none; border-radius:0; border:0; box-shadow:none; background:var(--bg); padding:0 14px calc(28px + env(safe-area-inset-bottom,0px));}
+.ys-hero.aa-hero{background:linear-gradient(145deg,#6db3ff 0%,#2f7cf0 48%,#1646b8 100%); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -5px 0 rgba(0,0,0,.2), 0 8px 0 #0f2f80, 0 18px 26px rgba(22,70,184,.38);}
+.aa-nm{position:relative; font-weight:800; font-size:calc(12.5px * var(--fs,1)); opacity:.92; margin-top:-6px; margin-bottom:10px;}
+.aa-chips{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 12px; margin:0 -2px; scrollbar-width:none;}
+.aa-chips::-webkit-scrollbar{display:none;}
+.aa-chip{flex:none; cursor:pointer; font:inherit; font-weight:800; font-size:calc(12.5px * var(--fs,1)); color:var(--text); background:var(--card); border:1px solid var(--border); border-radius:999px; padding:8px 14px; box-shadow:0 3px 0 rgba(0,0,0,.14), 0 6px 9px rgba(0,0,0,.07); white-space:nowrap;}
+.aa-chip.on{color:#fff; border-color:transparent; background:linear-gradient(145deg,#4c93ff,#1f5fe0); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 3px 0 #123c99, 0 8px 12px rgba(31,95,224,.3);}
+.aa-chip small{opacity:.75; font-weight:700; margin-inline-start:4px;}
+.aa-mh{margin:16px 4px 8px; font-weight:900; font-size:calc(13px * var(--fs,1)); color:var(--muted); display:flex; justify-content:space-between;}
+.aa-r{display:flex; gap:11px; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:11px 12px; margin-bottom:11px; box-shadow:0 5px 0 rgba(0,0,0,.13), 0 11px 16px rgba(30,41,59,.07);}
+.aa-ic{flex:none; width:44px; height:44px; border-radius:15px; display:grid; place-items:center; font-size:20px; color:#fff; box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -3px 0 rgba(0,0,0,.2), 0 3px 0 var(--ae,#0a6a52); background:linear-gradient(145deg,var(--a1,#38e0aa),var(--a2,#0f9d78));}
+.aa-dep{--a1:#38e0aa; --a2:#0f9d78; --ae:#0a6a52;}
+.aa-out{--a1:#ff8f8f; --a2:#e03a3a; --ae:#9b1f1f;}
+.aa-xin{--a1:#6db3ff; --a2:#2563eb; --ae:#173f9c;}
+.aa-xout{--a1:#c5a2ff; --a2:#7a45e8; --ae:#4a22a8;}
+.aa-int{--a1:#ffd36a; --a2:#e09a00; --ae:#8f5f00;}
+.aa-edit{--a1:#9fb2d6; --a2:#5b719c; --ae:#35466a;}
+.aa-open{--a1:#6fe3d6; --a2:#0f9a96; --ae:#09605e;}
+.aa-tx{flex:1; min-width:0;}
+.aa-tx b{display:block; font-size:calc(14.5px * var(--fs,1)); font-weight:900; line-height:1.4; overflow-wrap:anywhere;}
+.aa-tx em{display:block; font-style:normal; font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700; line-height:1.5; overflow-wrap:anywhere;}
+.aa-ln{margin-top:6px; padding:6px 9px; border-radius:11px; background:var(--bg); font-size:calc(11.5px * var(--fs,1)); font-weight:800; line-height:1.6; box-shadow:inset 0 2px 0 rgba(255,255,255,.2);}
+.aa-ln i{font-style:normal; color:var(--muted); font-weight:700;}
+.aa-am{flex:none; direction:ltr; text-align:end; font-size:calc(16.5px * var(--fs,1)); font-weight:900; line-height:1.25;}
+.aa-am.pos{color:#0b9a68;} .aa-am.neg{color:#e03a3a;}
+.aa-empty{text-align:center; color:var(--muted); font-weight:700; padding:34px 10px; font-size:calc(13.5px * var(--fs,1));}
 
 /* ===== ملخص الدخل العام بكامل الشاشة + بطاقتا المنصرف/العجز بتظهر مهما اتغيّر ترتيب البطاقات ===== */
 .header-stats-row.yr-show{display:flex; animation:zkPop .4s cubic-bezier(.2,.9,.3,1.2);}
@@ -2746,6 +2777,17 @@ html{ overscroll-behavior:none; }
     <div class="gi-sumrow"><span id="opsSum"></span></div>
     <div class="gi-rows" id="opsList" style="max-height:380px;"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeOps()">إغلاق</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="aaOverlay">
+  <div class="modal-box">
+    <div class="ys-top"><button type="button" class="ys-back" onclick="closeAcctAct()">› رجوع</button><h3 class="ys-ttl" id="aaTitle">📒 نشاط الحساب</h3></div>
+    <div class="ys-wrap">
+      <div class="ys-hero aa-hero" id="aaHero"></div>
+      <div class="aa-chips" id="aaChips"></div>
+      <div id="aaList"></div>
+    </div>
   </div>
 </div>
 
@@ -6284,6 +6326,106 @@ function cmEditItem(x){
   document.getElementById('cmSaveBtn').textContent = '💾 حفظ التعديل';
   document.getElementById('cmName').scrollIntoView({block:'center'});
 }
+
+// ===== نشاط الحساب: سجل التعديلات + تجميع الإيداع والصرف والتحويل والفوايد =====
+var AA_FIELDS = [['name', 'الاسم'], ['accName', 'اسم الحساب'], ['bank', 'البنك'], ['accType', 'النوع'], ['rate', 'نسبة الفايدة'], ['amount', 'الرصيد'], ['payFreq', 'صرف الفايدة'], ['intKeep', 'وجهة الفايدة'], ['date', 'تاريخ الفتح'], ['noZk', 'الزكاة']];
+function aaNorm(k, v){ if(k === 'intKeep' || k === 'noZk') return v === true ? '1' : '0'; if(k === 'date') return v ? dateToInputValue(v) : ''; return v === undefined || v === null ? '' : String(v); }
+function aaFmtVal(k, v){
+  if(k === 'rate') return toArabicDigits(Number(v) || 0) + '٪';
+  if(k === 'amount') return fmt(Number(v) || 0);
+  if(k === 'accType') return v === 'current' ? 'جاري' : 'توفير';
+  if(k === 'payFreq') return v === 'annual' ? 'سنوي' : (v === 'quarter' || v === 'quarterly' ? 'كل ٣ شهور' : 'شهري');
+  if(k === 'intKeep') return v === true ? 'تتضاف لرصيد الحساب' : 'تروح للدخل العام';
+  if(k === 'noZk') return v === true ? 'خارج حساب الزكاة' : 'داخل حساب الزكاة';
+  if(k === 'date') return v ? formatDate(v) : '—';
+  return v === undefined || v === null || v === '' ? '—' : String(v);
+}
+function aaLogEdit(id, before, modes){
+  const x = capList().find(function(z){ return z && z.id === id; }); if(!x || (capSubOf(x) !== 'bank' && capSubOf(x) !== 'pension')) return;
+  const ch = [];
+  AA_FIELDS.forEach(function(f){ const k = f[0]; if(k === 'amount' && !(modes && modes.amt)) return; if(aaNorm(k, before[k]) !== aaNorm(k, x[k])) ch.push({k: k, a: before[k] === undefined ? null : before[k], b: x[k] === undefined ? null : x[k]}); });
+  if(!ch.length) return;
+  const mm = {past: 'بأثر رجعي', cur: 'من الشهر الحالي والقادمة', only: 'الشهر الحالي فقط', next: 'من الشهور القادمة'}, m = [];
+  if(modes){ if(modes.rate && ch.some(function(c){ return c.k === 'rate'; })) m.push('النسبة: ' + (mm[modes.rate] || '')); if(modes.amt && ch.some(function(c){ return c.k === 'amount'; })) m.push('الرصيد: ' + (mm[modes.amt] || '')); if(modes.keep && ch.some(function(c){ return c.k === 'intKeep'; })) m.push('الفايدة: ' + (mm[modes.keep] || '')); }
+  const raw = capRaw().find(function(z){ return z && z.id === id; }) || x;
+  if(!Array.isArray(raw.act)) raw.act = [];
+  raw.act.push({t: Date.now(), c: ch, m: m.join(' · ')});
+  if(raw.act.length > 200) raw.act = raw.act.slice(-200);
+}
+function aaOpening(x){
+  const snaps = (Array.isArray(x.rv) ? x.rv : []).filter(function(v){ return v && v.p === 1 && v.it; });
+  const base = snaps.length ? snaps[0].it : x, sum = (Array.isArray(base.chg) ? base.chg : []).reduce(function(a, c){ return a + (Number(c && c.delta) || 0); }, 0);
+  return cgInt((Number(base.amount) || 0) - sum);
+}
+function aaEvents(x){
+  const ev = [], T12 = function(d){ return new Date(String(d) + 'T12:00:00').getTime() || 0; };
+  (data.moneyDeposits || []).forEach(function(r){ if(r && r.to === x.id) ev.push({k: 'dep', t: T12(r.date), ts: r.ts || 0, amt: Number(r.amount) || 0, title: 'إيداع', note: r.note || ''}); });
+  (data.moneyOut || []).forEach(function(r){ if(r && r.itemId === x.id && r.kind === 'bank'){ let lb = ''; try{ lb = cmoDestLbl(r); }catch(e){} ev.push({k: 'out', t: T12(r.date), ts: r.ts || 0, amt: -(Number(r.amount) || 0), title: 'صرف', note: (lb ? lb : '') + (r.note ? ' · ' + r.note : '')}); } });
+  (data.moneyXfer || []).forEach(function(r){
+    if(!r) return;
+    if(r.from === x.id) ev.push({k: 'xout', t: T12(r.date), ts: r.ts || 0, amt: -(Number(r.amount) || 0), title: 'تحويل إلى «' + (r.tn || '') + '»', note: r.note || ''});
+    if(r.to === x.id) ev.push({k: 'xin', t: T12(r.date), ts: r.ts || 0, amt: Number(r.amount) || 0, title: 'تحويل من «' + (r.fn || '') + '»', note: r.note || ''});
+  });
+  (Array.isArray(x.chg) ? x.chg : []).forEach(function(c){
+    if(!c || c.dep !== true || typeof c.id !== 'string') return;
+    if(c.id.indexOf('cd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'فايدة اتضافت للرصيد', note: ''});
+    else if(c.id.indexOf('pd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'معاش اتضاف للرصيد', note: ''});
+  });
+  (Array.isArray(x.act) ? x.act : []).forEach(function(a){ ev.push({k: 'edit', t: Number(a.t) || 0, ts: Number(a.t) || 0, amt: null, title: 'تعديل', note: a.m || '', lines: a.c || []}); });
+  const op = aaOpening(x); ev.push({k: 'open', t: Number(x.date) || 0, ts: -1, amt: op > 0 ? op : null, title: x.isSub ? 'فتح الحساب الفرعي' : 'فتح الحساب', note: ''});
+  const dayOf = function(t){ const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
+  ev.sort(function(a, b){ return (dayOf(b.t) - dayOf(a.t)) || ((b.ts || b.t) - (a.ts || a.t)); });
+  return ev;
+}
+var _aaState = {id: null, f: 'all'};
+function aaEl(tag, cls, txt){ const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; }
+function openAcctAct(id){
+  const x = capRaw().find(function(z){ return z && z.id === id; }); if(!x) return;
+  _aaState = {id: id, f: 'all'}; aaRender();
+  document.getElementById('aaOverlay').classList.add('open');
+  try{ document.querySelector('#aaOverlay .modal-box').scrollTop = 0; }catch(e){}
+}
+function closeAcctAct(){ document.getElementById('aaOverlay').classList.remove('open'); }
+function aaRender(){
+  const x = capRaw().find(function(z){ return z && z.id === _aaState.id; }); if(!x) return;
+  const ev = aaEvents(x), grp = {all: ev.length, dep: 0, out: 0, xf: 0, int: 0, edit: 0};
+  let tdep = 0, tout = 0, txf = 0;
+  ev.forEach(function(e){
+    if(e.k === 'dep'){ grp.dep++; tdep += e.amt; } else if(e.k === 'int'){ grp.int++; tdep += e.amt; } else if(e.k === 'out'){ grp.out++; tout += -e.amt; }
+    else if(e.k === 'xin' || e.k === 'xout'){ grp.xf++; txf += e.amt; } else if(e.k === 'edit') grp.edit++;
+  });
+  document.getElementById('aaTitle').textContent = '📒 نشاط الحساب';
+  const hero = document.getElementById('aaHero'); hero.innerHTML = '';
+  hero.appendChild(aaEl('small', '', 'الرصيد الحالي')); hero.appendChild(aaEl('span', 'ys-big', fmt(Number(x.amount) || 0))); hero.appendChild(aaEl('div', 'aa-nm', (x.isSub ? '🗂 ' : '🏦 ') + (x.accName || x.name)));
+  const st = aaEl('div', 'ys-stats');
+  [[fmt(cgInt(tdep)), 'إجمالي الإيداع'], [fmt(cgInt(tout)), 'إجمالي الصرف'], [(txf > 0 ? '+' : '') + fmt(cgInt(txf)), 'صافي التحويلات']].forEach(function(a){ const d = aaEl('div'); d.appendChild(aaEl('b', '', a[0])); d.appendChild(aaEl('span', '', a[1])); st.appendChild(d); });
+  hero.appendChild(st);
+  const chips = document.getElementById('aaChips'); chips.innerHTML = '';
+  [['all', 'الكل'], ['dep', '⬇️ إيداع'], ['out', '⬆️ صرف'], ['xf', '🔁 تحويل'], ['int', '🏦 فوايد'], ['edit', '✏️ تعديلات']].forEach(function(c){
+    const b = aaEl('button', 'aa-chip' + (_aaState.f === c[0] ? ' on' : ''), c[1]); b.type = 'button'; b.appendChild(aaEl('small', '', toArabicDigits(grp[c[0]])));
+    b.onclick = function(){ _aaState.f = c[0]; aaRender(); }; chips.appendChild(b);
+  });
+  const list = document.getElementById('aaList'); list.innerHTML = '';
+  const ok = function(e){ const f = _aaState.f; return f === 'all' || (f === 'xf' ? (e.k === 'xin' || e.k === 'xout') : e.k === f); };
+  const rows = ev.filter(ok); if(!rows.length){ list.appendChild(aaEl('div', 'aa-empty', 'مفيش حركات هنا لسه')); return; }
+  const ICON = {dep: '⬇️', out: '⬆️', xin: '📥', xout: '📤', int: '🏦', edit: '✏️', open: '🌱'};
+  let cur = '';
+  rows.forEach(function(e){
+    const d = new Date(e.t), mk = d.getFullYear() + '-' + d.getMonth();
+    if(mk !== cur){ cur = mk; const h = aaEl('div', 'aa-mh'); h.appendChild(aaEl('span', '', MONTHS[d.getMonth()] + ' ' + toArabicDigits(d.getFullYear()))); list.appendChild(h); }
+    const r = aaEl('div', 'aa-r aa-' + e.k), ic = aaEl('div', 'aa-ic', ICON[e.k] || '•'), tx = aaEl('div', 'aa-tx');
+    tx.appendChild(aaEl('b', '', e.title));
+    const when = e.t ? d.toLocaleDateString(dateLocale(), {weekday: 'long', day: 'numeric', month: 'long'}) + (e.k === 'edit' ? ' · ' + d.toLocaleTimeString(dateLocale(), {hour: '2-digit', minute: '2-digit'}) : '') : '';
+    tx.appendChild(aaEl('em', '', when + (e.note && e.k !== 'edit' ? ' · ' + e.note : '')));
+    if(e.k === 'edit'){
+      if(e.note) tx.appendChild(aaEl('em', '', '🕒 ' + e.note));
+      (e.lines || []).forEach(function(c){ const f = AA_FIELDS.filter(function(z){ return z[0] === c.k; })[0], ln = aaEl('div', 'aa-ln'); ln.appendChild(aaEl('i', '', (f ? f[1] : c.k) + ': ')); ln.appendChild(document.createTextNode(aaFmtVal(c.k, c.a) + ' ← ' + aaFmtVal(c.k, c.b))); tx.appendChild(ln); });
+    }
+    r.appendChild(ic); r.appendChild(tx);
+    if(e.amt !== null && e.amt !== undefined) r.appendChild(aaEl('div', 'aa-am ' + (e.amt >= 0 ? 'pos' : 'neg'), (e.amt >= 0 ? '+' : '−') + fmt(Math.abs(e.amt))));
+    list.appendChild(r);
+  });
+}
 function mcCard(x, o){
   o = o || {};
   const sub = capSubOf(x), now = new Date(), y = now.getFullYear(), m = now.getMonth(), dt = x.date ? formatDate(x.date) : '';
@@ -6295,6 +6437,7 @@ function mcCard(x, o){
   const grid = d.querySelector('.mc-grid'), vl = d.querySelector('.mc-bal small'), tg = d.querySelector('.mc-tags');
   if(sub === 'bank'){
     vl.textContent = 'الرصيد';
+    if((x.isAcc || x.isSub) && !cmPastView()){ const pb = document.createElement('span'); pb.className = 'plus-badge in-card pb-sm pb-blue aa-pb'; pb.textContent = '+'; pb.setAttribute('role', 'button'); pb.setAttribute('aria-label', 'نشاط الحساب'); pb.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); openAcctAct(x.id); }); vl.appendChild(pb); }
     const mon = bankMonthly(x);
     if(x.isAcc || x.isSub){
       const ann = bankAnnualPay(x), mn0 = MONTHS[new Date(x.date || Date.now()).getMonth()];
@@ -6795,7 +6938,7 @@ function cmoLog(){
 function cmoAfter(){ save(); try{ renderZM(); }catch(e){} try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderGI(); }catch(e){} try{ renderZakat(); }catch(e){} try{ if(currentMonth !== null && data[currentYear]) renderDetail(); }catch(e){} try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} cmoRender(); }
 function cmoApply(x, amt, note, dateStr, keepId, stlArg, stgArg){
   const date = dateStr || cmoToday(), dt = new Date(date + 'T12:00:00'), t = {y: dt.getFullYear(), m: dt.getMonth(), k: dt.getFullYear() + '-' + dt.getMonth()}, id = keepId || uid();
-  const rec = {id: id, kind: _cmoKind, itemId: x.id, name: x.name, amount: amt, dest: _cmoDest, note: note, date: date, ym: t.k};
+  const rec = {id: id, kind: _cmoKind, itemId: x.id, name: x.name, amount: amt, dest: _cmoDest, note: note, date: date, ym: t.k, ts: Date.now()};
   const gen = _cmoDest === 'gen', effD = gen ? (_cmoSub === 'gi' ? 'gi' : 'income') : _cmoDest;
   const stgOf = function(lim){ return Number(stgArg) > 0 ? Math.min(cgRound(Number(stgArg)), lim) : lim; };
   let stl = amt, stg = 0; if(gen){ stl = _cmoSub === 'gi' ? 0 : (Number(stlArg) > 0 ? Math.min(cgRound(Number(stlArg)), amt) : amt); stg = _cmoSub === 'grp' ? stgOf(stl) : 0; }
@@ -12266,6 +12409,7 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
       var res = f.apply(this, arguments), done = false;
       if(window._ikPend){ try{ if(ikPendApply()){ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); } }catch(e){ console.error('ikPend', e); } window._ikPend = null; }
       var ikm = window._ikMsg || '';
+      try{ if(id && before && !capIsPast()) aaLogEdit(id, before, modes); }catch(e){ console.error('aaLog', e); }
       try{ if(id && before) done = capAfterEdit(id, before, modes); }catch(e){ console.error('capAfterEdit', e); }
       if(done){
         try{ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
