@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-02.8201">
+<meta name="app-version" content="2026-11-02.8202">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2498,7 +2498,7 @@ html{ overscroll-behavior:none; }
       <span id="cmChipAll" class="gi-chip v-violet wide" onclick="setCmFilter(null)"><small>💼 إجمالي الأموال</small><b id="cmTotal">0</b></span>
       <span id="cmChipCash" class="gi-chip v-green" onclick="setCmFilter('cash')"><small>💵 نقدي</small><b id="cmCash">0</b></span>
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
-      <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاش شهري</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(10.5px * var(--fs,1));font-weight:800;color:#6b5a2a;line-height:1.3;"></em></span>
+      <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاشي</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:900;color:#8a5a00;line-height:1.3;margin-top:4px;"></em><em id="cmPenSub2" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:800;color:#6b7280;line-height:1.3;margin-top:2px;"></em></span>
     </div>
     <button type="button" class="gp-btn dp" id="cmDepBtn" data-id="blk:dep" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openDepPick()"><span class="dp-ic">＋</span><span>إيداع</span></button>
     <button type="button" class="gp-btn r" id="cmOutBtn" data-id="blk:out" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openCmOut()">💸 صرف من الأموال</button>
@@ -6280,6 +6280,24 @@ function penGenAt(x, due, y, m){   // القاعدة وقت موعد معيّن:
 function penToGen(x, y, m){ return penGenAt(x, penDueOf(x, y, m).getTime(), y, m); }
 function penFutureFrom(){ const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1).getTime(); }   // التغيير بيسري من بكره، واللي استحق لحد النهارده يفضل زي ما هو
 // سطر الحالة تحت قيمة المعاش في المربع: استحق الشهر ده ولا لسه (ويوم كام)
+// ===== مربع «معاشي» في أموال: استحق هذا الشهر / حُوّل إلى البنك / انتظر الشهر القادم =====
+function penBoxInfo(now0){
+  const now = now0 || new Date(), y = now.getFullYear(), m = now.getMonth(), eod = new Date(y, m, now.getDate(), 23, 59, 59, 999);
+  const items = capList().filter(function(x){ return x && capCatOf(x) === 'money' && capSubOf(x) === 'pension' && (Number(x.amount) || 0) > 0; });
+  if(!items.length) return null;
+  let keptNow = 0, nKept = 0, nBank = 0, nGen = 0;
+  items.forEach(function(x){
+    const d = penDueOf(x, y, m), arrived = penActive(x, y, m) && d <= eod;
+    if(!arrived) return;
+    if(penDepOn(x, y, m)) nBank++;
+    else if(penToGen(x, y, m)) nGen++;
+    else { keptNow += penAmtAt(x, d); nKept++; }
+  });
+  if(nKept) return {value: keptNow, status: '✅ استحق هذا الشهر', ok: true};
+  if(nBank) return {value: 0, status: '✅ حُوّل إلى البنك', ok: true};
+  if(nGen) return {value: 0, status: '✅ حُوّل للدخل العام', ok: true};
+  return {value: 0, status: '⏳ انتظر الاستحقاق', ok: false};
+}
 function cmPenStatus(){
   const now = new Date(), y = now.getFullYear(), m = now.getMonth(), eod = new Date(y, m, now.getDate(), 23, 59, 59, 999);
   const pens = capList().filter(function(x){ return capCatOf(x) === 'money' && capSubOf(x) === 'pension' && penActive(x, y, m); });
@@ -6715,7 +6733,12 @@ function renderCapMoney(){
   document.getElementById('cmCash').textContent = fmt(t.cash);
   document.getElementById('cmBank').textContent = fmt(t.bank);
   document.getElementById('cmPen').textContent = fmt(t.penMonthly !== undefined ? t.penMonthly : t.pension);   // قيمة المعاش الشهرية كاملة (مش اللي لسه ما اتحوّلش)
-  try{ const se = document.getElementById('cmPenSub'); if(se){ se.textContent = pastV ? '' : cmPenStatus(); se.style.display = se.textContent ? '' : 'none'; } }catch(e){}
+  try{
+    const se = document.getElementById('cmPenSub'), s2 = document.getElementById('cmPenSub2'); let l1 = '', l2 = '', ok = false;
+    if(!pastV){ const pi = penBoxInfo(); if(pi){ document.getElementById('cmPen').textContent = fmt(pi.value); l1 = pi.status; ok = pi.ok; if(pi.ok) l2 = '⏳ انتظر الشهر القادم'; } }
+    if(se){ se.textContent = l1; se.style.display = l1 ? 'block' : 'none'; se.style.color = ok ? '#0a7a4f' : '#8a5a00'; }
+    if(s2){ s2.textContent = l2; s2.style.display = l2 ? 'block' : 'none'; }
+  }catch(e){}
   document.getElementById('cmChipPen').classList.toggle('on', _cmFilter === 'pension');
   document.getElementById('cmChipAll').classList.toggle('on', !_cmFilter);
   document.getElementById('cmChipCash').classList.toggle('on', _cmFilter === 'cash');
