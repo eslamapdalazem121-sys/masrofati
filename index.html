@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-02.8199">
+<meta name="app-version" content="2026-11-02.8200">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2881,6 +2881,14 @@ html{ overscroll-behavior:none; }
   </div>
 </div>
 
+<div class="modal-overlay" id="zfYrOverlay" onclick="if(event.target===this) closeZfYr()">
+  <div class="modal-box">
+    <h3>🗓 المبلغ ده يخص زكاة سنة…</h3>
+    <div class="zp-years" id="zfYrChips" style="flex-wrap:wrap;overflow:visible;"></div>
+    <div class="modal-actions"><button type="button" class="btn-cancel" onclick="closeZfYr()">إلغاء</button></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="gxOverlay">
   <div class="modal-box">
     <h3 id="gxTitle">✏️ تعديل</h3>
@@ -4898,6 +4906,7 @@ function zkYearStatus(y, zm){
 }
 function renderZM(){
   const t = document.getElementById('zmTitle'); if(!t || !data[currentYear]) return;
+  zfNormAdds();
   t.textContent = 'زكاة المال ' + toArabicDigits(currentYear);
   const zm = zmGet(), paid = zmPaidTotal(), left = zm - paid, bad = left < 0;
   document.getElementById('zmAmt').textContent = fmt(zm);
@@ -4917,11 +4926,33 @@ function renderZM(){
 function zmPaidTotal(){ return zmPaidFor(currentYear); }
 // الرصيد المتاح للزكاة لسنة = كل الوارد للزكاة في السنة (تحويلات/دخل/إضافات) − المنصرف
 function zmAddedFor(y){
-  const yr = data.zakat && data.zakat[String(y)];
-  if(!yr || typeof yr !== 'object') return 0;
-  const sum = a => Array.isArray(a) ? a.reduce((t,x)=> t + (Number(x.amount) || 0), 0) : 0;
-  if('payments' in yr || 'total' in yr) return Number(yr.total) || 0;
-  return Object.keys(yr).reduce((t,m)=>{ const mo = yr[m]; return t + (mo && typeof mo === 'object' ? sum(mo.adds) + (Number(mo.total) || 0) : 0); }, 0);
+  y = Number(y); let s = 0; const z = data.zakat; if(!z || typeof z !== 'object') return 0;
+  Object.keys(z).forEach(function(k){
+    const yr = z[k]; if(!yr || typeof yr !== 'object') return;
+    if('payments' in yr || 'total' in yr){ if(Number(k) === y) s += Number(yr.total) || 0; return; }   // بيانات قديمة على مستوى السنة
+    Object.keys(yr).forEach(function(mk){
+      const mo = yr[mk]; if(!mo || typeof mo !== 'object') return;
+      (Array.isArray(mo.adds) ? mo.adds : []).forEach(function(a){ const zy = (a && a.zy !== undefined) ? Number(a.zy) : Number(k); if(zy === y) s += Number(a && a.amount) || 0; });
+      if(Number(k) === y) s += Number(mo.total) || 0;
+    });
+  });
+  return s;
+}
+// كل مبلغ داخل للزكاة ليه «سنة زكاة» (zy). اللي اتسجّل في السنة الحالية من غير سنة بيروح لزكاة السنة اللي فاتت لو لسه ما اتغطّتش (الأقدم الأول)، وإلا بيفضل للسنة الحالية
+function zfNormAdds(){
+  try{
+    if(!data.zakat || typeof data.zakat !== 'object') return;
+    const ry = new Date().getFullYear(), py = ry - 1, yr = data.zakat[String(ry)];
+    if(!yr || typeof yr !== 'object' || 'payments' in yr || 'total' in yr) return;
+    const un = [];
+    Object.keys(yr).forEach(function(mk){ const mo = yr[mk]; if(mo && typeof mo === 'object' && Array.isArray(mo.adds)) mo.adds.forEach(function(a){ if(a && a.zy === undefined) un.push(a); }); });
+    if(!un.length) return;
+    un.sort(function(a, b){ return String(a.date || '').localeCompare(String(b.date || '')); });
+    let funded = zmAddedFor(py), moved = 0; const due = Math.max(Number(zpZmOf(py)) || 0, zmPaidFor(py));
+    un.forEach(function(a){ if(funded < due - 0.5){ a.zy = py; a.auto = true; funded += Number(a.amount) || 0; moved += Number(a.amount) || 0; } else a.zy = ry; });
+    save();
+    if(moved > 0) showToast('🔁 اتنقل ' + fmt(moved) + ' لرصيد زكاة ' + toArabicDigits(py) + ' لأنها لسه ما اتغطّتش — تقدر تغيّر السنة من 🗓 في صفحة الصرف', true);
+  }catch(e){ console.error(e); }
 }
 function zmAvailFor(y){ return zmAddedFor(y) - zmPaidFor(y); }
 function zmPaidFor(y){
@@ -7012,7 +7043,7 @@ function cmoApply(x, amt, note, dateStr, keepId, stlArg, stgArg){
   }
   if(_cmoDest === 'zakat' && _cmoZkYear){   // سداد زكاة سنة ماضية من رأس المال الحالي
     const zy = Number(_cmoZkYear), nm = label + ' · سداد من رأس مال ' + t.y, z = zkGetAt(zy, t.m);
-    z.adds.push({id: id, name: nm, amount: amt, date: date}); z.payments.push({id: id + 'p', amount: amt, note: nm, date: date});
+    z.adds.push({id: id, name: nm, amount: amt, date: date, zy: zy}); z.payments.push({id: id + 'p', amount: amt, note: nm, date: date});
     rec.zkY = zy; rec.zkM = t.m; rec.zy = zy; rec.zm = t.m;
   }
   else if(_cmoDest === 'zakat'){ const z = zkGetAt(t.y, t.m); z.adds.push({id: id, name: label, amount: amt, date: date}); rec.zy = t.y; rec.zm = t.m; }
@@ -8333,7 +8364,7 @@ function renderZmPay(){
     document.getElementById('zfCnt').textContent = fa.length ? toArabicDigits(fa.length) + ' عملية' : '';
     if(!fa.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'مفيش رصيد داخل للزكاة في ' + toArabicDigits(y) + ' لسه.'; fb.appendChild(e); }
     fa.forEach(function(x){ const q = x.p, dt = q.date ? formatDate(new Date(q.date + 'T12:00:00').getTime()) : MONTHS[x.m];
-      fb.appendChild(gpRow({cls: '', ic: '💳', name: q.name || 'رصيد زكاة', sub: dt, amt: q.amount, acts: q.zf ? [{t: '✏️', fn: function(){ zfEdit(x); }}, {t: '🗑', fn: function(){ zfDel(x); }}] : null})); }); }
+      const mv = {t: '🗓', fn: function(){ zfPickYear(x); }}; fb.appendChild(gpRow({cls: '', ic: '💳', name: q.name || 'رصيد زكاة', sub: dt + (x.by !== y ? ' · اتسجّل في ' + toArabicDigits(x.by) : ''), amt: q.amount, acts: q.zf ? [mv, {t: '✏️', fn: function(){ zfEdit(x); }}, {t: '🗑', fn: function(){ zfDel(x); }}] : [mv]})); }); }
   document.getElementById('zpLeft').textContent = fmt(Math.abs(left));
   document.getElementById('zpLeftLbl').textContent = bad ? '⚠️ زيادة عن المطلوب' : '⏳ المتبقي';
   document.getElementById('zpHero').classList.toggle('bad', bad);
@@ -8352,17 +8383,38 @@ function renderZmPay(){
   });
 }
 function zpYearAdds(y){
-  const out = [], k = String(y); if(!data.zakat || !data.zakat[k] || typeof data.zakat[k] !== 'object') return out;
-  if('payments' in data.zakat[k] || 'total' in data.zakat[k]) zkGetAt(y, 0);
-  Object.keys(data.zakat[k]).forEach(function(mk){ zkGetAt(y, Number(mk)); const mo = data.zakat[k][mk]; if(mo && Array.isArray(mo.adds)) mo.adds.forEach(function(p){ out.push({p: p, m: Number(mk), bucket: mo}); }); });
+  const out = [], z = data.zakat; y = Number(y); if(!z || typeof z !== 'object') return out;
+  Object.keys(z).forEach(function(k){
+    if(!z[k] || typeof z[k] !== 'object') return;
+    if('payments' in z[k] || 'total' in z[k]) zkGetAt(Number(k), 0);
+    Object.keys(z[k]).forEach(function(mk){
+      zkGetAt(Number(k), Number(mk)); const mo = z[k][mk];
+      if(mo && Array.isArray(mo.adds)) mo.adds.forEach(function(p){ const zy = p.zy !== undefined ? Number(p.zy) : Number(k); if(zy === y) out.push({p: p, m: Number(mk), by: Number(k), bucket: mo}); });
+    });
+  });
   out.sort(function(a, b){ return String(b.p.date || '').localeCompare(String(a.p.date || '')) || (b.m - a.m); });
   return out;
 }
+// تغيير سنة الزكاة اللي المبلغ ده بيتحسب عليها
+var _zfYrX = null;
+function zfPickYear(x){
+  _zfYrX = x; const box = document.getElementById('zfYrChips'); box.innerHTML = '';
+  const ry = new Date().getFullYear(), set = {}; set[ry] = 1; set[ry - 1] = 1; set[ry - 2] = 1; zpYears().forEach(function(y){ set[y] = 1; });
+  const cur = x.p.zy !== undefined ? Number(x.p.zy) : x.by;
+  Object.keys(set).map(Number).sort(function(a, b){ return b - a; }).forEach(function(yy){
+    const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<span></span><small></small>'; b.children[0].textContent = 'زكاة ' + toArabicDigits(yy);
+    const lf = zpZmOf(yy) - zmPaidFor(yy); b.children[1].textContent = 'المتاح ' + fmt(zmAvailFor(yy)); if(yy === cur) b.classList.add('active');
+    b.onclick = function(){ if(_zfYrX){ _zfYrX.p.zy = yy; delete _zfYrX.p.auto; } closeZfYr(); zpAfter(); showToast('اتنقل المبلغ لرصيد زكاة ' + toArabicDigits(yy) + ' ✅', true); };
+    box.appendChild(b);
+  });
+  document.getElementById('zfYrOverlay').classList.add('open');
+}
+function closeZfYr(){ _zfYrX = null; document.getElementById('zfYrOverlay').classList.remove('open'); }
 function zfAdd(){
   const src = document.getElementById('zfSrc').value.trim(), amt = Number(document.getElementById('zfAmt').value) || 0;
   if(amt <= 0){ showToast('اكتب القيمة', false); return; }
   const zy = _zpYear || currentYear, date = dateToInputValue(Date.now());
-  zkGetAt(zy, zpMonthFor(date, zy)).adds.push({id: uid(), name: src || 'رصيد زكاة', amount: amt, date: date, zf: true});
+  zkGetAt(zy, zpMonthFor(date, zy)).adds.push({id: uid(), name: src || 'رصيد زكاة', amount: amt, date: date, zf: true, zy: zy});
   document.getElementById('zfSrc').value = ''; document.getElementById('zfAmt').value = '';
   zpAfter(); showToast('اتضاف للرصيد المتاح لزكاة ' + toArabicDigits(zy) + ' ✅', true);
 }
