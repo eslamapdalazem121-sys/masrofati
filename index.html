@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-02.8200">
+<meta name="app-version" content="2026-11-02.8201">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -5439,6 +5439,7 @@ function cmvSnap(y, m, d){
       c.chg = x.chg.filter(function(q){ const eff = (q && typeof q.id === 'string' && q.id.indexOf('cd:') === 0) ? (Number(q.e) || q.t) : q.t; return !(eff > et); });   // بنشيل الإيداعات اللي بعد الشهر عشان الفايدة ما تتخصمش مرتين
       return c;
     }
+    if(capCatOf(x) === 'money' && capSubOf(x) === 'pension' && Array.isArray(x.rv) && x.rv.length){ const c = Object.assign({}, x); c.amount = penAmtAt(x, penDueOf(x, E.getFullYear(), E.getMonth())); return c; }   // المعاش بمبلغ الشهر ده مش المبلغ الحالي
     return x;
   });
   let t; try{ t = capTotalsCalc(list, et); }catch(e){ console.error(e); t = {all: 0, money: 0, cash: 0, bank: 0, bankAdded: 0, gold: 0, goldBuy: 0, grams: 0, pension: 0, penMonthly: 0}; }
@@ -6062,7 +6063,7 @@ function penStart(x){ const d = new Date(x.date || Date.now()); return new Date(
 function penActive(x, y, m){ return (Number(x.amount) || 0) > 0 && penDueOf(x, y, m) >= penStart(x); }
 function pensionDue(y, m, d){
   return capList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'pension' && penActive(x, y, m) && penDueOf(x, y, m).getDate() === d)
-    .map(x=> ({name: x.name, amt: Number(x.amount) || 0}));
+    .map(x=> ({name: x.name, amt: penAmtAt(x, penDueOf(x, y, m))}));
 }
 function renderPensionPanel(){
   if(_cmFilter !== 'pension') return;
@@ -6070,7 +6071,7 @@ function renderPensionPanel(){
   const pens = cmSrcList().filter(x=> capCatOf(x) === 'money' && capSubOf(x) === 'pension');
   box.style.display = 'block'; box.innerHTML = '';
   const yr = cmYear(), now = new Date(), monthlyAll = pens.reduce((t,x)=> t + (Number(x.amount) || 0), 0);
-  const months = MONTHS.map((mn, m)=> ({mn, m, items: pens.filter(x=> penActive(x, yr, m)).map(x=>{ const due = penDueOf(x, yr, m); return {x, day: due.getDate(), amt: Number(x.amount) || 0, reached: due <= now}; }).sort((a,b)=> a.day - b.day)}));
+  const months = MONTHS.map((mn, m)=> ({mn, m, items: pens.filter(x=> penActive(x, yr, m)).map(x=>{ const due = penDueOf(x, yr, m); return {x, day: due.getDate(), amt: penAmtAt(x, due), reached: due <= now}; }).sort((a,b)=> a.day - b.day)}));
   const received = months.reduce((t,mo)=> t + mo.items.filter(e=> e.reached).reduce((a,e)=> a + e.amt, 0), 0);
   const expectedYear = months.reduce((t,mo)=> t + mo.items.reduce((a,e)=> a + e.amt, 0), 0);
   const isCur = yr === now.getFullYear();
@@ -6295,7 +6296,7 @@ function penKeepAvail(x){
     const now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999), st = penStart(x);
     let y = st.getFullYear(), m = st.getMonth(), g = 0;
     while((y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) && g++ < 600){
-      if(penActive(x, y, m) && penDueOf(x, y, m) <= eod && !penToGen(x, y, m) && !penDepOn(x, y, m)) sum += Number(x.amount) || 0;
+      if(penActive(x, y, m) && penDueOf(x, y, m) <= eod && !penToGen(x, y, m) && !penDepOn(x, y, m)) sum += penAmtAt(x, penDueOf(x, y, m));
       m++; if(m > 11){ m = 0; y++; }
     }
   }catch(e){}
@@ -6559,7 +6560,7 @@ function mcCard(x, o){
       mcCell(grid, 'mon', '💳 المعاش', fmt(amt), 'كل شهر');
       mcCell(grid, 'day', '📅 يوم الاستحقاق', toArabicDigits(penDay(x)), 'من كل شهر');
       const due = penDueOf(x, y, m);
-      if(penActive(x, y, m)) mcPill(d, due <= now ? 'ok' : 'wait', due <= now ? '✅ استُلم معاش ' + MONTHS[m] + ': ' + fmt(amt) : '⏳ المعاش القادم يوم ' + toArabicDigits(due.getDate()) + ' ' + MONTHS[m]);
+      if(penActive(x, y, m)) mcPill(d, due <= now ? 'ok' : 'wait', due <= now ? '✅ استُلم معاش ' + MONTHS[m] + ': ' + fmt(penAmtAt(x, due)) : '⏳ المعاش القادم يوم ' + toArabicDigits(due.getDate()) + ' ' + MONTHS[m]);
       else mcPill(d, 'wait', '⏳ أول موعد ' + penStart(x).toLocaleDateString(dateLocale(), {day:'numeric', month:'long'}));
     }
     if(x.payAcc){ const pa = penDepAcc(x); if(pa){ const dk = (x.depDone && typeof x.depDone === 'object') ? Object.keys(x.depDone) : [], dt0 = dk.reduce(function(t, k){ return t + (Number(x.depDone[k] && x.depDone[k].a) || 0); }, 0); mcPill(d, 'ok', '🏦 بيتحط كل شهر في رصيد «' + pa.name + '»' + (dk.length ? ' — اتضاف حتى الآن ' + toArabicDigits(dk.length) + (dk.length === 1 ? ' شهر' : ' شهور') + ' = ' + fmt(dt0) : '')); } else mcPill(d, 'wait', penToGen(x, now.getFullYear(), now.getMonth()) ? '⚠️ حساب البنك المحدد اتحذف — المعاش بيتحول للدخل العام' : '⚠️ حساب البنك المحدد اتحذف — المعاش مش بيتحوّل للدخل العام'); }
@@ -12453,7 +12454,17 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
           msg = parts.length ? parts.join(' · ') : true;
         } else {
           if(!Array.isArray(x.rv)) x.rv = [];
-          x.rv.push({f: 0, u: T, p: 1, it: before});                 // اللي فات يفضل بقيمه القديمة
+          if(chg(x, before, ['amount'])){   // المعاش: المبلغ الجديد يسري من أول الشهر الحالي والشهور القادمة، والشهور اللي فاتت تفضل بمبلغها القديم
+            var U = monthStart(0);
+            x.rv.forEach(function(v){ if(v && Number(v.p) !== 2 && Number(v.u) > U) v.u = U; });   // تعديل سابق في نفس الشهر: بنوحّد حدّ الفترة القديمة
+            x.rv.push({f: 0, u: U, p: 1, it: before});
+            try{   // لو معاش الشهر ده اتحط في رصيد الحساب بالمبلغ القديم: نصحّح الفرق عشان الشهر الحالي يبقى بالمبلغ الجديد
+              var k0 = now.getFullYear() + '-' + now.getMonth(), dd0 = x.depDone && x.depDone[k0], acc0 = penDepAcc(x);
+              if(dd0 && acc0){ var nv0 = cgInt(x.amount), ov0 = Number(dd0.a) || 0;
+                if(nv0 !== ov0){ acc0.amount = cgInt((Number(acc0.amount) || 0) + (nv0 - ov0)); var c0 = (acc0.chg || []).find(function(q){ return q && q.id === 'pd:' + x.id + ':' + k0; }); if(c0) c0.delta = nv0; dd0.a = nv0; } }
+            }catch(e){ console.error('penDepFix', e); }
+            msg = 'المعاش الجديد ساري من شهر ' + monthName(0) + ' (الحالي) والشهور القادمة — الشهور اللي فاتت زي ما هي';
+          } else x.rv.push({f: 0, u: T, p: 1, it: before});                 // اللي فات يفضل بقيمه القديمة
         }
       } else {
         var r = capRaw().find(function(z){ return z.id === id; });
