@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>مصروفاتي B</title>
 <meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-02.8202">
+<meta name="app-version" content="2026-11-03.8203">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1703,6 +1703,10 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 #capMoneyOverlay.mv-ro #cmBox > *:not(h3):not(.fs-close):not(.mv-bar):not(#cmChips):not(#cmInterest):not(#cmList):not(#cmAddLog){display:none !important;}
 #capGoldOverlay.mv-ro .modal-box.gd > *:not(.gd-top):not(.fs-close):not(.mv-bar):not(.gd-hero):not(#cgKaratRow):not(#cgUseRow):not(#cgList){display:none !important;}
 #capGoldOverlay.mv-ro .pc-acts{display:none !important;}
+/* الشهور اللي عدّت في السنة الحالية: إضافة + ✏️ + 🗑 شغالين (على البيانات الحقيقية) */
+#capMoneyOverlay.mv-ed #cmDepBtn, #capMoneyOverlay.mv-ed #cmOutBtn, #capMoneyOverlay.mv-ed #cmXfBtn, #capMoneyOverlay.mv-ed #cmGrpRow, #capMoneyOverlay.mv-ed #cmAccRow{display:none !important;}
+#capGoldOverlay.mv-ed details.gd-grp{display:none !important;}
+#cmList.cm-ed .mc-addsub{display:none !important;}
 .cmv-tiles{margin-top:6px !important;}
 /* التاريخ الكبير + 3D */
 .cmv-bigd,.mv-bar .cmv-bigd{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 8px; border-radius:22px; line-height:1.15; color:#fff; background:linear-gradient(145deg,#9d74ff,#5b32c8 58%,#3f1f95); box-shadow:inset 0 3px 0 rgba(255,255,255,.4), inset 0 -4px 0 rgba(0,0,0,.2), 0 7px 0 #34187f, 0 14px 20px rgba(60,20,140,.38);}
@@ -4437,6 +4441,7 @@ function saveNewYear(){
   showToast('تم إنشاء سنة ' + toArabicDigits(y), true);
 }
 function save(){
+  try{ _mvCache = null; }catch(e){}
   try{ bankPiasterMigrate(); }catch(e){}
   try{ capSnapLive(); }catch(e){}
   try{ autoIncSync(); }catch(e){}
@@ -5363,6 +5368,14 @@ function mvPast(){
   let sn = null; try{ sn = cmvSnap(_mv.y, _mv.m, dd); }catch(e){ console.error(e); }
   _mvCache = {k: k, s: sn}; return sn;
 }
+// الشهر اللي عدّى في السنة الحالية بقى قابل للتعديل (إضافة / ✏️ / 🗑) — والتعديل على البيانات الحقيقية
+function mvEd(){ try{ return !!(mvPast() && _mv && _mv.y === new Date().getFullYear() && !capIsPast()); }catch(e){ return false; } }
+function mvInputDate(){   // تاريخ نماذج الإضافة: اليوم المعروض في الشهر القديم، وإلا النهارده
+  try{ if(_mv && mvPast()) return dateToInputValue(new Date(_mv.y, _mv.m, cmvDayOf(_mv.y, _mv.m, _mv.d), 12).getTime()); }catch(e){}
+  return dateToInputValue(Date.now());
+}
+function mvRealOf(x){ if(x && _mv && mvPast()){ const r = capRaw().find(function(z){ return z && z.id === x.id; }); if(r) return r; } return x; }   // نسخة الشهر → البند الحقيقي
+function mvSetMaxDate(){ const lim = mvEd() ? mvInputDate() : ''; ['cmDate', 'cgDate'].forEach(function(id){ const e = document.getElementById(id); if(e) e.max = lim; }); }
 function cmvOpenMoney(){ _mvPending = {y: _cmvY, m: _cmvM, d: _cmvD}; openCapMoney(); }
 function cmvOpenGold(){ _mvPending = {y: _cmvY, m: _cmvM, d: _cmvD}; openCapGold(); }
 function mvGo(d){
@@ -5394,15 +5407,15 @@ function mvBarRender(){
   [['capMoneyOverlay', 'mvBarM', 'h3'], ['capGoldOverlay', 'mvBarG', '.gd-top']].forEach(function(o){
     const root = document.getElementById(o[0]); if(!root) return;
     let bar = document.getElementById(o[1]);
-    if(!_mv){ if(bar) bar.remove(); root.classList.remove('mv-ro'); return; }
-    const past = !!mvPast(); root.classList.toggle('mv-ro', past);
+    if(!_mv){ if(bar) bar.remove(); root.classList.remove('mv-ro'); root.classList.remove('mv-ed'); mvSetMaxDate(); return; }
+    const past = !!mvPast(), ed = past && mvEd(); root.classList.toggle('mv-ro', past && !ed); root.classList.toggle('mv-ed', ed); mvSetMaxDate();
     if(!bar){ const a = root.querySelector(o[2]); if(!a) return; bar = document.createElement('div'); bar.id = o[1]; bar.className = 'mv-bar'; a.parentNode.insertBefore(bar, a.nextSibling); }
     bar.innerHTML = '';
     const dd = cmvDayOf(_mv.y, _mv.m, _mv.d), mnY = cmvMinYear(), canPrev = !(_mv.y < mnY || (_mv.y === mnY && _mv.m === 0)), canNext = !cmvIsFuture(_mv.m === 11 ? _mv.y + 1 : _mv.y, (_mv.m + 1) % 12);
     const r1 = cmvEl('div', 'r'), r2 = cmvEl('div', 'r r2');
     const pv = cmvEl('button', '', '▸'); pv.type = 'button'; pv.disabled = !canPrev; pv.onclick = function(){ mvGo(-1); };
     const nx = cmvEl('button', '', '◂'); nx.type = 'button'; nx.disabled = !canNext; nx.onclick = function(){ mvGo(1); };
-    const tt = cmvEl('div', 't'); tt.appendChild(cmvEl('small', '', past ? '🔒 للاطلاع — الأرقام في آخر اليوم ده' : '✏️ النهارده — شغل عادي'));
+    const tt = cmvEl('div', 't'); tt.appendChild(cmvEl('small', '', past ? (ed ? '✏️ شهر عدّى — تضيف وتعدّل وتحذف (الأرقام في آخر اليوم ده)' : '🔒 للاطلاع — الأرقام في آخر اليوم ده') : '✏️ النهارده — شغل عادي'));
     const bk = cmvEl('button', '', '▦ الأشهر'); bk.type = 'button'; bk.onclick = mvLeave;
     r1.appendChild(tt);
     const dp = cmvEl('button', '', '▸ قبله'); dp.type = 'button'; dp.disabled = !cmvStep(_mv.y, _mv.m, dd, -1); dp.onclick = function(){ mvDayGo(-1); };
@@ -5480,7 +5493,7 @@ function renderCapMonths(){
 }
 function cmvRenderGrid(wrap){
   const y = _cmvY, mnY = cmvMinYear(), ry = cmvRY(), now = new Date();
-  const ttl = cmvEl('h3', 'cmv-title', '💼 رأس المال — أشهر السنة'); ttl.appendChild(cmvEl('small', '', 'دوس على أي شهر تفتح أمواله وذهبه'));
+  const ttl = cmvEl('h3', 'cmv-title', '💼 رأس المال — أشهر السنة'); ttl.appendChild(cmvEl('small', '', 'دوس على أي شهر تفتح أمواله وذهبه وتعدّل فيهم'));
   wrap.appendChild(ttl);
   const bar = cmvEl('div', 'cmv-bar');
   const older = cmvEl('button', 'cmv-btn', '▸ ' + toArabicDigits(y - 1)); older.type = 'button'; older.disabled = y <= mnY; older.onclick = function(){ cmvShiftYear(-1); };
@@ -5498,7 +5511,7 @@ function cmvRenderGrid(wrap){
     grid.appendChild(c);
   }
   wrap.appendChild(grid);
-  wrap.appendChild(cmvEl('div', 'cmv-note', '📅 رأس المال كل شهر = البنود اللي اتضافت لحد آخره وأرصدة الحسابات في نهايته. اللي اتباع أو اتحذف قبل كده مش بيظهر، والذهب بسعر البيع الحالي. العرض ده للتصفح بس ومش بيغيّر أي بيانات.'));
+  wrap.appendChild(cmvEl('div', 'cmv-note', '📅 رأس المال كل شهر = البنود اللي اتضافت لحد آخره وأرصدة الحسابات في نهايته. اللي اتباع أو اتحذف قبل كده مش بيظهر، والذهب بسعر البيع الحالي. دوس على أي شهر تفتحه وتعدّل فيه (إضافة / ✏️ / 🗑) — التعديل على البيانات الحقيقية وبيتحسب في الشهور اللي بعده.'));
 }
 function cmvRow(x, s, nested){
   const sub = capSubOf(x), r = cmvEl('div', 'cmv-row' + (nested ? ' nested' : '')), tp = cmvEl('div', 'tp');
@@ -5568,7 +5581,7 @@ function cmvRenderMonth(wrap){
     if(intTot > 0) wrap.appendChild(cmvEl('div', 'cmv-sub', '🏦 فوائد ' + MONTHS[m] + ': ' + fmt(cgInt(intGot)) + ' استحقت' + (intTot - intGot > 0.5 ? ' · ' + fmt(cgInt(intTot - intGot)) + ' لسه' : ''))); }
   wrap.appendChild(cmvEl('div', 'cmv-note', isNow
     ? '📅 ده الشهر الحالي — دوس على «أموال» أو «ذهب» تفتح الصفحة كاملة وتشتغل عليها عادي (إضافة / تعديل / صرف / إيداع).'
-    : '📅 دوس على «أموال» أو «ذهب» تفتح صفحة ' + MONTHS[m] + ' ' + toArabicDigits(y) + ' بكل حاجة فيها بحسابات آخر الشهر. الشهور اللي عدّت للاطلاع بس (الإضافة والتعديل من الشهر الحالي). اللي اتباع أو اتحذف قبل كده مش بيظهر، والذهب بسعر البيع الحالي.'));
+    : '📅 دوس على «أموال» أو «ذهب» تفتح صفحة ' + MONTHS[m] + ' ' + toArabicDigits(y) + ' بكل حاجة فيها بحسابات آخر الشهر. الشهور اللي عدّت في السنة الحالية تقدر تضيف فيها وتعدّل ✏️ وتحذف 🗑 (التعديل على البيانات الحقيقية). اللي اتباع أو اتحذف قبل كده مش بيظهر، والذهب بسعر البيع الحالي.'));
 }
 
 function capDel(id){ data.capital = capRaw().filter(z=> z.id !== id); save(); renderCap(); }
@@ -5893,6 +5906,7 @@ function openCapSub(parentId){
   openCapAcc(null, {sub: true, parent: parentId || ''});
 }
 function openCapAcc(x, opt){
+  if(x) x = mvRealOf(x);
   _accEditId = x ? x.id : null; _accSub = !!((x && x.isSub) || (opt && opt.sub));
   document.getElementById('accTitle').textContent = _accSub ? (x ? 'تعديل الحساب الفرعي' : 'إنشاء حساب فرعي') : (x ? 'تعديل الحساب البنكي' : 'إنشاء حساب بنكي');
   document.getElementById('accSubTitle').textContent = _accSub ? 'حساب تابع لحساب بنكي — بفايدته ومبلغه' : 'كأنك بتفتح حساب في البنك';
@@ -5989,6 +6003,7 @@ function certCalc(){
   else el.textContent = '🗓 فايدة شهرية: ' + fmt(cgInt(annual / 12)) + ' (سنويًا ' + fmt(annual) + ') — بتتصرف كل يوم ' + day + ' من الشهر، وأول فايدة بعد شهر';
 }
 function openCapCert(x){
+  if(x) x = mvRealOf(x);
   _certEditId = x ? x.id : null;
   document.getElementById('certTitle').textContent = x ? 'تعديل الشهادة' : 'إنشاء شهادة بنكية';
   const accs = capList().filter(z=> z.isAcc), sel = document.getElementById('certAcc'); sel.innerHTML = '';
@@ -6405,7 +6420,7 @@ function cmReset(){
   document.getElementById('cmName').value = ''; document.getElementById('cmAmt').value = '';
   document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; _cmRemTouched = false; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = true; } { const zc = document.getElementById('cmZk'); if(zc) zc.checked = true; }
   { const pg = document.getElementById('cmPenGen'); if(pg) pg.checked = true; _cmPenGenTouched = false; }
-  document.getElementById('cmDate').value = dateToInputValue(Date.now());
+  document.getElementById('cmDate').value = mvInputDate();
   document.getElementById('cmSaveBtn').textContent = '＋ إضافة';
   fillGrpSel('cmGrp', 'money', '');
   try{ cmPayAccFill(); }catch(e){}
@@ -6420,6 +6435,7 @@ function mcCell(grid, cls, lb, big, sm){
 }
 function mcPill(d, cls, txt){ const p = document.createElement('div'); p.className = 'mc-pill ' + cls; p.textContent = txt; d.appendChild(p); return p; }
 function cmEditItem(x){
+  x = mvRealOf(x);
   if(x.isAcc || x.isSub){ openCapAcc(x); return; }
   if(x.isCert){ openCapCert(x); return; }
   _cmEditId = x.id; _cmFormOpen = true; cmSubUI(capSubOf(x));
@@ -6748,7 +6764,7 @@ function renderCapMoney(){
   const srcL = cmSrcList(), arr = sortDescByDate(srcL.filter(x=> capCatOf(x) === 'money' && (!_cmFilter || capSubOf(x) === _cmFilter)));
   const mcBase = srcL.filter(x=> capCatOf(x) === 'money' && capSubOf(x) !== 'pension').reduce((t,x)=> t + (Number(x.amount) || 0), 0);
   box.innerHTML = arr.length ? '' : '<div class="mc-empty">' + (pastV ? (mvPast() ? 'مفيش بنود أموال في الشهر ده' : 'مفيش بنود في سنة ' + toArabicDigits(cmYear())) : 'لا توجد بنود بعد') + '</div>';
-  box.classList.toggle('cm-ro', pastV);
+  box.classList.toggle('cm-ro', pastV && !mvEd()); box.classList.toggle('cm-ed', pastV && mvEd());
   if(pastV && !mvPast()){ const bn = document.createElement('div'); bn.className = 'hint'; bn.style.cssText = 'margin:2px 6px 12px;padding:10px 14px;border-radius:14px;font-weight:800;line-height:1.7;text-align:center;background:rgba(80,90,110,.12);border:1px solid rgba(80,90,110,.35);color:var(--text);'; bn.textContent = '📁 بتشوف سنة ' + toArabicDigits(cmYear()) + ' (للرجوع فقط) — اللي كان موجود فيها بس (الأرصدة تقديرية من تواريخ الإضافة). ';
     const rb = document.createElement('button'); rb.type = 'button'; rb.textContent = '↩ رجوع'; rb.style.cssText = 'margin-inline-start:8px;font-weight:800;font-size:12px;cursor:pointer;'; rb.onclick = function(){ _cmYear = null; renderCapMoney(); }; bn.appendChild(rb); box.appendChild(bn); }
   const accIds = new Set(arr.filter(x=> x.isAcc).map(x=> x.id)), certsOf = {}, pensOf = {};
@@ -6766,7 +6782,7 @@ function renderCapMoney(){
       b.accs.forEach(a=> (pensOf[a.id] || []).forEach(p=> b.pens.push(p)));
       box.appendChild(mbCard(b, mcBase)); return;
     }
-    box.appendChild(mcCard(x, {acts: !pastV, total: mcBase}));
+    box.appendChild(mcCard(x, {acts: !pastV || mvEd(), total: mcBase}));
   });
   capGroupize(box, 'money');
   renderBankInterest();
@@ -7316,6 +7332,7 @@ function closeCapMoney(){ document.getElementById('capMoneyOverlay').classList.r
 function addCapMoney(backChoice){
   const n = document.getElementById('cmName').value.trim(), amt = Number(document.getElementById('cmAmt').value) || 0;
   if(!n || amt <= 0){ showToast('من فضلك أدخل اسم ومبلغ صحيحين', false); return; }
+  if(mvEd()){ const dv = document.getElementById('cmDate').value; if(dv && dv > mvInputDate()){ showToast('التاريخ لازم يكون في اليوم المعروض أو قبله', false); return; } }
   const rec = {name: n, amount: amt, cat: 'money', sub: _cmSub, date: inputValueToDate(document.getElementById('cmDate').value, Date.now())};
   const gv = document.getElementById('cmGrp').value; if(gv && _cmSub !== 'pension') rec.grp = gv;
   let payNew = ''; if(_cmSub === 'pension'){ const pv = (document.getElementById('cmPayAcc') || {}).value; if(pv){ rec.payAcc = pv; payNew = pv; } }
@@ -7376,7 +7393,7 @@ function cgReset(){
   _cgEditId = null; _cgFormOpen = false;
   ['cgName','cgGramsIn','cgPpg'].forEach(id=> document.getElementById(id).value = '');
   document.getElementById('cgKarat').value = '21';
-  document.getElementById('cgDate').value = dateToInputValue(Date.now());
+  document.getElementById('cgDate').value = mvInputDate();
   document.getElementById('cgSaveBtn').textContent = '＋ إضافة';
   setCgUse('save'); fillGrpSel('cgGrp', 'gold', '');
   cgCalc();
@@ -7925,6 +7942,7 @@ function closeCapGold(){ document.getElementById('capGoldOverlay').classList.rem
 function saveCapGold(){
   const n = document.getElementById('cgName').value.trim(), g = Number(document.getElementById('cgGramsIn').value) || 0, pr = Number(document.getElementById('cgPpg').value) || 0;
   if(!n || g <= 0 || pr <= 0){ showToast('اكتب اسم القطعة والوزن وثمن الجرام', false); return; }
+  if(mvEd()){ const dv = document.getElementById('cgDate').value; if(dv && dv > mvInputDate()){ showToast('التاريخ لازم يكون في اليوم المعروض أو قبله', false); return; } }
   const rec = {name: n, cat: 'gold', karat: Number(document.getElementById('cgKarat').value), grams: g, ppg: pr, use: _cgUse, grp: document.getElementById('cgGrp').value || undefined, amount: cgInt(g * pr), date: inputValueToDate(document.getElementById('cgDate').value, Date.now())};
   if(_cgEditId){ const x = capList().find(z=> z.id === _cgEditId); if(x){ delete x.grp; Object.assign(x, rec); } }
   else capList().push(Object.assign({id: uid()}, rec));
