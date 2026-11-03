@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-03.8219">
+<meta name="app-version" content="2026-11-03.8234">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2466,7 +2466,7 @@ html{ overscroll-behavior:none; }
 .cap-hero:active .ch-stage{transform:translateY(6px) scale(.96);}
 .cap-hero .ch-lbl{font-weight:900; font-size:calc(15px * var(--fs,1)); letter-spacing:.2px; text-shadow:0 1px 0 rgba(255,255,255,.5);}
 @media (prefers-reduced-motion:reduce){.cap-hero .ch-ico svg{animation:none;}}
-#capHeroOverlay, #zakHeroOverlay, #msHeroOverlay, #yiHeroOverlay{align-items:stretch !important; justify-content:stretch !important; background:var(--bg); backdrop-filter:none;}
+#capHeroOverlay, #zakHeroOverlay, #msHeroOverlay, #yiHeroOverlay{align-items:stretch !important; justify-content:stretch !important; background:var(--bg); backdrop-filter:none; z-index:90;}  /* أقل من صفحات .gp (٩٥) وشاشة حساب الزكاة (٩٦) عشان اللي بيتفتح من البطاقات يظهر فوق */
 #capHeroOverlay .modal-box, #zakHeroOverlay .modal-box, #msHeroOverlay .modal-box, #yiHeroOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; overflow-y:auto; position:relative; box-sizing:border-box; padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px));}
 #capHeroOverlay .ch-ptitle, #zakHeroOverlay .ch-ptitle, #msHeroOverlay .ch-ptitle, #yiHeroOverlay .ch-ptitle{text-align:center; font-weight:900; font-size:calc(20px * var(--fs,1)); margin:6px 0 10px;}
 #capHeroHost .zk-wrap, #zakHeroHost .zk-wrap, #msHeroHost .zk-wrap, #yiHeroHost .gi-wrap{margin-top:8px;}
@@ -2512,6 +2512,14 @@ html{ overscroll-behavior:none; }
 #quickAddOverlay .btn-save{background:linear-gradient(180deg,#ff8a7a,var(--expense) 45%,var(--expense-dark)); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -3px 0 rgba(0,0,0,.18), 0 6px 0 rgba(0,0,0,.3), 0 14px 18px rgba(0,0,0,.25); text-shadow:0 1px 2px rgba(0,0,0,.35);}
 #quickAddOverlay .btn-save:active,#quickAddOverlay .btn-cancel:active{transform:translateY(5px); box-shadow:0 1px 0 rgba(0,0,0,.3);}
 /* ===== QUICK ADD FULL PAGE 3D END ===== */
+
+/* ===== ZAKAT CARD GOLD TILE START ===== */
+.zk-wrap.yr-zm .zm-av{color:#4a2c00; text-shadow:0 1px 0 rgba(255,255,255,.55);
+  background:linear-gradient(160deg,#fff4c2,#f6c445 55%,#d18d0a);
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -3px 0 rgba(120,76,0,.22) inset, 0 5px 0 #8a5a00, 0 10px 14px rgba(120,76,0,.32);}
+.zk-wrap.yr-zm .zm-av:active{box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -3px 0 rgba(120,76,0,.22) inset, 0 1px 0 #8a5a00, 0 3px 6px rgba(120,76,0,.3);}
+.zk-wrap.yr-zm .zm-av.neg{color:#450a0a; background:linear-gradient(160deg,#ffe1e1,#f98b8b 55%,#dc2626); box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 -3px 0 rgba(0,0,0,.16) inset, 0 5px 0 #991b1b, 0 10px 14px rgba(153,27,27,.3);}
+/* ===== ZAKAT CARD GOLD TILE END ===== */
 </style>
 </head>
 <body>
@@ -2723,12 +2731,12 @@ html{ overscroll-behavior:none; }
       </span>
       <span class="gi-col zm-note"><span class="zk-sub" id="zmStatus"></span><span class="zk-bell" id="zmBell"></span></span>
     </div>
-    <div class="zk-due-line" id="zmDue" onclick="openZkCalc()"></div>
-    <div class="zk-due-line zm-prev" id="zmPrev" onclick="openZkCalc()"></div>
     <div class="zk-row">
       <div class="zk-sq" onclick="openZmPay()" role="button"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🤲</span><span class="zk-l">إجمالي منصرف الزكاة</span><span class="zk-v" id="zmPaid">0</span></div>
       <div class="zk-sq" id="zmLeftSq"><span class="zk-i" id="zmLeftIco">⏳</span><span class="zk-l" id="zmLeftLbl">المتبقي</span><span class="zk-v" id="zmLeft">0</span></div>
     </div>
+    <div class="zk-due-line" id="zmDue" onclick="openZkCalc()"></div>
+    <div class="zk-due-line zm-prev" id="zmPrev" onclick="openZkCalc()"></div>
   </div>
 
   <div class="cap-hero-wrap" id="capHeroWrap">
