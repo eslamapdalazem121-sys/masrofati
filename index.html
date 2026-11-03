@@ -2496,6 +2496,22 @@ html{ overscroll-behavior:none; }
 .year-switcher .nav-btn,.year-switcher .nav-btn:active{flex:0 0 44px !important; width:44px !important; height:44px !important; background:none !important; box-shadow:none !important; border:0 !important; color:var(--accent) !important; font-size:calc(40px * var(--fs,1)) !important; font-weight:700; line-height:1; padding:0 0 4px !important;}
 .year-switcher .nav-btn:active{transform:scale(.88) !important;}
 /* ===== YEAR PLAIN END ===== */
+
+/* ===== QUICK ADD FULL PAGE 3D START ===== */
+#quickAddOverlay{align-items:stretch;}
+#quickAddOverlay .modal-box{max-width:none; width:100%; height:100%; max-height:none; border-radius:0; border:0; box-shadow:none; background:var(--bg); padding:0 14px calc(28px + env(safe-area-inset-bottom,0px)); overflow-y:auto;}
+#quickAddOverlay .qa-hero{background:linear-gradient(145deg,#ff8a7a 0%,var(--expense) 48%,var(--expense-dark) 100%); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -5px 0 rgba(0,0,0,.2), 0 8px 0 rgba(0,0,0,.28), 0 18px 26px rgba(0,0,0,.25); padding:18px 14px;}
+#quickAddOverlay .qa-hero-ico{position:relative; font-size:calc(44px * var(--fs,1)); line-height:1; filter:drop-shadow(0 5px 3px rgba(0,0,0,.35));}
+#quickAddOverlay .qa-hero-t{position:relative; font-weight:900; font-size:calc(20px * var(--fs,1)); margin-top:6px; text-shadow:0 2px 0 rgba(0,0,0,.25);}
+#quickAddOverlay .qa-card{background:var(--card); border:1px solid var(--border); border-radius:22px; padding:16px 14px 14px; box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 6px 0 rgba(0,0,0,.14), 0 16px 22px rgba(0,0,0,.12);}
+#quickAddOverlay .field label{font-weight:800; color:var(--text); opacity:.75;}
+#quickAddOverlay .field select,#quickAddOverlay .field input[type=text],#quickAddOverlay .field input[type=number],#quickAddOverlay .field input[type=date]{width:100%; box-sizing:border-box; padding:13px; border-radius:14px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-size:calc(15px * var(--fs,1)); box-shadow:inset 0 3px 6px rgba(0,0,0,.14), inset 0 -1px 0 rgba(255,255,255,.3);}
+#quickAddOverlay .field select:focus,#quickAddOverlay .field input:focus{border-color:var(--expense); box-shadow:inset 0 3px 6px rgba(0,0,0,.14), 0 0 0 3px rgba(0,0,0,.06);}
+#quickAddOverlay .modal-actions{position:static; background:none; border:0; padding:0; margin-top:18px;}
+#quickAddOverlay .modal-actions button{padding:15px; border-radius:16px; font-weight:900; font-size:calc(16px * var(--fs,1));}
+#quickAddOverlay .btn-save{background:linear-gradient(180deg,#ff8a7a,var(--expense) 45%,var(--expense-dark)); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -3px 0 rgba(0,0,0,.18), 0 6px 0 rgba(0,0,0,.3), 0 14px 18px rgba(0,0,0,.25); text-shadow:0 1px 2px rgba(0,0,0,.35);}
+#quickAddOverlay .btn-save:active,#quickAddOverlay .btn-cancel:active{transform:translateY(5px); box-shadow:0 1px 0 rgba(0,0,0,.3);}
+/* ===== QUICK ADD FULL PAGE 3D END ===== */
 </style>
 </head>
 <body>
@@ -3305,7 +3321,10 @@ html{ overscroll-behavior:none; }
 
 <div class="modal-overlay" id="quickAddOverlay">
   <div class="modal-box">
-    <h3>🧾 إضافة مصروف</h3>
+    <div class="ys-top"><button type="button" class="ys-back" onclick="closeQuickAdd()">› رجوع</button><h3 class="ys-ttl">🧾 إضافة مصروف</h3></div>
+    <div class="ys-wrap qa-page">
+    <div class="ys-hero qa-hero"><div class="qa-hero-ico">🧾</div><div class="qa-hero-t">مصروف جديد</div></div>
+    <div class="qa-card">
     <div class="field">
       <label>الشهر</label>
       <select id="qaMonth"></select>
@@ -3341,6 +3360,8 @@ html{ overscroll-behavior:none; }
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeQuickAdd()">إلغاء</button>
       <button class="btn-save" onclick="saveQuickAdd()">حفظ</button>
+    </div>
+    </div>
     </div>
   </div>
 </div>
@@ -11902,6 +11923,7 @@ function openQuickAdd(){
   document.getElementById('qaIconGrid').innerHTML = buildIconGrid('qaIconInput','🧾');
   populateQaGroups();
   document.getElementById('quickAddOverlay').classList.add('open');
+  setTimeout(function(){ var e=document.getElementById('qaName'); if(e) e.focus(); }, 120);
 }
 function closeQuickAdd(){
   document.getElementById('quickAddOverlay').classList.remove('open');
@@ -11912,6 +11934,11 @@ function populateQaGroups(){
   const options = flattenGroupOptions(data[currentYear][mi].groups);
   groupSel.innerHTML = options.map(o=>`<option value="${o.id}">${o.label}</option>`).join('')
     + `<option value="new">＋ مجموعة جديدة</option>`;
+  const qaNone = options.length===0;
+  const qaNameEl = document.getElementById('qaNewGroupName');
+  if(qaNone && !qaNameEl.value.trim()) qaNameEl.value = 'مصروفات عامة';
+  const qaLbl = document.querySelector('#qaNewGroupField label');
+  if(qaLbl) qaLbl.textContent = qaNone ? 'المجموعة (هتتعمل تلقائيًا، تقدر تغيّر اسمها)' : 'اسم المجموعة الجديدة';
   qaToggleNewGroup();
 }
 function qaToggleNewGroup(){
