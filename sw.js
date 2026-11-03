@@ -1,5 +1,5 @@
 /* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
-const VERSION = '2026-11-03.8208';
+const VERSION = '2026-11-03.8219';
 const CACHE_PREFIX = 'masrofati-b-v';
 const CACHE = CACHE_PREFIX + VERSION;
 const SHELL = [
@@ -111,7 +111,15 @@ self.addEventListener('push', (event) => {
   if (!body) return;
   event.waitUntil((async () => {
     const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    if (list.some((c) => c.visibilityState === 'visible')) return;
+    if (list.some((c) => c.visibilityState === 'visible' && c.focused)) return;
     await self.registration.showNotification(title, { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: d.tag || d.id || 'push', lang: 'ar', dir: 'rtl', vibrate: [200, 100, 200] });
+  })());
+});
+
+// لو المتصفح جدّد/غيّر اشتراك الإشعارات، نفتح التطبيق يجدد التصريح تلقائي أول ما يتفتح
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    list.forEach((c) => { try { c.postMessage({ type: 'PUSH_RENEW' }); } catch (e) {} });
   })());
 });
