@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-03.8244">
+<meta name="app-version" content="2026-11-04.8245">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2627,6 +2627,26 @@ html{ overscroll-behavior:none; }
 #capMoneyOverlay #cmChipAll.cm-st-glass{background:rgba(255,255,255,.35) !important; backdrop-filter:blur(8px); box-shadow:none !important; border-color:rgba(128,128,128,.3);}
 #capMoneyOverlay #cmChipAll.cm-st-none{background:none !important; box-shadow:none !important;}
 </style>
+<style id="v8245fix">
+/* الخط: كل الأزرار والحقول تاخد الخط المختار (كانت بتاخد خط الجهاز) */
+button,input,select,textarea,optgroup{font-family:inherit;}
+#capGoldOverlay .modal-box.gd{font-family:inherit !important;}
+.year-switcher select{font-family:Arial,Helvetica,sans-serif !important;}
+.font-prev{margin-top:10px; padding:11px 14px; border-radius:12px; background:var(--bg); border:1.5px dashed var(--border); font-size:calc(15px * var(--fs-app,1)); font-weight:700; line-height:1.7; text-align:center;}
+#optFont .opt-chip{font-size:calc(14px * var(--fs,1));}
+/* وحدة العملة / الجرام أصغر من الرقم */
+.cur-u{font-size:.45em; font-weight:800; opacity:.8; margin-inline-start:.3em; font-family:inherit; letter-spacing:0;}
+#yrCap .c2-rows .r b .cur-u, #yrCap .c2-karat b .cur-u, #yrCap .c2-pnl .cur-u{font-size:.72em;}
+/* بطاقة إجمالي الأموال: رقم أكبر + زجزاج */
+#cmTotal::after{font-size:.36em !important; margin-inline-start:.25em !important;}
+#capMoneyOverlay .gi-sumrow > span.wide b#cmTotal{font-size:calc(44px * var(--fs,1)); line-height:1.1; white-space:nowrap; letter-spacing:-.5px;}
+#cmChipAll.cm-all{flex-wrap:wrap !important; row-gap:6px !important;}
+#cmChipAll .cm-all-body{flex:1 1 0; min-width:0;}
+#cmChipAll .cm-zig{flex:1 1 100%; width:100%; height:calc(40px * var(--fs,1)); display:block; overflow:visible; margin-top:2px;}
+#cmChipAll .cm-zl{stroke-dasharray:1; stroke-dashoffset:0; animation:cmZdraw 1.2s ease-out both;}
+@keyframes cmZdraw{from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
+@media (prefers-reduced-motion: reduce){ #cmChipAll .cm-zl{animation:none;} }
+</style>
 </head>
 <body>
 
@@ -2953,7 +2973,7 @@ html{ overscroll-behavior:none; }
     <button type="button" class="fs-close" onclick="closeCapMoney()" aria-label="رجوع">✕</button>
     <h3>💵 أموال</h3>
     <div class="gi-sumrow t3d money-t" id="cmChips" data-id="blk:chips">
-      <span id="cmChipAll" class="gi-chip v-violet wide cm-all" onclick="setCmFilter(null)"><span class="cm-all-ico" id="cmAllIco" aria-hidden="true"></span><span class="cm-all-body"><small>إجمالي الأموال</small><b id="cmTotal">0</b></span></span>
+      <span id="cmChipAll" class="gi-chip v-violet wide cm-all" onclick="setCmFilter(null)"><span class="cm-all-ico" id="cmAllIco" aria-hidden="true"></span><span class="cm-all-body"><small>إجمالي الأموال</small><b id="cmTotal">0</b></span><svg id="cmZig" class="cm-zig" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"></svg></span>
       <span id="cmChipCash" class="gi-chip v-green" onclick="setCmFilter('cash')"><small>💵 نقدي</small><b id="cmCash">0</b></span>
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
       <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاشي</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:900;color:#8a5a00;line-height:1.3;margin-top:4px;"></em><em id="cmPenSub2" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:800;color:#6b7280;line-height:1.3;margin-top:2px;"></em></span>
@@ -3656,10 +3676,21 @@ html{ overscroll-behavior:none; }
 <div class="settings-section">
       <h4>الخط</h4>
       <div class="opt-row" id="optFont">
-        <button class="opt-chip" data-val="Tajawal" style="font-family:Tajawal;" onclick="previewSetting('font','Tajawal')">Tajawal</button>
-        <button class="opt-chip" data-val="Cairo" style="font-family:Cairo;" onclick="previewSetting('font','Cairo')">Cairo</button>
-        <button class="opt-chip" data-val="Almarai" style="font-family:Almarai;" onclick="previewSetting('font','Almarai')">Almarai</button>
+        <button class="opt-chip" data-val="Tajawal" style="font-family:'Tajawal',sans-serif;" onclick="previewSetting('font','Tajawal')">تجوال</button>
+        <button class="opt-chip" data-val="Cairo" style="font-family:'Cairo',sans-serif;" onclick="previewSetting('font','Cairo')">القاهرة</button>
+        <button class="opt-chip" data-val="Almarai" style="font-family:'Almarai',sans-serif;" onclick="previewSetting('font','Almarai')">المرعي</button>
+        <button class="opt-chip" data-val="Changa" style="font-family:'Changa',sans-serif;" onclick="previewSetting('font','Changa')">شانجا</button>
+        <button class="opt-chip" data-val="El Messiri" style="font-family:'El Messiri',sans-serif;" onclick="previewSetting('font','El Messiri')">المسيري</button>
+        <button class="opt-chip" data-val="Noto Kufi Arabic" style="font-family:'Noto Kufi Arabic',sans-serif;" onclick="previewSetting('font','Noto Kufi Arabic')">نوتو كوفي</button>
+        <button class="opt-chip" data-val="Noto Naskh Arabic" style="font-family:'Noto Naskh Arabic',sans-serif;" onclick="previewSetting('font','Noto Naskh Arabic')">نوتو نسخ</button>
+        <button class="opt-chip" data-val="Amiri" style="font-family:'Amiri',sans-serif;" onclick="previewSetting('font','Amiri')">أميري</button>
+        <button class="opt-chip" data-val="Reem Kufi" style="font-family:'Reem Kufi',sans-serif;" onclick="previewSetting('font','Reem Kufi')">ريم كوفي</button>
+        <button class="opt-chip" data-val="IBM Plex Sans Arabic" style="font-family:'IBM Plex Sans Arabic',sans-serif;" onclick="previewSetting('font','IBM Plex Sans Arabic')">آي بي إم</button>
+        <button class="opt-chip" data-val="Readex Pro" style="font-family:'Readex Pro',sans-serif;" onclick="previewSetting('font','Readex Pro')">ريدكس</button>
+        <button class="opt-chip" data-val="Mada" style="font-family:'Mada',sans-serif;" onclick="previewSetting('font','Mada')">مدى</button>
+        <button class="opt-chip" data-val="system" onclick="previewSetting('font','system')">خط الجهاز</button>
       </div>
+      <div class="font-prev" id="fontPrev">معاينة الخط: مصروفاتي ١٢٣٬٤٥٦ ج.م — أموالي من الألف للياء</div>
     </div>
 
 <div class="settings-section">
@@ -4432,6 +4463,23 @@ function shade(hex, percent){
 }
 var DIGITS_MODE = 'ar';
 function dateLocale(){ return DIGITS_MODE === 'en' ? 'ar-EG-u-nu-latn' : 'ar-EG'; }
+var FONT_LIST = ['Tajawal','Cairo','Almarai','Changa','El Messiri','Noto Kufi Arabic','Noto Naskh Arabic','Amiri','Reem Kufi','IBM Plex Sans Arabic','Readex Pro','Mada'];
+var _fontsAsked = {Tajawal:1, Cairo:1, Almarai:1};
+function fontCss(name){
+  if(name === 'system') return 'system-ui,-apple-system,"Segoe UI",Tahoma';
+  if(FONT_LIST.indexOf(name) < 0) name = 'Tajawal';
+  return '"' + name + '","Tajawal","Cairo"';
+}
+function ensureFont(name){
+  if(!name || name === 'system' || _fontsAsked[name] || FONT_LIST.indexOf(name) < 0) return;
+  _fontsAsked[name] = 1;
+  try{
+    var l = document.createElement('link'); l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name).replace(/%20/g,'+') + ':wght@400;700&display=swap';
+    l.onerror = function(){ _fontsAsked[name] = 0; try{ showToast('الخط ده محتاج إنترنت أول مرة بس', false); }catch(e){} };
+    document.head.appendChild(l);
+  }catch(e){}
+}
 let settings = {
   digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, yiIcon:'growth', yiIconSize:100, homeCols:1,
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
@@ -4487,7 +4535,8 @@ function applySettings(s){
   root.style.setProperty('--accent-dark', a.dark);
   root.style.setProperty('--accent-soft', a.soft);
 
-  root.style.setProperty('--app-font', '"' + s.font + '"');
+  root.style.setProperty('--app-font', fontCss(s.font)); try{ ensureFont(s.font); }catch(e){}
+  { const fp = document.getElementById('fontPrev'); if(fp) fp.style.fontFamily = fontCss(s.font); }
 
   const c = Object.assign({}, DEFAULT_CARD_COLORS, s.colors||{});
   const off = Number(s.brightness) || 0; // نسبة مئوية من -40 إلى +40
@@ -4753,6 +4802,7 @@ async function copyAppLink(which, msg){
 }
 let _scrollYBeforeSettings = 0;
 function openSettings(){
+  try{ FONT_LIST.forEach(ensureFont); }catch(e){}
   if(typeof updateCloudUI === 'function') updateCloudUI();
   updateVersionUI();
   updateInstallUI();
@@ -5937,23 +5987,27 @@ function capPastBar(){
   else if(bar.nextSibling !== wrap) wrap.parentNode.insertBefore(bar, wrap);
   bar.textContent = '📁 سنة ' + toArabicDigits(currentYear) + ' — رأس المال والزكاة بحساباتها (مثبّت' + (sn.est ? ' — تقدير من تواريخ الإضافة، راجع الأرقام' : ' بتاريخ ' + gFmt(new Date(sn.ts))) + '). أي تعديل في بنود «أموال» (حساب / فايدة / مبلغ) من هنا بيأثر على السنة دي بس، ومن السنة الحالية بيسري من يوم التعديل.';
 }
+function unitHtml(str){
+  str = String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return str.replace(/\s*(ج\.م|جم)\s*$/, function(m, u){ return '<small class="cur-u">' + u + '</small>'; });
+}
 function renderCap(){
   try{ capPastBar(); }catch(e){}
   const el = document.getElementById('capAmt'); if(!el) return;
   const t = capTotals();
   const CUR = ' ج.م';
-  el.textContent = fmt(t.all) + CUR;
-  document.getElementById('capMoney').textContent = fmt(t.money) + CUR;
-  document.getElementById('capGold').textContent = fmt(t.gold) + CUR;
-  const rowsInto = (id, arr)=>{ const e = document.getElementById(id); if(!e) return; e.innerHTML = ''; arr.forEach(([l, v])=>{ const r = document.createElement('span'); r.className = 'r'; const a = document.createElement('span'); a.textContent = l; const b = document.createElement('b'); b.textContent = v; r.appendChild(a); r.appendChild(b); e.appendChild(r); }); };
+  el.innerHTML = unitHtml(fmt(t.all) + CUR);
+  document.getElementById('capMoney').innerHTML = unitHtml(fmt(t.money) + CUR);
+  document.getElementById('capGold').innerHTML = unitHtml(fmt(t.gold) + CUR);
+  const rowsInto = (id, arr)=>{ const e = document.getElementById(id); if(!e) return; e.innerHTML = ''; arr.forEach(([l, v])=>{ const r = document.createElement('span'); r.className = 'r'; const a = document.createElement('span'); a.textContent = l; const b = document.createElement('b'); b.innerHTML = unitHtml(v); r.appendChild(a); r.appendChild(b); e.appendChild(r); }); };
   rowsInto('capMoneySplit', (t.cash > 0 || t.bank > 0) ? [['💵 نقدي', fmt(t.cash) + CUR], ['🏦 بنوك', fmt(t.bank) + CUR]] : []);
   rowsInto('capGoldSplit', t.grams > 0 ? [['⚖️ الوزن', fmt(Math.round(t.grams * 100) / 100) + ' جم']] : []);
   { const ks = goldKaratStats(goldPieces()), kb = document.getElementById('capGoldKarat'); kb.innerHTML = '';
-    if(t.grams > 0) [24, 21, 18].forEach(k=>{ const c = document.createElement('span'); const a = document.createElement('small'); a.textContent = 'عيار ' + toArabicDigits(k); const b = document.createElement('b'); b.textContent = fmt(Math.round(ks[k] * 100) / 100) + ' جم'; c.appendChild(a); c.appendChild(b); kb.appendChild(c); }); }
+    if(t.grams > 0) [24, 21, 18].forEach(k=>{ const c = document.createElement('span'); const a = document.createElement('small'); a.textContent = 'عيار ' + toArabicDigits(k); const b = document.createElement('b'); b.innerHTML = unitHtml(fmt(Math.round(ks[k] * 100) / 100) + ' جم'); c.appendChild(a); c.appendChild(b); kb.appendChild(c); }); }
   const mp = t.all > 0 ? Math.round(t.money / t.all * 100) : 0, lab = ' من رأس المال';
   document.getElementById('capMoneyPct').textContent = t.all > 0 ? toArabicDigits(mp) + '٪' + lab : '';
   document.getElementById('capGoldPct').textContent = t.all > 0 ? toArabicDigits(100 - mp) + '٪' + lab : '';
-  { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.className = 'c2-pnl ' + (g.pnl >= 0 ? 'up' : 'down'); pe.textContent = g.ok ? '📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) + CUR : ''; } }
+  { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.className = 'c2-pnl ' + (g.pnl >= 0 ? 'up' : 'down'); pe.innerHTML = g.ok ? unitHtml('📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) + CUR) : ''; } }
   try{ if(typeof renderZM === 'function') renderZM(); const zo = document.getElementById('zkcOverlay'); if(zo && zo.classList.contains('open')) renderZkCalc(); }catch(e){}   // الزكاة بتتجدد تلقائي مع أي تغيير في رأس المال
 }
 function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
@@ -7428,10 +7482,47 @@ function mbCard(b, base){
   bind(head, body, badge, K);
   return card;
 }
+function cmTotalFit(){
+  var b = document.getElementById('cmTotal'), body = b && b.parentNode, chip = document.getElementById('cmChipAll'), ico = document.getElementById('cmAllIco');
+  if(!b || !chip || !chip.clientWidth) return;
+  b.style.fontSize = '';
+  var avail = chip.clientWidth - (ico ? ico.offsetWidth : 0) - 14 - 24, base = parseFloat(getComputedStyle(b).fontSize) || 42, n = 0;
+  b.style.whiteSpace = 'nowrap';
+  while(b.scrollWidth > avail && base > 22 && n++ < 40){ base -= 1; b.style.fontSize = base + 'px'; }
+}
+function cmZigRender(){
+  var svg = document.getElementById('cmZig'); if(!svg) return;
+  var pts = [];
+  try{
+    cmSrcList().filter(function(x){ return capCatOf(x) === 'money'; })
+      .map(function(x){ return [opsMs(x.date) || 0, Number(x.amount) || 0]; })
+      .filter(function(a){ return a[0] > 0; }).sort(function(a, b){ return a[0] - b[0]; })
+      .forEach(function(a, i, all){ pts.push((pts.length ? pts[pts.length - 1] : 0) + a[1]); });
+  }catch(e){}
+  pts = pts.slice(-8);
+  var real = pts.length >= 2;
+  if(!real) pts = [0.2, 0.35, 0.3, 0.55, 0.5, 0.8];
+  var mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts), rg = (mx - mn) || 1;
+  var norm = pts.map(function(v){ return (v - mn) / rg; });
+  var M = 11, W = 300, H = 46, xs = [], ys = [];
+  for(var i = 0; i < M; i++){
+    var f = i / (M - 1) * (norm.length - 1), a = Math.floor(f), c = Math.min(norm.length - 1, a + 1), base = norm[a] + (norm[c] - norm[a]) * (f - a);
+    var y = 0.26 + base * 0.48 + (i % 2 ? -0.24 : 0.24);
+    xs.push(6 + i * (W - 12) / (M - 1)); ys.push(H - Math.max(0.06, Math.min(0.94, y)) * H);
+  }
+  var up = norm[norm.length - 1] >= norm[0], col = up ? '#0f9d78' : '#d6336c';
+  var d = xs.map(function(x, i){ return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + ys[i].toFixed(1); }).join(' ');
+  svg.innerHTML = '<defs><linearGradient id="cmZg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + col + '" stop-opacity=".28"/><stop offset="1" stop-color="' + col + '" stop-opacity="0"/></linearGradient></defs>' +
+    '<path d="' + d + ' L' + xs[M - 1].toFixed(1) + ' ' + H + ' L' + xs[0].toFixed(1) + ' ' + H + ' Z" fill="url(#cmZg)"/>' +
+    '<path class="cm-zl" pathLength="1" d="' + d + '" fill="none" stroke="' + col + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+    '<circle cx="' + xs[M - 1].toFixed(1) + '" cy="' + ys[M - 1].toFixed(1) + '" r="4.5" fill="#fff" stroke="' + col + '" stroke-width="2.5" vector-effect="non-scaling-stroke"/>';
+  svg.setAttribute('data-up', up ? '1' : '0');
+}
 function renderCapMoney(){
   ensureGrpColors(); mvBarRender();
   const t = cmSrcTotals(), box = document.getElementById('cmList'), pastV = cmPastView();
   document.getElementById('cmTotal').textContent = fmt(t.money);
+  try{ cmZigRender(); cmTotalFit(); setTimeout(cmTotalFit,80); }catch(e){}
   document.getElementById('cmCash').textContent = fmt(t.cash);
   document.getElementById('cmBank').textContent = fmt(t.bank);
   document.getElementById('cmPen').textContent = fmt(t.penMonthly !== undefined ? t.penMonthly : t.pension);   // قيمة المعاش الشهرية كاملة (مش اللي لسه ما اتحوّلش)
