@@ -1333,7 +1333,7 @@ body{overflow-x:hidden;}
 .year-switcher{max-width:264px; padding:9px 10px; gap:8px; border-radius:22px;
   box-shadow:0 1px 0 rgba(255,255,255,.3) inset, 0 -4px 0 rgba(0,0,0,.2) inset, 0 8px 0 rgba(0,0,0,.22), 0 16px 24px rgba(0,0,0,.25);}
 .year-switcher .fy-label{font-size:calc(12px * var(--fs,1)); font-weight:800;}
-.year-switcher select{font-family:Arial, Helvetica, sans-serif; font-size:calc(30px * var(--fs,1)); font-weight:900; letter-spacing:2px; text-shadow:0 2px 0 rgba(0,0,0,.25); direction:ltr;}
+.year-switcher select{font-family:Arial, Helvetica, sans-serif; font-size:calc(42px * var(--fs,1)); font-weight:900; letter-spacing:2px; text-shadow:0 2px 0 rgba(0,0,0,.25); direction:ltr;}
 .year-switcher .icon{font-size:calc(26px * var(--fs,1));}
 .year-switcher .nav-btn{width:34px; height:34px; font-size:calc(22px * var(--fs,1)); font-weight:900; line-height:1; padding:0 0 3px;
   background:linear-gradient(145deg,#ffffff 0%,#e4ece7 55%,#c3d2c9 100%); color:var(--accent-dark,#0b7a52); border:0;
@@ -2487,6 +2487,15 @@ html{ overscroll-behavior:none; }
 #homeExtras .cap-hero .ch-lbl{text-align:center; line-height:1.3; padding:0 2px;}
 #homeExtras.hcols-2 .cap-hero .ch-lbl{font-size:calc(14px * var(--fs,1));}
 #homeExtras.hcols-4 .cap-hero .ch-lbl{font-size:calc(11.5px * var(--fs,1));}
+
+/* ===== YEAR PLAIN START ===== */
+.year-switcher{max-width:none !important; width:100%; box-sizing:border-box; flex-wrap:nowrap; overflow:visible; background:none !important; box-shadow:none !important; border-radius:0 !important; padding:0 !important; margin:0 auto 14px !important; gap:18px !important;}
+.year-switcher .icon,.year-switcher .fy-label{display:none !important;}
+.year-switcher select{color:var(--text) !important; font-family:Arial,Helvetica,sans-serif; font-size:min(11vw,44px) !important; font-weight:800; letter-spacing:2px; width:auto !important; min-width:0 !important; flex:0 1 auto; text-shadow:none !important; direction:ltr; line-height:1.1;}
+.year-switcher select option{color:#111;}
+.year-switcher .nav-btn,.year-switcher .nav-btn:active{flex:0 0 44px !important; width:44px !important; height:44px !important; background:none !important; box-shadow:none !important; border:0 !important; color:var(--accent) !important; font-size:calc(40px * var(--fs,1)) !important; font-weight:700; line-height:1; padding:0 0 4px !important;}
+.year-switcher .nav-btn:active{transform:scale(.88) !important;}
+/* ===== YEAR PLAIN END ===== */
 </style>
 </head>
 <body>
