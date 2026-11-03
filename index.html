@@ -2520,6 +2520,53 @@ html{ overscroll-behavior:none; }
 .zk-wrap.yr-zm .zm-av:active{box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -3px 0 rgba(120,76,0,.22) inset, 0 1px 0 #8a5a00, 0 3px 6px rgba(120,76,0,.3);}
 .zk-wrap.yr-zm .zm-av.neg{color:#450a0a; background:linear-gradient(160deg,#ffe1e1,#f98b8b 55%,#dc2626); box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 -3px 0 rgba(0,0,0,.16) inset, 0 5px 0 #991b1b, 0 10px 14px rgba(153,27,27,.3);}
 /* ===== ZAKAT CARD GOLD TILE END ===== */
+
+/* ===== ZAKAT SPEND PAGE 3D START ===== */
+.zp-card{position:relative; overflow:hidden; padding:0 14px 16px !important; border-radius:24px !important;
+  background:linear-gradient(180deg,var(--card),var(--card)) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 7px 0 rgba(0,0,0,.12), 0 18px 26px rgba(30,41,59,.14) !important;}
+.zp-card h4{margin:0 -14px 6px !important; padding:14px 18px !important; font-size:calc(17px * var(--fs,1)) !important; font-weight:900 !important; letter-spacing:.2px; display:flex; align-items:center; gap:8px;}
+.zp-card label{font-weight:800 !important; margin:12px 2px 6px !important;}
+.zp-card input{border-radius:16px !important; padding:13px 14px !important; border:1.5px solid var(--border,#d6dbe4) !important;
+  box-shadow:0 3px 6px rgba(0,0,0,.12) inset, 0 -1px 0 rgba(255,255,255,.5) inset, 0 1px 0 rgba(255,255,255,.7) !important; transition:border-color .15s, box-shadow .15s;}
+.zp-card .gp-btn{width:100%; margin-top:16px; font-size:calc(16.5px * var(--fs,1)); letter-spacing:.3px;}
+.zp-card .gp-pct{opacity:.85;}
+/* بطاقة إضافة رصيد: أخضر */
+.zp-fund h4{color:#fff !important; text-shadow:0 1px 2px rgba(0,0,0,.3);
+  background:linear-gradient(180deg,#6fe3b0,#12a56f 70%,#0e8c5c); box-shadow:0 2px 0 rgba(255,255,255,.45) inset, 0 4px 0 #0b6e48;}
+.zp-fund input:focus{outline:none; border-color:#12a56f !important; box-shadow:0 3px 6px rgba(0,0,0,.1) inset, 0 0 0 3px rgba(18,165,111,.2) !important;}
+/* بطاقة صرف الزكاة: ذهبي عصري */
+.zp-spend h4{color:#3b2a00 !important; text-shadow:0 1px 0 rgba(255,255,255,.5);
+  background:linear-gradient(180deg,#ffe28a,#f6b81c 70%,#e09f00); box-shadow:0 2px 0 rgba(255,255,255,.7) inset, 0 4px 0 #8a5a00;}
+.zp-spend input:focus{outline:none; border-color:#e09f00 !important; box-shadow:0 3px 6px rgba(0,0,0,.1) inset, 0 0 0 3px rgba(224,159,0,.22) !important;}
+.zp-spend .zp-chips{gap:8px; margin-top:10px;}
+.zp-spend .zp-chips button{padding:8px 14px; border-radius:99px; font-weight:800; color:#5a3b00;
+  background:linear-gradient(160deg,#fffbe6,#ffe9a6); box-shadow:0 2px 0 rgba(255,255,255,.9) inset, 0 3px 0 #c99100, 0 6px 8px rgba(185,120,0,.2);}
+.zp-spend .zp-chips button:active{transform:translateY(3px); box-shadow:0 1px 0 #c99100;}
+/* الوارد للزكاة: قابل للطي */
+.zp-sec{margin:26px 0 6px;}
+.zp-sec-h{width:100%; display:flex; align-items:center; gap:10px; border:0; cursor:pointer; padding:14px 16px; border-radius:20px; font-family:inherit; font-size:calc(17px * var(--fs,1)); font-weight:900; color:#053b27; text-align:start;
+  background:linear-gradient(160deg,#eafff5,#bff0d8 55%,#8fdcb9);
+  box-shadow:0 2px 0 rgba(255,255,255,.95) inset, 0 -3px 0 rgba(11,110,72,.14) inset, 0 6px 0 #0b6e48, 0 14px 18px rgba(11,110,72,.25); transition:transform .1s, box-shadow .1s;}
+.zp-sec-h:active{transform:translateY(5px); box-shadow:0 2px 0 rgba(255,255,255,.95) inset, 0 1px 0 #0b6e48;}
+.zp-sec-h .zs-ico{font-size:calc(22px * var(--fs,1)); filter:drop-shadow(0 2px 1px rgba(0,0,0,.25));}
+.zp-sec-h b{flex:0 1 auto;}
+.zp-sec-h .zs-cnt{margin-inline-start:auto; font-size:calc(12.5px * var(--fs,1)); font-weight:800; background:rgba(255,255,255,.65); padding:3px 10px; border-radius:99px; box-shadow:0 1px 0 rgba(11,110,72,.25);}
+.zp-sec-h .zs-cnt:empty{display:none;}
+.zp-sec-h .zs-arr{font-size:calc(24px * var(--fs,1)); line-height:1; margin-inline-start:auto; transition:transform .3s; display:inline-block;}
+.zp-sec-h .zs-cnt:not(:empty) + .zs-arr{margin-inline-start:0;}
+.zp-sec.collapsed .zs-arr{transform:rotate(90deg);}
+.zp-sec-b{display:grid; grid-template-rows:1fr; transition:grid-template-rows .32s ease; padding-top:16px;}
+.zp-sec-i{overflow:hidden; min-height:0; padding:2px 2px 0;}
+.zp-sec.collapsed .zp-sec-b{grid-template-rows:0fr; padding-top:0;}
+@media (prefers-reduced-motion:reduce){.zp-sec-b,.zp-sec-h .zs-arr{transition:none;}}
+
+/* سجل صرف الزكاة: نفس الطي بلون ذهبي */
+.zp-sec.gold .zp-sec-h{color:#4a2c00; background:linear-gradient(160deg,#fff6cf,#ffe08a 55%,#f3bd3a);
+  box-shadow:0 2px 0 rgba(255,255,255,.95) inset, 0 -3px 0 rgba(120,76,0,.14) inset, 0 6px 0 #8a5a00, 0 14px 18px rgba(185,120,0,.28);}
+.zp-sec.gold .zp-sec-h:active{box-shadow:0 2px 0 rgba(255,255,255,.95) inset, 0 1px 0 #8a5a00;}
+.zp-sec.gold .zp-sec-h .zs-cnt{box-shadow:0 1px 0 rgba(120,76,0,.3);}
+/* ===== ZAKAT SPEND PAGE 3D END ===== */
 </style>
 </head>
 <body>
@@ -3294,7 +3341,7 @@ html{ overscroll-behavior:none; }
       </div>
     </div>
     <div class="zp-years" id="zpYears"></div>
-    <div class="zp-form zp-fund">
+    <div class="zp-form zp-fund zp-card">
       <h4 id="zfFormT">💳 إضافة رصيد للزكاة</h4>
       <div class="zp-row2">
         <div><label for="zfSrc">المصدر</label><input type="text" id="zfSrc" placeholder="مثال: راتب، هدية" autocomplete="off"></div>
@@ -3303,9 +3350,11 @@ html{ overscroll-behavior:none; }
       <button type="button" class="gp-btn g" onclick="zfAdd()">💳 إضافة للرصيد</button>
       <div class="gp-pct" style="text-align:center;margin-top:8px;color:var(--muted);font-size:12.5px;">أي تحويل للزكاة من «أموالي» أو الدخل العام بيدخل هنا لوحده.</div>
     </div>
-    <div class="gp-h"><b>💳 الوارد للزكاة</b><span id="zfCnt"></span></div>
-    <div id="zfList"></div>
-    <div class="zp-form">
+    <div class="zp-sec" id="zfSec">
+      <button type="button" class="zp-sec-h" onclick="zpToggleSec('zfSec')" aria-expanded="true"><span class="zs-ico">💳</span><b>الوارد للزكاة</b><span id="zfCnt" class="zs-cnt"></span><span class="zs-arr" aria-hidden="true">⌄</span></button>
+      <div class="zp-sec-b"><div class="zp-sec-i"><div id="zfList"></div></div></div>
+    </div>
+    <div class="zp-form zp-spend zp-card">
       <h4 id="zpFormT">🤲 صرف زكاة جديد</h4>
       <label for="zpDest">جهة الصرف</label>
       <input type="text" id="zpDest" list="zpDestList" placeholder="مثال: أسرة محتاجة، جمعية خيرية" autocomplete="off">
@@ -3318,8 +3367,10 @@ html{ overscroll-behavior:none; }
       <button type="button" class="gp-btn y" onclick="zpAdd()">🤲 صرف من الزكاة</button>
       <div class="gp-pct" style="text-align:center;margin-top:8px;color:var(--muted);font-size:12.5px;">المبلغ بيتخصم من الرصيد المتاح ومن المستحق، ويظهر في المنصرف.</div>
     </div>
-    <div class="gp-h"><b>🧾 سجل صرف الزكاة</b><span id="zpCnt"></span></div>
-    <div id="zpList"></div>
+    <div class="zp-sec gold" id="zpSec">
+      <button type="button" class="zp-sec-h" onclick="zpToggleSec('zpSec')" aria-expanded="true"><span class="zs-ico">🧾</span><b>سجل صرف الزكاة</b><span id="zpCnt" class="zs-cnt"></span><span class="zs-arr" aria-hidden="true">⌄</span></button>
+      <div class="zp-sec-b"><div class="zp-sec-i"><div id="zpList"></div></div></div>
+    </div>
   </div>
 </div>
 
@@ -13526,6 +13577,16 @@ function homeColsApply(s){
   try{ if(window.__homeRefresh) window.__homeRefresh(); }catch(e){}
 }
 homeColsApply(settings);
+</script>
+<script>
+/* طي/فرد قسم الوارد للزكاة (الحالة بتتحفظ) */
+function zpToggleSec(id){
+  var e=document.getElementById(id); if(!e) return;
+  var c=e.classList.toggle('collapsed');
+  var b=e.querySelector('.zp-sec-h'); if(b) b.setAttribute('aria-expanded', c?'false':'true');
+  try{ localStorage.setItem('zpsec_'+id, c?'1':'0'); }catch(_){}
+}
+(function(){ ['zfSec','zpSec'].forEach(function(id){ try{ if(localStorage.getItem('zpsec_'+id)==='1'){ var e=document.getElementById(id); if(e){ e.classList.add('collapsed'); var b=e.querySelector('.zp-sec-h'); if(b) b.setAttribute('aria-expanded','false'); } } }catch(_){} }); })();
 </script>
 </body>
 </html>
