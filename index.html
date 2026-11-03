@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>مصروفاتي B</title>
-<meta name="theme-color" content="#16A870">
-<meta name="app-version" content="2026-11-03.8205">
+<title>أموالي AtoZ</title>
+<meta name="theme-color" content="#0a1f2e">
+<meta name="app-version" content="2026-11-03.8208">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1571,17 +1571,17 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 body.modal-locked{position:fixed; left:0; right:0; width:100%; overflow:hidden;}
 
 /* ===== HOME REORDER START (نقل بطاقات الصفحة الأولى) ===== */
-.home-reorder-row{display:flex; justify-content:center; margin:0 0 8px;}
+.home-reorder-row{display:none !important;}
 .home-reorder-btn{border:1px solid var(--border); background:var(--card); color:var(--muted); font-family:inherit; font-weight:700; font-size:calc(12px * var(--fs,1)); padding:5px 14px; border-radius:999px; cursor:pointer;}
 .home-reorder-btn.on{background:var(--accent, #7c4ddb); color:#fff; border-color:transparent;}
 .home-mv{display:none;}
-.home-edit .hc{position:relative; outline:2px dashed rgba(124,77,219,.55); outline-offset:3px; border-radius:16px;}
+.home-edit .hc{position:relative;}
 .home-edit .hc > *:not(.home-mv){pointer-events:none;}
 .home-edit .home-mv{display:flex; gap:8px; position:absolute; top:-14px; left:12px; z-index:30; pointer-events:auto;}
 .home-mvb{width:32px; height:32px; border-radius:50%; border:0; cursor:pointer; color:#fff; font-size:15px; font-weight:900; line-height:1; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 34% 26%, #c4e8ff 0%, #3fa9ff 38%, #0a68ee 100%); box-shadow:inset 0 2px 0 rgba(255,255,255,.65), inset 0 -3px 0 rgba(0,0,0,.22), 0 3px 0 #0746a3, 0 8px 12px -3px rgba(10,90,210,.6);}
 .home-mvb:disabled{opacity:.35; box-shadow:none; cursor:default;}
 .hc{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
-.hc-ph{opacity:.3; outline:2px dashed rgba(124,77,219,.75); outline-offset:3px; border-radius:16px;}
+.hc-ph{opacity:.3; outline:none;}
 .hc-ghost{position:fixed !important; margin:0 !important; z-index:99999; pointer-events:none; transform:scale(1.03); opacity:.97; box-shadow:0 18px 40px rgba(0,0,0,.38); will-change:top,transform;}
 body.hc-dragging{-webkit-user-select:none; user-select:none; cursor:grabbing; overscroll-behavior:contain;}
 body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cgList .gi-row, #cmList .cap-grp, #cgList .cap-grp, #cmBox > [data-id], .cap-grp-body > .gi-row, #zkList > .gi-row, #giSrcList > .gi-row, #incomeSourcesList > .inc-row){-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
@@ -1736,7 +1736,7 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="مصروفاتي B">
+<meta name="apple-mobile-web-app-title" content="أموالي AtoZ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style id="gpCss">
 .gp{display:none;position:fixed;inset:0;z-index:95;background:radial-gradient(1200px 500px at 50% -10%,rgba(22,168,112,.18),transparent 60%),linear-gradient(165deg,var(--bg),var(--bg2));overflow-y:auto;overscroll-behavior:contain;padding-top:env(safe-area-inset-top,0px);font-family:'Tajawal','Cairo',sans-serif;}
@@ -2397,15 +2397,176 @@ html{ overscroll-behavior:none; }
 #capCertOverlay .acc-seg button{padding:13px 4px; font-size:calc(13px * var(--fs,1));}
 /* سنة قديمة (للرجوع فقط): مفيش أزرار تعديل/إضافة جوه القايمة */
 #cmList.cm-ro .mc-acts, #cmList.cm-ro .mc-addsub{display:none !important;}
+
+/* ===== Splash: أموالي AtoZ (ذهبي حي — خفيف) ===== */
+#aSplash{position:fixed; inset:0; z-index:100001; overflow:hidden; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 50% 40%, #fff6c9 0%, #ffd95a 28%, #f6ad12 62%, #c97500 100%); color:#fff; direction:rtl;
+  font-family:'Cairo','Tajawal',system-ui,sans-serif; transition:opacity .45s ease; -webkit-tap-highlight-color:transparent; contain:strict;}
+#aSplash.out{opacity:0; pointer-events:none;}
+#aSplash .rays{position:absolute; left:50%; top:40%; width:220vmax; height:220vmax; margin:-110vmax 0 0 -110vmax; will-change:transform;
+  background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.34) 0deg 7deg, rgba(255,255,255,0) 7deg 20deg);
+  -webkit-mask-image:radial-gradient(circle, #000 0%, transparent 34%); mask-image:radial-gradient(circle, #000 0%, transparent 34%);
+  animation:aRays 28s linear infinite;}
+#aSplash .glow{position:absolute; left:50%; top:40%; width:340px; height:340px; margin:-170px 0 0 -170px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.85), rgba(255,244,190,.35) 45%, transparent 70%); animation:aPulse 2.4s ease-in-out infinite; will-change:transform,opacity;}
+#aSplash canvas{position:absolute; inset:0; width:100%; height:100%;}
+#aSplash .stage{position:relative; z-index:2; text-align:center; width:100%; padding:0 20px; margin-top:-4vh;}
+#aSplash .scene{width:156px; height:156px; margin:0 auto 18px; perspective:700px;}
+#aSplash .coin{position:relative; width:156px; height:156px; transform-style:preserve-3d; will-change:transform; animation:aSpin 4.4s linear infinite;}
+#aSplash .coin i{position:absolute; inset:0; border-radius:50%; display:block;
+  background:repeating-conic-gradient(#8a5a05 0 4deg, #e0a21c 4deg 8deg);}
+#aSplash .face{position:absolute; inset:0; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  background:conic-gradient(from 20deg,#c98a0b,#ffe27a,#d9a21f,#fff2b0,#c98a0b,#ffe27a,#c98a0b);
+  box-shadow:inset 0 0 0 5px #ffe9a0, inset 0 0 0 8px #b57a08, inset 0 0 16px 8px rgba(120,70,0,.35);}
+#aSplash .face::before{content:""; position:absolute; inset:14px; border-radius:50%; border:2px solid rgba(255,255,255,.7);
+  background:radial-gradient(circle at 35% 30%, #fff6c4, #f4b823 55%, #b8780a);}
+#aSplash .face::after{content:""; position:absolute; top:-20%; bottom:-20%; width:34%; left:-60%; transform:skewX(-20deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent); animation:aShine 2.2s ease-in-out infinite;}
+#aSplash .face b{position:relative; z-index:1; font-size:76px; font-weight:800; line-height:1; color:#fff8dc;
+  text-shadow:0 1px 0 #d89a10,0 2px 0 #b97a06,0 3px 0 #9a6204,0 4px 0 #7a4a02,0 7px 10px rgba(90,50,0,.5);}
+#aSplash .face.f{transform:translateZ(8px);}
+#aSplash .face.b{transform:rotateY(180deg) translateZ(8px);}
+#aSplash .shadow{width:120px; height:14px; margin:0 auto; border-radius:50%; background:radial-gradient(ellipse,rgba(110,60,0,.45),transparent 70%); animation:aShadow 1.1s ease-in-out infinite alternate;}
+#aSplash .title{margin:10px 0 0; perspective:600px;}
+#aSplash .ar{display:inline-block; font-size:58px; font-weight:800; line-height:1.15; color:#fff;
+  text-shadow:0 1px 0 #ffe9a0,0 2px 0 #e0a21c,0 3px 0 #c98a0b,0 4px 0 #a86a05,0 5px 0 #8a5400,0 6px 0 #6e4200,0 12px 14px rgba(90,50,0,.45);
+  opacity:0; transform:translateY(20px) rotateX(-55deg); animation:aRise .6s .15s cubic-bezier(.2,.9,.3,1.25) forwards;}
+#aSplash .lat{direction:ltr; display:flex; justify-content:center; font-size:44px; font-weight:800; letter-spacing:2px; margin-top:0;}
+#aSplash .lat span{display:inline-block; opacity:0; transform:translateY(20px) scale(.6); color:#0b6b46;
+  text-shadow:0 1px 0 #3fd9a0,0 2px 0 #16a870,0 3px 0 #0e8c5c,0 4px 0 #0a6b49,0 5px 0 #07553a,0 10px 12px rgba(60,30,0,.45);
+  animation:aLetter .5s cubic-bezier(.2,.9,.3,1.4) forwards, aWave 1.8s 1.3s ease-in-out infinite;}
+#aSplash .lat span:nth-child(1){animation-delay:.45s,1.3s;} #aSplash .lat span:nth-child(2){animation-delay:.55s,1.4s;}
+#aSplash .lat span:nth-child(3){animation-delay:.65s,1.5s;} #aSplash .lat span:nth-child(4){animation-delay:.75s,1.6s;}
+#aSplash .tag{margin-top:8px; font-size:15px; font-weight:700; color:#6b3e00; opacity:0; animation:aFade .5s 1s forwards;}
+#aSplash .bar{width:150px; height:6px; margin:18px auto 0; border-radius:6px; background:rgba(110,60,0,.25); overflow:hidden;}
+#aSplash .bar u{display:block; height:100%; width:100%; border-radius:6px; background:linear-gradient(90deg,#0e8c5c,#3fd9a0); transform:scaleX(0); transform-origin:100% 50%; animation:aLoad 2.3s .2s ease-out forwards;}
+@keyframes aSpin{to{transform:rotateY(360deg)}}
+@keyframes aRays{to{transform:rotate(360deg)}}
+@keyframes aPulse{0%,100%{transform:scale(1); opacity:.9}50%{transform:scale(1.12); opacity:1}}
+@keyframes aShine{0%{left:-60%}60%,100%{left:130%}}
+@keyframes aShadow{from{transform:scale(1); opacity:.9}to{transform:scale(.8); opacity:.6}}
+@keyframes aRise{to{opacity:1; transform:none}}
+@keyframes aLetter{to{opacity:1; transform:none}}
+@keyframes aWave{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes aFade{to{opacity:1}}
+@keyframes aLoad{to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){ #aSplash *{animation-duration:.01s !important; animation-iteration-count:1 !important;} }
 </style>
 </head>
 <body>
+
+<div id="aSplash" role="img" aria-label="أموالي AtoZ">
+  <div class="rays"></div><div class="glow"></div><canvas id="aSplashCv"></canvas>
+  <div class="stage">
+    <div class="scene"><div class="coin"><i style="transform:translateZ(-7px)"></i><i style="transform:translateZ(-4px)"></i><i style="transform:translateZ(-1px)"></i><i style="transform:translateZ(2px)"></i><i style="transform:translateZ(5px)"></i><div class="face f"><b>A</b></div><div class="face b"><b>Z</b></div></div></div>
+    <div class="shadow"></div>
+    <div class="title"><div class="ar">أموالي</div></div>
+    <div class="lat" aria-hidden="true"><span>A</span><span>t</span><span>o</span><span>Z</span></div>
+    <div class="tag">كل أموالك من الألف للياء</div>
+    <div class="bar"><u></u></div>
+  </div>
+</div>
+
+<script>
+/* صوت الافتتاح — أصوات مجسّمة (ستريو) مصنوعة بالكود، من غير ملفات */
+(function(){
+  var AC=window.AudioContext||window.webkitAudioContext, ctx=null, master=null, bus=null, send=null, nbuf=null, seq=0;
+  var KEYS=['coins','magic','fanfare','bell','whoosh','harp'];
+  function cfg(){ var o={on:true,vol:80,key:'coins'};
+    try{ var s=JSON.parse(localStorage.getItem('budget_settings_v1')||'{}');
+      if(s.introOn===false) o.on=false;
+      if(typeof s.introVol==='number'&&isFinite(s.introVol)) o.vol=Math.max(0,Math.min(100,s.introVol));
+      if(KEYS.indexOf(s.introSound)>=0) o.key=s.introSound; }catch(e){}
+    return o; }
+  function ensure(){
+    if(ctx) return ctx; if(!AC) return null;
+    try{
+      ctx=new AC(); master=ctx.createGain(); master.connect(ctx.destination);
+      bus=ctx.createGain(); bus.gain.value=.9; bus.connect(master);
+      var conv=ctx.createConvolver(), len=Math.floor(ctx.sampleRate*1.8), ib=ctx.createBuffer(2,len,ctx.sampleRate), c, i, d;
+      for(c=0;c<2;c++){ d=ib.getChannelData(c); for(i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6); }
+      conv.buffer=ib; send=ctx.createGain(); send.gain.value=.32; send.connect(conv); conv.connect(master);
+      nbuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate); d=nbuf.getChannelData(0); for(i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    }catch(e){ ctx=null; }
+    return ctx;
+  }
+  function route(node,o,t,dur){
+    var out=node, pn=ctx.createStereoPanner?ctx.createStereoPanner():null;
+    if(pn){ pn.pan.setValueAtTime(o.pan||0,t); if(o.pan2!==undefined) pn.pan.linearRampToValueAtTime(o.pan2,t+dur); out.connect(pn); out=pn; }
+    out.connect(bus); out.connect(send);
+  }
+  function tone(f,t,o){
+    var a=o.a||.005, d=o.d||.4, osc=ctx.createOscillator(), g=ctx.createGain(), n=osc;
+    osc.type=o.type||'sine'; osc.frequency.setValueAtTime(f,t); if(o.f1) osc.frequency.exponentialRampToValueAtTime(o.f1,t+a+d);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(o.peak||.3,t+a); g.gain.exponentialRampToValueAtTime(.0001,t+a+d);
+    if(o.lp){ var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=o.lp; osc.connect(lp); n=lp; }
+    n.connect(g); route(g,o,t,a+d); osc.start(t); osc.stop(t+a+d+.05);
+  }
+  function noise(t,dur,o){
+    var s=ctx.createBufferSource(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+    s.buffer=nbuf; s.loop=true; f.type=o.type||'bandpass'; f.Q.value=o.q||1.2;
+    f.frequency.setValueAtTime(o.f0,t); f.frequency.exponentialRampToValueAtTime(o.f1,t+dur);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(o.peak||.3,t+dur*(o.at||.5)); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    s.connect(f); f.connect(g); route(g,o,t,dur); s.start(t); s.stop(t+dur+.05);
+  }
+  function bell(f,t,peak,pn,d){ var m=[1,2.76,5.4,8.93]; for(var i=0;i<4;i++) tone(f*m[i],t,{a:.003,d:d/(1+i*.8),peak:peak/(1+i*1.6),pan:pn}); }
+  function br(f,t,d,pk,pn){ tone(f,t,{type:'sawtooth',a:.03,d:d,peak:pk,lp:1800,pan:pn}); tone(f*1.005,t,{type:'sawtooth',a:.03,d:d,peak:pk*.7,lp:1800,pan:pn}); }
+  var S={
+    coins:function(t){ var fr=[2637,3136,3520,2794,3951,3322,4186], i;
+      for(i=0;i<fr.length;i++) bell(fr[i],t+.04+i*.105,.22,(i%2?1:-1)*(.8-i*.08),.55);
+      noise(t+.78,.5,{type:'highpass',f0:5000,f1:9000,peak:.06,pan:0}); bell(1568,t+.82,.3,-.25,1.5); bell(2093,t+.86,.26,.25,1.5); },
+    magic:function(t){ var fr=[1047,1175,1319,1568,1760,2093,2349,2637], i, p;
+      for(i=0;i<fr.length;i++){ p=-.85+i*.24; tone(fr[i],t+i*.085,{type:'triangle',a:.01,d:.55,peak:.2,pan:p}); tone(fr[i]*2,t+i*.085,{a:.01,d:.35,peak:.06,pan:p}); }
+      [1047,1319,1568,2093].forEach(function(f,k){ tone(f,t+.78,{a:.05,d:1.4,peak:.16,pan:(k-1.5)*.4}); });
+      noise(t+.7,1.2,{type:'highpass',f0:4000,f1:10000,peak:.05,at:.3,pan:-.5,pan2:.5}); },
+    fanfare:function(t){ br(262,t,.2,.09,-.4); br(392,t+.22,.2,.09,.4); br(523,t+.44,.2,.1,0);
+      [262,330,392,523].forEach(function(f,k){ br(f,t+.7,1.3,.1,(k-1.5)*.35); });
+      tone(131,t+.7,{a:.03,d:1.3,peak:.25,pan:0}); bell(1046,t+.72,.12,0,1.4); },
+    bell:function(t){ bell(880,t+.05,.32,0,2); bell(1319,t+.4,.24,.4,1.8); bell(1760,t+.75,.2,-.4,1.6); },
+    whoosh:function(t){ noise(t,.9,{f0:250,f1:5000,q:2.5,peak:.5,at:.8,pan:-.9,pan2:.9}); tone(110,t+.9,{f1:42,a:.01,d:.7,peak:.55,pan:0});
+      bell(3136,t+.95,.18,.5,1.2); bell(4186,t+1.05,.14,-.5,1.1); bell(2093,t+1.15,.16,0,1.4); },
+    harp:function(t){ var fr=[523,659,784,1047,1319,1568,2093], i, p;
+      for(i=0;i<fr.length;i++){ p=-.7+i*.23; tone(fr[i],t+.03+i*.11,{type:'triangle',a:.004,d:.9,peak:.24,pan:p}); tone(fr[i]*2,t+.03+i*.11,{a:.004,d:.4,peak:.05,pan:p}); }
+      tone(1047,t+.9,{a:.01,d:1.3,peak:.18,pan:0}); tone(1568,t+.9,{a:.01,d:1.3,peak:.13,pan:0}); }
+  };
+  function play(key,vol){
+    var c=ensure(); if(!c||!S[key]) return Promise.resolve(false);
+    var my=++seq, r;
+    try{ r=c.state==='running'?Promise.resolve():Promise.race([Promise.resolve(c.resume()),new Promise(function(res){ setTimeout(res,220); })]); }catch(e){ r=Promise.resolve(); }
+    return r.catch(function(){}).then(function(){
+      if(my!==seq||c.state!=='running') return false;
+      var t=c.currentTime+.03; master.gain.cancelScheduledValues(0);
+      master.gain.setValueAtTime(Math.max(0,Math.min(1,vol/100))*.85,t-.03);
+      try{ S[key](t); }catch(e){ return false; } return true; });
+  }
+  function stop(){ seq++; if(ctx&&master){ try{ var t=ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value,t); master.gain.linearRampToValueAtTime(0,t+.2); }catch(e){} } }
+  window.AtoZIntro={play:play, stop:stop, cfg:cfg, keys:KEYS};
+  /* تحكم الإعدادات */
+  function cur(){ var s=(typeof _draftSettings!=='undefined'&&_draftSettings)||settings; return s; }
+  function curVol(){ var s=cur(); return (typeof s.introVol==='number'&&isFinite(s.introVol))?s.introVol:80; }
+  window.pickIntroSound=function(k){ previewSetting('introSound',k); play(k,curVol()); };
+  window.previewIntro=function(){ var s=cur(); play(KEYS.indexOf(s.introSound)>=0?s.introSound:'coins',curVol()); };
+  window.onIntroToggle=function(){
+    if(!_draftSettings) _draftSettings=cloneSettings(settings);
+    _draftSettings.introOn=document.getElementById('introOnToggle').checked;
+    applySettings(_draftSettings); refreshSettingsUI(_draftSettings);
+    if(_draftSettings.introOn) window.previewIntro();
+  };
+  window.onIntroVolInput=function(){
+    if(!_draftSettings) _draftSettings=cloneSettings(settings);
+    var v=Number(document.getElementById('introVol').value); _draftSettings.introVol=v;
+    applySettings(_draftSettings);
+    var l=document.getElementById('introVolLabel'); if(l) l.textContent=v+'%';
+  };
+})();
+</script>
 
 <div id="lockScreen" class="lock-screen" style="display:none;">
   <div class="lock-box">
     <div class="lock-icon">🔒</div>
     <h2>تسجيل الدخول</h2>
-    <div class="lock-sub">مصروفاتي المنزلية</div>
+    <div class="lock-sub">أموالي AtoZ</div>
     <div id="lockCheckingArea" style="display:none; color:var(--muted); font-size:calc(13px * var(--fs,1)); padding:10px 0;">جارٍ التحقق من حسابك…</div>
     <div id="lockPasswordArea" style="display:none;">
       <input type="password" id="lockPasswordInput" class="lock-input" placeholder="كلمة المرور" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')attemptUnlockPassword()">
@@ -2434,7 +2595,7 @@ html{ overscroll-behavior:none; }
 
 <button class="settings-fab" onclick="openSettings()" title="الإعدادات">⚙️</button>
 
-<h1>💰 مصروفاتي المنزلية</h1>
+<h1>💰 أموالي AtoZ</h1>
 <div id="syncStatus" style="text-align:center; font-size:calc(10.5px * var(--fs,1)); color:var(--muted); margin:-12px 0 10px;"></div>
 
 <div id="homeExtras">
@@ -3356,6 +3517,30 @@ html{ overscroll-behavior:none; }
       <button type="button" class="drive-btn" style="margin:12px 0 0;" data-nosound onclick="playClick(true)">🔊 جرّب الصوت</button>
     </div>
 
+    <div class="settings-section" id="introSoundSection">
+      <h4>🎵 صوت الافتتاح</h4>
+      <div class="check-row" style="margin:6px 0 12px;">
+        <input type="checkbox" id="introOnToggle" data-nosound onchange="onIntroToggle()">
+        <label for="introOnToggle" data-nosound style="margin:0;">تشغيل صوت مع الواجهة الافتتاحية</label>
+      </div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">🔈 واطي</span>
+        <input type="range" id="introVol" min="0" max="100" step="5" value="80" oninput="onIntroVolInput()" onchange="previewIntro()">
+        <span class="vol-end">🔊 عالي</span>
+      </div>
+      <div class="vol-val" id="introVolLabel">80%</div>
+      <div class="opt-row" id="optIntroSound" data-nosound>
+        <button type="button" class="opt-chip" data-val="coins" onclick="pickIntroSound('coins')">🪙 عملات ذهبية</button>
+        <button type="button" class="opt-chip" data-val="magic" onclick="pickIntroSound('magic')">✨ سحري</button>
+        <button type="button" class="opt-chip" data-val="fanfare" onclick="pickIntroSound('fanfare')">🎺 بوق ملكي</button>
+        <button type="button" class="opt-chip" data-val="bell" onclick="pickIntroSound('bell')">🔔 جرس</button>
+        <button type="button" class="opt-chip" data-val="whoosh" onclick="pickIntroSound('whoosh')">🌬️ عصري</button>
+        <button type="button" class="opt-chip" data-val="harp" onclick="pickIntroSound('harp')">🎼 قيثارة</button>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin:8px 0 0;">الأصوات مجسّمة (ستريو) وتحس بيها بتتحرك بين الودنين، والسماعة بتفرق كتير. لو المتصفح منع الصوت أول مرة، دوس على الشاشة مرة وقت الافتتاح يشتغل.</p>
+      <button type="button" class="drive-btn" style="margin:12px 0 0;" data-nosound onclick="previewIntro()">🔊 جرّب الصوت</button>
+    </div>
+
     <div class="groups-toggle-card" id="colorsToggleCard" onclick="toggleColorsSection()" style="margin-top:6px;">
       <span class="icon">🎨</span>
       <span class="txt">ألوان الشاشة</span>
@@ -3536,7 +3721,7 @@ html{ overscroll-behavior:none; }
     <div class="settings-section" id="installSection" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
       <h4>📲 تثبيت التطبيق واختصار الشاشة الرئيسية</h4>
       <p style="font-size:calc(12px * var(--fs,1)); color:var(--text); margin:0 0 8px; line-height:1.7;">
-        اسم التطبيق: <b>مصروفاتي B</b> — الاسم ده هو اللي هيظهر تحت الأيقونة، وتقدر تبحث عنه بيه في شريط عنوان المتصفح بعد ما تفتحه مرة.
+        اسم التطبيق: <b>أموالي AtoZ</b> — الاسم ده هو اللي هيظهر تحت الأيقونة، وتقدر تبحث عنه بيه في شريط عنوان المتصفح بعد ما تفتحه مرة.
       </p>
       <button type="button" class="drive-btn" id="installBtn" style="margin:0 0 8px;" onclick="installApp()">📲 تثبيت التطبيق / إضافة اختصار</button>
       <p id="installNote" style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin:0; line-height:1.7;"></p>
@@ -3639,7 +3824,7 @@ html{ overscroll-behavior:none; }
   <div class="cloud-gate-box">
     <div style="font-size:calc(44px * var(--fs,1));">💰</div>
     <h2 style="margin:6px 0 4px;">تسجيل الدخول</h2>
-    <div class="lock-sub" style="margin:0 0 14px;">مصروفاتي B — بياناتك تتزامن بين كل أجهزتك</div>
+    <div class="lock-sub" style="margin:0 0 14px;">أموالي AtoZ — بياناتك تتزامن بين كل أجهزتك</div>
     <input type="email" id="gateEmail" class="lock-input" dir="ltr" placeholder="الإيميل" autocomplete="email" autocapitalize="off" spellcheck="false" style="text-align:left;">
     <input type="password" id="gatePassword" class="lock-input" dir="ltr" placeholder="كلمة المرور" autocomplete="current-password" style="text-align:left; margin-top:8px;">
     <button type="button" class="btn-save bk-main-btn" style="margin-top:12px;" onclick="cloudAuthAction('gate','signin')">دخول</button>
@@ -3892,7 +4077,7 @@ function shade(hex, percent){
 var DIGITS_MODE = 'ar';
 function dateLocale(){ return DIGITS_MODE === 'en' ? 'ar-EG-u-nu-latn' : 'ar-EG'; }
 let settings = {
-  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click',
+  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins',
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -3992,6 +4177,10 @@ function applySettings(s){
   root.style.setProperty('--bg', shade(baseBg, Math.round(off*0.3)));
   root.style.setProperty('--bg2', shade(baseBg2, Math.round(off*0.3)));
   root.style.setProperty('--card', shade(baseCard, Math.round(off*0.3)));
+  const itg = document.getElementById('introOnToggle'); if(itg) itg.checked = s.introOn !== false;
+  const ivv = (typeof s.introVol === 'number' && isFinite(s.introVol)) ? s.introVol : 80;
+  const ivEl = document.getElementById('introVol'); if(ivEl) ivEl.value = ivv;
+  const ivl = document.getElementById('introVolLabel'); if(ivl) ivl.textContent = ivv + '%';
   const label = document.getElementById('fontScaleLabel');
   if(label) label.textContent = Math.round((s.fontScale||1)*100) + '%';
   const bLabel = document.getElementById('brightnessLabel');
@@ -4008,7 +4197,7 @@ function refreshDigitsView(){
 function refreshSettingsUI(s){
   const nc = document.getElementById('notifyChk'); if(nc) nc.checked = !!s.notify;
   try{ nfRender(s); }catch(e){}
-  ['theme','accent','font','depth','digits','clickType'].forEach(key=>{
+  ['theme','accent','font','depth','digits','clickType','introSound'].forEach(key=>{
     const containerId = 'opt' + key.charAt(0).toUpperCase() + key.slice(1);
     const container = document.getElementById(containerId);
     if(!container) return;
@@ -4131,7 +4320,7 @@ function linkFor(which){
   }catch(e){}
   return which === 'public' ? PUBLIC_LINK : APP_LINK;
 }
-function msgFor(which){ return which === 'public' ? 'جرّب تطبيق مصروفاتي المنزلية:' : 'رابط تطبيق مصروفاتي المنزلية:'; }
+function msgFor(which){ return which === 'public' ? 'جرّب تطبيق أموالي AtoZ:' : 'رابط تطبيق أموالي AtoZ:'; }
 function buildShareButtons(){
   const privInput = document.getElementById('appLinkInput');
   if(privInput) privInput.value = linkFor('private');
@@ -4581,10 +4770,10 @@ function opsNotify(list){
     if(list.length > 3){
       const cf = {m:false, s:false, l:false};
       list.forEach(e=>{ const c = nfCfg(e.c); cf.m = cf.m || c.m; cf.s = cf.s || c.s; cf.l = cf.l || c.l; });
-      nfFire(cf, 'مصروفاتي B', '📝 تمت ' + toArabicDigits(list.length) + ' عمليات', 'multi' + Date.now());
+      nfFire(cf, 'أموالي AtoZ', '📝 تمت ' + toArabicDigits(list.length) + ' عمليات', 'multi' + Date.now());
       return;
     }
-    list.forEach(e=> nfFire(nfCfg(e.c), 'مصروفاتي B', e.x + (e.a ? ' — ' + fmt(e.a) : ''), e.id));
+    list.forEach(e=> nfFire(nfCfg(e.c), 'أموالي AtoZ', e.x + (e.a ? ' — ' + fmt(e.a) : ''), e.id));
   }catch(err){}
 }
 function showOpNotification(title, body, tag, extra){
@@ -4603,7 +4792,7 @@ async function toggleNotifySetting(on){
     hint.textContent = 'مفعّلة ✅ — دوس «حفظ» علشان تثبت الاختيار.';
   }
   previewSetting('notify', !!on);
-  if(on){ try{ nfFire({m:true, s:true, l:true}, 'مصروفاتي B', '🔔 تم تفعيل الإشعارات', 'test' + Date.now(), true); }catch(e){} }
+  if(on){ try{ nfFire({m:true, s:true, l:true}, 'أموالي AtoZ', '🔔 تم تفعيل الإشعارات', 'test' + Date.now(), true); }catch(e){} }
 }
 // ---- تقرير العمليات
 function openOps(){ _opsTab = 'day'; opsTab('day'); document.getElementById('opsOverlay').classList.add('open'); }
@@ -10224,9 +10413,9 @@ function updateInstallUI(){
   }
   btn.style.display = '';
   if(_deferredInstall){
-    note.textContent = 'دوس «تثبيت التطبيق» وهيتضاف على الشاشة الرئيسية باسم «مصروفاتي B».';
+    note.textContent = 'دوس «تثبيت التطبيق» وهيتضاف على الشاشة الرئيسية باسم «أموالي AtoZ».';
   } else if(isEmbedded()){
-    note.textContent = 'أنت فاتح التطبيق من جوه صفحة تانية. افتح رابط التطبيق مباشرة في المتصفح، وبعدين من قائمة المتصفح ⋮ اختار «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية» (وكمان احفظه كإشارة مرجعية باسم «مصروفاتي B» عشان تلاقيه بالاسم).';
+    note.textContent = 'أنت فاتح التطبيق من جوه صفحة تانية. افتح رابط التطبيق مباشرة في المتصفح، وبعدين من قائمة المتصفح ⋮ اختار «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية» (وكمان احفظه كإشارة مرجعية باسم «أموالي AtoZ» عشان تلاقيه بالاسم).';
   } else if(isIOSDevice()){
     note.textContent = 'على الآيفون: دوس زرار المشاركة ⬆️ في سفاري، ثم «إضافة إلى الشاشة الرئيسية».';
   } else {
@@ -10263,7 +10452,7 @@ function updateOfflineStatus(){
   } else if(swReady){
     el.textContent = '✅ جاهز للعمل بدون إنترنت. بياناتك محفوظة على جهازك دايمًا.';
   } else if(isEmbedded()){
-    el.textContent = '⚠️ النسخة اللي بتتفتح من جوه Claude محتاجة إنترنت عشان تتفتح. للعمل بدون نت ثبّت «مصروفاتي B» من المتصفح (نسخة التثبيت) أو تطبيق الأندرويد.';
+    el.textContent = '⚠️ النسخة اللي بتتفتح من جوه Claude محتاجة إنترنت عشان تتفتح. للعمل بدون نت ثبّت «أموالي AtoZ» من المتصفح (نسخة التثبيت) أو تطبيق الأندرويد.';
   } else {
     el.textContent = '⏳ بنجهّز التطبيق للعمل بدون إنترنت… افتحه مرة تانية بعد ثواني وأنت متصل بالنت.';
   }
@@ -12345,7 +12534,7 @@ function nfFire(cfg, title, body, tag, force){
     if(vib && vis && (cfg.s || cfg.l || cfg.m) && navigator.vibrate){ try{ navigator.vibrate([90, 60, 90]); }catch(e){} }
   }catch(e){}
 }
-function nfEvent(cat, body, tag){ nfFire(nfCfg(cat), 'مصروفاتي B', body, tag || (cat + Date.now())); }
+function nfEvent(cat, body, tag){ nfFire(nfCfg(cat), 'أموالي AtoZ', body, tag || (cat + Date.now())); }
 /* ---- واجهة الإعدادات ---- */
 function nfSet(key, val){ previewSetting(key, val); }
 function nfToggle(cat, ch){
@@ -12363,7 +12552,7 @@ function nfVolInput(){ var v = Number(document.getElementById('nfVol').value); n
 function nfVibeChange(on){ nfSet('nfVibe', !!on); if(on && navigator.vibrate){ try{ navigator.vibrate(120); }catch(e){} } }
 function nfTest(){
   var d = _draftSettings || settings, old = settings;
-  try{ settings = Object.assign({}, d, {notify: true}); nfFire({m:true, s:true, l:true}, 'مصروفاتي B', '🔔 ده إشعار تجريبي', 'test' + Date.now()); } finally { settings = old; }
+  try{ settings = Object.assign({}, d, {notify: true}); nfFire({m:true, s:true, l:true}, 'أموالي AtoZ', '🔔 ده إشعار تجريبي', 'test' + Date.now()); } finally { settings = old; }
 }
 function nfRender(s){
   var box = document.getElementById('nfBox'); if(!box) return;
@@ -12499,7 +12688,7 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
   try{ st = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ st = {}; }
   var META = {
     'الخط': ['🔤', 'font'], 'حجم الخط والأيقونات': ['🔠', 'size'], 'شكل الأرقام': ['🔢', 'digits'], 'عمق البطاقات (3D)': ['🧊', 'depth'],
-    'الإشعارات': ['🔔', 'notify'], 'صوت النقر': ['🔊', 'click'], 'ترتيب وتحريك العناصر': ['↕️', 'move'],
+    'الإشعارات': ['🔔', 'notify'], 'صوت النقر': ['🔊', 'click'], 'صوت الافتتاح': ['🎵', 'intro'], 'ترتيب وتحريك العناصر': ['↕️', 'move'],
     'الوضع': ['🌓', 'theme'], 'اللون الأساسي': ['🎨', 'accent'], 'تفتيح / تغميق الألوان': ['🔆', 'bright'], 'ألوان البطاقات (كل بطاقة على حدا)': ['🖌️', 'cardcolors'],
     'النسخ الاحتياطي': ['💾', 'backup'], 'قفل التطبيق': ['🔒', 'lock'], 'شارك التطبيق مع غيرك': ['🔗', 'share'], 'الحساب والمزامنة بين الأجهزة': ['☁️', 'cloud'], 'تثبيت التطبيق واختصار الشاشة الرئيسية': ['📲', 'install']
   };
@@ -12534,6 +12723,7 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     if(k === 'depth') return activeTxt('optDepth');
     if(k === 'notify') return s.notify ? 'مفعّلة (رسالة + صوت + ضوء)' : 'متوقفة';
     if(k === 'click') return s.clickOn === false ? 'متوقف' : 'شغّال · ' + activeTxt('optClickType');
+    if(k === 'intro') return s.introOn === false ? 'متوقف' : 'شغّال · ' + activeTxt('optIntroSound');
     if(k === 'move') return activeTxt('optMove');
     if(k === 'theme') return activeTxt('optTheme');
     if(k === 'lock'){ try{ return lockConfig && lockConfig.enabled ? 'مفعّل' : 'غير مفعّل'; }catch(e){ return 'حماية التطبيق'; } }
@@ -12555,7 +12745,7 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     var colorsCard = document.getElementById('colorsToggleCard'), colorsBody = document.getElementById('colorsSectionBody');
     var order = [
       ['🎨 المظهر', [by['الخط'], by['حجم الخط والأيقونات'], by['شكل الأرقام'], by['عمق البطاقات (3D)'], colorsCard, colorsBody]],
-      ['🔔 الصوت والإشعارات', [by['الإشعارات'], by['صوت النقر']]],
+      ['🔔 الصوت والإشعارات', [by['الإشعارات'], by['صوت النقر'], by['صوت الافتتاح']]],
       ['🧩 السلوك', [by['ترتيب وتحريك العناصر']]],
       ['🛡️ البيانات والأمان', [by['النسخ الاحتياطي'], by['قفل التطبيق'], by['شارك التطبيق مع غيرك'], by['الحساب والمزامنة بين الأجهزة'], by['تثبيت التطبيق واختصار الشاشة الرئيسية']]]
     ];
@@ -12890,6 +13080,38 @@ document.addEventListener('visibilitychange', function(){ if(pushLs('on') === '1
 setInterval(function(){ if(pushLs('on') === '1' && document.visibilityState === 'visible') pushSync(false); }, 10 * 60 * 1000);
 setTimeout(function(){ pushRender(); if(pushLs('on') === '1') pushSync(false); }, 6000);
 setInterval(function(){ if(pushLs('on') === '1' && !_pushBusy && cloud.user && !pushLs('sig')) pushSync(false); }, 30000);
+</script>
+
+<script>
+(function(){
+  var s=document.getElementById('aSplash'); if(!s) return;
+  var done=false, raf=0, cv=document.getElementById('aSplashCv'), pending=false, tm=0;
+  function close(){ if(done) return; done=true; cancelAnimationFrame(raf); clearTimeout(tm); try{ AtoZIntro.stop(); }catch(e){} s.classList.add('out'); setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); },500); }
+  function startSound(){ try{ var c=AtoZIntro.cfg(); if(!c.on||c.vol<=0) return; AtoZIntro.play(c.key,c.vol).then(function(ok){ pending=!ok; }); }catch(e){} }
+  function tap(){ if(pending&&!done){ pending=false; clearTimeout(tm); tm=setTimeout(close,2500); startSound(); return; } close(); }
+  s.addEventListener('click',tap);
+  tm=setTimeout(close,2800);
+  startSound();
+  try{
+    var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches; if(reduce||!cv.getContext) return;
+    var c=cv.getContext('2d'), W=0, H=0, dpr=Math.min(window.devicePixelRatio||1,1.5), P=[], N=34;
+    function size(){ W=s.clientWidth; H=s.clientHeight; cv.width=W*dpr; cv.height=H*dpr; c.setTransform(dpr,0,0,dpr,0,0); }
+    size();
+    function mk(i){ return {x:Math.random()*W, y:H*(i===undefined?1.05:Math.random()), r:1.5+Math.random()*3.5, v:18+Math.random()*40, a:.4+Math.random()*.6, p:Math.random()*6.28, w:.6+Math.random()*1.2}; }
+    for(var i=0;i<N;i++) P.push(mk(i));
+    var last=performance.now();
+    function frame(n){
+      var dt=Math.min((n-last)/1000,.05); last=n; c.clearRect(0,0,W,H);
+      for(var i=0;i<N;i++){ var q=P[i]; q.y-=q.v*dt; q.p+=q.w*dt; q.x+=Math.sin(q.p)*10*dt;
+        if(q.y<-10){ P[i]=q=mk(); }
+        var tw=.55+.45*Math.sin(q.p*3);
+        c.globalAlpha=q.a*tw; c.fillStyle='#fffbe6'; c.beginPath(); c.arc(q.x,q.y,q.r,0,6.283); c.fill();
+        c.globalAlpha=q.a*tw*.35; c.fillStyle='#fff'; c.beginPath(); c.arc(q.x,q.y,q.r*2.4,0,6.283); c.fill(); }
+      raf=requestAnimationFrame(frame);
+    }
+    raf=requestAnimationFrame(frame);
+  }catch(e){}
+})();
 </script>
 </body>
 </html>

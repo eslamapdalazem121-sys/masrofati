@@ -1,5 +1,5 @@
-/* Service Worker — مصروفاتي B (العمل بدون إنترنت) */
-const VERSION = '2026-11-03.8205';
+/* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
+const VERSION = '2026-11-03.8208';
 const CACHE_PREFIX = 'masrofati-b-v';
 const CACHE = CACHE_PREFIX + VERSION;
 const SHELL = [
@@ -106,7 +106,7 @@ self.addEventListener('push', (event) => {
   let p = {};
   try { p = event.data ? event.data.json() : {}; } catch (e) { try { p = { data: { body: event.data.text() } }; } catch (e2) {} }
   const d = (p && p.data) || p || {};
-  const title = d.title || (p.notification && p.notification.title) || 'مصروفاتي B';
+  const title = d.title || (p.notification && p.notification.title) || 'أموالي AtoZ';
   const body = d.body || (p.notification && p.notification.body) || '';
   if (!body) return;
   event.waitUntil((async () => {
