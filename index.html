@@ -8795,21 +8795,22 @@ function groupItemDates(){
   new MutationObserver(sync).observe(document.body, {attributes:true, attributeFilter:['class'], subtree:true});
   // اللمس على الخلفية أو على محتوى مش بيتحرك ما يحرّكش الصفحة اللي تحتيه
   function scrollableUp(el, overlay){
-    while(el && el !== overlay && el.nodeType === 1){
+    while(el && el.nodeType === 1){
       const cs = getComputedStyle(el);
       if((cs.overflowY === 'auto' || cs.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
+      if(el === overlay) break;
       el = el.parentElement;
     }
     return false;
   }
   document.addEventListener('touchmove', function(e){
     if(!locked) return;
-    const overlay = e.target.closest ? e.target.closest('.modal-overlay.open') : null;
+    const overlay = e.target.closest ? e.target.closest('.modal-overlay.open, .gp.open') : null;
     if(!overlay || !scrollableUp(e.target, overlay)) e.preventDefault();
   }, {passive:false});
   document.addEventListener('wheel', function(e){
     if(!locked) return;
-    const overlay = e.target.closest ? e.target.closest('.modal-overlay.open') : null;
+    const overlay = e.target.closest ? e.target.closest('.modal-overlay.open, .gp.open') : null;
     if(!overlay || !scrollableUp(e.target, overlay)) e.preventDefault();
   }, {passive:false});
   sync();
