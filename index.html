@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-03.8242">
+<meta name="app-version" content="2026-11-03.8244">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2615,6 +2615,18 @@ html{ overscroll-behavior:none; }
 #yrCap.cap-subglass .cap-sub .c2-pill, #yrCap.cap-subglass .cap-sub .c2-rows .r, #yrCap.cap-subglass .cap-sub .c2-karat > span{background:rgba(128,128,128,.12); border:1px solid rgba(128,128,128,.22); box-shadow:none;}
 @media (prefers-reduced-motion: reduce){ #yrCap .cap-sub .cs-ico svg{animation:none;} }
 </style>
+<style id="heroZfix">#capHeroOverlay,#zakHeroOverlay,#msHeroOverlay,#yiHeroOverlay{z-index:94;}#cmChipAll.cm-all{flex-direction:row !important; align-items:center; justify-content:center; gap:14px;}
+#cmChipAll .cm-all-ico{flex:none; width:calc(64px * var(--cm-sc,1)); height:calc(64px * var(--cm-sc,1));}
+#cmChipAll .cm-all-ico svg{width:100%; height:100%; display:block; overflow:visible; filter:drop-shadow(0 4px 3px rgba(0,0,0,.25));}
+#cmChipAll .cm-all-body{display:flex; flex-direction:column; align-items:center; min-width:0;}
+#cmChipAll .cm-all-ico, #cmChipAll .cm-all-body{background:none !important; box-shadow:none !important; border:0 !important; border-radius:0 !important; padding:0 !important; margin:0 !important; backdrop-filter:none !important;}
+#cmTotal::after{content:' ج.م'; font-size:.5em; font-weight:800; margin-inline-start:.3em; opacity:.8;}
+#capMoneyOverlay #cmChipAll.cm-st-green{--tb:#d3f5e4; --te:#98d9b8;}
+#capMoneyOverlay #cmChipAll.cm-st-gold{--tb:#ffeeb8; --te:#e2bf62;}
+#capMoneyOverlay #cmChipAll.cm-st-blue{--tb:#d6e6ff; --te:#a3bff0;}
+#capMoneyOverlay #cmChipAll.cm-st-glass{background:rgba(255,255,255,.35) !important; backdrop-filter:blur(8px); box-shadow:none !important; border-color:rgba(128,128,128,.3);}
+#capMoneyOverlay #cmChipAll.cm-st-none{background:none !important; box-shadow:none !important;}
+</style>
 </head>
 <body>
 
@@ -2941,7 +2953,7 @@ html{ overscroll-behavior:none; }
     <button type="button" class="fs-close" onclick="closeCapMoney()" aria-label="رجوع">✕</button>
     <h3>💵 أموال</h3>
     <div class="gi-sumrow t3d money-t" id="cmChips" data-id="blk:chips">
-      <span id="cmChipAll" class="gi-chip v-violet wide" onclick="setCmFilter(null)"><small>💼 إجمالي الأموال</small><b id="cmTotal">0</b></span>
+      <span id="cmChipAll" class="gi-chip v-violet wide cm-all" onclick="setCmFilter(null)"><span class="cm-all-ico" id="cmAllIco" aria-hidden="true"></span><span class="cm-all-body"><small>إجمالي الأموال</small><b id="cmTotal">0</b></span></span>
       <span id="cmChipCash" class="gi-chip v-green" onclick="setCmFilter('cash')"><small>💵 نقدي</small><b id="cmCash">0</b></span>
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
       <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاشي</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:900;color:#8a5a00;line-height:1.3;margin-top:4px;"></em><em id="cmPenSub2" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:800;color:#6b7280;line-height:1.3;margin-top:2px;"></em></span>
@@ -3760,6 +3772,22 @@ html{ overscroll-behavior:none; }
         <button type="button" class="opt-chip" data-val="glass" onclick="nfSet('capSubStyle','glass')">🫧 شفافة</button><button type="button" class="opt-chip" data-val="none" onclick="nfSet('capSubStyle','none')">🚫 من غير بطاقة</button><button type="button" class="opt-chip" data-val="color" onclick="nfSet('capSubStyle','color')">🟩 ملوّنة</button>
       </div>
 
+      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">💼 بطاقة إجمالي الأموال <small>(أول بطاقة في صفحة الأموال)</small></div>
+      <div class="opt-row" id="optCmIco" data-nosound>
+        <button type="button" class="opt-chip" data-val="cash" onclick="nfSet('cmIcon','cash')">💵 فلوس</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('cmIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('cmIcon','bank')">🏦 بنك</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('cmIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('cmIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('cmIcon','btc')">₿ بيتكوين</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم أيقونة إجمالي الأموال</div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="cmIcoSize" min="60" max="180" step="5" value="100" oninput="cmIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="cmIcoSizeLabel">100%</div>
+      <div class="nf-sub" style="margin-top:14px;">🎨 بطاقة إجمالي الأموال</div>
+      <div class="opt-row" id="optCmCard" data-nosound>
+        <button type="button" class="opt-chip" data-val="violet" onclick="nfSet('cmCardStyle','violet')">🟪 بنفسجي</button><button type="button" class="opt-chip" data-val="green" onclick="nfSet('cmCardStyle','green')">🟩 أخضر</button><button type="button" class="opt-chip" data-val="gold" onclick="nfSet('cmCardStyle','gold')">🟨 ذهبي</button><button type="button" class="opt-chip" data-val="blue" onclick="nfSet('cmCardStyle','blue')">🟦 أزرق</button><button type="button" class="opt-chip" data-val="glass" onclick="nfSet('cmCardStyle','glass')">🫧 شفافة</button><button type="button" class="opt-chip" data-val="none" onclick="nfSet('cmCardStyle','none')">🚫 من غير بطاقة</button>
+      </div>
+
       <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">🕌 أيقونة الزكاة <small>(منفصلة عن رأس المال)</small></div>
       <div class="opt-row" id="optZakIcon" data-nosound>
         <button type="button" class="opt-chip" data-val="mosque" onclick="nfSet('zakIcon','mosque')">🕌 جامع ذهبي</button><button type="button" class="opt-chip" data-val="moon" onclick="nfSet('zakIcon','moon')">🌙 هلال ونجمة</button><button type="button" class="opt-chip" data-val="lantern" onclick="nfSet('zakIcon','lantern')">🏮 فانوس</button><button type="button" class="opt-chip" data-val="heart" onclick="nfSet('zakIcon','heart')">💛 قلب الصدقة</button><button type="button" class="opt-chip" data-val="quran" onclick="nfSet('zakIcon','quran')">📖 مصحف</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('zakIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('zakIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('zakIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('zakIcon','btc')">₿ بيتكوين</button>
@@ -4405,7 +4433,7 @@ function shade(hex, percent){
 var DIGITS_MODE = 'ar';
 function dateLocale(){ return DIGITS_MODE === 'en' ? 'ar-EG-u-nu-latn' : 'ar-EG'; }
 let settings = {
-  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, yiIcon:'growth', yiIconSize:100, homeCols:1,
+  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, yiIcon:'growth', yiIconSize:100, homeCols:1,
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -5913,18 +5941,19 @@ function renderCap(){
   try{ capPastBar(); }catch(e){}
   const el = document.getElementById('capAmt'); if(!el) return;
   const t = capTotals();
-  el.textContent = fmt(t.all);
-  document.getElementById('capMoney').textContent = fmt(t.money);
-  document.getElementById('capGold').textContent = fmt(t.gold);
+  const CUR = ' ج.م';
+  el.textContent = fmt(t.all) + CUR;
+  document.getElementById('capMoney').textContent = fmt(t.money) + CUR;
+  document.getElementById('capGold').textContent = fmt(t.gold) + CUR;
   const rowsInto = (id, arr)=>{ const e = document.getElementById(id); if(!e) return; e.innerHTML = ''; arr.forEach(([l, v])=>{ const r = document.createElement('span'); r.className = 'r'; const a = document.createElement('span'); a.textContent = l; const b = document.createElement('b'); b.textContent = v; r.appendChild(a); r.appendChild(b); e.appendChild(r); }); };
-  rowsInto('capMoneySplit', (t.cash > 0 || t.bank > 0) ? [['💵 نقدي', fmt(t.cash)], ['🏦 بنوك', fmt(t.bank)]] : []);
+  rowsInto('capMoneySplit', (t.cash > 0 || t.bank > 0) ? [['💵 نقدي', fmt(t.cash) + CUR], ['🏦 بنوك', fmt(t.bank) + CUR]] : []);
   rowsInto('capGoldSplit', t.grams > 0 ? [['⚖️ الوزن', fmt(Math.round(t.grams * 100) / 100) + ' جم']] : []);
   { const ks = goldKaratStats(goldPieces()), kb = document.getElementById('capGoldKarat'); kb.innerHTML = '';
     if(t.grams > 0) [24, 21, 18].forEach(k=>{ const c = document.createElement('span'); const a = document.createElement('small'); a.textContent = 'عيار ' + toArabicDigits(k); const b = document.createElement('b'); b.textContent = fmt(Math.round(ks[k] * 100) / 100) + ' جم'; c.appendChild(a); c.appendChild(b); kb.appendChild(c); }); }
   const mp = t.all > 0 ? Math.round(t.money / t.all * 100) : 0, lab = ' من رأس المال';
   document.getElementById('capMoneyPct').textContent = t.all > 0 ? toArabicDigits(mp) + '٪' + lab : '';
   document.getElementById('capGoldPct').textContent = t.all > 0 ? toArabicDigits(100 - mp) + '٪' + lab : '';
-  { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.className = 'c2-pnl ' + (g.pnl >= 0 ? 'up' : 'down'); pe.textContent = g.ok ? '📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) : ''; } }
+  { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.className = 'c2-pnl ' + (g.pnl >= 0 ? 'up' : 'down'); pe.textContent = g.ok ? '📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) + CUR : ''; } }
   try{ if(typeof renderZM === 'function') renderZM(); const zo = document.getElementById('zkcOverlay'); if(zo && zo.classList.contains('open')) renderZkCalc(); }catch(e){}   // الزكاة بتتجدد تلقائي مع أي تغيير في رأس المال
 }
 function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
@@ -13514,13 +13543,14 @@ function capIcoKey(s){ var k = s && s.capIcon; return CAPICO_SVG[k] ? k : 'bag';
 function capIcoApply(s){
   s = s || settings;
   try{ capSubApply(s); }catch(e){}
+  try{ cmAllApply(s); }catch(e){}
   var k = capIcoKey(s), sc = Math.min(180, Math.max(60, Number(s && s.capIconSize) || 100)) / 100;
   var el = document.getElementById('capHeroIco'); if(el && el.getAttribute('data-k') !== k){ el.innerHTML = CAPICO_SVG[k].replace(/__U__/g, 'h'); el.setAttribute('data-k', k); }
   var w = document.getElementById('capHeroWrap'); if(w) w.style.setProperty('--ch-sc', String(sc));
   try{ var yc = document.getElementById('yrCap'); if(yc){ yc.style.setProperty('--cc-sc', String(sc)); yc.classList.toggle('cap-nobox', !(s && s.capCardBox === true)); } var ci = document.getElementById('capCardIco'); if(ci && ci.getAttribute('data-k') !== k){ ci.innerHTML = CAPICO_SVG[k].replace(/__U__/g, 'cc'); ci.setAttribute('data-k', k); } }catch(e){}
 }
 function capIcoRender(s){
-  s = s || settings; capIcoApply(s);
+  s = s || settings; capIcoApply(s); try{ cmAllRender(s); }catch(e){}
   var k = capIcoKey(s), sz = Math.min(180, Math.max(60, Math.round(Number(s.capIconSize) || 100)));
   var r = document.getElementById('optCapIcon'); if(r) Array.prototype.forEach.call(r.children, function(c){ c.classList.toggle('active', c.getAttribute('data-val') === k); });
   var sl = document.getElementById('capIcoSize'); if(sl && Number(sl.value) !== sz) sl.value = sz;
@@ -13531,12 +13561,29 @@ function capIcoRender(s){
   var lb = document.getElementById('capIcoSizeLabel'); if(lb) lb.textContent = (typeof toArabicDigits === 'function' ? toArabicDigits(sz) : sz) + '٪';
   var pv = document.getElementById('capIcoPrev'); if(pv && pv.getAttribute('data-k') !== k){ pv.innerHTML = CAPICO_SVG[k].replace(/__U__/g, 'p'); pv.setAttribute('data-k', k); }
 }
+function cmAllApply(s){
+  s = s || settings;
+  var k = capSubMoneySvg(s.cmIcon) ? s.cmIcon : 'cash', sc = Math.min(180, Math.max(60, Number(s.cmIconSize) || 100)) / 100;
+  var st = ['green', 'gold', 'blue', 'glass', 'none'].indexOf(s.cmCardStyle) > -1 ? s.cmCardStyle : 'violet';
+  var c = document.getElementById('cmChipAll');
+  if(c){ ['violet', 'green', 'gold', 'blue', 'glass', 'none'].forEach(function(x){ c.classList.remove('cm-st-' + x); }); c.classList.add('cm-st-' + st); c.style.setProperty('--cm-sc', String(sc)); }
+  var e = document.getElementById('cmAllIco'); if(e && e.getAttribute('data-k') !== k){ e.innerHTML = capSubMoneySvg(k).replace(/__U__/g, 'ca'); e.setAttribute('data-k', k); }
+}
+function cmIcoSizeInput(){ previewSetting('cmIconSize', Number(document.getElementById('cmIcoSize').value) || 100); }
+function cmAllRender(s){
+  s = s || settings;
+  var k = capSubMoneySvg(s.cmIcon) ? s.cmIcon : 'cash', st = ['green', 'gold', 'blue', 'glass', 'none'].indexOf(s.cmCardStyle) > -1 ? s.cmCardStyle : 'violet';
+  var sz = Math.min(180, Math.max(60, Math.round(Number(s.cmIconSize) || 100)));
+  [['optCmIco', k], ['optCmCard', st]].forEach(function(p){ var r = document.getElementById(p[0]); if(r) Array.prototype.forEach.call(r.children, function(c){ c.classList.toggle('active', c.getAttribute('data-val') === p[1]); }); });
+  var sl = document.getElementById('cmIcoSize'); if(sl && Number(sl.value) !== sz) sl.value = sz;
+  var lb = document.getElementById('cmIcoSizeLabel'); if(lb) lb.textContent = (typeof toArabicDigits === 'function' ? toArabicDigits(sz) : sz) + '٪';
+}
 function capIcoSizeInput(){ previewSetting('capIconSize', Number(document.getElementById('capIcoSize').value) || 100); }
 var _chPh = null, _chWasOpen = false;
 function openCapHero(){
   var card = document.getElementById('yrCap'), host = document.getElementById('capHeroHost'); if(!card || !host) return;
   if(card.parentNode !== host){ _chPh = document.createComment('capHero'); card.parentNode.insertBefore(_chPh, card); _chWasOpen = card.classList.contains('open'); host.appendChild(card); }
-  card.classList.remove('open');   // أموال وذهب مخفيين لحد ما تدوس على الأيقونة
+  card.classList.add('open');   // أموال وذهب مخفيين لحد ما تدوس على الأيقونة
   document.getElementById('capHeroOverlay').classList.add('open');
   try{ renderCap(); }catch(e){}
 }
