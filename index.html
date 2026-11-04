@@ -2646,6 +2646,225 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 #cmChipAll .cm-zl{stroke-dasharray:1; stroke-dashoffset:0; animation:cmZdraw 1.2s ease-out both;}
 @keyframes cmZdraw{from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
 @media (prefers-reduced-motion: reduce){ #cmChipAll .cm-zl{animation:none;} }
+
+/* ===== CAP MONEY ACTION ICONS 3D START ===== */
+#capMoneyOverlay .cm-act{display:inline-flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:9px; box-sizing:border-box; position:relative;
+  width:calc(33.333% - 8px); min-height:0; margin:10px 2px 16px; padding:6px 0 0; vertical-align:top; font-size:calc(14px * var(--fs,1));
+  background:none !important; box-shadow:none !important; border:0 !important; border-radius:0 !important; color:var(--text) !important; text-shadow:none !important; -webkit-tap-highlight-color:transparent;}
+#capMoneyOverlay .cm-act:active{transform:none !important;}
+#capMoneyOverlay .cm-ic{position:relative; display:flex; align-items:center; justify-content:center; width:58px; height:58px; border-radius:50%; font-size:calc(27px * var(--fs,1)); line-height:1; text-shadow:none;
+  animation:cmFloat 3.2s ease-in-out infinite; transition:transform .12s;
+  border:1.5px solid rgba(255,255,255,.75); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -8px 14px var(--cm-g) inset, 0 8px 14px var(--cm-s), 0 2px 0 rgba(255,255,255,.5);}
+#capMoneyOverlay .cm-ic::before{content:""; position:absolute; top:5px; left:10px; width:28px; height:16px; border-radius:50%; background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,0)); transform:rotate(-18deg); pointer-events:none;}
+#capMoneyOverlay .cm-ic::after{content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.7) 50%,transparent 62%); background-size:260% 100%; animation:cmShine 4.2s ease-in-out infinite; pointer-events:none;}
+#capMoneyOverlay .cm-ic > i{font-style:normal; display:inline-block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.25)); animation:cmSpin 5s ease-in-out infinite;}
+#capMoneyOverlay .cm-act:active .cm-ic{transform:translateY(3px) scale(.94);}
+#cmDepBtn{--cm-g:rgba(40,130,255,.45); --cm-s:rgba(40,130,255,.35);} #cmDepBtn .cm-ic{background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95) 0%,rgba(205,228,255,.7) 40%,rgba(120,180,255,.55) 100%);}
+#cmOutBtn{--cm-g:rgba(255,130,30,.45); --cm-s:rgba(255,130,30,.35);} #cmOutBtn .cm-ic{background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95) 0%,rgba(255,226,196,.7) 40%,rgba(255,170,90,.55) 100%); animation-delay:.5s;}
+#cmXfBtn{--cm-g:rgba(20,180,120,.45); --cm-s:rgba(20,180,120,.35);} #cmXfBtn .cm-ic{background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95) 0%,rgba(205,245,228,.7) 40%,rgba(90,215,165,.55) 100%); animation-delay:1s;}
+#cmOutBtn .cm-ic > i{animation-delay:.6s;} #cmXfBtn .cm-ic > i{animation-delay:1.2s;}
+#capMoneyOverlay .cm-lb{font-weight:900; font-size:calc(15px * var(--fs,1)); letter-spacing:.2px;}
+@keyframes cmFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+@keyframes cmShine{0%,55%{background-position:160% 0;}100%{background-position:-60% 0;}}
+@keyframes cmSpin{0%,100%{transform:perspective(200px) rotateY(-16deg);}50%{transform:perspective(200px) rotateY(16deg);}}
+@media (prefers-reduced-motion:reduce){#capMoneyOverlay .cm-ic,#capMoneyOverlay .cm-ic::after,#capMoneyOverlay .cm-ic > i{animation:none;}}
+/* ===== CAP MONEY ACTION ICONS 3D END ===== */
+
+/* ===== DEPOSIT FULL PAGE 3D START ===== */
+#depOverlay{align-items:stretch;}
+#depOverlay .modal-box{max-width:none; width:100%; height:100%; max-height:none; border-radius:0; border:0; box-shadow:none; background:var(--bg); padding:0 14px calc(30px + env(safe-area-inset-bottom,0px)); overflow-y:auto;}
+#depOverlay .dep-hero{background:linear-gradient(150deg,#7cbcff 0%,#3b8cf5 45%,#1450b8 100%); padding:10px 12px 10px; margin-bottom:16px; border-radius:20px; box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -4px 0 rgba(0,0,0,.18), 0 5px 0 rgba(10,50,130,.45), 0 12px 18px rgba(20,80,184,.3);}
+#depOverlay .dep-hero::before{content:""; position:absolute; inset:0 0 55% 0; background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0)); pointer-events:none;}
+#depOverlay .dep-hero-ico{position:relative; width:48px; height:48px; margin:0 auto 4px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(24px * var(--fs,1));
+  background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95),rgba(205,228,255,.7) 40%,rgba(120,180,255,.5) 100%); border:1.5px solid rgba(255,255,255,.8);
+  box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -8px 14px rgba(40,130,255,.45) inset, 0 10px 16px rgba(5,30,90,.4); animation:depFloat 3.2s ease-in-out infinite;}
+#depOverlay .dep-hero-ico i{font-style:normal; filter:drop-shadow(0 3px 2px rgba(0,0,0,.3));}
+#depOverlay .dep-hero-t{position:relative; font-weight:900; font-size:calc(16px * var(--fs,1)); text-shadow:0 2px 0 rgba(0,0,0,.25);}
+#depOverlay .dep-hero .dep-acc{position:relative; margin:8px 2px 0; padding:6px 10px; color:#fff; font-weight:800; font-size:calc(12.5px * var(--fs,1)); line-height:1.6; text-shadow:0 1px 2px rgba(0,0,0,.3);
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.45); border-radius:16px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 4px 8px rgba(0,0,0,.15); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);}
+#depOverlay .dep-card{background:var(--card); border:1px solid var(--border); border-radius:24px; padding:6px 14px 16px; box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 7px 0 rgba(0,0,0,.12), 0 18px 24px rgba(0,0,0,.12);}
+#depOverlay .field label{font-weight:800; opacity:.78;}
+#depOverlay .field input,#depOverlay .field select{width:100%; box-sizing:border-box; padding:14px; border-radius:16px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-size:calc(15.5px * var(--fs,1));
+  box-shadow:0 3px 6px rgba(0,0,0,.14) inset, 0 -1px 0 rgba(255,255,255,.35) inset;}
+#depOverlay .field input:focus,#depOverlay .field select:focus{outline:none; border-color:#3b8cf5; box-shadow:0 3px 6px rgba(0,0,0,.1) inset, 0 0 0 3px rgba(59,140,245,.22);}
+#depOverlay #depAmt{font-size:calc(26px * var(--fs,1)); font-weight:900; text-align:center; color:#1c6fe0; letter-spacing:1px;}
+#depOverlay .dep-prev{margin:12px 0 6px; border-inline-start:6px solid #3b8cf5; background:var(--bg); box-shadow:0 3px 6px rgba(0,0,0,.1) inset;}
+#depOverlay .dep-prev:empty{display:none;}
+#depOverlay .modal-actions{position:static; background:none; border:0; padding:0; margin-top:16px; display:flex; gap:12px;}
+#depOverlay .modal-actions button{flex:1; padding:15px; border-radius:18px; font-weight:900; font-size:calc(16px * var(--fs,1)); border:0; cursor:pointer; transition:transform .08s, box-shadow .08s;}
+#depOverlay .btn-save{color:#fff; background:linear-gradient(180deg,#6fb4ff,#3b8cf5 50%,#1c6fe0); text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:0 2px 0 rgba(255,255,255,.5) inset, 0 -3px 0 rgba(0,0,0,.14) inset, 0 6px 0 #0f4aa3, 0 14px 18px rgba(28,111,224,.35);}
+#depOverlay .btn-cancel{flex:.6 !important; color:var(--text); background:linear-gradient(180deg,#fff,#e7ebf1); box-shadow:0 2px 0 #fff inset, 0 6px 0 rgba(0,0,0,.18), 0 12px 16px rgba(0,0,0,.12);}
+#depOverlay .modal-actions button:active{transform:translateY(5px);}
+#depOverlay .btn-save:active{box-shadow:0 2px 0 rgba(255,255,255,.5) inset, 0 1px 0 #0f4aa3;}
+#depOverlay .btn-cancel:active{box-shadow:0 1px 0 rgba(0,0,0,.18);}
+#depOverlay .dep-logh{margin:26px 4px 12px;}
+@keyframes depFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+@media (prefers-reduced-motion:reduce){#depOverlay .dep-hero-ico{animation:none;}}
+/* ===== DEPOSIT FULL PAGE 3D END ===== */
+
+/* ===== TRANSFER FULL PAGE 3D START ===== */
+#xfOverlay{align-items:stretch;}
+#xfOverlay .modal-box{max-width:none; width:100%; height:100%; max-height:none; border-radius:0; border:0; box-shadow:none; background:var(--bg); padding:0 14px calc(30px + env(safe-area-inset-bottom,0px)); overflow-y:auto;}
+#xfOverlay .xf-hero{background:linear-gradient(150deg,#7cecc0 0%,#26c48b 45%,#0a7a54 100%); padding:20px 14px 16px; box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -6px 0 rgba(0,0,0,.18), 0 8px 0 rgba(6,80,52,.45), 0 20px 28px rgba(10,122,84,.35);}
+#xfOverlay .xf-hero::before{content:""; position:absolute; inset:0 0 55% 0; background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0)); pointer-events:none;}
+#xfOverlay .xf-hero-ico{position:relative; width:74px; height:74px; margin:0 auto 8px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(36px * var(--fs,1));
+  background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95),rgba(205,245,228,.7) 40%,rgba(90,215,165,.5) 100%); border:1.5px solid rgba(255,255,255,.8);
+  box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -8px 14px rgba(20,180,120,.45) inset, 0 10px 16px rgba(4,60,40,.4); animation:xfFloat 3.2s ease-in-out infinite;}
+#xfOverlay .xf-hero-ico i{font-style:normal; display:inline-block; filter:drop-shadow(0 3px 2px rgba(0,0,0,.3)); animation:xfSpin 5s ease-in-out infinite;}
+#xfOverlay .xf-hero-t{position:relative; font-weight:900; font-size:calc(20px * var(--fs,1)); text-shadow:0 2px 0 rgba(0,0,0,.25);}
+#xfOverlay .xf-card{background:var(--card); border:1px solid var(--border); border-radius:24px; padding:6px 14px 16px; box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 7px 0 rgba(0,0,0,.12), 0 18px 24px rgba(0,0,0,.12);}
+#xfOverlay .field label{font-weight:800; opacity:.78;}
+#xfOverlay .field input,#xfOverlay .field select{width:100%; box-sizing:border-box; padding:14px; border-radius:16px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-size:calc(15.5px * var(--fs,1));
+  box-shadow:0 3px 6px rgba(0,0,0,.14) inset, 0 -1px 0 rgba(255,255,255,.35) inset;}
+#xfOverlay .field input:focus,#xfOverlay .field select:focus{outline:none; border-color:#26c48b; box-shadow:0 3px 6px rgba(0,0,0,.1) inset, 0 0 0 3px rgba(38,196,139,.22);}
+#xfOverlay .xf-swap{margin:2px 0 -2px; position:relative;}
+#xfOverlay .xf-swap::before{content:""; position:absolute; top:50%; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--border),transparent);}
+#xfOverlay .xf-swap button{position:relative; width:48px; height:48px; border:2px solid rgba(255,255,255,.75); background:radial-gradient(circle at 32% 24%,#bdf6dc,#35d89f 50%,#12a56f); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3);
+  box-shadow:0 2px 3px rgba(255,255,255,.7) inset, 0 5px 0 #0a6644, 0 10px 12px rgba(18,165,111,.35); transition:transform .15s;}
+#xfOverlay .xf-swap button:active{transform:translateY(4px) rotate(180deg); box-shadow:0 2px 3px rgba(255,255,255,.7) inset, 0 1px 0 #0a6644;}
+#xfOverlay #xfAmt{font-size:calc(24px * var(--fs,1)); font-weight:900; text-align:center; color:#0e8c5c; letter-spacing:1px;}
+#xfOverlay .xf-amtrow button{padding:0 18px; border-radius:16px; color:#0a6644; background:linear-gradient(180deg,#e6fff4,#b9f0d7); box-shadow:0 2px 0 rgba(255,255,255,.9) inset, 0 4px 0 #0e8c5c, 0 8px 10px rgba(14,140,92,.25);}
+#xfOverlay .xf-amtrow button:active{transform:translateY(3px); box-shadow:0 1px 0 #0e8c5c;}
+#xfOverlay .xf-prev{margin:12px 0 6px; border-inline-start:6px solid #26c48b; background:var(--bg); box-shadow:0 3px 6px rgba(0,0,0,.1) inset;}
+#xfOverlay .xf-prev:empty{display:none;}
+#xfOverlay .modal-actions{position:static; background:none; border:0; padding:0; margin-top:16px; display:flex; gap:12px;}
+#xfOverlay .modal-actions button{flex:1; padding:15px; border-radius:18px; font-weight:900; font-size:calc(16px * var(--fs,1)); border:0; cursor:pointer; transition:transform .08s, box-shadow .08s;}
+#xfOverlay .btn-save{color:#fff; background:linear-gradient(180deg,#5fdca4,#26c48b 50%,#12a56f); text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:0 2px 0 rgba(255,255,255,.5) inset, 0 -3px 0 rgba(0,0,0,.14) inset, 0 6px 0 #0a6644, 0 14px 18px rgba(18,165,111,.35);}
+#xfOverlay .btn-cancel{flex:.6 !important; color:var(--text); background:linear-gradient(180deg,#fff,#e7ebf1); box-shadow:0 2px 0 #fff inset, 0 6px 0 rgba(0,0,0,.18), 0 12px 16px rgba(0,0,0,.12);}
+#xfOverlay .modal-actions button:active{transform:translateY(5px);}
+#xfOverlay .btn-save:active{box-shadow:0 2px 0 rgba(255,255,255,.5) inset, 0 1px 0 #0a6644;}
+#xfOverlay .btn-cancel:active{box-shadow:0 1px 0 rgba(0,0,0,.18);}
+#xfOverlay .xf-logh{margin:26px 4px 12px;}
+@keyframes xfFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+@keyframes xfSpin{0%,100%{transform:perspective(200px) rotateY(-16deg);}50%{transform:perspective(200px) rotateY(16deg);}}
+@media (prefers-reduced-motion:reduce){#xfOverlay .xf-hero-ico,#xfOverlay .xf-hero-ico i{animation:none;}}
+/* ===== TRANSFER FULL PAGE 3D END ===== */
+
+/* ===== SPEND-FROM-MONEY FULL PAGE 3D START ===== */
+#cmOutOverlay{align-items:stretch;}
+#cmOutOverlay .modal-box.cmo-page{max-width:none; width:100%; height:100%; max-height:none; border-radius:0; border:0; box-shadow:none; background:var(--bg); padding:0 14px calc(30px + env(safe-area-inset-bottom,0px)); overflow-y:auto;}
+#cmOutOverlay .cmo-hero{background:linear-gradient(150deg,#ffc27a 0%,#ff8a2b 45%,#c24a00 100%); padding:10px 12px; margin-bottom:16px; border-radius:20px; box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -4px 0 rgba(0,0,0,.18), 0 5px 0 rgba(120,50,0,.45), 0 12px 18px rgba(194,74,0,.3);}
+#cmOutOverlay .cmo-hero::before{content:""; position:absolute; inset:0 0 55% 0; background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0)); pointer-events:none;}
+#cmOutOverlay .cmo-hero-ico{position:relative; width:48px; height:48px; margin:0 auto 4px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(24px * var(--fs,1));
+  background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95),rgba(255,226,196,.7) 40%,rgba(255,170,90,.5) 100%); border:1.5px solid rgba(255,255,255,.8);
+  box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -8px 14px rgba(255,130,30,.45) inset, 0 10px 16px rgba(90,30,0,.4); animation:cmFloat 3.2s ease-in-out infinite;}
+#cmOutOverlay .cmo-hero-ico i{font-style:normal; display:inline-block; filter:drop-shadow(0 3px 2px rgba(0,0,0,.3)); animation:cmSpin 5s ease-in-out infinite;}
+#cmOutOverlay .cmo-hero-t{position:relative; font-weight:900; font-size:calc(16px * var(--fs,1)); text-shadow:0 2px 0 rgba(0,0,0,.25);}
+#cmOutOverlay .cmo-card{background:var(--card); border:1px solid var(--border); border-radius:24px; padding:10px 12px 16px; box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 7px 0 rgba(0,0,0,.12), 0 18px 24px rgba(0,0,0,.12);}
+/* كرات زجاجية حية */
+#cmOutOverlay .cmo-sph{position:relative; flex:none; width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(22px * var(--fs,1)); line-height:1;
+  background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95) 0%,var(--sa) 42%,var(--sb) 100%); border:1.5px solid rgba(255,255,255,.75);
+  box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -7px 12px var(--sg) inset, 0 7px 12px var(--ss), 0 2px 0 rgba(255,255,255,.5);
+  animation:cmFloat 3.2s ease-in-out infinite; transition:transform .15s, box-shadow .15s, filter .15s;}
+#cmOutOverlay .cmo-sph::before{content:""; position:absolute; top:4px; left:8px; width:22px; height:12px; border-radius:50%; background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,0)); transform:rotate(-18deg); pointer-events:none;}
+#cmOutOverlay .cmo-sph::after{content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.7) 50%,transparent 62%); background-size:260% 100%; animation:cmShine 4.2s ease-in-out infinite; pointer-events:none;}
+#cmOutOverlay .cmo-sph i{font-style:normal; display:inline-block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.25)); animation:cmSpin 5s ease-in-out infinite;}
+.sp-blue{--sa:rgba(205,228,255,.7); --sb:rgba(120,180,255,.55); --sg:rgba(40,130,255,.45); --ss:rgba(40,130,255,.35);}
+.sp-orange{--sa:rgba(255,226,196,.7); --sb:rgba(255,170,90,.55); --sg:rgba(255,130,30,.45); --ss:rgba(255,130,30,.35);}
+.sp-green{--sa:rgba(205,245,228,.7); --sb:rgba(90,215,165,.55); --sg:rgba(20,180,120,.45); --ss:rgba(20,180,120,.35);}
+.sp-gold{--sa:rgba(255,243,196,.75); --sb:rgba(255,205,70,.6); --sg:rgba(235,170,0,.45); --ss:rgba(235,170,0,.35);}
+.sp-amber{--sa:rgba(255,236,190,.75); --sb:rgba(255,190,80,.6); --sg:rgba(230,140,0,.45); --ss:rgba(230,140,0,.35);}
+.sp-violet{--sa:rgba(231,218,255,.75); --sb:rgba(176,140,255,.55); --sg:rgba(120,70,235,.45); --ss:rgba(120,70,235,.35);}
+.sp-teal{--sa:rgba(200,244,244,.75); --sb:rgba(80,200,205,.55); --sg:rgba(10,150,160,.45); --ss:rgba(10,150,160,.35);}
+.sp-brown{--sa:rgba(240,222,200,.75); --sb:rgba(200,150,100,.55); --sg:rgba(150,90,40,.45); --ss:rgba(150,90,40,.35);}
+/* صفوف الاختيار: أيقونات من غير مربعات */
+#cmOutOverlay .gi-dest,#cmOutOverlay .cmo-sub{display:flex; gap:4px; margin:8px 0 14px; justify-content:space-around; align-items:flex-start;}
+#cmOutOverlay button.cmo-ic{flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:7px; padding:6px 0 8px !important; border:0 !important; border-radius:0 !important; background:none !important; box-shadow:none !important; transform:none !important; color:var(--text) !important; text-shadow:none !important; cursor:pointer; position:relative; font-family:inherit; -webkit-tap-highlight-color:transparent;}
+#cmOutOverlay button.cmo-ic .cmo-sph{filter:saturate(.7) opacity(.85);}
+#cmOutOverlay button.cmo-ic .cmo-lb{font-weight:800; font-size:calc(11.5px * var(--fs,1)); line-height:1.3; text-align:center; opacity:.7;}
+#cmOutOverlay button.cmo-ic:nth-child(2) .cmo-sph,#cmOutOverlay button.cmo-ic:nth-child(2) .cmo-sph i{animation-delay:.4s;}
+#cmOutOverlay button.cmo-ic:nth-child(3) .cmo-sph,#cmOutOverlay button.cmo-ic:nth-child(3) .cmo-sph i{animation-delay:.8s;}
+#cmOutOverlay button.cmo-ic:nth-child(4) .cmo-sph,#cmOutOverlay button.cmo-ic:nth-child(4) .cmo-sph i{animation-delay:1.2s;}
+#cmOutOverlay button.cmo-ic:nth-child(5) .cmo-sph,#cmOutOverlay button.cmo-ic:nth-child(5) .cmo-sph i{animation-delay:1.6s;}
+#cmOutOverlay button.cmo-ic.active .cmo-sph{filter:none; transform:scale(1.18); box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -7px 12px var(--sg) inset, 0 0 0 3px var(--sg), 0 10px 16px var(--ss);}
+#cmOutOverlay button.cmo-ic.active .cmo-lb{opacity:1; font-weight:900;}
+#cmOutOverlay button.cmo-ic.active::after{content:""; position:absolute; bottom:0; left:50%; width:22px; height:4px; margin-left:-11px; border-radius:4px; background:var(--sg);}
+#cmOutOverlay button.cmo-ic:active .cmo-sph{transform:translateY(3px) scale(.94);}
+/* الإجماليات */
+#cmOutOverlay .cmo-stats{display:flex; gap:10px; margin:6px 0 14px; padding:6px 2px 12px; border-bottom:1px dashed var(--border);}
+#cmOutOverlay .cmo-stat{flex:1 1 0; min-width:0; display:flex; align-items:center; gap:10px;}
+#cmOutOverlay .cmo-st{display:flex; flex-direction:column; min-width:0; line-height:1.35;}
+#cmOutOverlay .cmo-st small{font-weight:800; font-size:calc(11.5px * var(--fs,1)); color:var(--muted);}
+#cmOutOverlay .cmo-st b{font-weight:900; font-size:calc(19px * var(--fs,1)); overflow-wrap:anywhere;}
+/* الحقول والأزرار */
+#cmOutOverlay .field label{font-weight:800; opacity:.78;}
+#cmOutOverlay .field input,#cmOutOverlay .field select{width:100%; box-sizing:border-box; padding:14px; border-radius:16px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-size:calc(15.5px * var(--fs,1)); box-shadow:0 3px 6px rgba(0,0,0,.14) inset, 0 -1px 0 rgba(255,255,255,.35) inset;}
+#cmOutOverlay .field input:focus,#cmOutOverlay .field select:focus{outline:none; border-color:#ff8a2b; box-shadow:0 3px 6px rgba(0,0,0,.1) inset, 0 0 0 3px rgba(255,138,43,.22);}
+#cmOutOverlay #cmoAmt{font-size:calc(26px * var(--fs,1)); font-weight:900; text-align:center; color:#d9570a; letter-spacing:1px;}
+#cmOutOverlay .modal-actions{position:static; background:none; border:0; padding:0; margin-top:16px; display:flex; gap:12px;}
+#cmOutOverlay .modal-actions button{flex:1; padding:15px; border-radius:18px; font-weight:900; font-size:calc(16px * var(--fs,1)); border:0; cursor:pointer; transition:transform .08s, box-shadow .08s;}
+#cmOutOverlay .btn-save{color:#fff; background:linear-gradient(180deg,#ffb066,#ff8a2b 50%,#e0600a); text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:0 2px 0 rgba(255,255,255,.5) inset, 0 -3px 0 rgba(0,0,0,.14) inset, 0 6px 0 #a64400, 0 14px 18px rgba(224,96,10,.35);}
+#cmOutOverlay .btn-cancel{flex:.6 !important; color:var(--text); background:linear-gradient(180deg,#fff,#e7ebf1); box-shadow:0 2px 0 #fff inset, 0 6px 0 rgba(0,0,0,.18), 0 12px 16px rgba(0,0,0,.12);}
+#cmOutOverlay .modal-actions button:active{transform:translateY(5px);}
+#cmOutOverlay .btn-save:active{box-shadow:0 2px 0 rgba(255,255,255,.5) inset, 0 1px 0 #a64400;}
+#cmOutOverlay .btn-cancel:active{box-shadow:0 1px 0 rgba(0,0,0,.18);}
+#cmOutOverlay .cmo-logh{margin:26px 4px 12px;}
+@media (prefers-reduced-motion:reduce){#cmOutOverlay .cmo-sph,#cmOutOverlay .cmo-sph::after,#cmOutOverlay .cmo-sph i,#cmOutOverlay .cmo-hero-ico,#cmOutOverlay .cmo-hero-ico i{animation:none;}}
+/* ===== SPEND-FROM-MONEY FULL PAGE 3D END ===== */
+
+/* ===== SPEND PAGE: STATIC ICONS + STAT BOXES START ===== */
+#cmOutOverlay .cmo-sph,#cmOutOverlay .cmo-sph::after,#cmOutOverlay .cmo-sph i,#cmOutOverlay .cmo-hero-ico,#cmOutOverlay .cmo-hero-ico i{animation:none !important;}
+#cmOutOverlay .cmo-sph::after{display:none;}
+#cmOutOverlay .cmo-stats{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:4px 0 16px; padding:0; border:0;}
+#cmOutOverlay .cmo-stat{position:relative; display:flex; flex-direction:column; align-items:stretch; gap:8px; min-width:0; padding:12px 12px 14px; border-radius:20px; overflow:hidden;
+  background:linear-gradient(180deg,var(--stA),var(--card) 62%); border:1px solid var(--border);
+  box-shadow:0 2px 0 rgba(255,255,255,.7) inset, 0 6px 0 var(--stD), 0 14px 18px rgba(0,0,0,.14);}
+#cmOutOverlay .cmo-stat:nth-child(1){--stA:rgba(176,140,255,.28); --stD:rgba(90,50,200,.55);}
+#cmOutOverlay .cmo-stat:nth-child(2){--stA:rgba(90,215,165,.30); --stD:rgba(10,120,80,.55);}
+#cmOutOverlay .cmo-stat .cmo-sph{width:38px; height:38px; font-size:calc(19px * var(--fs,1)); position:absolute; top:10px; inset-inline-end:10px;}
+#cmOutOverlay .cmo-st{display:flex; flex-direction:column; gap:6px; min-width:0; padding-inline-end:46px; line-height:1.4;}
+#cmOutOverlay .cmo-st small{font-weight:900; font-size:calc(13px * var(--fs,1)); color:var(--text); opacity:.85; line-height:1.45;}
+#cmOutOverlay .cmo-st b{display:block; font-weight:900; font-size:calc(24px * var(--fs,1)); line-height:1.2; color:var(--text); overflow-wrap:anywhere; margin-top:2px;}
+#cmOutOverlay .cmo-stat:nth-child(1) .cmo-st b{color:#5b34c8;}
+#cmOutOverlay .cmo-stat:nth-child(2) .cmo-st b{color:#0a7a54;}
+#cmOutOverlay .cmo-stat:active{transform:translateY(3px);}
+
+:root[data-theme="dark"] #cmOutOverlay .cmo-stat:nth-child(1) .cmo-st b{color:#c9b3ff;}
+:root[data-theme="dark"] #cmOutOverlay .cmo-stat:nth-child(2) .cmo-st b{color:#6ef0bd;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #cmOutOverlay .cmo-stat:nth-child(1) .cmo-st b{color:#c9b3ff;} :root:not([data-theme="light"]) #cmOutOverlay .cmo-stat:nth-child(2) .cmo-st b{color:#6ef0bd;} }
+/* ===== SPEND PAGE: STATIC ICONS + STAT BOXES END ===== */
+
+/* ===== SPEND PAGE: GLASS ROW + VIVID ICONS + TIDY STATS START ===== */
+.sp-blue{--sa:#bcdcff; --sb:#2f7bff; --sg:rgba(30,100,230,.55); --ss:rgba(30,100,230,.4);}
+.sp-orange{--sa:#ffd2a3; --sb:#ff7a00; --sg:rgba(230,100,0,.55); --ss:rgba(230,100,0,.4);}
+.sp-green{--sa:#b9f3d8; --sb:#12b27a; --sg:rgba(10,150,100,.55); --ss:rgba(10,150,100,.4);}
+.sp-gold{--sa:#fff0a6; --sb:#f5b800; --sg:rgba(220,150,0,.55); --ss:rgba(220,150,0,.4);}
+.sp-amber{--sa:#ffe0a8; --sb:#f08c00; --sg:rgba(215,115,0,.55); --ss:rgba(215,115,0,.4);}
+.sp-violet{--sa:#dccbff; --sb:#7a4be8; --sg:rgba(100,50,210,.55); --ss:rgba(100,50,210,.4);}
+.sp-teal{--sa:#b4f1f3; --sb:#0fa7ad; --sg:rgba(5,130,140,.55); --ss:rgba(5,130,140,.4);}
+.sp-brown{--sa:#f1d2b0; --sb:#b9733a; --sg:rgba(140,80,30,.55); --ss:rgba(140,80,30,.4);}
+#cmOutOverlay .cmo-sph{background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95) 0%,var(--sa) 28%,var(--sb) 100%);}
+#cmOutOverlay button.cmo-ic .cmo-sph{filter:none;}
+#cmOutOverlay button.cmo-ic .cmo-lb{opacity:.85;}
+#cmOutOverlay #cmoKinds{position:relative; gap:2px; margin:6px 0 16px; padding:14px 6px 10px; border-radius:24px; border:1.5px solid rgba(255,255,255,.75); overflow:hidden;
+  background:linear-gradient(135deg,rgba(120,180,255,.26),rgba(176,140,255,.2) 48%,rgba(90,215,165,.24));
+  -webkit-backdrop-filter:blur(12px) saturate(1.3); backdrop-filter:blur(12px) saturate(1.3);
+  box-shadow:0 2px 3px rgba(255,255,255,.85) inset, 0 -10px 18px rgba(255,255,255,.12) inset, 0 5px 0 rgba(0,0,0,.08), 0 14px 20px rgba(60,80,140,.18);}
+#cmOutOverlay #cmoKinds::before{content:""; position:absolute; inset:0 0 58% 0; background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0)); pointer-events:none;}
+:root[data-theme="dark"] #cmOutOverlay #cmoKinds{border-color:rgba(255,255,255,.22); background:linear-gradient(135deg,rgba(120,180,255,.16),rgba(176,140,255,.12) 48%,rgba(90,215,165,.14)); box-shadow:0 1px 2px rgba(255,255,255,.2) inset, 0 5px 0 rgba(0,0,0,.25), 0 14px 20px rgba(0,0,0,.35);}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #cmOutOverlay #cmoKinds{border-color:rgba(255,255,255,.22); background:linear-gradient(135deg,rgba(120,180,255,.16),rgba(176,140,255,.12) 48%,rgba(90,215,165,.14)); box-shadow:0 1px 2px rgba(255,255,255,.2) inset, 0 5px 0 rgba(0,0,0,.25), 0 14px 20px rgba(0,0,0,.35);} }
+#cmOutOverlay #cmoKinds button.cmo-ic{position:relative; z-index:1;}
+/* مربعا الإجمالي: ترتيب موحّد في المنتصف */
+#cmOutOverlay .cmo-stats{align-items:stretch;}
+#cmOutOverlay .cmo-stat{align-items:center; text-align:center; gap:9px; padding:14px 8px 16px;}
+#cmOutOverlay .cmo-stat .cmo-sph{position:relative; top:auto; inset-inline-end:auto; width:42px; height:42px; font-size:calc(21px * var(--fs,1)); margin:0 auto;}
+#cmOutOverlay .cmo-st{align-items:center; justify-content:flex-start; width:100%; padding:0; gap:7px; flex:1;}
+#cmOutOverlay .cmo-st small{display:flex; align-items:center; justify-content:center; text-align:center; min-height:2.9em; font-size:calc(13px * var(--fs,1)); font-weight:900; line-height:1.45; opacity:1; padding:0 2px;}
+#cmOutOverlay .cmo-st b{width:100%; text-align:center; font-size:calc(24px * var(--fs,1)); font-weight:900; line-height:1.15; letter-spacing:.3px; font-variant-numeric:tabular-nums; padding-top:8px; border-top:1px dashed var(--border); margin:0;}
+/* ===== SPEND PAGE: GLASS ROW + VIVID ICONS + TIDY STATS END ===== */
+
+/* ===== SPEND PAGE: SEPARATE CARDS START ===== */
+#cmOutOverlay #cmoKinds{margin:4px 0 20px; padding:16px 6px 12px; border-radius:26px;
+  box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -10px 18px rgba(255,255,255,.14) inset, 0 8px 0 rgba(60,70,120,.22), 0 20px 26px rgba(40,60,120,.22);}
+#cmOutOverlay .cmo-stats{margin:0 0 20px; gap:14px;}
+#cmOutOverlay .cmo-stat{border-radius:22px; box-shadow:0 2px 0 rgba(255,255,255,.8) inset, 0 7px 0 var(--stD), 0 18px 22px rgba(0,0,0,.16);}
+#cmOutOverlay .cmo-card{margin-top:2px;}
+/* ===== SPEND PAGE: SEPARATE CARDS END ===== */
+
+/* ===== SPEND PAGE: DEST ROW BACK TO BOXES START ===== */
+#cmOutOverlay #cmoDest{display:flex; gap:8px; margin:8px 2px 16px !important; justify-content:flex-start; align-items:stretch;}
+/* ===== SPEND PAGE: DEST ROW BACK TO BOXES END ===== */
 </style>
 </head>
 <body>
@@ -2978,9 +3197,9 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
       <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاشي</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:900;color:#8a5a00;line-height:1.3;margin-top:4px;"></em><em id="cmPenSub2" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:800;color:#6b7280;line-height:1.3;margin-top:2px;"></em></span>
     </div>
-    <button type="button" class="gp-btn dp" id="cmDepBtn" data-id="blk:dep" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openDepPick()"><span class="dp-ic">＋</span><span>إيداع</span></button>
-    <button type="button" class="gp-btn r" id="cmOutBtn" data-id="blk:out" data-hold-ok="1" style="width:100%;margin:6px 0 12px;" onclick="openCmOut()">💸 صرف من الأموال</button>
-    <button type="button" class="gp-btn g" id="cmXfBtn" data-id="blk:xfer" data-hold-ok="1" style="width:100%;margin:0 0 12px;" onclick="openXfer()">🔁 تحويل بين الحسابات</button>
+    <button type="button" class="gp-btn dp cm-act" id="cmDepBtn" data-id="blk:dep" data-hold-ok="1" onclick="openDepPick()" aria-label="إيداع"><span class="cm-ic"><i>➕</i></span><span class="cm-lb">إيداع</span></button>
+    <button type="button" class="gp-btn r cm-act" id="cmOutBtn" data-id="blk:out" data-hold-ok="1" onclick="openCmOut()" aria-label="صرف من الأموال"><span class="cm-ic"><i>💸</i></span><span class="cm-lb">صرف</span></button>
+    <button type="button" class="gp-btn g cm-act" id="cmXfBtn" data-id="blk:xfer" data-hold-ok="1" onclick="openXfer()" aria-label="تحويل بين الحسابات"><span class="cm-ic"><i>🔁</i></span><span class="cm-lb">تحويل</span></button>
     <div id="cmInterest" data-id="blk:int" style="display:none;"></div>
     <div class="gi-rows" id="cmList" data-id="blk:list"></div>
     <div id="cmAddLog" data-id="blk:log"></div>
@@ -3071,22 +3290,26 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 
 <div class="modal-overlay" id="cmOutOverlay">
   <div class="modal-box cmo-page">
-    <button type="button" class="fs-close" onclick="closeCmOut()" aria-label="رجوع">✕</button>
-    <h3 class="cmo-title">💸 صرف من الأموال</h3>
+    <div class="ys-top"><button type="button" class="ys-back" onclick="closeCmOut()">› رجوع</button><h3 class="ys-ttl">💸 صرف من الأموال</h3></div>
+    <div class="ys-wrap cmo-wrap">
+    <div class="ys-hero cmo-hero"><div class="cmo-hero-ico"><i>💸</i></div><div class="cmo-hero-t">صرف جديد</div></div>
     <div class="cmo-editbar" id="cmoEditBar" style="display:none;"><span>✏️ بتعدّل صرف قديم — غيّر اللي عايزه واضغط «حفظ التعديل»</span><button type="button" onclick="cmoCancelEdit()">إلغاء</button></div>
-    <div class="gi-dest" id="cmoKinds" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetKind('all')">⭐ المتاح</button><button type="button" onclick="cmoSetKind('cash')">💵 نقدي</button><button type="button" onclick="cmoSetKind('bank')">🏦 حسابات</button><button type="button" onclick="cmoSetKind('int')">🪙 فوائد</button><button type="button" onclick="cmoSetKind('pension')">💳 معاش</button></div>
-    <div class="gi-sumrow t3d money-t" id="cmoTotalRow"><span class="gi-chip v-violet"><small id="cmoTotLbl">💵 إجمالي النقدي</small><b id="cmoTot">0</b></span><span class="gi-chip v-green"><small>المتبقي بعد الصرف</small><b id="cmoAfter">0</b></span></div>
+    <div class="gi-dest" id="cmoKinds" style="margin:6px 0 10px;"><button type="button" class="cmo-ic sp-gold active" onclick="cmoSetKind('all')"><span class="cmo-sph"><i>⭐</i></span><span class="cmo-lb">المتاح</span></button><button type="button" class="cmo-ic sp-green" onclick="cmoSetKind('cash')"><span class="cmo-sph"><i>💵</i></span><span class="cmo-lb">نقدي</span></button><button type="button" class="cmo-ic sp-blue" onclick="cmoSetKind('bank')"><span class="cmo-sph"><i>🏦</i></span><span class="cmo-lb">حسابات</span></button><button type="button" class="cmo-ic sp-amber" onclick="cmoSetKind('int')"><span class="cmo-sph"><i>🪙</i></span><span class="cmo-lb">فوائد</span></button><button type="button" class="cmo-ic sp-violet" onclick="cmoSetKind('pension')"><span class="cmo-sph"><i>💳</i></span><span class="cmo-lb">معاش</span></button></div>
+    <div class="cmo-stats" id="cmoTotalRow"><span class="cmo-stat"><span class="cmo-sph sp-violet"><i>💼</i></span><span class="cmo-st"><small id="cmoTotLbl">💵 إجمالي النقدي</small><b id="cmoTot">0</b></span></span><span class="cmo-stat"><span class="cmo-sph sp-green"><i>✅</i></span><span class="cmo-st"><small>المتبقي بعد الصرف</small><b id="cmoAfter">0</b></span></span></div>
+    <div class="cmo-card">
     <div class="field"><label>الصرف من (كل بند وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
     <div class="hint" id="cmoAvail" style="white-space:pre-line;"></div>
     <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
     <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetDest('zakat')">🕌 زكاتي</button><button type="button" onclick="cmoSetDest('other')">📦 أخرى</button><button type="button" onclick="cmoSetDest('gen')">💵 الدخل العام الشهري</button></div>
-    <div class="field" id="cmoGenRow" style="display:none;"><label>💵 المبلغ بعد ما يدخل الدخل العام الشهري يستقر فين؟</label><div class="cmo-sub" id="cmoSub"><button type="button" onclick="cmoSetSub('gi')">💵 الدخل العام بس</button><button type="button" class="active" onclick="cmoSetSub('home')">💰 المصروف المنزلي</button><button type="button" onclick="cmoSetSub('grp')">📁 مجموعة منه</button></div><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStlRow" style="margin-top:8px;"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div id="cmoStgRow" style="margin-top:8px;display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div><div class="hint" id="cmoGenHint"></div></div>
+    <div class="field" id="cmoGenRow" style="display:none;"><label>💵 المبلغ بعد ما يدخل الدخل العام الشهري يستقر فين؟</label><div class="cmo-sub" id="cmoSub"><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام بس</span></button><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المصروف المنزلي</span></button><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">مجموعة منه</span></button></div><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStlRow" style="margin-top:8px;"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div id="cmoStgRow" style="margin-top:8px;display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div><div class="hint" id="cmoGenHint"></div></div>
     <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
     <div class="field"><label>📅 تاريخ الصرف</label><input type="date" id="cmoDate" onchange="cmoGenRender()"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
+    </div>
     <h4 class="cmo-logh">🧾 سجل الصرف <small>(كل يوم بتاريخه)</small></h4>
     <div class="cmo-log" id="cmoLog"></div>
+    </div>
   </div>
 </div>
 
@@ -3130,8 +3353,10 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 </style>
 <div class="modal-overlay" id="xfOverlay">
   <div class="modal-box">
-    <button type="button" class="fs-close" onclick="closeXfer()" aria-label="رجوع">✕</button>
-    <h3 class="xf-title">🔁 تحويل بين الحسابات</h3>
+    <div class="ys-top"><button type="button" class="ys-back" onclick="closeXfer()">› رجوع</button><h3 class="ys-ttl">🔁 تحويل بين الحسابات</h3></div>
+    <div class="ys-wrap xf-page">
+    <div class="ys-hero xf-hero"><div class="xf-hero-ico"><i>🔁</i></div><div class="xf-hero-t">تحويل جديد</div></div>
+    <div class="xf-card">
     <div class="field"><label>التحويل من</label><select id="xfFrom" onchange="xfPrev()"></select></div>
     <div class="xf-swap"><button type="button" onclick="xfSwap()" aria-label="عكس">⇅</button></div>
     <div class="field"><label>التحويل إلى</label><select id="xfTo" onchange="xfPrev()"></select></div>
@@ -3140,24 +3365,29 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     <div class="field"><label>📅 تاريخ التحويل</label><input type="date" id="xfDate"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="xfNote" placeholder="مثال: تغذية الحساب الفرعي"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeXfer()">إغلاق</button><button class="btn-save" id="xfSaveBtn" onclick="xfSave()">🔁 تحويل</button></div>
+    </div>
     <h4 class="xf-logh">🧾 سجل التحويلات</h4>
     <div id="xfLog"></div>
+    </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="depOverlay">
   <div class="modal-box">
-    <button type="button" class="fs-close" onclick="closeDeposit()" aria-label="رجوع">✕</button>
-    <h3 class="dep-title">➕ إيداع في الحساب</h3>
+    <div class="ys-top"><button type="button" class="ys-back" onclick="closeDeposit()">› رجوع</button><h3 class="ys-ttl">➕ إيداع في الحساب</h3></div>
+    <div class="ys-wrap dep-page">
+    <div class="ys-hero dep-hero"><div class="dep-hero-ico"><i>➕</i></div><div class="dep-hero-t">إيداع جديد</div><div class="dep-acc" id="depAcc"></div></div>
+    <div class="dep-card">
     <div class="field" id="depPickRow" style="display:none;"><label>🏦 اختار الحساب</label><select id="depSel" onchange="depPickChg()"></select></div>
-    <div class="dep-acc" id="depAcc"></div>
     <div class="field"><label>💰 مبلغ الإيداع</label><input type="number" id="depAmt" placeholder="0" inputmode="decimal" step="any" oninput="depPrev()"></div>
     <div class="dep-prev" id="depPrev"></div>
     <div class="field"><label>📅 تاريخ الإيداع (الفايدة بتتحسب عليه من اليوم ده)</label><input type="date" id="depDate"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="depNote" placeholder="مثال: راتب شهر نوفمبر"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeDeposit()">إغلاق</button><button class="btn-save" onclick="depSave()">➕ إيداع</button></div>
+    </div>
     <h4 class="dep-logh">🧾 إيداعات الحساب</h4>
     <div id="depLog"></div>
+    </div>
   </div>
 </div>
 
