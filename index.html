@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-04.8245">
+<meta name="app-version" content="2026-11-04.8258">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2642,10 +2642,42 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 #capMoneyOverlay .gi-sumrow > span.wide b#cmTotal{font-size:calc(44px * var(--fs,1)); line-height:1.1; white-space:nowrap; letter-spacing:-.5px;}
 #cmChipAll.cm-all{flex-wrap:wrap !important; row-gap:6px !important;}
 #cmChipAll .cm-all-body{flex:1 1 0; min-width:0;}
-#cmChipAll .cm-zig{flex:1 1 100%; width:100%; height:calc(40px * var(--fs,1)); display:block; overflow:visible; margin-top:2px;}
+#cmChipAll .cm-zig{flex:1 1 100%; width:100%; height:auto; display:block; overflow:visible; margin-top:2px;}
+#cmChipAll .cm-zcap{flex:1 1 100%; display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:2px 6px; font-size:calc(12.5px * var(--fs,1)); font-weight:800; line-height:1.5; text-align:center;}
+#cmChipAll .cm-zcap:empty{display:none;}
+#cmChipAll .cm-zcap{background:none !important; padding:0 !important; box-shadow:none !important; border:0 !important; border-radius:0 !important; margin:2px 0 0 !important;}
+#cmChipAll .cm-zcap bdi{display:inline-block; direction:ltr; unicode-bidi:isolate; margin-inline:2px;}
+#cmChipAll .cm-zcap span{flex:none !important; padding:0 !important; background:none !important; box-shadow:none !important; border-radius:0 !important; margin:0 !important; border:0 !important;}
+#cmChipAll .cz-ch{font-weight:900; font-size:1.08em;} #cmChipAll .cz-ch.up{color:#0a7a4f;} #cmChipAll .cz-ch.dn{color:#c2255c;}
+#cmChipAll .cz-mut{color:#4b5563; font-weight:700;} #cmChipAll .cm-zcap .cz-last{flex:1 1 100% !important; color:#374151; font-weight:700; font-size:.94em;}
 #cmChipAll .cm-zl{stroke-dasharray:1; stroke-dashoffset:0; animation:cmZdraw 1.2s ease-out both;}
 @keyframes cmZdraw{from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
 @media (prefers-reduced-motion: reduce){ #cmChipAll .cm-zl{animation:none;} }
+#yrCap .cm-zig2{display:block; width:100%; height:auto; overflow:visible; margin:6px 0 2px;}
+#yrCap .zg-cap{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 6px; font-size:calc(11.5px * var(--fs,1)); font-weight:800; line-height:1.55;}
+#yrCap .zg-cap:empty{display:none;}
+#yrCap .zg-cap bdi, #cmChipAll .cm-zcap bdi{display:inline-block; direction:ltr; unicode-bidi:isolate; margin-inline:2px;}
+#yrCap .zg-cap .cz-ch{font-weight:900; font-size:1.08em;} #yrCap .zg-cap .cz-ch.up{color:#0a7a4f;} #yrCap .zg-cap .cz-ch.dn{color:#c2255c;}
+#yrCap .zg-cap .cz-mut{color:var(--muted); font-weight:700;}
+#yrCap .zg-cap .cz-last{flex:1 1 100%; color:var(--text); opacity:.85; font-weight:700;}
+.cz-demo{flex:1 1 100%; text-align:center; font-weight:900; font-size:.92em; color:#8a5a00; background:rgba(245,168,0,.2) !important; border-radius:8px !important; padding:1px 8px !important; margin-bottom:2px !important;}
+#cmChipAll .cm-zcap .cz-demo{background:rgba(245,168,0,.22) !important; border-radius:8px !important; padding:1px 8px !important; flex:1 1 100% !important; color:#8a5a00;}
+#yrCap .cm-zl{stroke-dasharray:1; stroke-dashoffset:0; animation:cmZdraw 1.2s ease-out both;}
+@media (prefers-reduced-motion: reduce){ #yrCap .cm-zl{animation:none;} }
+#cmChipAll .cm-bar, #yrCap .cm-bar{transform-box:fill-box; transform-origin:50% 100%; animation:cmBarUp .55s ease-out both;}
+@keyframes cmBarUp{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+#capGoldOverlay .gd-zig{display:block; width:100%; height:auto; overflow:visible; margin:4px 0 6px;}
+#capGoldOverlay .gd-zcap{display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:2px 6px; margin:0 0 10px; font-size:calc(12.5px * var(--fs,1)); font-weight:800; line-height:1.55; color:#3b2a00; text-align:center;}
+#capGoldOverlay .gd-zcap:empty{display:none;}
+#capGoldOverlay .gd-zcap span{background:none !important; padding:0 !important; box-shadow:none !important; border:0 !important; margin:0 !important; flex:none;}
+#capGoldOverlay .gd-zcap bdi{display:inline-block; direction:ltr; unicode-bidi:isolate; margin-inline:2px;}
+#capGoldOverlay .gd-zcap .cz-ch{font-weight:900; font-size:1.08em;} #capGoldOverlay .gd-zcap .cz-ch.up{color:#075c3d;} #capGoldOverlay .gd-zcap .cz-ch.dn{color:#a61e1e;}
+#capGoldOverlay .gd-zcap .cz-mut{color:#5a3f00; font-weight:700;}
+#capGoldOverlay .gd-zcap .cz-last{flex:1 1 100%; font-weight:700; font-size:.94em;}
+#capGoldOverlay .gd-zcap .cz-demo{flex:1 1 100% !important; background:rgba(255,255,255,.45) !important; border-radius:8px; padding:1px 8px !important; color:#6b4300;}
+#capGoldOverlay .gd-zig .cm-bar{transform-box:fill-box; transform-origin:50% 100%; animation:cmBarUp .55s ease-out both;}
+#capGoldOverlay .gd-zig .cm-zl{stroke-dasharray:1; stroke-dashoffset:0; animation:cmZdraw 1.2s ease-out both;}
+@media (prefers-reduced-motion: reduce){ .cm-bar{animation:none !important;} }
 
 /* ===== CAP MONEY ACTION ICONS 3D START ===== */
 #capMoneyOverlay .cm-act{display:inline-flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:9px; box-sizing:border-box; position:relative;
@@ -3108,6 +3140,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         <span class="cs-body">
           <span class="c2-head"><span class="c2-l">أموال</span></span>
           <span class="c2-v" id="capMoney">0</span>
+          <svg id="capMoneyZig" class="cm-zig2" viewBox="0 0 300 56" role="img" aria-label="حركة الأموال"></svg><div id="capMoneyZigCap" class="zg-cap"></div>
           <span class="c2-pill" id="capMoneyPct"></span>
           <span class="c2-rows" id="capMoneySplit"></span>
         </span></div>
@@ -3116,6 +3149,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         <span class="cs-body">
           <span class="c2-head"><span class="c2-l">ذهب</span></span>
           <span class="c2-v" id="capGold">0</span>
+          <svg id="capGoldZig" class="cm-zig2" viewBox="0 0 300 56" role="img" aria-label="حركة الذهب"></svg><div id="capGoldZigCap" class="zg-cap"></div>
           <span class="c2-pill" id="capGoldPct"></span>
           <span class="c2-rows" id="capGoldSplit"></span>
           <span class="c2-karat" id="capGoldKarat"></span>
@@ -3192,7 +3226,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     <button type="button" class="fs-close" onclick="closeCapMoney()" aria-label="رجوع">✕</button>
     <h3>💵 أموال</h3>
     <div class="gi-sumrow t3d money-t" id="cmChips" data-id="blk:chips">
-      <span id="cmChipAll" class="gi-chip v-violet wide cm-all" onclick="setCmFilter(null)"><span class="cm-all-ico" id="cmAllIco" aria-hidden="true"></span><span class="cm-all-body"><small>إجمالي الأموال</small><b id="cmTotal">0</b></span><svg id="cmZig" class="cm-zig" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"></svg></span>
+      <span id="cmChipAll" class="gi-chip v-violet wide cm-all" onclick="setCmFilter(null)"><span class="cm-all-ico" id="cmAllIco" aria-hidden="true"></span><span class="cm-all-body"><small>إجمالي الأموال</small><b id="cmTotal">0</b></span><svg id="cmZig" class="cm-zig" viewBox="0 0 300 56" aria-hidden="false" role="img" aria-label="حركة إجمالي الأموال"></svg><span id="cmZigCap" class="cm-zcap"></span></span>
       <span id="cmChipCash" class="gi-chip v-green" onclick="setCmFilter('cash')"><small>💵 نقدي</small><b id="cmCash">0</b></span>
       <span id="cmChipBank" class="gi-chip v-blue" onclick="setCmFilter('bank')"><small>🏦 بنوك</small><b id="cmBank">0</b></span>
       <span id="cmChipPen" class="gi-chip v-gold" onclick="setCmFilter('pension')"><small>💳 معاشي</small><b id="cmPen">0</b><em id="cmPenSub" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:900;color:#8a5a00;line-height:1.3;margin-top:4px;"></em><em id="cmPenSub2" style="display:none;font-style:normal;font-size:calc(11px * var(--fs,1));font-weight:800;color:#6b7280;line-height:1.3;margin-top:2px;"></em></span>
@@ -3399,6 +3433,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     <div class="gd-hero">
       <small>إجمالي الذهب الآن</small>
       <b class="gd-big" id="cgTotal">0</b>
+      <svg id="glZig" class="gd-zig" viewBox="0 0 300 56" role="img" aria-label="قيمة الذهب"></svg><div id="glZigCap" class="gd-zcap"></div>
       <div class="gd-mini">
         <div><small>⚖️ الوزن</small><b id="cgGrams">0</b></div>
         <div><small>🛒 الشراء</small><b id="glBuy">0</b></div>
@@ -3937,6 +3972,28 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       </div>
     </div>
 
+
+<div class="settings-section" id="zigStyleSection">
+      <h4>📈 شكل المؤشرات</h4>
+      <p style="font-size:12px; color:var(--muted); margin:0 0 4px; line-height:1.6;">اختار شكل المؤشر لكل بطاقة. التغيير بيظهر فورًا في البطاقة.</p>
+      <div style="font-weight:800; font-size:13px; margin:10px 0 6px;">💵 إجمالي الأموال</div>
+      <div class="opt-row" id="optZig_total"><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('total','smooth')">〰️ منحنى ناعم</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('total','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('total','step')">🪜 درجات سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('total','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('total','off')">🚫 بدون</button></div>
+      <div style="font-weight:800; font-size:13px; margin:10px 0 6px;">💰 أموال</div>
+      <div class="opt-row" id="optZig_money"><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('money','smooth')">〰️ منحنى ناعم</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('money','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('money','step')">🪜 درجات سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('money','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('money','off')">🚫 بدون</button></div>
+      <div style="font-weight:800; font-size:13px; margin:10px 0 6px;">🪙 ذهب</div>
+      <div class="opt-row" id="optZig_gold"><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('gold','smooth')">〰️ منحنى ناعم</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('gold','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('gold','step')">🪜 درجات سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('gold','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('gold','off')">🚫 بدون</button></div>
+      <div style="font-weight:800; font-size:13px; margin:10px 0 6px;">🪙 صفحة الذهب (قيمة الذهب)</div>
+      <div class="opt-row" id="optZig_goldpage"><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('goldpage','smooth')">〰️ منحنى ناعم</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('goldpage','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('goldpage','step')">🪜 درجات سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('goldpage','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('goldpage','off')">🚫 بدون</button></div>
+    </div>
+
+<div class="settings-section">
+      <h4>🎲 تجربة المؤشرات</h4>
+      <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.6;">بتعرض مؤشرات «إجمالي الأموال» و«أموال» و«ذهب» بأرقام عشوائية للتجربة بس. بياناتك الحقيقية مش بتتغير ولا بتتحفظ، والتجربة بتقفل لوحدها لما تقفل التطبيق.</p>
+      <div class="opt-row">
+        <button type="button" class="opt-chip" onclick="zigDemoRoll()">🎲 أرقام عشوائية جديدة</button>
+        <button type="button" class="opt-chip" onclick="zigDemoOff()">↩️ الأرقام الحقيقية</button>
+      </div>
+    </div>
 
     <div class="settings-section" id="nfSection">
       <h4>🔔 الإشعارات</h4>
@@ -4715,6 +4772,21 @@ let settings = {
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
+var ZIG_STYLES = ['smooth','zig','step','bars','off'];
+function zigStyleOf(card){
+  try{ var z = (_draftSettings || settings).zig || {}, v = z[card]; return ZIG_STYLES.indexOf(v) >= 0 ? v : 'smooth'; }catch(e){ return 'smooth'; }
+}
+function zigSetStyle(card, style){
+  if(!_draftSettings) _draftSettings = cloneSettings(settings);
+  _draftSettings.zig = Object.assign({}, _draftSettings.zig || {}); _draftSettings.zig[card] = style;
+  try{ zigSettingsUI(); }catch(e){}
+  try{ zigRefresh(); }catch(e){}
+  try{ autoSaveSettings(); }catch(e){}
+}
+function zigSettingsUI(){
+  ['total','money','gold','goldpage'].forEach(function(c){ var box = document.getElementById('optZig_' + c); if(!box) return; var cur = zigStyleOf(c);
+    Array.from(box.children).forEach(function(el){ el.classList.toggle('active', el.dataset.val === cur); }); });
+}
 
 function loadSettings(){
   try{
@@ -4835,6 +4907,7 @@ function refreshDigitsView(){
   }catch(e){}
 }
 function refreshSettingsUI(s){
+  try{ zigSettingsUI(); }catch(e){}
   const nc = document.getElementById('notifyChk'); if(nc) nc.checked = !!s.notify;
   try{ nfRender(s); }catch(e){}
   try{ capIcoRender(s); }catch(e){}
@@ -4896,7 +4969,7 @@ function resetCardColors(){
 
 function cloneSettings(s){
   const months = (s.colors && s.colors.months) ? s.colors.months.slice() : DEFAULT_CARD_COLORS.months.slice();
-  return Object.assign({}, s, { colors: Object.assign({}, DEFAULT_CARD_COLORS, s.colors||{}, {months}) });
+  return Object.assign({}, s, { zig: Object.assign({}, s.zig || {}) }, { colors: Object.assign({}, DEFAULT_CARD_COLORS, s.colors||{}, {months}) });
 }
 
 function adjustFontScale(delta){
@@ -6238,6 +6311,7 @@ function renderCap(){
   document.getElementById('capMoneyPct').textContent = t.all > 0 ? toArabicDigits(mp) + '٪' + lab : '';
   document.getElementById('capGoldPct').textContent = t.all > 0 ? toArabicDigits(100 - mp) + '٪' + lab : '';
   { const pe = document.getElementById('capGoldPnl'); if(pe){ const g = goldPnl(); pe.className = 'c2-pnl ' + (g.pnl >= 0 ? 'up' : 'down'); pe.innerHTML = g.ok ? unitHtml('📈 ' + (g.pnl >= 0 ? 'ربح ' : 'خسارة ') + glSigned(g.pnl) + CUR) : ''; } }
+  try{ capZigRender(); }catch(e){}
   try{ if(typeof renderZM === 'function') renderZM(); const zo = document.getElementById('zkcOverlay'); if(zo && zo.classList.contains('open')) renderZkCalc(); }catch(e){}   // الزكاة بتتجدد تلقائي مع أي تغيير في رأس المال
 }
 function toggleCapCards(){ document.getElementById('yrCap').classList.toggle('open'); }
@@ -7720,33 +7794,153 @@ function cmTotalFit(){
   b.style.whiteSpace = 'nowrap';
   while(b.scrollWidth > avail && base > 22 && n++ < 40){ base -= 1; b.style.fontSize = base + 'px'; }
 }
-function cmZigRender(){
-  var svg = document.getElementById('cmZig'); if(!svg) return;
-  var pts = [];
-  try{
-    cmSrcList().filter(function(x){ return capCatOf(x) === 'money'; })
-      .map(function(x){ return [opsMs(x.date) || 0, Number(x.amount) || 0]; })
-      .filter(function(a){ return a[0] > 0; }).sort(function(a, b){ return a[0] - b[0]; })
-      .forEach(function(a, i, all){ pts.push((pts.length ? pts[pts.length - 1] : 0) + a[1]); });
-  }catch(e){}
-  pts = pts.slice(-8);
-  var real = pts.length >= 2;
-  if(!real) pts = [0.2, 0.35, 0.3, 0.55, 0.5, 0.8];
-  var mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts), rg = (mx - mn) || 1;
-  var norm = pts.map(function(v){ return (v - mn) / rg; });
-  var M = 11, W = 300, H = 46, xs = [], ys = [];
-  for(var i = 0; i < M; i++){
-    var f = i / (M - 1) * (norm.length - 1), a = Math.floor(f), c = Math.min(norm.length - 1, a + 1), base = norm[a] + (norm[c] - norm[a]) * (f - a);
-    var y = 0.26 + base * 0.48 + (i % 2 ? -0.24 : 0.24);
-    xs.push(6 + i * (W - 12) / (M - 1)); ys.push(H - Math.max(0.06, Math.min(0.94, y)) * H);
+function cmTimeline(totalNow){
+  var now = Date.now(), DAY = 86400000, ids = {}, ev = [], dep = {}, out = {}, xin = {}, xout = {};
+  var items = cmSrcList().filter(function(x){ return capCatOf(x) === 'money' && (capSubOf(x) === 'cash' || capSubOf(x) === 'bank'); });
+  items.forEach(function(x){ ids[x.id] = x; });
+  (data.moneyDeposits || []).forEach(function(r){ if(!r || !ids[r.to]) return; var a = Number(r.amount) || 0, t = opsMs(r.date) || 0; dep[r.to] = (dep[r.to] || 0) + a; if(t && a) ev.push({t: t, d: a, k: 'dep'}); });
+  (data.moneyOut || []).forEach(function(r){ if(!r || !ids[r.itemId] || (r.kind !== 'cash' && r.kind !== 'bank')) return; var a = Number(r.amount) || 0, t = opsMs(r.date) || 0; out[r.itemId] = (out[r.itemId] || 0) + a; if(t && a) ev.push({t: t, d: -a, k: 'out'}); });
+  (data.moneyXfer || []).forEach(function(r){ if(!r) return; var a = Number(r.amount) || 0, t = opsMs(r.date) || 0, f = !!ids[r.from], o = !!ids[r.to];
+    if(f) xout[r.from] = (xout[r.from] || 0) + a; if(o) xin[r.to] = (xin[r.to] || 0) + a;
+    if(t && a && f !== o) ev.push({t: t, d: f ? -a : a, k: f ? 'out' : 'dep'}); });
+  items.forEach(function(x){ var op = (Number(x.amount) || 0) - (dep[x.id] || 0) + (out[x.id] || 0) - (xin[x.id] || 0) + (xout[x.id] || 0), t = opsMs(x.date) || 0; if(op > 0.5 && t) ev.push({t: t, d: op, k: 'open'}); });
+  ev = ev.filter(function(e){ return e.t <= now + DAY; }).sort(function(a, b){ return a.t - b.t; });
+  var cum = ev.reduce(function(a, e){ return a + e.d; }, 0), gap = (Number(totalNow) || 0) - cum;
+  if(Math.abs(gap) > 0.5) ev.push({t: now, d: gap, k: 'int'});   // فرق = فوايد اتضافت للرصيد
+  var days = [], map = {};
+  ev.forEach(function(e){ var dt = new Date(e.t), key = dt.getFullYear() + '-' + dt.getMonth() + '-' + dt.getDate();
+    if(!map[key]){ map[key] = {t: e.t, d: 0, k: e.k}; days.push(map[key]); } map[key].d += e.d; if(e.k !== 'int') map[key].k = e.k; map[key].t = Math.max(map[key].t, e.t); });
+  var run = 0; days.forEach(function(g){ run += g.d; g.bal = run; });
+  var cut = now - 30 * DAY, before = 0; ev.forEach(function(e){ if(e.t <= cut) before += e.d; });
+  var last = null; ev.forEach(function(e){ if(e.k !== 'int') last = e; });
+  return {days: days, change30: (Number(totalNow) || 0) - before, before: before, last: last};
+}
+/* ===== مؤشرات رأس المال (حقيقية) + وضع التجربة بأرقام عشوائية (للعرض بس، مش بيتحفظ) ===== */
+var __zigDemo = false, _zdCache = null, _zdSeed = 7;
+function zdRand(){ _zdSeed = (_zdSeed * 16807) % 2147483647; return (_zdSeed - 1) / 2147483646; }
+function zdMoney(){
+  var DAY = 86400000, now = Date.now(), n = 8 + Math.floor(zdRand() * 3), bal = Math.round(20 + zdRand() * 80) * 1000, start = bal, days = [], ago = n * 4;
+  for(var i = 0; i < n; i++){
+    ago -= 2 + Math.floor(zdRand() * 3); if(ago < 0) ago = 0;
+    var d = Math.round(2 + zdRand() * 18) * 500 * (zdRand() < 0.5 ? 1 : -1); if(bal + d < 4000) d = Math.abs(d);
+    bal += d; days.push({t: now - ago * DAY, d: d, bal: bal, k: d > 0 ? 'dep' : 'out'});
   }
-  var up = norm[norm.length - 1] >= norm[0], col = up ? '#0f9d78' : '#d6336c';
+  var before = start; days.forEach(function(g){ if(g.t <= now - 30 * DAY) before += g.d; });
+  return {days: days, change30: bal - before, before: before, last: days[days.length - 1], total: bal};
+}
+function zdGold(){
+  var DAY = 86400000, now = Date.now(), n = 5 + Math.floor(zdRand() * 3), cost = 0, grams = 0, g30 = 0, days = [], ago = n * 14, last = null;
+  for(var i = 0; i < n; i++){
+    ago -= 5 + Math.floor(zdRand() * 10); if(ago < 1) ago = 1;
+    var g = Math.round((2 + zdRand() * 14) * 10) / 10, c = Math.round(g * (3600 + zdRand() * 900));
+    cost += c; grams += g; var t = now - ago * DAY; if(t >= now - 30 * DAY) g30 += g;
+    days.push({t: t, d: c, bal: cost, k: 'buy', g: g}); last = {t: t, g: g, kar: [18, 21, 24][Math.floor(zdRand() * 3)]};
+  }
+  var mkt = Math.round(cost * (0.9 + zdRand() * 0.28)); days.push({t: now, d: mkt - cost, bal: mkt, k: 'mkt'});
+  return {days: days, ok: true, pnl: mkt - cost, pct: (mkt - cost) / cost * 100, g30: g30, grams: grams, last: last};
+}
+function zigDemoData(){ if(!_zdCache) _zdCache = {money: zdMoney(), gold: zdGold()}; return _zdCache; }
+function zigRefresh(){ try{ if(typeof renderCap === 'function') renderCap(); }catch(e){} try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} }
+function zigDemoRoll(){ __zigDemo = true; _zdSeed = (Date.now() % 2147483646) + 1; _zdCache = null; zigRefresh(); showToast('🎲 المؤشرات شغّالة بأرقام تجريبية — اقفل الإعدادات وافتح رأس المال', true); }
+function zigDemoOff(){ __zigDemo = false; _zdCache = null; zigRefresh(); showToast('رجعت للأرقام الحقيقية', true); }
+function zigAr(n){ return toArabicDigits(fmt(Math.round(Math.abs(n)))); }
+function zigDate(t){ return new Date(t).toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long'}); }
+/* رسم زجزاج عام: o.days = [{t, d, bal, k}] بالترتيب الزمني، o.cap = HTML التعليق */
+function zigPaint(svg, cap, o){
+  if(!svg) return;
+  var days = (o.days || []).slice(-10), W = 300, H = 56, P = 7;
+  if(cap) cap.style.display = '';
+  svg.style.display = '';
+  if(!days.length){
+    svg.innerHTML = '<line x1="6" y1="' + H / 2 + '" x2="294" y2="' + H / 2 + '" stroke="rgba(128,128,128,.55)" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+    if(cap) cap.innerHTML = '<span class="cz-mut">' + (o.empty || '') + '</span>';
+    return;
+  }
+  var pts = [days[0].bal - days[0].d].concat(days.map(function(g){ return g.bal; }));
+  var mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts), rg = (mx - mn) || 1, n = pts.length;
+  var xs = pts.map(function(v, i){ return P + i * (W - 2 * P) / (n - 1); });
+  var ys = pts.map(function(v){ return H - P - ((v - mn) / rg) * (H - 2 * P); });
+  var up = pts[n - 1] >= pts[0], col = up ? '#0f9d78' : '#d6336c', uid = 'zg' + Math.floor(Math.random() * 1e6);
   var d = xs.map(function(x, i){ return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + ys[i].toFixed(1); }).join(' ');
-  svg.innerHTML = '<defs><linearGradient id="cmZg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + col + '" stop-opacity=".28"/><stop offset="1" stop-color="' + col + '" stop-opacity="0"/></linearGradient></defs>' +
-    '<path d="' + d + ' L' + xs[M - 1].toFixed(1) + ' ' + H + ' L' + xs[0].toFixed(1) + ' ' + H + ' Z" fill="url(#cmZg)"/>' +
-    '<path class="cm-zl" pathLength="1" d="' + d + '" fill="none" stroke="' + col + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
-    '<circle cx="' + xs[M - 1].toFixed(1) + '" cy="' + ys[M - 1].toFixed(1) + '" r="4.5" fill="#fff" stroke="' + col + '" stroke-width="2.5" vector-effect="non-scaling-stroke"/>';
+  var sty = o.style || 'zig';
+  if(sty === 'smooth'){ d = 'M' + xs[0].toFixed(1) + ' ' + ys[0].toFixed(1); for(var r = 1; r < n; r++){ var mx2 = (xs[r - 1] + xs[r]) / 2; d += ' C' + mx2.toFixed(1) + ' ' + ys[r - 1].toFixed(1) + ' ' + mx2.toFixed(1) + ' ' + ys[r].toFixed(1) + ' ' + xs[r].toFixed(1) + ' ' + ys[r].toFixed(1); } }   // منحنى ناعم
+  if(sty === 'step'){ d = 'M' + xs[0].toFixed(1) + ' ' + ys[0].toFixed(1); for(var q = 1; q < n; q++){ d += ' L' + xs[q].toFixed(1) + ' ' + ys[q - 1].toFixed(1) + ' L' + xs[q].toFixed(1) + ' ' + ys[q].toFixed(1); } }   // درجات سلم
+  var dots = days.map(function(g, i){ var c = g.d >= 0 ? '#0f9d78' : '#d6336c';
+    return '<circle cx="' + xs[i + 1].toFixed(1) + '" cy="' + ys[i + 1].toFixed(1) + '" r="' + (i === days.length - 1 ? 5 : 3.6) + '" fill="#fff" stroke="' + c + '" stroke-width="2.4" vector-effect="non-scaling-stroke"><title>' + zigDate(g.t) + ' · ' + (g.d >= 0 ? '+' : '−') + zigAr(g.d) + ' · ' + zigAr(g.bal) + '</title></circle>'; }).join('');
+  if(sty === 'bars'){
+    var bw = Math.min(22, (W - 2 * P) / days.length * 0.62), bars = '', lo = mn >= 0 ? mn - ((mx - mn) || mx || 1) * 0.45 : mn, rg2 = (mx - lo) || 1;
+    days.forEach(function(g, i){ var x = P + (days.length === 1 ? (W - 2 * P) / 2 : i * (W - 2 * P) / (days.length - 1)), h = Math.max(4, ((g.bal - lo) / rg2) * (H - 2 * P)), c = g.d >= 0 ? '#0f9d78' : '#d6336c';
+      bars += '<rect class="cm-bar" style="animation-delay:' + (i * 50) + 'ms" x="' + (x - bw / 2).toFixed(1) + '" y="' + (H - P - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" fill="' + c + '" fill-opacity="' + (i === days.length - 1 ? 1 : 0.78) + '"><title>' + zigDate(g.t) + ' · ' + (g.d >= 0 ? '+' : '−') + zigAr(g.d) + ' · ' + zigAr(g.bal) + '</title></rect>'; });
+    svg.innerHTML = bars; svg.setAttribute('data-up', up ? '1' : '0');
+    if(cap) cap.innerHTML = (__zigDemo ? '<span class="cz-demo">🎲 أرقام تجريبية</span>' : '') + (o.cap || '');
+    return;
+  }
+  svg.innerHTML = '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + col + '" stop-opacity=".26"/><stop offset="1" stop-color="' + col + '" stop-opacity="0"/></linearGradient></defs>' +
+    '<path d="' + d + ' L' + xs[n - 1].toFixed(1) + ' ' + H + ' L' + xs[0].toFixed(1) + ' ' + H + ' Z" fill="url(#' + uid + ')"/>' +
+    '<path class="cm-zl" pathLength="1" d="' + d + '" fill="none" stroke="' + col + '" stroke-width="3" stroke-linejoin="' + (sty === 'step' ? 'miter' : 'round') + '" stroke-linecap="' + (sty === 'step' ? 'square' : 'round') + '" vector-effect="non-scaling-stroke"/>' + dots;
   svg.setAttribute('data-up', up ? '1' : '0');
+  if(cap) cap.innerHTML = (__zigDemo ? '<span class="cz-demo">🎲 أرقام تجريبية</span>' : '') + (o.cap || '');
+}
+function zigHide(svg, cap){ if(svg){ svg.innerHTML = ''; svg.style.display = 'none'; } if(cap){ cap.innerHTML = ''; cap.style.display = 'none'; } }
+function zigMoneyCap(tl){
+  var c30 = tl.change30, pc = tl.before > 0 ? Math.round(c30 / tl.before * 100) : null, h = '';
+  if(Math.abs(c30) < 0.5) h = '<span class="cz-mut">➖ من غير تغيير في آخر ٣٠ يوم</span>';
+  else h = '<span class="cz-ch ' + (c30 > 0 ? 'up' : 'dn') + '"><bdi>' + (c30 > 0 ? '▲ ' : '▼ ') + zigAr(c30) + '</bdi>' + (pc !== null ? ' <bdi>(' + toArabicDigits(Math.abs(pc)) + '٪)</bdi>' : '') + '</span><span class="cz-mut"> آخر ٣٠ يوم</span>';
+  if(tl.last){ var L = tl.last, nm = L.k === 'dep' ? '💰 إيداع' : (L.k === 'out' ? '💸 صرف' : '➕ إضافة');
+    h += '<span class="cz-last">آخر حركة: ' + nm + ' <bdi>' + zigAr(L.d) + '</bdi> <bdi>·</bdi> <bdi>' + zigDate(L.t) + '</bdi></span>'; }
+  return h;
+}
+function zigGoldCap(m){
+  var h = '';
+  if(m.ok){ h = '<span class="cz-ch ' + (m.pnl >= 0 ? 'up' : 'dn') + '"><bdi>' + (m.pnl >= 0 ? '▲ ' : '▼ ') + zigAr(m.pnl) + '</bdi> <bdi>(' + toArabicDigits(Math.round(Math.abs(m.pct))) + '٪)</bdi></span><span class="cz-mut"> ' + (m.pnl >= 0 ? 'ربح' : 'خسارة') + ' عن سعر الشراء</span>'; }
+  else h = '<span class="cz-mut">سعر الذهب الحالي مش متاح — الرسم بسعر الشراء</span>';
+  if(m.g30 > 0) h += '<span class="cz-last">آخر ٣٠ يوم: اشتريت <bdi>' + toArabicDigits(Math.round(m.g30 * 100) / 100) + ' جم</bdi></span>';
+  if(m.last) h += '<span class="cz-last">آخر شراء: 🪙 <bdi>' + toArabicDigits(Math.round(m.last.g * 100) / 100) + ' جم</bdi>' + (m.last.kar ? ' عيار <bdi>' + toArabicDigits(m.last.kar) + '</bdi>' : '') + ' <bdi>·</bdi> <bdi>' + zigDate(m.last.t) + '</bdi></span>';
+  return h;
+}
+function goldTimeline(){
+  var DAY = 86400000, now = Date.now(), pcs = goldPieces().map(function(x){ return {t: opsMs(x.date) || 0, g: Number(x.grams) || 0, c: cgInt(x.amount), k: x.karat}; })
+    .filter(function(q){ return q.t && q.t <= now + DAY; }).sort(function(a, b){ return a.t - b.t; });
+  var days = [], map = {}, cost = 0, g30 = 0, last = null, grams = 0;
+  pcs.forEach(function(q){ var dt = new Date(q.t), key = dt.getFullYear() + '-' + dt.getMonth() + '-' + dt.getDate();
+    if(!map[key]){ map[key] = {t: q.t, d: 0, k: 'buy'}; days.push(map[key]); } map[key].d += q.c; map[key].t = Math.max(map[key].t, q.t);
+    grams += q.g; if(q.t >= now - 30 * DAY) g30 += q.g; last = {t: q.t, g: q.g, kar: q.k}; });
+  days.forEach(function(g){ cost += g.d; g.bal = cost; });
+  var pl = goldPnl();
+  if(pl.ok && days.length){ days.push({t: now, d: pl.now - cost, bal: pl.now, k: 'mkt'}); }
+  return {days: days, ok: pl.ok && days.length > 0, pnl: pl.pnl, pct: pl.pct, g30: g30, grams: grams, last: last};
+}
+function cmZigRender(){
+  var svg = document.getElementById('cmZig'), cap = document.getElementById('cmZigCap'); if(!svg) return;
+  var tl;
+  if(__zigDemo){ tl = zigDemoData().money; }
+  else{
+    var hide = false; try{ hide = !!cmPastView() || capIsPast(); }catch(e){}
+    if(hide){ zigHide(svg, cap); return; }
+    tl = cmTimeline(cmSrcTotals().money);
+  }
+  if(zigStyleOf('total') === 'off'){ zigHide(svg, cap); return; }
+  zigPaint(svg, cap, {days: tl.days, cap: zigMoneyCap(tl), empty: 'ضيف إيداعات أو مصروفات وهيظهر المؤشر هنا', style: zigStyleOf('total')});
+}
+function goldPageZigRender(){
+  var svg = document.getElementById('glZig'), cap = document.getElementById('glZigCap'); if(!svg) return;
+  var gm, hide = false; try{ hide = (typeof mvPast === 'function' && !!mvPast()) || capIsPast(); }catch(e){}
+  if((hide && !__zigDemo) || zigStyleOf('goldpage') === 'off'){ zigHide(svg, cap); return; }
+  if(__zigDemo) gm = zigDemoData().gold; else { try{ gm = goldTimeline(); }catch(e){ gm = {days: [], ok: false, g30: 0}; } }
+  zigPaint(svg, cap, {days: gm.days, cap: zigGoldCap(gm), empty: 'مفيش مشتريات ذهب لسه', style: zigStyleOf('goldpage')});
+}
+function capZigRender(){
+  var ms = document.getElementById('capMoneyZig'), mc = document.getElementById('capMoneyZigCap'), gs = document.getElementById('capGoldZig'), gc = document.getElementById('capGoldZigCap');
+  if(!ms && !gs) return;
+  var past = false; try{ past = capIsPast(); }catch(e){}
+  if(past && !__zigDemo){ zigHide(ms, mc); zigHide(gs, gc); return; }
+  var tl, gm;
+  if(__zigDemo){ var dd = zigDemoData(); tl = dd.money; gm = dd.gold; }
+  else{ try{ tl = cmTimeline(capTotals().money); }catch(e){ tl = {days: [], change30: 0, before: 0, last: null}; } try{ gm = goldTimeline(); }catch(e){ gm = {days: [], ok: false, g30: 0}; } }
+  if(zigStyleOf('money') === 'off') zigHide(ms, mc); else
+  zigPaint(ms, mc, {days: tl.days, cap: zigMoneyCap(tl), empty: 'مفيش حركات لسه', style: zigStyleOf('money')});
+  if(zigStyleOf('gold') === 'off') zigHide(gs, gc); else
+  zigPaint(gs, gc, {days: gm.days, cap: zigGoldCap(gm), empty: 'مفيش مشتريات ذهب لسه', style: zigStyleOf('gold')});
 }
 function renderCapMoney(){
   ensureGrpColors(); mvBarRender();
@@ -8881,6 +9075,7 @@ function renderCapGold(){
   document.getElementById('cgTotal').textContent = fmt(t.gold);
   document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams)) + ' جم';
   glPanel(); glInfoPanel();
+  try{ goldPageZigRender(); }catch(e){}
   // وزن كل عيار
   const ks = goldKaratStats(all), kr = document.getElementById('cgKaratRow'); kr.innerHTML = '';
   const live = glBase24() > 0;
