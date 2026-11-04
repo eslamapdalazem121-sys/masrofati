@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-04.8268">
+<meta name="app-version" content="2026-11-05.8272">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -4633,8 +4633,8 @@ button,input,select,textarea,optgroup{font-family:inherit;}
   </div>
   <div id="groupsSectionBody" style="display:none;">
     <div class="new-group-form">
-      <input id="newGroupName" placeholder="اسم مجموعة جديدة (مثال: فواتير)" onfocus="document.getElementById('newGroupIconGrid').style.display='flex'">
-      <button onclick="addGroup()">إضافة</button>
+      <input id="newGroupName" type="text" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();addGroup();}" placeholder="اسم مجموعة جديدة (مثال: فواتير)" onfocus="document.getElementById('newGroupIconGrid').style.display='flex'">
+      <button type="button" onclick="addGroup()">＋ إضافة</button>
     </div>
     <div class="date-row" style="margin:6px 4px 8px;"><label for="newGroupDate">📅 تاريخ المجموعة</label><input type="date" id="newGroupDate"></div>
     <div id="newGroupIconGrid" style="display:none;"></div>
@@ -7540,7 +7540,7 @@ function setCmSub(c){
   if(_cmFormOpen && _cmSub === c){ _cmFormOpen = false; cmReset(); }
   else { _cmFormOpen = true; _cmFilter = c; }
   cmSubUI(c); renderCapMoney();
-  if(_cmFormOpen) setTimeout(()=>{ const f = document.getElementById('cmForm'); if(f) f.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
+  if(_cmFormOpen) setTimeout(()=>{ const f = document.getElementById('cmForm'); if(f) f.scrollIntoView({behavior:'auto', block:'nearest'}); }, 60);
 }
 function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMoney(); }
 function cmReset(){
@@ -8702,7 +8702,7 @@ function setCgUse(u){
 function cgUseTap(u){
   if(_cgFormOpen && _cgUse === u){ cgReset(); return; }   // دوسة تانية على نفس الزرار = إخفاء النموذج
   _cgFormOpen = true; setCgUse(u);
-  setTimeout(()=>{ const f = document.getElementById('cgForm'); if(f) f.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
+  setTimeout(()=>{ const f = document.getElementById('cgForm'); if(f) f.scrollIntoView({behavior:'auto', block:'nearest'}); }, 60);
 }
 function setCgFk(k){ _cgFk = (k === _cgFk) ? null : k; renderCapGold(); }
 function setCgFu(u){ _cgFu = (u === _cgFu) ? null : u; renderCapGold(); }
@@ -9067,7 +9067,7 @@ function goldAdjChange(){
 }
 function glBasisTap(){
   if(!_glInfoOpen) glInfoToggle();
-  setTimeout(()=>{ const i = document.getElementById('glSarUsd'); if(i){ i.scrollIntoView({behavior:'smooth', block:'center'}); i.focus(); } }, 80);
+  setTimeout(()=>{ const i = document.getElementById('glSarUsd'); if(i){ i.scrollIntoView({behavior:'auto', block:'center'}); i.focus(); } }, 80);
 }
 var _glPanelOpen = true;
 try{ if(localStorage.getItem('masrofati_gold_panel_v1') === '0') _glPanelOpen = false; }catch(e){}
@@ -10184,7 +10184,7 @@ function renderGroupEl(g, depth, indexInParent, siblingCount){
   head.onclick = ()=> toggleGroup(g.id);
   head.innerHTML = `
     ${dragHandleHtml(g.id, indexInParent, siblingCount, 'moveNode')}
-    <span class="gname">${g.icon||'📁'} <span class="txt">${g.name}</span>${g.date ? ' <small class="gdate">📅 ' + formatDate(g.date) + '</small>' : ''}</span>
+    <span class="gname"><span class="g-ico">${g.icon||'📁'}</span> <span class="txt">${g.name}</span>${g.date ? ' <small class="gdate">📅 ' + formatDate(g.date) + '</small>' : ''}</span>
     <span style="display:flex;align-items:center;gap:6px;">
       <span class="gtotal">${fmt(gtotal)}</span>
       ${gExcluded>0 ? `<span class="gtotal-excluded">🚫 ${fmt(gExcluded)}</span>` : ''}
@@ -10223,32 +10223,36 @@ function renderGroupEl(g, depth, indexInParent, siblingCount){
   });
   body.appendChild(childrenList);
 
+  const addCard = document.createElement('div');
+  addCard.className = 'add-card';
+  addCard.innerHTML = '<div class="aic-title">＋ مصروف جديد</div>';
+
   const addRow = document.createElement('div');
   addRow.className = 'add-item-form';
   addRow.innerHTML = `
-    <input id="itName-${g.id}" placeholder="اسم المصروف" onfocus="document.getElementById('itIconGrid-${g.id}').style.display='flex'">
-    <input id="itAmt-${g.id}" type="number" inputmode="decimal" step="any" placeholder="المبلغ">
-    <button onclick="addItem('${g.id}')">＋</button>`;
-  body.appendChild(addRow);
+    <input id="itName-${g.id}" type="text" enterkeyhint="next" autocomplete="off" placeholder="اسم المصروف" onfocus="document.getElementById('itIconGrid-${g.id}').style.display='flex'">
+    <input id="itAmt-${g.id}" type="number" inputmode="decimal" step="any" enterkeyhint="done" placeholder="المبلغ" onkeydown="if(event.key==='Enter'){event.preventDefault();addItem('${g.id}');}">
+    <button type="button" class="aic-add" onclick="addItem('${g.id}')">＋ إضافة</button>`;
+  addCard.appendChild(addRow);
 
   const dateRow = document.createElement('div');
-  dateRow.className = 'field';
-  dateRow.style.margin = '6px 0 0';
-  dateRow.innerHTML = `<input type="date" id="itDate-${g.id}" value="${dateToInputValue(Date.now())}" style="width:100%; padding:9px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-size:calc(13px * var(--fs,1)); font-family:inherit;">`;
-  body.appendChild(dateRow);
+  dateRow.className = 'field aic-date';
+  dateRow.innerHTML = `<label for="itDate-${g.id}">📅 التاريخ</label><input type="date" id="itDate-${g.id}" value="${dateToInputValue(Date.now())}">`;
+  addCard.appendChild(dateRow);
 
   const itIconGrid = document.createElement('div');
   itIconGrid.id = 'itIconGrid-' + g.id;
   itIconGrid.style.display = 'none';
   itIconGrid.innerHTML = buildIconGrid('itIcon-'+g.id, '🧾');
-  body.appendChild(itIconGrid);
+  addCard.appendChild(itIconGrid);
 
   const checkRow = document.createElement('div');
   checkRow.className = 'check-row';
   checkRow.innerHTML = `
     <input type="checkbox" id="itCounted-${g.id}" checked>
     <label for="itCounted-${g.id}" style="margin:0;">احتسب ضمن إجمالي الشهر</label>`;
-  body.appendChild(checkRow);
+  addCard.appendChild(checkRow);
+  body.appendChild(addCard);
 
   const subActions = document.createElement('div');
   subActions.className = 'sub-actions';
@@ -10265,12 +10269,13 @@ function renderItemEl(it, indexInParent, siblingCount){
   row.dataset.id = it.id;
   row.innerHTML = `
     ${dragHandleHtml(it.id, indexInParent, siblingCount, 'moveNode')}
+    <span class="it-ico">${it.icon||'🧾'}</span>
     <span class="item-main">
-      <span>${it.icon||'🧾'} ${it.counted===false?'<span class="tag">غير محسوب</span>':''}${isBackdated(it)?'<span class="tag backdated-tag">🕓 بأثر رجعي</span>':''}${it.name}</span>
+      <span class="it-name">${it.counted===false?'<span class="tag">غير محسوب</span>':''}${isBackdated(it)?'<span class="tag backdated-tag">🕓 بأثر رجعي</span>':''}${it.name}</span>
       ${it.date?`<span class="item-date">${formatDate(it.date)}</span>`:''}
     </span>
     <span style="display:flex;align-items:center;gap:6px;">
-      <span>${fmt(it.amount)}</span>
+      <span class="it-amt">${fmt(it.amount)}</span>
       <button class="icon-btn" onclick="openEditItem('${it.id}')">✏️</button>
       <button class="del" onclick="delNode('${it.id}')">🗑</button>
     </span>`;
@@ -11144,7 +11149,7 @@ async function exportBackup(){
   // التنزيل غير متاح هنا: نظهر النص جاهز للنسخ اليدوي كخطة مضمونة
   document.getElementById('manualPanel').style.display = 'block';
   showToast('التنزيل غير متاح هنا، انسخ النص الظاهر تحت واحفظه', false);
-  document.getElementById('manualPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  document.getElementById('manualPanel').scrollIntoView({behavior:'auto', block:'start'});
 }
 
 // ===== SOUND START (صوت النقر) =====
@@ -11442,7 +11447,7 @@ async function installApp(){
   updateInstallUI();
   showToast('اتبع الخطوات المكتوبة تحت الزرار', true);
   const note = document.getElementById('installNote');
-  if(note) note.scrollIntoView({behavior:'smooth', block:'center'});
+  if(note) note.scrollIntoView({behavior:'auto', block:'center'});
 }
 window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); _deferredInstall = e; updateInstallUI(); });
 window.addEventListener('appinstalled', ()=>{ _deferredInstall = null; updateInstallUI(); showToast('تم تثبيت التطبيق ✅', true); });
@@ -13236,7 +13241,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     var other = document.getElementById(ord[j]);
     if(d < 0) h.insertBefore(el, other); else h.insertBefore(other, el);
     save(); refreshButtons();
-    try{ el.scrollIntoView({behavior:'smooth', block:'nearest'}); }catch(e){}
+    try{ el.scrollIntoView({behavior:'auto', block:'nearest'}); }catch(e){}
   }
   function addControls(){
     IDS.forEach(function(id){
@@ -14389,6 +14394,268 @@ function zpToggleSec(id){
     document.querySelectorAll('[data-k]').forEach(function(e){ e.setAttribute('data-k', ''); });
     ['capIcoApply','zakIcoApply','msIcoApply','yiIcoApply','capIcoRender','zakIcoRender','msIcoRender','yiIcoRender'].forEach(function(f){ try{ if(typeof window[f] === 'function') window[f](settings); }catch(e){} });
   }catch(e){}
+})();
+</script>
+
+<script>
+/* ===== 8272: أيقونات مجسمة 4D جديدة — كل بند له اختيارات تناسبه في الإعدادات (مع الأيقونات الموجودة) ===== */
+(function(){
+  function L(id,a,b,c,v){ return '<linearGradient id="'+id+'__U__" x1="0" y1="0" x2="'+(v?0:1)+'" y2="1"><stop offset="0" stop-color="'+a+'"/><stop offset=".5" stop-color="'+b+'"/><stop offset="1" stop-color="'+c+'"/></linearGradient>'; }
+  function Rd(id,a,b,c){ return '<radialGradient id="'+id+'__U__" cx=".32" cy=".28" r=".85"><stop offset="0" stop-color="'+a+'"/><stop offset=".5" stop-color="'+b+'"/><stop offset="1" stop-color="'+c+'"/></radialGradient>'; }
+  function u(id){ return 'url(#'+id+'__U__)'; }
+  function W(defs,body){ return '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><defs>'+defs+'</defs><ellipse cx="60" cy="111" rx="38" ry="6" fill="#000" opacity=".22"/>'+body+'</svg>'; }
+  function hl(cx,cy,rx,ry,rot,o){ return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="#fff" opacity="'+(o||.55)+'" transform="rotate('+(rot||0)+' '+cx+' '+cy+')"/>'; }
+  function star(cx,cy,ro,ri,fill,stroke){ var p=[],i,a,r; for(i=0;i<10;i++){ a=-Math.PI/2+i*Math.PI/5; r=i%2?ri:ro; p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); } return '<polygon points="'+p.join(' ')+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.2" stroke-linejoin="round"/>'; }
+  var GD=['#fff6bf','#f7c93f','#a86a00'], GR=['#8ff5c4','#13b878','#07694a'], BL=['#cfeaff','#3a8fe8','#0b3f94'], RD=['#ffb4b4','#e0243a','#7a0a1c'], PU=['#e4d4ff','#8d5be0','#4a22a0'], BR=['#e8b078','#b86b2c','#6e3510'];
+  var X = {};
+
+  X.n4safe = W(L('a','#aebfdc','#5d78a8','#2c3f66')+L('b','#e4ecfa','#a3b8dc','#6b83b0')+Rd('c',GD[0],GD[1],GD[2]),
+    '<rect x="20" y="26" width="88" height="80" rx="10" fill="#17223d"/><rect x="14" y="18" width="88" height="82" rx="10" fill="'+u('a')+'" stroke="#17223d" stroke-width="2"/>'+
+    '<rect x="24" y="28" width="68" height="62" rx="6" fill="'+u('b')+'" stroke="#2c3f66" stroke-width="1.5"/>'+
+    '<circle cx="52" cy="59" r="17" fill="#2c3f66"/><circle cx="52" cy="59" r="15" fill="'+u('c')+'" stroke="#7a4a00" stroke-width="1.5"/><circle cx="52" cy="59" r="7" fill="#7a4a00" opacity=".5"/>'+
+    '<path d="M52 44v4M52 70v4M37 59h4M63 59h4" stroke="#7a4a00" stroke-width="2" stroke-linecap="round"/><path d="M52 59 L58 51" stroke="#fff6bf" stroke-width="2.6" stroke-linecap="round"/>'+
+    '<rect x="76" y="48" width="8" height="22" rx="4" fill="'+u('c')+'" stroke="#7a4a00" stroke-width="1.2"/><rect x="24" y="100" width="14" height="8" rx="3" fill="#17223d"/><rect x="78" y="100" width="14" height="8" rx="3" fill="#17223d"/>'+
+    '<path d="M20 30 Q20 22 30 22 H66" stroke="#fff" stroke-opacity=".6" stroke-width="3" fill="none" stroke-linecap="round"/>');
+
+  X.n4wallet = W(L('a',BR[0],BR[1],BR[2])+L('b',GR[0],GR[1],GR[2])+Rd('c',GD[0],GD[1],GD[2]),
+    '<g transform="rotate(-8 60 40)"><rect x="26" y="16" width="62" height="36" rx="5" fill="'+u('b')+'" stroke="#06503a" stroke-width="1.5"/><circle cx="57" cy="34" r="8" fill="#b6f5d6" opacity=".8"/></g>'+
+    '<rect x="16" y="40" width="92" height="64" rx="12" fill="#4e2408"/><rect x="12" y="34" width="92" height="64" rx="12" fill="'+u('a')+'" stroke="#4e2408" stroke-width="2"/>'+
+    '<path d="M16 52 H100" stroke="#fff" stroke-opacity=".25" stroke-width="2"/><rect x="74" y="54" width="38" height="26" rx="11" fill="'+u('a')+'" stroke="#4e2408" stroke-width="2"/><circle cx="90" cy="67" r="6" fill="'+u('c')+'" stroke="#7a4a00" stroke-width="1.2"/>'+
+    '<path d="M20 46 Q20 38 30 38 H66" stroke="#fff" stroke-opacity=".5" stroke-width="3" fill="none" stroke-linecap="round"/>');
+
+  function bill(rot,dx,dy,top){ return '<g transform="translate('+dx+','+dy+') rotate('+rot+' 60 60)"><rect x="18" y="38" width="84" height="46" rx="6" fill="#06503a" transform="translate(2,4)"/><rect x="18" y="38" width="84" height="46" rx="6" fill="'+u('b')+'" stroke="#06503a" stroke-width="1.6"/><rect x="24" y="44" width="72" height="34" rx="3" fill="none" stroke="#b6f5d6" stroke-opacity=".7" stroke-width="1.2"/>'+(top?'<circle cx="60" cy="61" r="11" fill="#b6f5d6" opacity=".85" stroke="#06503a" stroke-width="1"/><circle cx="60" cy="61" r="5" fill="#13b878"/><circle cx="30" cy="50" r="3" fill="#b6f5d6"/><circle cx="90" cy="72" r="3" fill="#b6f5d6"/>':'')+'</g>'; }
+  X.n4cash = W(L('b',GR[0],GR[1],GR[2])+L('g',GD[0],GD[1],GD[2]),
+    bill(-14,0,-8,false)+bill(10,0,-2,false)+bill(0,0,6,true)+'<rect x="52" y="34" width="16" height="58" rx="2" fill="'+u('g')+'" stroke="#8a5a00" stroke-width="1.2" opacity=".95"/>'+hl(34,50,14,3,-12,.5));
+
+  X.n4coin = W(Rd('c',GD[0],GD[1],GD[2])+L('s','#fff9d8','#ffd23f','#d9890b'),
+    '<circle cx="60" cy="64" r="42" fill="#7a4a00"/><circle cx="60" cy="58" r="42" fill="'+u('c')+'" stroke="#8a5a00" stroke-width="2"/>'+
+    '<circle cx="60" cy="58" r="33" fill="none" stroke="#a86a00" stroke-width="3" opacity=".7"/><circle cx="59" cy="57" r="33" fill="none" stroke="#fff6bf" stroke-width="1" opacity=".8"/>'+
+    star(60,58,19,8,u('s'),'#b86a05')+hl(40,34,16,8,-35,.6));
+
+  X.n4piggy = W(Rd('p','#ffe0ec','#ff8fb8','#c43f78')+Rd('c',GD[0],GD[1],GD[2]),
+    '<ellipse cx="59" cy="26" rx="10" ry="13" fill="'+u('c')+'" stroke="#8a5a00" stroke-width="1.4"/>'+
+    '<ellipse cx="58" cy="76" rx="40" ry="30" fill="#8a2a58"/><rect x="30" y="88" width="14" height="18" rx="5" fill="#c43f78" stroke="#8a2a58" stroke-width="1.4"/><rect x="72" y="88" width="14" height="18" rx="5" fill="#c43f78" stroke="#8a2a58" stroke-width="1.4"/>'+
+    '<ellipse cx="58" cy="70" rx="40" ry="30" fill="'+u('p')+'" stroke="#8a2a58" stroke-width="2"/><path d="M30 46 L34 28 L48 42 Z" fill="#ff8fb8" stroke="#8a2a58" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<ellipse cx="100" cy="72" rx="11" ry="13" fill="#ffb0cd" stroke="#8a2a58" stroke-width="1.8"/><ellipse cx="97" cy="68" rx="2.2" ry="3.4" fill="#8a2a58"/><ellipse cx="103" cy="76" rx="2.2" ry="3.4" fill="#8a2a58"/>'+
+    '<circle cx="80" cy="56" r="4" fill="#3a0f24"/><circle cx="79" cy="55" r="1.4" fill="#fff"/><rect x="46" y="38" width="24" height="5" rx="2.5" fill="#6e1a45"/>'+
+    '<path d="M18 66 Q8 60 14 52 Q20 58 14 62" fill="none" stroke="#8a2a58" stroke-width="3" stroke-linecap="round"/>'+hl(46,56,14,6,-25,.55));
+
+  X.n4goldbar = W(L('t','#fffbe0','#ffe27a','#e0a41c')+L('f',GD[0],GD[1],GD[2],1)+L('s','#d9a21b','#a86a00','#6e4000',1),
+    '<polygon points="18,60 98,60 110,46 30,46" fill="'+u('t')+'" stroke="#8a5a00" stroke-width="1.6" stroke-linejoin="round"/><rect x="18" y="60" width="80" height="38" fill="'+u('f')+'" stroke="#8a5a00" stroke-width="1.6"/>'+
+    '<polygon points="98,60 110,46 110,84 98,98" fill="'+u('s')+'" stroke="#8a5a00" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<text x="58" y="86" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="17" fill="#8a5a00" opacity=".85">999.9</text>'+
+    '<polygon points="34,50 90,50 94,55 30,55" fill="#fff" opacity=".55"/><rect x="22" y="64" width="6" height="30" fill="#fff" opacity=".35"/>'+
+    '<path d="M100 12 l2.4 6.6 l6.6 2.4 l-6.6 2.4 l-2.4 6.6 l-2.4 -6.6 l-6.6 -2.4 l6.6 -2.4z" fill="#fff"/>');
+
+  X.n4crescent = W(L('a',GD[0],GD[1],GD[2])+L('s','#fffbe0','#ffe27a','#e0a41c'),
+    '<g transform="translate(10,0)"><path d="M74 17 A46 46 0 0 0 74 109 A56 56 0 0 1 74 17 Z" fill="#7a4a00"/><path d="M74 12 A46 46 0 0 0 74 104 A56 56 0 0 1 74 12 Z" fill="'+u('a')+'" stroke="#8a5a00" stroke-width="2" stroke-linejoin="round"/>'+
+    '<path d="M64 20 A40 40 0 0 0 40 62" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="3.5" stroke-linecap="round"/>'+star(86,44,15,6.4,u('s'),'#b86a05')+'</g>'+
+    '<path d="M24 24 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z" fill="#fff"/>');
+
+  X.n4lantern = W(L('a',GD[0],GD[1],GD[2])+Rd('b','#fff2a0','#ff9a2e','#b3380c'),
+    '<path d="M48 18 Q60 0 72 18" fill="none" stroke="#8a5a00" stroke-width="4" stroke-linecap="round"/><path d="M40 24 H80 L74 14 H46 Z" fill="'+u('a')+'" stroke="#8a5a00" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<path d="M38 24 H82 C94 44 94 70 82 90 H38 C26 70 26 44 38 24 Z" fill="'+u('b')+'" stroke="#8a5a00" stroke-width="2"/>'+
+    '<path d="M50 24 C42 46 42 68 50 90 M70 24 C78 46 78 68 70 90 M60 24 V90" fill="none" stroke="#f7c93f" stroke-width="2.6"/>'+
+    '<ellipse cx="60" cy="58" rx="9" ry="16" fill="#fff6a0" opacity=".85"/><path d="M34 90 H86 L78 100 H42 Z" fill="'+u('a')+'" stroke="#8a5a00" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<path d="M60 100 V108" stroke="#8a5a00" stroke-width="2.4"/><ellipse cx="60" cy="109" rx="3.4" ry="4" fill="'+u('a')+'" stroke="#8a5a00"/>'+hl(42,44,5,14,12,.5));
+
+  X.n4heart = W(Rd('h','#ffc4c4','#e0243a','#7a0a1c'),
+    '<path d="M60 108 C14 76 12 44 34 34 C48 28 60 38 60 44 C60 38 72 28 86 34 C108 44 106 76 60 108Z" fill="#5a0716"/>'+
+    '<path d="M60 102 C14 70 12 38 34 28 C48 22 60 32 60 38 C60 32 72 22 86 28 C108 38 106 70 60 102Z" fill="'+u('h')+'" stroke="#7a0a1c" stroke-width="2" stroke-linejoin="round"/>'+
+    '<path d="M30 40 Q32 32 42 32" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="4" stroke-linecap="round"/>'+hl(40,42,6,3,-30,.8));
+
+  X.n4gift = W(L('a',RD[0],RD[1],RD[2])+L('b','#ff9a9a','#c4162c','#6e0a18')+L('r',GD[0],GD[1],GD[2]),
+    '<rect x="24" y="62" width="80" height="46" rx="4" fill="#4a0810"/><rect x="20" y="56" width="80" height="48" rx="4" fill="'+u('a')+'" stroke="#6e0a18" stroke-width="1.8"/>'+
+    '<rect x="14" y="40" width="92" height="22" rx="5" fill="'+u('b')+'" stroke="#6e0a18" stroke-width="1.8"/><rect x="52" y="40" width="16" height="64" fill="'+u('r')+'" stroke="#8a5a00" stroke-width="1.2"/>'+
+    '<path d="M60 40 C38 8 16 28 46 40 Z" fill="'+u('r')+'" stroke="#8a5a00" stroke-width="1.6" stroke-linejoin="round"/><path d="M60 40 C82 8 104 28 74 40 Z" fill="'+u('r')+'" stroke="#8a5a00" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<circle cx="60" cy="40" r="7" fill="'+u('r')+'" stroke="#8a5a00" stroke-width="1.4"/>'+hl(30,48,12,3,0,.5));
+
+  X.n4mosque = W(L('a','#fff4d6','#e8c98a','#a37c3c')+L('d','#9ff5e6','#17b0a0','#066a62')+L('g',GD[0],GD[1],GD[2]),
+    '<rect x="26" y="68" width="68" height="40" fill="'+u('a')+'" stroke="#7a5a1c" stroke-width="1.8"/><path d="M30 68 A30 30 0 0 1 90 68 Z" fill="'+u('d')+'" stroke="#04504a" stroke-width="1.8"/>'+
+    '<path d="M60 38 V26" stroke="#8a5a00" stroke-width="2.6"/><circle cx="60" cy="22" r="5.4" fill="'+u('g')+'" stroke="#8a5a00"/>'+
+    '<rect x="10" y="50" width="14" height="58" fill="'+u('a')+'" stroke="#7a5a1c" stroke-width="1.8"/><path d="M10 50 L17 34 L24 50 Z" fill="'+u('d')+'" stroke="#04504a" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<rect x="96" y="50" width="14" height="58" fill="'+u('a')+'" stroke="#7a5a1c" stroke-width="1.8"/><path d="M96 50 L103 34 L110 50 Z" fill="'+u('d')+'" stroke="#04504a" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<path d="M50 108 V88 A10 10 0 0 1 70 88 V108 Z" fill="#06504a" stroke="#04504a"/><circle cx="17" cy="70" r="3" fill="#06504a"/><circle cx="103" cy="70" r="3" fill="#06504a"/>'+hl(44,52,10,5,-30,.55));
+
+  X.n4cart = W(L('a',BL[0],BL[1],BL[2])+L('g',GD[0],GD[1],GD[2]),
+    '<path d="M6 16 H22 L28 34" fill="none" stroke="#0b3f94" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16 H22 L28 34" fill="none" stroke="#6bb0ff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '<path d="M32 40 H112 L100 80 H42 Z" fill="#082c6a"/><path d="M28 34 H108 L96 74 H38 Z" fill="'+u('a')+'" stroke="#0b3f94" stroke-width="2" stroke-linejoin="round"/>'+
+    '<path d="M44 34 L48 74 M60 34 L62 74 M76 34 L76 74 M92 34 L90 74 M32 48 H103 M35 61 H99" stroke="#fff" stroke-opacity=".45" stroke-width="2"/>'+
+    '<path d="M38 74 L42 86 H92" fill="none" stroke="#0b3f94" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '<circle cx="46" cy="98" r="9" fill="#17223d"/><circle cx="46" cy="98" r="4" fill="'+u('g')+'"/><circle cx="88" cy="98" r="9" fill="#17223d"/><circle cx="88" cy="98" r="4" fill="'+u('g')+'"/>'+hl(48,41,14,3,-8,.55));
+
+  X.n4bag = W(L('a',PU[0],PU[1],PU[2])+Rd('c',GD[0],GD[1],GD[2]),
+    '<path d="M44 46 V32 A16 16 0 0 1 76 32 V46" fill="none" stroke="#2a1070" stroke-width="7" stroke-linecap="round"/><path d="M44 46 V32 A16 16 0 0 1 76 32 V46" fill="none" stroke="#b79cff" stroke-width="3" stroke-linecap="round"/>'+
+    '<rect x="24" y="44" width="80" height="66" rx="9" fill="#2a1070"/><rect x="18" y="38" width="80" height="66" rx="9" fill="'+u('a')+'" stroke="#2a1070" stroke-width="2"/>'+
+    '<circle cx="58" cy="72" r="15" fill="#7a4a00"/><circle cx="58" cy="70" r="14" fill="'+u('c')+'" stroke="#8a5a00" stroke-width="1.4"/>'+star(58,70,9,4,'#fffbe0','#b86a05')+
+    '<path d="M24 46 Q24 40 32 40 H62" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>');
+
+  X.n4receipt = W(L('p','#ffffff','#eef2fa','#bcc8de')+L('g',GR[0],GR[1],GR[2]),
+    '<g transform="rotate(-6 60 60)"><path d="M32 18 H94 V112 L86 105 L78 112 L70 105 L62 112 L54 105 L46 112 L38 105 L32 112 Z" fill="#5a6a8c"/>'+
+    '<path d="M28 12 H90 V106 L82 99 L74 106 L66 99 L58 106 L50 99 L42 106 L34 99 L28 106 Z" fill="'+u('p')+'" stroke="#7a8aa6" stroke-width="1.8" stroke-linejoin="round"/>'+
+    '<rect x="38" y="24" width="30" height="6" rx="3" fill="#7a8aa6"/><rect x="38" y="38" width="44" height="4" rx="2" fill="#b4c0d8"/><rect x="38" y="48" width="38" height="4" rx="2" fill="#b4c0d8"/><rect x="38" y="58" width="44" height="4" rx="2" fill="#b4c0d8"/>'+
+    '<rect x="38" y="72" width="44" height="14" rx="5" fill="'+u('g')+'" stroke="#06503a" stroke-width="1.2"/><rect x="44" y="77" width="22" height="4" rx="2" fill="#fff" opacity=".85"/></g>');
+
+  X.n4calendar = W(L('p','#ffffff','#f1f4fa','#c5cfe2')+L('r',RD[0],RD[1],RD[2])+L('g',GR[0],GR[1],GR[2]),
+    '<rect x="20" y="28" width="88" height="82" rx="10" fill="#4a5a7c"/><rect x="14" y="22" width="88" height="82" rx="10" fill="'+u('p')+'" stroke="#7a8aa6" stroke-width="1.8"/>'+
+    '<path d="M14 32 a10 10 0 0 1 10 -10 H92 a10 10 0 0 1 10 10 V46 H14Z" fill="'+u('r')+'" stroke="#7a0a1c" stroke-width="1.6"/>'+
+    '<rect x="32" y="12" width="9" height="20" rx="4.5" fill="#8a96b0" stroke="#4a5a7c"/><rect x="75" y="12" width="9" height="20" rx="4.5" fill="#8a96b0" stroke="#4a5a7c"/>'+
+    '<g fill="#9fb4d6"><rect x="24" y="54" width="10" height="8" rx="2"/><rect x="42" y="54" width="10" height="8" rx="2"/><rect x="60" y="54" width="10" height="8" rx="2"/><rect x="78" y="54" width="10" height="8" rx="2"/><rect x="24" y="68" width="10" height="8" rx="2"/><rect x="78" y="68" width="10" height="8" rx="2"/></g>'+
+    '<path d="M40 82 L54 94 L84 62" fill="none" stroke="#06503a" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity=".4" transform="translate(0,3)"/><path d="M40 82 L54 94 L84 62" fill="none" stroke="'+u('g')+'" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>');
+
+  X.n4target = W(Rd('o','#ffb4b4','#e0243a','#7a0a1c')+Rd('w','#ffffff','#f1f4fa','#bcc8de')+L('g',GD[0],GD[1],GD[2]),
+    '<circle cx="56" cy="68" r="44" fill="#4a0810"/><circle cx="56" cy="62" r="44" fill="'+u('o')+'" stroke="#7a0a1c" stroke-width="2"/><circle cx="56" cy="62" r="33" fill="'+u('w')+'"/><circle cx="56" cy="62" r="23" fill="'+u('o')+'"/><circle cx="56" cy="62" r="12" fill="'+u('w')+'"/><circle cx="56" cy="62" r="5.4" fill="#c4162c"/>'+
+    '<path d="M60 58 L104 14" stroke="#6e4000" stroke-width="6" stroke-linecap="round"/><path d="M60 58 L104 14" stroke="'+u('g')+'" stroke-width="3.4" stroke-linecap="round"/>'+
+    '<path d="M96 22 L100 6 L106 10 L110 14 L114 20 L98 24Z" fill="#e0243a" stroke="#7a0a1c" stroke-width="1.2" stroke-linejoin="round"/>'+hl(36,40,12,5,-35,.55));
+
+  X.n4tree = W(Rd('l','#c8ffd6','#2fc766','#0b6a38')+L('t',BR[0],BR[1],BR[2])+Rd('c',GD[0],GD[1],GD[2]),
+    '<ellipse cx="60" cy="108" rx="34" ry="6" fill="#6e3510" opacity=".6"/><path d="M52 108 V74 L40 60 M68 108 V70 L82 58 M60 108 V60" stroke="#4e2408" stroke-width="10" stroke-linecap="round" fill="none"/><path d="M52 108 V74 M68 108 V70 M60 108 V60" stroke="'+u('t')+'" stroke-width="6" stroke-linecap="round" fill="none"/>'+
+    '<circle cx="36" cy="58" r="21" fill="'+u('l')+'" stroke="#0b6a38" stroke-width="1.6"/><circle cx="84" cy="58" r="21" fill="'+u('l')+'" stroke="#0b6a38" stroke-width="1.6"/><circle cx="60" cy="36" r="27" fill="'+u('l')+'" stroke="#0b6a38" stroke-width="1.6"/><circle cx="60" cy="62" r="22" fill="'+u('l')+'" stroke="#0b6a38" stroke-width="1.6"/>'+
+    '<g stroke="#8a5a00" stroke-width="1.2" fill="'+u('c')+'"><circle cx="48" cy="34" r="6.5"/><circle cx="72" cy="26" r="6.5"/><circle cx="88" cy="56" r="6.5"/><circle cx="32" cy="62" r="6.5"/><circle cx="60" cy="56" r="6.5"/><circle cx="46" cy="72" r="5.5"/><circle cx="76" cy="70" r="5.5"/></g>'+hl(44,24,8,4,-30,.5));
+
+  X.n4medal = W(Rd('m',GD[0],GD[1],GD[2])+L('s','#fffbe0','#ffe27a','#e0a41c')+L('a',RD[0],RD[1],RD[2])+L('b',BL[0],BL[1],BL[2]),
+    '<path d="M32 6 L62 56 L48 62 L22 14Z" fill="'+u('a')+'" stroke="#7a0a1c" stroke-width="1.4" stroke-linejoin="round"/><path d="M88 6 L58 56 L72 62 L98 14Z" fill="'+u('b')+'" stroke="#0b3f94" stroke-width="1.4" stroke-linejoin="round"/>'+
+    '<circle cx="60" cy="80" r="32" fill="#7a4a00"/><circle cx="60" cy="74" r="32" fill="'+u('m')+'" stroke="#8a5a00" stroke-width="2"/><circle cx="60" cy="74" r="24" fill="none" stroke="#a86a00" stroke-width="2.6" opacity=".7"/>'+
+    star(60,74,16,7,u('s'),'#b86a05')+hl(46,54,10,5,-35,.6));
+
+  var LBL = {n4safe:'🔐 خزنة 4D', n4wallet:'👛 محفظة 4D', n4cash:'💵 رزمة فلوس 4D', n4coin:'🪙 عملة ذهبية 4D', n4piggy:'🐷 حصالة 4D', n4goldbar:'🥇 سبيكة ذهب 4D',
+    n4crescent:'🌙 هلال ونجمة 4D', n4lantern:'🏮 فانوس 4D', n4heart:'❤️ قلب 4D', n4gift:'🎁 هدية 4D', n4mosque:'🕌 مسجد 4D',
+    n4cart:'🛒 عربية تسوق 4D', n4bag:'🛍️ شنطة تسوق 4D', n4receipt:'🧾 فاتورة 4D', n4calendar:'📅 تقويم 4D', n4target:'🎯 هدف 4D', n4tree:'🌳 شجرة فلوس 4D', n4medal:'🏅 ميدالية 4D'};
+  var CAP = ['n4safe','n4wallet','n4cash','n4coin','n4piggy'];
+  var ROWS = [['optCapIcon','capIcon',CAP],['optMoneyIco','moneyIcon',CAP],['optCmIco','cmIcon',CAP],['optGoldIco','goldIcon',['n4goldbar','n4coin']],
+    ['optZakIcon','zakIcon',['n4crescent','n4lantern','n4heart','n4gift','n4mosque']],['optMsIcon','msIcon',['n4cart','n4bag','n4receipt','n4wallet','n4cash']],
+    ['optYiIcon','yiIcon',['n4calendar','n4target','n4tree','n4medal','n4piggy']]];
+  window.N4_ICONS = X;
+  try{
+    Object.keys(X).forEach(function(k){ CAPICO_SVG[k] = X[k]; });
+    ROWS.forEach(function(r){
+      var el = document.getElementById(r[0]); if(!el) return;
+      r[2].forEach(function(k){
+        if(el.querySelector('[data-val="' + k + '"]')) return;
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'opt-chip'; b.setAttribute('data-val', k);
+        b.setAttribute('onclick', "nfSet('" + r[1] + "','" + k + "')"); b.textContent = LBL[k]; el.appendChild(b);
+      });
+    });
+    document.querySelectorAll('[data-k]').forEach(function(e){ e.setAttribute('data-k', ''); });
+    ['capIcoApply','zakIcoApply','msIcoApply','yiIcoApply','capIcoRender','zakIcoRender','msIcoRender','yiIcoRender'].forEach(function(f){ try{ if(typeof window[f] === 'function') window[f](settings); }catch(e){} });
+  }catch(e){}
+})();
+</script>
+
+<style id="v8269">
+/* ===== 8269: المجموعات والمصروفات — 3D منسّق + إصلاح ظهور الكتابة وزر ＋ ===== */
+body.kb-open .fab{display:none !important;}
+#groupsSectionBody{padding-bottom:28px;}
+.new-group-form{display:flex !important; gap:10px; align-items:stretch; margin:0 0 12px; padding:12px; border-radius:22px;
+  background:linear-gradient(180deg,var(--card),var(--bg2)); border:1px solid var(--border);
+  box-shadow:inset 0 2px 0 var(--edge-light,rgba(255,255,255,.9)), 0 4px 0 var(--edge-dark,rgba(0,0,0,.10)), 0 16px 24px -16px var(--drop-2,rgba(15,25,60,.3));}
+.new-group-form input, .add-item-form input{height:50px; padding:0 14px !important; border-radius:15px !important; border:2px solid var(--border) !important;
+  background:var(--bg) !important; color:var(--text) !important; -webkit-text-fill-color:var(--text) !important; caret-color:var(--accent);
+  font-weight:800; text-align:right; direction:rtl; opacity:1 !important; box-shadow:inset 0 3px 6px rgba(0,0,0,.10); min-width:0;}
+.new-group-form input{flex:1 1 0;}
+.new-group-form input::placeholder, .add-item-form input::placeholder{color:var(--muted); -webkit-text-fill-color:var(--muted); font-weight:600; opacity:1;}
+.new-group-form input:focus, .add-item-form input:focus{outline:none; border-color:var(--accent) !important; box-shadow:inset 0 3px 6px rgba(0,0,0,.10), 0 0 0 4px var(--accent-soft);}
+.new-group-form button, .group-body .add-item-form button.aic-add{flex:0 0 auto !important; width:auto !important; min-width:112px !important; height:50px; padding:0 16px !important; border:none; border-radius:15px;
+  display:flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap; color:#fff !important; -webkit-text-fill-color:#fff;
+  font-size:calc(16px * var(--fs,1)) !important; font-weight:900; cursor:pointer;
+  background:linear-gradient(180deg,#38d79a 0%,var(--accent) 55%,var(--accent-dark) 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -3px 0 rgba(0,0,0,.14), 0 5px 0 #0a6b46, 0 14px 18px -8px rgba(14,140,92,.6);}
+.new-group-form button:active, .group-body .add-item-form button.aic-add:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 1px 0 #0a6b46, 0 4px 8px -4px rgba(14,140,92,.5);}
+#groupsSectionBody .date-row{display:flex; align-items:center; gap:10px; margin:6px 4px 12px; flex-wrap:wrap;}
+#groupsSectionBody .date-row label{font-weight:800; color:var(--muted); font-size:calc(13px * var(--fs,1));}
+#groupsSectionBody .date-row input[type=date]{flex:1 1 150px; min-width:0; max-width:100%; height:44px; border-radius:14px; border:2px solid var(--border); background:var(--bg); color:var(--text); padding:0 10px; font-family:inherit;}
+
+/* بطاقة المجموعة */
+.group{position:relative; overflow:hidden; border-radius:26px; margin-bottom:18px; border:1px solid var(--border);
+  background:linear-gradient(180deg,var(--card) 0%,var(--bg2) 170%);
+  box-shadow:inset 0 2px 0 var(--edge-light,rgba(255,255,255,.9)), 0 6px 0 var(--edge-dark,rgba(0,0,0,.10)), 0 22px 30px -18px var(--drop-2,rgba(15,25,60,.4));}
+.group::before{content:""; position:absolute; top:0; bottom:0; inset-inline-start:0; width:7px; background:linear-gradient(180deg,#7db4ff,#3b6fe0 60%,#2a52b8); box-shadow:2px 0 6px rgba(59,111,224,.35);}
+.group.nested{border-radius:20px; margin:12px 0; background:linear-gradient(180deg,var(--nested-bg),var(--bg2) 200%);
+  box-shadow:inset 0 1px 0 var(--edge-light,rgba(255,255,255,.8)), 0 4px 0 var(--edge-dark,rgba(0,0,0,.08)), 0 12px 18px -14px var(--drop-2,rgba(15,25,60,.3));}
+.group.nested::before{background:linear-gradient(180deg,#c4a6ff,#7c4ddb);box-shadow:2px 0 6px rgba(124,77,219,.35);}
+.group-head{flex-wrap:wrap; row-gap:10px; padding:14px 18px 14px 14px;}
+.group-head .gname{flex:1 1 0; min-width:0; gap:10px; font-size:calc(17px * var(--fs,1)); font-weight:900;}
+.group-head .g-ico{flex:0 0 auto; width:46px; height:46px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:calc(24px * var(--fs,1));
+  background:linear-gradient(145deg,var(--card),color-mix(in srgb,#3b6fe0 22%,var(--card))); box-shadow:inset 0 2px 0 var(--edge-light,#fff), inset 0 -3px 0 rgba(40,70,160,.16), 0 4px 0 rgba(40,70,160,.22), 0 10px 14px -8px rgba(40,70,160,.5);}
+.group-head .gname small.gdate{display:block; font-size:calc(11px * var(--fs,1)); color:var(--muted); font-weight:700;}
+.group-head > span[style]{flex:1 1 100%; display:flex !important; align-items:center; gap:8px !important;}
+.group-head .gtotal{padding:6px 14px; border-radius:14px; font-size:calc(19px * var(--fs,1)); font-weight:900; color:var(--expense-dark);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--expense) 18%,var(--card)),color-mix(in srgb,var(--expense) 8%,var(--card))); box-shadow:inset 0 1px 0 var(--edge-light,#fff), 0 3px 0 rgba(214,58,58,.25);}
+.group-head .icon-btn, .group-head .del-group{width:40px; height:40px; padding:0 !important; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(17px * var(--fs,1));
+  background:linear-gradient(180deg,var(--card),var(--bg)); color:var(--text); border:1px solid var(--border);
+  box-shadow:inset 0 2px 0 var(--edge-light,#fff), 0 3px 0 var(--edge-dark,rgba(0,0,0,.12)), 0 8px 10px -6px var(--drop-2,rgba(0,0,0,.3));}
+.group-head .icon-btn{margin-inline-start:auto;}
+.group-head .icon-btn:active, .group-head .del-group:active{transform:translateY(3px); box-shadow:0 0 0 var(--edge-dark,rgba(0,0,0,.1));}
+.group-body{padding:0 16px 16px 14px;}
+
+/* تاريخ اليوم */
+.day-header{display:inline-flex; align-items:center; margin:12px 0 8px; padding:5px 14px; border-radius:999px; font-size:calc(13px * var(--fs,1)); font-weight:900; color:#fff;
+  background:linear-gradient(180deg,#6aa8ff,#3b6fe0); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 3px 0 #2a52b8, 0 8px 10px -6px rgba(42,82,184,.6);}
+
+/* صف المصروف */
+.item-row{flex-wrap:nowrap !important; align-items:center; gap:10px; padding:10px 12px; margin-bottom:10px; border-radius:18px; border:1px solid var(--border);
+  background:linear-gradient(180deg,var(--card),var(--bg));
+  box-shadow:inset 0 2px 0 var(--edge-light,rgba(255,255,255,.9)), 0 4px 0 var(--edge-dark,rgba(0,0,0,.10)), 0 12px 16px -12px var(--drop-2,rgba(15,25,60,.35));}
+.item-row:not(.excluded){color:var(--text);}
+.item-row .it-ico{flex:0 0 auto; width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:calc(22px * var(--fs,1));
+  background:linear-gradient(145deg,var(--card),color-mix(in srgb,var(--accent) 22%,var(--card))); box-shadow:inset 0 2px 0 var(--edge-light,#fff), inset 0 -3px 0 rgba(14,140,92,.16), 0 3px 0 rgba(14,140,92,.22), 0 8px 12px -8px rgba(14,140,92,.5);}
+.item-row .it-name{font-size:calc(16px * var(--fs,1)); font-weight:800; line-height:1.4;}
+.item-row .item-date{font-size:calc(11.5px * var(--fs,1)); color:var(--muted); font-weight:700;}
+.item-row .it-amt{display:inline-block; padding:4px 11px; border-radius:12px; font-size:calc(16px * var(--fs,1)) !important; font-weight:900 !important; color:var(--expense-dark); background:color-mix(in srgb,var(--expense) 15%,var(--card)); box-shadow:inset 0 1px 0 var(--edge-light,#fff), 0 2px 0 rgba(214,58,58,.22); white-space:nowrap;}
+.item-row.excluded .it-amt{color:var(--c-excluded-txt); background:var(--c-excluded); box-shadow:0 2px 0 rgba(168,100,0,.2);}
+.item-row .icon-btn, .item-row .del{width:34px; height:34px; padding:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(15px * var(--fs,1));
+  background:var(--bg); border:1px solid var(--border); box-shadow:inset 0 1px 0 var(--edge-light,#fff), 0 2px 0 var(--edge-dark,rgba(0,0,0,.1));}
+.item-row .tag{display:inline-block; margin-inline-end:6px;}
+
+/* نموذج إضافة مصروف: بطاقة واحدة واضحة */
+.add-card{margin-top:14px; padding:14px; border-radius:22px; border:1px solid var(--border);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 16%,var(--card)),var(--card) 85%);
+  box-shadow:inset 0 2px 0 var(--edge-light,rgba(255,255,255,.9)), 0 5px 0 var(--edge-dark,rgba(0,0,0,.10)), 0 16px 22px -16px var(--drop-2,rgba(15,25,60,.35));}
+.add-card .aic-title{font-weight:900; color:var(--accent-dark); font-size:calc(15px * var(--fs,1)); margin:0 2px 10px;}
+.group-body .add-item-form{display:flex !important; flex-wrap:wrap !important; gap:10px !important; align-items:stretch;}
+.group-body .add-item-form input{flex:1 1 100% !important; width:100% !important; min-width:0 !important; height:50px;}
+.group-body .add-item-form input[type=number]{flex:1 1 0 !important; width:auto !important; min-width:90px !important; text-align:center; direction:ltr;}
+.add-card .aic-date{display:flex; align-items:center; gap:10px; margin:12px 0 0;}
+.add-card .aic-date label{margin:0; font-weight:800; color:var(--muted); font-size:calc(13px * var(--fs,1)); white-space:nowrap;}
+.add-card .aic-date input{flex:1; min-width:0; height:44px; padding:0 10px; border-radius:14px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit;}
+.add-card .check-row{margin:12px 2px 0; font-weight:700;}
+.sub-actions button{padding:12px; border-radius:16px; border:2px dashed var(--accent); color:var(--accent-dark); font-weight:900; font-size:calc(14px * var(--fs,1));
+  background:var(--card); box-shadow:0 3px 0 var(--edge-dark,rgba(0,0,0,.08));}
+.empty{padding:22px; text-align:center; border-radius:20px; background:var(--card); border:2px dashed var(--border); font-weight:800; color:var(--muted);}
+/* 8270: اسم المجموعة والمصروف يظهروا كاملين (من غير قطع ولا كتابة بالطول) */
+.group-head .gname{flex-wrap:wrap; row-gap:4px;}
+.group-head .gname span.txt{flex:1 1 0; min-width:0; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; overflow-wrap:anywhere; word-break:break-word; line-height:1.4;}
+.group-head .gname small.gdate{flex:1 1 100%; order:3; padding-inline-start:56px;}
+.item-row{flex-wrap:wrap !important; row-gap:8px;}
+.item-row .item-main{flex:1 1 0 !important; min-width:0 !important; overflow-wrap:anywhere; word-break:break-word;}
+.item-row .it-name{display:block; white-space:normal; overflow-wrap:anywhere; word-break:break-word;}
+.item-row > span[style]{flex:1 1 100% !important; display:flex !important; align-items:center; justify-content:space-between; gap:8px !important; padding-top:8px; border-top:1px dashed var(--border);}
+/* 8271: المجموعات بلون ثلجي فاتح عشان تتميز عن المصروفات (البيضا) */
+.group{background:linear-gradient(180deg,color-mix(in srgb,#bfe6ff 42%,var(--card)),color-mix(in srgb,#d6f0ff 60%,var(--card))) !important; border-color:color-mix(in srgb,#8fd0ff 60%,var(--border)) !important;}
+.group::before{background:linear-gradient(180deg,#e3f6ff,#86d0f7 55%,#4aaee6) !important; box-shadow:2px 0 6px rgba(74,174,230,.4) !important;}
+.group.nested{background:linear-gradient(180deg,color-mix(in srgb,#a9defa 50%,var(--card)),color-mix(in srgb,#cdeeff 65%,var(--card))) !important;}
+.group-head .g-ico{background:linear-gradient(145deg,color-mix(in srgb,#ffffff 60%,var(--card)),color-mix(in srgb,#9edcff 55%,var(--card))) !important;}
+.group-head .gtotal{background:linear-gradient(180deg,color-mix(in srgb,#ffffff 55%,var(--card)),color-mix(in srgb,#bfe6ff 40%,var(--card))) !important; color:#0b6aa8 !important; box-shadow:inset 0 1px 0 var(--edge-light,#fff), 0 3px 0 rgba(74,174,230,.35) !important;}
+.item-row{background:var(--card) !important;}
+</style>
+<script>
+/* 8269: الحقل اللي بتكتب فيه يفضل ظاهر فوق الكيبورد، وزر ＋ العايم يختفي وقت الكتابة */
+(function(){
+  function isField(e){ return !!(e && e.matches && e.matches('#groupsSectionBody input, .add-card input')); }
+  function show(el){ try{ el.scrollIntoView({block:'center', behavior:'auto'}); }catch(_){ } }
+  document.addEventListener('focusin', function(e){
+    if(!isField(e.target)) return;
+    document.body.classList.add('kb-open');
+    var t = e.target; setTimeout(function(){ show(t); }, 320);
+  });
+  document.addEventListener('focusout', function(){
+    setTimeout(function(){ if(!isField(document.activeElement)) document.body.classList.remove('kb-open'); }, 150);
+  });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', function(){
+      var a = document.activeElement; if(isField(a)) setTimeout(function(){ show(a); }, 60);
+    });
+  }
 })();
 </script>
 </body>
