@@ -1,6 +1,8 @@
 /* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
-const VERSION = '2026-11-04.8263';
-const CACHE_PREFIX = 'masrofati-b-v';
+const VERSION = '2026-11-04.8265';
+// كاش مستقل لكل نسخة/مجلد (مش بيمسح كاش النسخ التانية)
+const SCOPE_ID = ((self.registration && self.registration.scope) || self.location.href).replace(/[^a-z0-9]+/gi, '-');
+const CACHE_PREFIX = 'amwali-' + SCOPE_ID + '-';
 const CACHE = CACHE_PREFIX + VERSION;
 const SHELL = [
   './',
