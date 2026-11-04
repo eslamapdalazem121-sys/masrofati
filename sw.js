@@ -1,5 +1,5 @@
 /* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
-const VERSION = '2026-11-04.8267';
+const VERSION = '2026-11-04.8268';
 // كاش مستقل لكل نسخة/مجلد (مش بيمسح كاش النسخ التانية)
 const SCOPE_ID = ((self.registration && self.registration.scope) || self.location.href).replace(/[^a-z0-9]+/gi, '-');
 const CACHE_PREFIX = 'amwali-' + SCOPE_ID + '-';
@@ -47,7 +47,7 @@ async function shellFromCache() {
 // صفحة التطبيق: نجرّب النت بسرعة (عشان التحديثات توصل)، ولو مفيش نت أو بطيء نفتح من التخزين فورًا
 async function handleNavigate(request) {
   const cache = await caches.open(CACHE);
-  const network = fetch(request).then(async (res) => {
+  const network = fetch(request.url, { cache: 'no-cache', credentials: 'same-origin' }).then(async (res) => {
     if (res && res.ok) { try { await cache.put('./', res.clone()); } catch (e) {} }
     return res;
   });
@@ -66,9 +66,10 @@ async function handleNavigate(request) {
 }
 
 // باقي الملفات: من التخزين فورًا وتتحدّث في الخلفية
-async function staleWhileRevalidate(request) {
+// exact=true للمصادر الخارجية: كل رابط خط ليه كاش لوحده (لو تجاهلنا الـ query كل الخطوط كانت بترجّع نفس ملف الـ CSS القديم)
+async function staleWhileRevalidate(request, exact) {
   const cache = await caches.open(CACHE);
-  const cached = await cache.match(request, { ignoreSearch: true });
+  const cached = await cache.match(request, exact ? { ignoreVary: true } : { ignoreSearch: true });
   const fetching = fetch(request).then(async (res) => {
     if (res && (res.ok || res.type === 'opaque')) { try { await cache.put(request, res.clone()); } catch (e) {} }
     return res;
@@ -87,7 +88,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(staleWhileRevalidate(req));
     return;
   }
-  if (CACHEABLE_HOSTS.indexOf(url.hostname) > -1) { event.respondWith(staleWhileRevalidate(req)); }
+  if (CACHEABLE_HOSTS.indexOf(url.hostname) > -1) { event.respondWith(staleWhileRevalidate(req, true)); }
 });
 
 self.addEventListener('message', (event) => {
