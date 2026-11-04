@@ -1,5 +1,5 @@
 /* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
-const VERSION = '2026-11-04.8258';
+const VERSION = '2026-11-04.8259';
 const CACHE_PREFIX = 'masrofati-b-v';
 const CACHE = CACHE_PREFIX + VERSION;
 const SHELL = [

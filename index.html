@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-04.8258">
+<meta name="app-version" content="2026-11-04.8259">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -2666,6 +2666,25 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 @media (prefers-reduced-motion: reduce){ #yrCap .cm-zl{animation:none;} }
 #cmChipAll .cm-bar, #yrCap .cm-bar{transform-box:fill-box; transform-origin:50% 100%; animation:cmBarUp .55s ease-out both;}
 @keyframes cmBarUp{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+/* بطاقتا أموال وذهب في رأس المال: أصغر وأكثر تراصًا */
+#yrCap .zk-row.cap-subs{gap:8px; margin-top:8px;}
+#yrCap .cap-sub{grid-template-columns:calc(60px * var(--cs-sc,1)) minmax(0,1fr); gap:8px; padding:8px 10px 8px 38px; border-radius:20px;}
+#yrCap .cap-sub .cs-ico{width:calc(60px * var(--cs-sc,1)); height:calc(60px * var(--cs-sc,1)); font-size:calc(32px * var(--cs-sc,1));}
+#yrCap .cap-sub .cs-body{gap:3px;}
+#yrCap .cap-sub .c2-l{font-size:calc(15px * var(--fs,1));}
+#yrCap .cap-sub .c2-v{font-size:calc(23px * var(--fs,1)); line-height:1.1;}
+#yrCap .cap-sub .cm-zig2{width:72%; margin:2px 0 0;}
+#yrCap .cap-sub .zg-cap{font-size:calc(10.5px * var(--fs,1)); line-height:1.4;}
+#yrCap .cap-sub .zg-cap .cz-last{display:none;}
+#yrCap .cap-sub .zg-cap .cz-demo{display:block;}
+#yrCap .cap-sub .c2-pill{padding:1px 9px; font-size:calc(11px * var(--fs,1));}
+#yrCap .cap-sub .c2-rows{gap:3px;}
+#yrCap .cap-sub .c2-rows .r{padding:3px 8px; border-radius:10px; font-size:calc(11.5px * var(--fs,1));}
+#yrCap .cap-sub .c2-rows .r b{font-size:calc(13px * var(--fs,1));}
+#yrCap .cap-sub .c2-karat{gap:3px;}
+#yrCap .cap-sub .c2-karat > span{padding:2px 1px; border-radius:9px;}
+#yrCap .cap-sub .c2-karat small{font-size:calc(9.5px * var(--fs,1));} #yrCap .cap-sub .c2-karat b{font-size:calc(11.5px * var(--fs,1));}
+#yrCap .cap-sub .c2-pnl{padding:2px 10px; font-size:calc(12px * var(--fs,1));}
 #capGoldOverlay .gd-zig{display:block; width:100%; height:auto; overflow:visible; margin:4px 0 6px;}
 #capGoldOverlay .gd-zcap{display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:2px 6px; margin:0 0 10px; font-size:calc(12.5px * var(--fs,1)); font-weight:800; line-height:1.55; color:#3b2a00; text-align:center;}
 #capGoldOverlay .gd-zcap:empty{display:none;}
