@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-05.8302">
+<meta name="app-version" content="2026-11-06.8304">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -6037,10 +6037,39 @@ function certIntDepositSync(){
   }catch(e){ console.error('certIntDepositSync', e); }
   return ch;
 }
+/* 8303: فايدة اتضافت لرصيد الحساب بمبلغ قديم (النسبة اتغيّرت بعد ما الفايدة اتضافت أو في نفس يوم الاستحقاق): المبلغ المسجّل لازم يطابق اللي التطبيق بيحسبه دلوقتي.
+   - من غير opt.id: بيصحّح فايدة الشهر الحالي بس (التشغيل العادي).
+   - opt.id (بعد تعديل البند ده): بيصحّح كل الشهور اللي كانت مطابقة للحساب القديم واتغيّر حسابها بالتعديل، وغيرها بيسيبه زي ما هو. */
+function certIntDepReconcile(opt){
+  let ch = false; opt = opt || {};
+  try{
+    if(window._depHold && !opt.id) return false;
+    const list = capRaw(), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999), curK = ikKey(now.getFullYear(), now.getMonth());
+    list.forEach(function(x){
+      if(!x || !x.intDepDone || typeof x.intDepDone !== 'object') return;
+      if(opt.id && x.id !== opt.id) return;
+      certIntDues(x, eod).forEach(function(d){
+        const r = x.intDepDone[d.k]; if(!r || r.init || !(Number(r.a) > 0) || !(d.a > 0)) return;
+        const was = cgInt(Number(r.a) || 0); if(was === d.a) return;
+        const q = d.k.split('-'); if(q.length !== 2) return;
+        if(opt.id){ if(typeof opt.oldAt === 'function' && cgInt(opt.oldAt(new Date(d.t))) !== was) return; }
+        else if(ikKey(+q[0], +q[1]) !== curK) return;
+        const acc = list.find(function(z){ return z && z.id === r.to; }); if(!acc) return;
+        const diff = cgInt(d.a - was);
+        acc.amount = Math.max(0, cgInt((Number(acc.amount) || 0) + diff));
+        if(Array.isArray(acc.chg)){ const c = acc.chg.find(function(z){ return z && z.id === 'cd:' + x.id + ':' + d.k; }); if(c) c.delta = d.a; }
+        x.intSpent = Math.max(0, cgInt((Number(x.intSpent) || 0) + diff));
+        r.a = d.a; ch = true;
+      });
+    });
+  }catch(e){ console.error('certIntDepReconcile', e); }
+  return ch;
+}
 function autoIncSync(){
   let changed = false;
   try{ if(ikPendApply()) changed = true; }catch(e){}
   try{ capRaw().forEach(function(x){ if(x && ikSync(x)) changed = true; }); }catch(e){}
+  try{ if(certIntDepReconcile()) changed = true; }catch(e){}
   try{ if(certIntDepositSync()) changed = true; }catch(e){}
   try{ if(certPoolSync()) changed = true; }catch(e){}
   try{ if(penDepositSync()) changed = true; }catch(e){}
@@ -11817,6 +11846,20 @@ window.addEventListener('appinstalled', ()=>{ _deferredInstall = null; updateIns
 // ===== INSTALL END =====
 
 // ===== OFFLINE START (العمل بدون إنترنت) =====
+// فحص حقيقي: هل ملف sw.js كامل، وهل صفحة التطبيق متخزّنة فعلًا في كاش الجهاز؟ (الـ controller لوحده مش كفاية: sw.js الفاضي بيبان كأنه شغّال)
+async function offlineReadyCheck(){
+  try{
+    if(!navigator.serviceWorker || !('caches' in window)) return {ok:false, why:'مفيش دعم'};
+    const reg = await navigator.serviceWorker.getRegistration(); if(!reg || !reg.active) return {ok:false, why:'مفيش خدمة مسجّلة'};
+    { const ac = new AbortController(), tm = setTimeout(function(){ ac.abort(); }, 4000);   // لو مفيش نت (أو الواي فاي من غير إنترنت) منقدرش نفحص الملف نفسه وبنكمّل بفحص الكاش
+      try{ const t = await (await fetch(new URL('sw.js', location.href).href + '?_=' + Date.now(), {cache:'no-store', signal: ac.signal})).text(); if(t.length < 500 || t.indexOf('fetch') < 0) return {ok:false, why:'sw.js فاضي'}; }catch(e){}
+      finally{ clearTimeout(tm); } }
+    const prefix = 'amwali-' + new URL('./', location.href).href.replace(/[^a-z0-9]+/gi, '-') + '-';
+    const keys = (await caches.keys()).filter(function(k){ return k.indexOf(prefix) === 0; });
+    for(const k of keys){ const c = await caches.open(k); if(await c.match('./', {ignoreSearch:true}) || await c.match('index.html', {ignoreSearch:true})) return {ok:true, why:''}; }
+    return {ok:false, why:'الصفحة مش في الكاش'};
+  }catch(e){ return {ok:false, why:'خطأ'}; }
+}
 function updateOfflineStatus(){
   const el = document.getElementById('offlineStatus');
   if(!el) return;
@@ -11824,7 +11867,11 @@ function updateOfflineStatus(){
   if(window.__IS_APK__){
     el.textContent = '✅ التطبيق مدمج في الموبايل ويشتغل بدون إنترنت. بياناتك على جهازك.';
   } else if(swReady){
-    el.textContent = '✅ جاهز للعمل بدون إنترنت. بياناتك محفوظة على جهازك دايمًا.';
+    el.textContent = '⏳ بنتأكد إن التطبيق متخزّن على الجهاز للعمل بدون إنترنت…';
+    offlineReadyCheck().then(function(r){
+      el.textContent = r.ok ? '✅ جاهز للعمل بدون إنترنت. بياناتك محفوظة على جهازك دايمًا.'
+        : '⚠️ التطبيق لسه مش متخزّن على الجهاز، فمش هيفتح بدون إنترنت. افتحه وأنت متصل بالنت مرتين وارجع شوف الرسالة دي. لو فضلت كده: ملف sw.js على GitHub فاضي أو ناقص — ارفعه تاني مع باقي الملفات (' + r.why + ').';
+    });
   } else if(isEmbedded()){
     el.textContent = '⚠️ النسخة اللي بتتفتح من جوه Claude محتاجة إنترنت عشان تتفتح. للعمل بدون نت ثبّت «أموالي AtoZ» من المتصفح (نسخة التثبيت) أو تطبيق الأندرويد.';
   } else {
@@ -14303,17 +14350,26 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
   function wrap(name, idGetter, modeGetter){
     var f = window[name]; if(typeof f !== 'function') return;
     window[name] = function(){
-      var id = idGetter(), before = null, modes = null;
-      if(id){ var x = capList().find(function(z){ return z.id === id; }); if(x){ before = capItemClone(x); if(modeGetter) modes = modeGetter(); if(modes && modes.keep && !capIsPast()) window._ikPend = {id: id, snap: {ik: x.ik ? JSON.parse(JSON.stringify(x.ik)) : null, keep: x.intKeep === true}, mode: modes.keep, t: Date.now()}; } }
+      var id = idGetter(), before = null, modes = null, beforeRv = null;
+      if(id){ var x = capList().find(function(z){ return z.id === id; }); if(x){ before = capItemClone(x); beforeRv = Array.isArray(x.rv) ? JSON.parse(JSON.stringify(x.rv)) : []; if(modeGetter) modes = modeGetter(); if(modes && modes.keep && !capIsPast()) window._ikPend = {id: id, snap: {ik: x.ik ? JSON.parse(JSON.stringify(x.ik)) : null, keep: x.intKeep === true}, mode: modes.keep, t: Date.now()}; } }
       window._ikMsg = '';
-      var res = f.apply(this, arguments), done = false;
+      var res, done = false; window._depHold = true;   // 8303: ما نصحّحش الفايدة المضافة قبل ما سجل النسب الجديد يتبني
+      try{ res = f.apply(this, arguments); }catch(err){ window._depHold = false; throw err; }
       if(window._ikPend){ try{ if(ikPendApply()){ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); } }catch(e){ console.error('ikPend', e); } window._ikPend = null; }
       var ikm = window._ikMsg || '';
       try{ if(id && before && !capIsPast()) aaLogEdit(id, before, modes); }catch(e){ console.error('aaLog', e); }
       try{ if(id && before) done = capAfterEdit(id, before, modes); }catch(e){ console.error('capAfterEdit', e); }
+      window._depHold = false;
+      var depMsg = '';
+      if(done && !capIsPast()){
+        try{
+          var oldItem = Object.assign({}, before, beforeRv && beforeRv.length ? {rv: beforeRv} : {});
+          if(certIntDepReconcile({id: id, oldAt: function(dt){ return bankMonthlyAt(oldItem, dt); }})) depMsg = ' · اتحدّثت الفايدة اللي اتضافت لرصيد الحساب على النسبة/المبلغ الجديد';
+        }catch(e){ console.error('depReconcile', e); }
+      }
       if(done){
         try{ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
-        try{ showToast(capIsPast() ? 'التعديل أثّر على سنة ' + toArabicDigits(currentYear) + ' بس' : (typeof done === 'string' ? done : 'التعديل ساري من النهارده، والشهور اللي فاتت زي ما هي') + (ikm ? ' · ' + ikm : ''), true); }catch(e){}
+        try{ showToast(capIsPast() ? 'التعديل أثّر على سنة ' + toArabicDigits(currentYear) + ' بس' : (typeof done === 'string' ? done : 'التعديل ساري من النهارده، والشهور اللي فاتت زي ما هي') + (ikm ? ' · ' + ikm : '') + depMsg, true); }catch(e){}
       } else if(ikm){ try{ showToast('اتطبّق ✅ ' + ikm, true); }catch(e){} }
       return res;
     };
