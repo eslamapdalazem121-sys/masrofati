@@ -485,6 +485,15 @@ h1{
 }
 .avg-spend-bar-wrap{width:100%; height:6px; border-radius:4px; background:var(--border); overflow:hidden; order:3;}
 .avg-spend-bar{height:100%; background:linear-gradient(90deg, var(--accent-dark), var(--accent)); transition:width .3s ease, background .3s ease;}
+/* 8293: مؤشر الإنفاق اليومي بنفس مؤشرات الإعدادات (بورصة / منحنى / زجزاج / سلم / أعمدة / مساحة / عصي / نقاط / عداد / بدون) */
+.avg-spend-bar-wrap{display:none !important;}
+.avg-zig{flex:1 1 100%; order:3; display:block; width:100%; height:auto; overflow:visible; margin-top:4px;}
+.avg-zig .cm-zl{stroke-dasharray:1; stroke-dashoffset:0; animation:cmZdraw 1.2s ease-out both;}
+@media (prefers-reduced-motion: reduce){ .avg-zig .cm-zl{animation:none;} }
+/* 8297: بطاقة متوسط الإنفاق اليومي والمؤشر أكبر رأسيًا: المؤشر تحت الرقم بعرض البطاقة وطول أكبر */
+#avgSpendCard{padding:14px 16px 12px; margin-top:16px;}
+#avgSpendCard .avg-spend-val{font-size:calc(21px * var(--fs,1));}
+#avgSpendCard .avg-zig{flex:1 1 100%; order:3; width:100%; max-width:none; margin:8px 0 0;}
 .avg-spend-card.over{background:var(--c-deficit); border-color:transparent;}
 .avg-spend-card.over .avg-spend-val{color:var(--c-deficit-txt);}
 .avg-spend-card.over .avg-spend-bar{background:linear-gradient(90deg, var(--expense-dark), var(--expense));}
@@ -1695,6 +1704,11 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 .mc-addsub:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 1px 0 #0a6a52;}
 .mc-addsub .mc-as-plus{display:grid; place-items:center; flex:none; width:calc(42px * var(--fs,1)); height:calc(42px * var(--fs,1)); border-radius:14px; font-size:calc(30px * var(--fs,1)); font-weight:900; line-height:1; color:#fff; text-shadow:0 2px 0 rgba(0,70,50,.5); background:rgba(255,255,255,.25); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.15);}
 .mc-addsub .mc-as-t{flex:1; text-align:start; font-size:inherit; font-weight:900;}
+/* 8289: زرار «＋ حساب فرعي» في صفحة البنوك — بطاقة غامقة + علامة ＋ وكلمة «حساب فرعي» بالأزرق */
+.mc-addsub.mc-addsub-sub{color:#5cb0ff; text-shadow:none; border:1.5px solid #2a3b63; background:linear-gradient(180deg,#1d2744,#0b1222); box-shadow:inset 0 1px 0 rgba(120,170,255,.22), inset 0 -3px 0 rgba(0,0,0,.35), 0 5px 0 #040710, 0 11px 14px rgba(5,10,30,.45);}
+.mc-addsub.mc-addsub-sub:active{transform:translateY(4px); box-shadow:inset 0 1px 0 rgba(120,170,255,.18), 0 1px 0 #040710;}
+.mc-addsub.mc-addsub-sub .mc-as-plus{color:#5cb0ff; text-shadow:0 0 10px rgba(92,176,255,.55); background:rgba(92,176,255,.14); box-shadow:inset 0 1px 0 rgba(160,205,255,.3), inset 0 -2px 0 rgba(0,0,0,.3);}
+.mc-addsub.mc-addsub-sub .mc-as-t{color:#5cb0ff; text-shadow:none;}
 /* 8278: أيقونات إنشاء حساب بنكي / شهادة / حساب فرعي — ثابتة ومجسمة وجنب بعض وقابلة للتحريك */
 .acc-new.acc-icons{display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 6px; align-items:stretch;}
 .ai-tile{flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:9px; padding:10px 2px 4px; border:0; border-radius:20px; cursor:pointer; font-family:inherit; color:var(--text); background:none; box-shadow:none; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; touch-action:manipulation;}
@@ -2534,6 +2548,61 @@ html{ overscroll-behavior:none; }
 #capAccOverlay .acc-sum{margin:2px 0 14px; padding:12px 14px; border-radius:16px; font-weight:800; line-height:1.7; text-align:center; background:linear-gradient(160deg,rgba(47,123,255,.14),rgba(47,123,255,.05)); box-shadow:inset 0 1px 0 var(--mchl), 0 4px 0 rgba(0,0,0,.07);}
 #capAccOverlay .acc-save{width:100%; border:0; cursor:pointer; padding:15px; border-radius:18px; font-family:inherit; font-weight:900; font-size:calc(17px * var(--fs,1)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#3ed89c,#12b27a); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 6px 0 #0b7a55, 0 13px 18px rgba(11,122,85,.3); transition:transform .1s, box-shadow .1s;}
 #capAccOverlay .acc-save:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 2px 0 #0b7a55;}
+
+/* 8290: صفحة «إنشاء حساب فرعي» بتصميم 3D (بتشتغل بس في وضع الحساب الفرعي — صفحة الحساب البنكي زي ما هي) */
+#capAccOverlay.sub3d{--s3a:#38d3a6; --s3b:#0f9d78; --s3e:#0a6a52; --s3in:rgba(0,0,0,.14);}
+#capAccOverlay.sub3d .modal-box{background:radial-gradient(130% 42% at 50% 0%,rgba(56,211,166,.30),transparent 70%),linear-gradient(180deg,var(--bg2),var(--bg)); perspective:900px;}
+#capAccOverlay.sub3d .acc-title{display:flex; align-items:center; gap:12px; padding:12px 14px; padding-inline-start:58px; margin:4px 2px 18px; border-radius:22px; background:linear-gradient(180deg,var(--s3a),var(--s3b)); color:#fff; text-shadow:0 1px 2px rgba(0,60,40,.55); box-shadow:inset 0 3px 0 rgba(255,255,255,.5), inset 0 -4px 0 rgba(0,0,0,.18), 0 7px 0 var(--s3e), 0 16px 20px rgba(15,157,120,.35);}
+#capAccOverlay.sub3d .acc-title small{color:rgba(255,255,255,.9);}
+#capAccOverlay.sub3d .acc-title .acc-ttl-ic{flex:none; display:grid; place-items:center; width:calc(48px * var(--fs,1)); height:calc(48px * var(--fs,1)); border-radius:16px; font-size:calc(26px * var(--fs,1)); background:rgba(255,255,255,.26); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,0,0,.18), 0 3px 0 rgba(0,70,50,.35); text-shadow:none;}
+#capAccOverlay.sub3d .acc-card{transform:rotateX(2.2deg); transform-origin:50% 0; padding:18px 14px 10px; border-radius:26px; border:1.5px solid rgba(56,211,166,.35); background:linear-gradient(160deg,var(--mchl) 0%,transparent 55%),var(--card); box-shadow:inset 0 2px 0 var(--mchl), 0 4px 0 rgba(15,157,120,.28), 0 9px 0 rgba(0,0,0,.10), 0 22px 26px var(--mcsh);}
+#capAccOverlay.sub3d .acc-card .field > label{color:var(--s3b); font-weight:900; text-shadow:0 1px 0 var(--mchl);}
+#capAccOverlay.sub3d .acc-card input[type=text], #capAccOverlay.sub3d .acc-card input[type=number], #capAccOverlay.sub3d .acc-card input[type=date], #capAccOverlay.sub3d .acc-card select{width:100%; border:0; border-radius:16px; padding:13px 14px; color:var(--text); background:var(--bg); box-shadow:inset 0 4px 7px var(--s3in), inset 0 -2px 0 var(--mchl), 0 3px 0 rgba(56,211,166,.28); transition:box-shadow .12s, transform .12s;}
+#capAccOverlay.sub3d .acc-card input:focus, #capAccOverlay.sub3d .acc-card select:focus{outline:none; transform:translateY(-1px); box-shadow:inset 0 4px 7px var(--s3in), 0 0 0 3px rgba(56,211,166,.55), 0 5px 0 var(--s3b);}
+#capAccOverlay.sub3d .acc-seg button.active{background:linear-gradient(180deg,var(--s3a),var(--s3b)); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 var(--s3e);}
+#capAccOverlay.sub3d .acc-seg button:not(.active):active{transform:translateY(3px); box-shadow:inset 0 2px 0 var(--mchl), 0 2px 0 rgba(0,0,0,.12);}
+#capAccOverlay.sub3d .acc-sum{border-radius:18px; background:linear-gradient(160deg,rgba(56,211,166,.22),rgba(56,211,166,.07)); box-shadow:inset 0 2px 0 var(--mchl), inset 0 -3px 0 rgba(0,0,0,.06), 0 5px 0 rgba(15,157,120,.22), 0 10px 14px var(--mcsh);}
+#capAccOverlay.sub3d .check-row{padding:10px 12px; border-radius:16px; background:var(--bg); box-shadow:inset 0 3px 6px var(--s3in), 0 3px 0 rgba(56,211,166,.22);}
+#capAccOverlay.sub3d .check-row input[type=checkbox]{accent-color:var(--s3b); width:22px; height:22px; flex:none;}
+#capAccOverlay.sub3d .acc-save{padding:17px; border-radius:22px; background:linear-gradient(180deg,var(--s3a),var(--s3b)); box-shadow:inset 0 3px 0 rgba(255,255,255,.55), inset 0 -4px 0 rgba(0,0,0,.16), 0 8px 0 var(--s3e), 0 17px 22px rgba(15,157,120,.4);}
+#capAccOverlay.sub3d .acc-save:active{transform:translateY(6px); box-shadow:inset 0 3px 0 rgba(255,255,255,.4), 0 2px 0 var(--s3e), 0 4px 8px rgba(15,157,120,.3);}
+#capAccOverlay.sub3d .fs-close{box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 rgba(0,0,0,.25);}
+/* 8291: صفحة إنشاء حساب بنكي (أزرق) بتصميم 3D */
+#capAccOverlay.bank3d{--s3a:#5aa9ff; --s3b:#2f7bff; --s3e:#1b53b8; --s3in:rgba(0,0,0,.14);}
+#capAccOverlay.bank3d .modal-box{background:radial-gradient(130% 42% at 50% 0%,rgba(90,169,255,.30),transparent 70%),linear-gradient(180deg,var(--bg2),var(--bg)); perspective:900px;}
+#capAccOverlay.bank3d .acc-title{display:flex; align-items:center; gap:12px; padding:12px 14px; padding-inline-start:58px; margin:4px 2px 18px; border-radius:22px; background:linear-gradient(180deg,var(--s3a),var(--s3b)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:inset 0 3px 0 rgba(255,255,255,.5), inset 0 -4px 0 rgba(0,0,0,.18), 0 7px 0 var(--s3e), 0 16px 20px rgba(47,123,255,.35);}
+#capAccOverlay.bank3d .acc-title small{color:rgba(255,255,255,.9);}
+#capAccOverlay.bank3d .acc-title .acc-ttl-ic{flex:none; display:grid; place-items:center; width:calc(48px * var(--fs,1)); height:calc(48px * var(--fs,1)); border-radius:16px; font-size:calc(26px * var(--fs,1)); background:rgba(255,255,255,.26); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,0,0,.18), 0 3px 0 rgba(0,0,0,.3); text-shadow:none;}
+#capAccOverlay.bank3d .acc-card{transform:rotateX(2.2deg); transform-origin:50% 0; padding:18px 14px 10px; border-radius:26px; border:1.5px solid rgba(90,169,255,.35); background:linear-gradient(160deg,var(--mchl) 0%,transparent 55%),var(--card); box-shadow:inset 0 2px 0 var(--mchl), 0 4px 0 rgba(47,123,255,.28), 0 9px 0 rgba(0,0,0,.10), 0 22px 26px var(--mcsh);}
+#capAccOverlay.bank3d .acc-card .field > label{color:var(--s3b); font-weight:900; text-shadow:0 1px 0 var(--mchl);}
+#capAccOverlay.bank3d .acc-card input[type=text], #capAccOverlay.bank3d .acc-card input[type=number], #capAccOverlay.bank3d .acc-card input[type=date], #capAccOverlay.bank3d .acc-card select{width:100%; border:0; border-radius:16px; padding:13px 14px; color:var(--text); background:var(--bg); box-shadow:inset 0 4px 7px var(--s3in), inset 0 -2px 0 var(--mchl), 0 3px 0 rgba(90,169,255,.28); transition:box-shadow .12s, transform .12s;}
+#capAccOverlay.bank3d .acc-card input:focus, #capAccOverlay.bank3d .acc-card select:focus{outline:none; transform:translateY(-1px); box-shadow:inset 0 4px 7px var(--s3in), 0 0 0 3px rgba(90,169,255,.55), 0 5px 0 var(--s3b);}
+#capAccOverlay.bank3d .acc-seg button.active{background:linear-gradient(180deg,var(--s3a),var(--s3b)); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 var(--s3e);}
+#capAccOverlay.bank3d .acc-seg button:not(.active):active{transform:translateY(3px); box-shadow:inset 0 2px 0 var(--mchl), 0 2px 0 rgba(0,0,0,.12);}
+#capAccOverlay.bank3d .acc-sum{border-radius:18px; background:linear-gradient(160deg,rgba(90,169,255,.22),rgba(90,169,255,.07)); box-shadow:inset 0 2px 0 var(--mchl), inset 0 -3px 0 rgba(0,0,0,.06), 0 5px 0 rgba(47,123,255,.22), 0 10px 14px var(--mcsh);}
+#capAccOverlay.bank3d .check-row{padding:10px 12px; border-radius:16px; background:var(--bg); box-shadow:inset 0 3px 6px var(--s3in), 0 3px 0 rgba(90,169,255,.22);}
+#capAccOverlay.bank3d .check-row input[type=checkbox]{accent-color:var(--s3b); width:22px; height:22px; flex:none;}
+#capAccOverlay.bank3d .acc-save{padding:17px; border-radius:22px; background:linear-gradient(180deg,var(--s3a),var(--s3b)); box-shadow:inset 0 3px 0 rgba(255,255,255,.55), inset 0 -4px 0 rgba(0,0,0,.16), 0 8px 0 var(--s3e), 0 17px 22px rgba(47,123,255,.4);}
+#capAccOverlay.bank3d .acc-save:active{transform:translateY(6px); box-shadow:inset 0 3px 0 rgba(255,255,255,.4), 0 2px 0 var(--s3e), 0 4px 8px rgba(47,123,255,.3);}
+#capAccOverlay.bank3d .fs-close{box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 rgba(0,0,0,.25);}
+/* 8291: صفحة إنشاء شهادة (بنفسجي) بتصميم 3D */
+#capCertOverlay{--s3a:#b78cff; --s3b:#7c4ddb; --s3e:#4f2a9e; --s3in:rgba(0,0,0,.14);}
+#capCertOverlay .modal-box{background:radial-gradient(130% 42% at 50% 0%,rgba(183,140,255,.30),transparent 70%),linear-gradient(180deg,var(--bg2),var(--bg)); perspective:900px;}
+#capCertOverlay .acc-title{display:flex; align-items:center; gap:12px; padding:12px 14px; padding-inline-start:58px; margin:4px 2px 18px; border-radius:22px; background:linear-gradient(180deg,var(--s3a),var(--s3b)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:inset 0 3px 0 rgba(255,255,255,.5), inset 0 -4px 0 rgba(0,0,0,.18), 0 7px 0 var(--s3e), 0 16px 20px rgba(124,77,219,.35);}
+#capCertOverlay .acc-title small{color:rgba(255,255,255,.9);}
+#capCertOverlay .acc-title .acc-ttl-ic{flex:none; display:grid; place-items:center; width:calc(48px * var(--fs,1)); height:calc(48px * var(--fs,1)); border-radius:16px; font-size:calc(26px * var(--fs,1)); background:rgba(255,255,255,.26); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,0,0,.18), 0 3px 0 rgba(0,0,0,.3); text-shadow:none;}
+#capCertOverlay .acc-card{transform:rotateX(2.2deg); transform-origin:50% 0; padding:18px 14px 10px; border-radius:26px; border:1.5px solid rgba(183,140,255,.35); background:linear-gradient(160deg,var(--mchl) 0%,transparent 55%),var(--card); box-shadow:inset 0 2px 0 var(--mchl), 0 4px 0 rgba(124,77,219,.28), 0 9px 0 rgba(0,0,0,.10), 0 22px 26px var(--mcsh);}
+#capCertOverlay .acc-card .field > label{color:var(--s3b); font-weight:900; text-shadow:0 1px 0 var(--mchl);}
+#capCertOverlay .acc-card input[type=text], #capCertOverlay .acc-card input[type=number], #capCertOverlay .acc-card input[type=date], #capCertOverlay .acc-card select{width:100%; border:0; border-radius:16px; padding:13px 14px; color:var(--text); background:var(--bg); box-shadow:inset 0 4px 7px var(--s3in), inset 0 -2px 0 var(--mchl), 0 3px 0 rgba(183,140,255,.28); transition:box-shadow .12s, transform .12s;}
+#capCertOverlay .acc-card input:focus, #capCertOverlay .acc-card select:focus{outline:none; transform:translateY(-1px); box-shadow:inset 0 4px 7px var(--s3in), 0 0 0 3px rgba(183,140,255,.55), 0 5px 0 var(--s3b);}
+#capCertOverlay .acc-seg button.active{background:linear-gradient(180deg,var(--s3a),var(--s3b)); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 var(--s3e);}
+#capCertOverlay .acc-seg button:not(.active):active{transform:translateY(3px); box-shadow:inset 0 2px 0 var(--mchl), 0 2px 0 rgba(0,0,0,.12);}
+#capCertOverlay .acc-sum{border-radius:18px; background:linear-gradient(160deg,rgba(183,140,255,.22),rgba(183,140,255,.07)); box-shadow:inset 0 2px 0 var(--mchl), inset 0 -3px 0 rgba(0,0,0,.06), 0 5px 0 rgba(124,77,219,.22), 0 10px 14px var(--mcsh);}
+#capCertOverlay .check-row{padding:10px 12px; border-radius:16px; background:var(--bg); box-shadow:inset 0 3px 6px var(--s3in), 0 3px 0 rgba(183,140,255,.22);}
+#capCertOverlay .check-row input[type=checkbox]{accent-color:var(--s3b); width:22px; height:22px; flex:none;}
+#capCertOverlay .acc-save{padding:17px; border-radius:22px; background:linear-gradient(180deg,var(--s3a),var(--s3b)); box-shadow:inset 0 3px 0 rgba(255,255,255,.55), inset 0 -4px 0 rgba(0,0,0,.16), 0 8px 0 var(--s3e), 0 17px 22px rgba(124,77,219,.4);}
+#capCertOverlay .acc-save:active{transform:translateY(6px); box-shadow:inset 0 3px 0 rgba(255,255,255,.4), 0 2px 0 var(--s3e), 0 4px 8px rgba(124,77,219,.3);}
+#capCertOverlay .fs-close{box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 rgba(0,0,0,.25);}
 /* شهادة بنكية: نفس شكل صفحة الحساب */
 #capCertOverlay{--mchl:rgba(255,255,255,.95); --mcsh:rgba(30,41,59,.13);}
 :root[data-theme="dark"] #capCertOverlay{--mchl:rgba(255,255,255,.08); --mcsh:rgba(0,0,0,.45);}
@@ -3489,7 +3558,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 <div class="modal-overlay" id="capAccOverlay">
   <div class="modal-box acc-page">
     <button type="button" class="fs-close" onclick="closeCapAcc()" aria-label="رجوع">✕</button>
-    <h3 class="acc-title">🏦 <span id="accTitle">إنشاء حساب بنكي</span><small id="accSubTitle">كأنك بتفتح حساب في البنك</small></h3>
+    <h3 class="acc-title"><span class="acc-ttl-ic" id="accTitleIc">🏦</span> <span id="accTitle">إنشاء حساب بنكي</span><small id="accSubTitle">كأنك بتفتح حساب في البنك</small></h3>
     <div class="acc-card">
       <div class="field" id="accParentRow" style="display:none;"><label for="accParent">🏦 الحساب البنكي الرئيسي</label><select id="accParent"></select></div>
       <div class="field"><label for="accName" id="accNameLbl">اسم الحساب</label><input type="text" id="accName" placeholder="مثال: حساب الراتب"></div>
@@ -3516,7 +3585,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 <div class="modal-overlay" id="capCertOverlay">
   <div class="modal-box acc-page">
     <button type="button" class="fs-close" onclick="closeCapCert()" aria-label="رجوع">✕</button>
-    <h3 class="acc-title">📜 <span id="certTitle">إنشاء شهادة بنكية</span><small>شهادة استثمار بعائد دوري</small></h3>
+    <h3 class="acc-title"><span class="acc-ttl-ic">📜</span> <span id="certTitle">إنشاء شهادة بنكية</span><small>شهادة استثمار بعائد دوري</small></h3>
     <div class="acc-card">
       <div class="field"><label for="certName">اسم الشهادة</label><input type="text" id="certName" placeholder="مثال: شهادة ٣ سنين"></div>
       <div class="field"><label for="certAcc">🏦 حساب البنك</label><select id="certAcc"></select><div class="hint" id="certAccHint" style="margin-top:6px;"></div></div>
@@ -4319,6 +4388,8 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <div class="opt-row" id="optZig_goldpage"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('goldpage','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('goldpage','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('goldpage','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('goldpage','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('goldpage','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('goldpage','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('goldpage','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('goldpage','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('goldpage','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('goldpage','off')">🚫 بدون</button></div>
       <div style="font-weight:700; font-size:12px; color:var(--muted); margin:8px 0 4px;">الفترة</div>
       <div class="opt-row" id="optZigP_goldpage"><button type="button" class="opt-chip" data-val="day" onclick="zigSetPeriod('goldpage','day')">📅 يومي</button><button type="button" class="opt-chip" data-val="month" onclick="zigSetPeriod('goldpage','month')">🗓️ شهري</button><button type="button" class="opt-chip" data-val="year" onclick="zigSetPeriod('goldpage','year')">📆 سنوي</button></div>
+      <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">📊 متوسط الإنفاق اليومي (صفحة الشهر)</div>
+      <div class="opt-row" id="optZig_avg"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('avg','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('avg','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('avg','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('avg','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('avg','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('avg','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('avg','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('avg','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('avg','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('avg','off')">🚫 بدون</button></div>
     </div>
 
 <div class="settings-section">
@@ -4805,6 +4876,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     <div class="avg-spend-bar-wrap">
       <div class="avg-spend-bar" id="avgSpendBar" style="width:0%"></div>
     </div>
+    <svg id="avgZig" class="avg-zig" viewBox="0 0 300 56" role="img" aria-label="مؤشر الإنفاق اليومي"></svg>
   </div>
 
   <div class="groups-toggle-card" onclick="toggleGroupsSection()">
@@ -5015,7 +5087,7 @@ let settings = {
 let _draftSettings = null;
 var ZIG_STYLES = ['smooth','zig','step','bars','area','lollipop','dots','gauge','market','off'], ZIG_PERIODS = ['day','month','year'];
 function zigStyleOf(card){
-  try{ var z = (_draftSettings || settings).zig || {}, v = z[card]; return ZIG_STYLES.indexOf(v) >= 0 ? v : 'smooth'; }catch(e){ return 'smooth'; }
+  try{ var z = (_draftSettings || settings).zig || {}, v = z[card]; return ZIG_STYLES.indexOf(v) >= 0 ? v : (card === 'avg' ? 'market' : 'smooth'); }catch(e){ return 'smooth'; }
 }
 function zigPeriodOf(card){
   try{ var z = (_draftSettings || settings).zigP || {}, v = z[card]; return ZIG_PERIODS.indexOf(v) >= 0 ? v : 'day'; }catch(e){ return 'day'; }
@@ -5035,7 +5107,7 @@ function zigSetStyle(card, style){
   try{ autoSaveSettings(); }catch(e){}
 }
 function zigSettingsUI(){
-  ['total','money','gold','goldpage'].forEach(function(c){ var box = document.getElementById('optZig_' + c); if(!box) return; var cur = zigStyleOf(c);
+  ['total','money','gold','goldpage','avg'].forEach(function(c){ var box = document.getElementById('optZig_' + c); if(!box) return; var cur = zigStyleOf(c);
     Array.from(box.children).forEach(function(el){ el.classList.toggle('active', el.dataset.val === cur); });
     var pb = document.getElementById('optZigP_' + c), pc = zigPeriodOf(c); if(pb) Array.from(pb.children).forEach(function(el){ el.classList.toggle('active', el.dataset.val === pc); }); });
 }
@@ -7124,6 +7196,7 @@ function openCapSub(parentId){
 function openCapAcc(x, opt){
   if(x) x = mvRealOf(x);
   _accEditId = x ? x.id : null; _accSub = !!((x && x.isSub) || (opt && opt.sub));
+  try{ document.getElementById('capAccOverlay').classList.toggle('sub3d', _accSub); document.getElementById('capAccOverlay').classList.toggle('bank3d', !_accSub); const _ti = document.getElementById('accTitleIc'); if(_ti) _ti.textContent = _accSub ? '🗂' : '🏦'; }catch(e){}
   document.getElementById('accTitle').textContent = _accSub ? (x ? 'تعديل الحساب الفرعي' : 'إنشاء حساب فرعي') : (x ? 'تعديل الحساب البنكي' : 'إنشاء حساب بنكي');
   document.getElementById('accSubTitle').textContent = _accSub ? 'حساب تابع لحساب بنكي — بفايدته ومبلغه' : 'كأنك بتفتح حساب في البنك';
   document.getElementById('accNameLbl').textContent = _accSub ? 'اسم الحساب الفرعي' : 'اسم الحساب';
@@ -7148,7 +7221,7 @@ function openCapAcc(x, opt){
   document.getElementById('capAccOverlay').classList.add('open');
   try{ document.querySelector('#capAccOverlay .modal-box').scrollTop = 0; }catch(e){}
 }
-function closeCapAcc(){ document.getElementById('capAccOverlay').classList.remove('open'); _accEditId = null; _accSub = false; }
+function closeCapAcc(){ document.getElementById('capAccOverlay').classList.remove('open', 'sub3d', 'bank3d'); _accEditId = null; _accSub = false; }
 function saveCapAcc(backChoice){
   const an = document.getElementById('accName').value.trim(), par = _accSub ? capList().find(z=> z.id === document.getElementById('accParent').value) : null;
   const bk = _accSub ? (par ? par.bank || '' : '') : document.getElementById('accBank').value.trim();
@@ -7962,7 +8035,7 @@ function cmAccCerts(card, acc, certs, base, box){
     bar.children[1].textContent = pr.length ? pr.join(' · ') : '📜 مفيش شهادات أو حسابات فرعية'; }
   bar.children[2].textContent = certs.length ? fmt(tot) : '';
   card.appendChild(bar); card.classList.add('mc-acc-tap');
-  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.innerHTML = '<span class="mc-as-plus" aria-hidden="true">＋</span><span class="mc-as-t">حساب فرعي</span>';
+  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub mc-addsub-sub'; addSub.innerHTML = '<span class="mc-as-plus" aria-hidden="true">＋</span><span class="mc-as-t">حساب فرعي</span>';
   addSub.addEventListener('click', function(e){ e.stopPropagation(); openCapSub(acc.id); });
   card.appendChild(addSub);
   const kids = certs.map(function(c){
@@ -8028,7 +8101,7 @@ function mbCard(b, base){
     const penM = b.pens.reduce(function(t, p){ return t + (Number(p.amount) || 0); }, 0);
     kind('k-pen', '💳', 'المعاش', (b.pens.length === 1 ? 'معاش واحد' : toArabicDigits(b.pens.length) + ' معاشات') + ' · شهريًا في الحساب الأساسي', penM, b.pens, K + '|p');
   }
-  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.innerHTML = '<span class="mc-as-plus" aria-hidden="true">＋</span><span class="mc-as-t">حساب فرعي</span>';
+  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub mc-addsub-sub'; addSub.innerHTML = '<span class="mc-as-plus" aria-hidden="true">＋</span><span class="mc-as-t">حساب فرعي</span>';
   addSub.addEventListener('click', function(e){ e.stopPropagation(); openCapSub(first.id); });
   body.appendChild(addSub);
   { let best = null; b.accs.concat(b.subs, b.certs, b.pens || []).forEach(function(x){ let ds = null; try{ ds = cmPastView() ? null : dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
@@ -8090,7 +8163,7 @@ function zdGold(){
   return {days: days, ok: true, pnl: mkt - cost, pct: (mkt - cost) / cost * 100, g30: g30, grams: grams, last: last};
 }
 function zigDemoData(){ if(!_zdCache) _zdCache = {money: zdMoney(), gold: zdGold()}; return _zdCache; }
-function zigRefresh(){ try{ if(typeof renderCap === 'function') renderCap(); }catch(e){} try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} }
+function zigRefresh(){ try{ if(typeof renderCap === 'function') renderCap(); }catch(e){} try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} try{ avgZigRedraw(); }catch(e){} }
 function zigDemoRoll(){ __zigDemo = true; _zdSeed = (Date.now() % 2147483646) + 1; _zdCache = null; zigRefresh(); showToast('🎲 المؤشرات شغّالة بأرقام تجريبية — اقفل الإعدادات وافتح رأس المال', true); }
 function zigDemoOff(){ __zigDemo = false; _zdCache = null; zigRefresh(); showToast('رجعت للأرقام الحقيقية', true); }
 function zigAr(n){ return toArabicDigits(fmt(Math.round(Math.abs(n)))); }
@@ -8107,10 +8180,10 @@ function zigGroup(days, per){
 function zigLabel(g, per){ var dt = new Date(g.t); if(per === 'year') return toArabicDigits(dt.getFullYear()); if(per === 'month') return dt.toLocaleDateString(dateLocale(), {month: 'long', year: 'numeric'}); return zigDate(g.t); }
 function zigPaint(svg, cap, o){
   if(!svg) return;
-  var per = o.period || 'day', all = zigGroup(o.days || [], per), days = all.slice(per === 'day' ? -10 : (per === 'month' ? -12 : -8)), W = 300, H = 56, P = 7;
+  var per = o.period || 'day', all = zigGroup(o.days || [], per), days = all.slice(per === 'day' ? -10 : (per === 'month' ? -12 : -8)), W = 300, H = (o.H && o.style !== 'gauge') ? o.H : 56, P = 7;
   if(cap) cap.style.display = '';
   svg.style.display = '';
-  svg.setAttribute('viewBox', '0 0 300 56');
+  svg.setAttribute('viewBox', '0 0 300 ' + H);
   if(!days.length){
     svg.innerHTML = '<line x1="6" y1="' + H / 2 + '" x2="294" y2="' + H / 2 + '" stroke="rgba(128,128,128,.55)" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
     if(cap) cap.innerHTML = '<span class="cz-mut">' + (o.empty || '') + '</span>';
@@ -8120,8 +8193,8 @@ function zigPaint(svg, cap, o){
   var mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts), rg = (mx - mn) || 1, n = pts.length;
   var xs = pts.map(function(v, i){ return P + i * (W - 2 * P) / (n - 1); });
   var ys = pts.map(function(v){ return H - P - ((v - mn) / rg) * (H - 2 * P); });
-  var up = pts[n - 1] >= pts[0], col = up ? '#0f9d78' : '#d6336c', uid = 'zg' + Math.floor(Math.random() * 1e6), sty = o.style || 'smooth';
-  var DG = '#0f9d78', DR = '#d6336c';
+  var up = o.tone ? o.tone === 'up' : pts[n - 1] >= pts[0], col = up ? '#0f9d78' : '#d6336c', uid = 'zg' + Math.floor(Math.random() * 1e6), sty = o.style || 'smooth';
+  var DG = '#0f9d78', DR = '#d6336c'; if(o.color){ col = o.color; DG = o.color; DR = o.color; }
   // الكابشن: لو الفترة شهري/سنوي بنحسب التغيير من نفس الرسم
   var capHtml = o.cap || '';
   if(per !== 'day'){
@@ -8132,13 +8205,13 @@ function zigPaint(svg, cap, o){
     var lasts = (String(o.cap || '').match(/<span class="cz-last">.*?<\/span>/g) || []).filter(function(x){ return x.indexOf('آخر ٣٠ يوم') < 0; });
     capHtml = chS + (o.keep || '') + lasts.join('');
   }
-  var tip = function(g){ return '<title>' + zigLabel(g, per) + ' · ' + (g.d >= 0 ? '+' : '−') + zigAr(g.d) + ' · ' + zigAr(g.bal) + '</title>'; };
+  var tip = function(g){ return '<title>' + zigLabel(g, per) + ' · ' + (o.spend ? 'إنفاق ' : (g.d >= 0 ? '+' : '−')) + zigAr(g.d) + ' · ' + (o.spend ? 'الإجمالي ' : '') + zigAr(g.bal) + '</title>'; };
   var done = function(inner){ svg.innerHTML = inner; svg.setAttribute('data-up', up ? '1' : '0'); if(cap) cap.innerHTML = (__zigDemo ? '<span class="cz-demo">🎲 أرقام تجريبية</span>' : '') + capHtml; };
   var base = H - P;
   if(sty === 'market'){
     /* شكل بورصة (زي مؤشرات CNBC): خط + تدرّج + خط مرجعي متقطع + شبكة ومحور تواريخ + نقطة حيّة. النقاط الحقيقية ثابتة، والتعرّج الخفيف بينها للشكل بس */
     var rw = 300; try{ rw = svg.getBoundingClientRect().width || 300; }catch(e){}
-    var small = rw < 170, MH = small ? 62 : 100, plotT = 6, plotB = small ? MH - 4 : MH - 20, axY = MH - 5, mL = 3, mR = 297;
+    var small = rw < 170, MH = small ? 62 : (o.H ? o.H + 46 : 100), plotT = 6, plotB = small ? MH - 4 : MH - 20, axY = MH - 5, mL = 3, mR = 297;
     var fz = Math.max(8, Math.min(13, 9.5 * 300 / Math.max(rw, 1))), DMS = 86400000;
     var tt = days.map(function(g){ return g.t; }), t1 = tt[tt.length - 1], tf = tt[0];
     var gap0 = days.length > 1 ? Math.max(DMS, (t1 - tf) / (days.length - 1) * 0.5) : DMS;
@@ -8162,7 +8235,7 @@ function zigPaint(svg, cap, o){
     }
     var ln = xy.map(function(q, i){ return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' ');
     var lx = xy[xy.length - 1][0], ly = xy[xy.length - 1][1], fx = xy[0][0];
-    var LINE = '#3f80c6', DOT = '#12b3d6', K = small ? 3 : 5, mk = '';
+    var LINE = o.color || '#3f80c6', DOT = o.color || '#12b3d6', K = small ? 3 : 5, mk = '';
     var tl = function(t){ var dt = new Date(t); if(per === 'year') return toArabicDigits(dt.getFullYear()); if(per === 'month') return dt.toLocaleDateString(dateLocale(), {month: 'short', year: '2-digit'}); return dt.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'short'}); };
     var prevLab = null, gi;
     for(gi = 0; gi < K; gi++){
@@ -8188,18 +8261,19 @@ function zigPaint(svg, cap, o){
   if(sty === 'bars'){
     var bw = Math.min(22, (W - 2 * P) / days.length * 0.62), bars = '', lo = mn >= 0 ? mn - ((mx - mn) || mx || 1) * 0.45 : mn, rg2 = (mx - lo) || 1;
     days.forEach(function(g, i){ var x = P + (days.length === 1 ? (W - 2 * P) / 2 : i * (W - 2 * P) / (days.length - 1)), h = Math.max(4, ((g.bal - lo) / rg2) * (H - 2 * P));
-      bars += '<rect class="cm-bar" style="animation-delay:' + (i * 50) + 'ms" x="' + (x - bw / 2).toFixed(1) + '" y="' + (base - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" fill="' + (g.d >= 0 ? DG : DR) + '" fill-opacity="' + (i === days.length - 1 ? 1 : 0.78) + '">' + tip(g) + '</rect>'; });
+      bars += '<rect class="cm-bar" style="animation-delay:' + (i * 50) + 'ms" x="' + (x - bw / 2).toFixed(1) + '" y="' + (base - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" fill="' + ((o.tone ? (o.tone === 'up' ? DG : DR) : (g.d >= 0 ? DG : DR))) + '" fill-opacity="' + (i === days.length - 1 ? 1 : 0.78) + '">' + tip(g) + '</rect>'; });
     return done(bars);
   }
   if(sty === 'lollipop' || sty === 'dots'){
     var lp = '<line x1="' + P + '" y1="' + base + '" x2="' + (W - P) + '" y2="' + base + '" stroke="rgba(128,128,128,.35)" stroke-width="1.5" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>';
-    days.forEach(function(g, i){ var x = xs[i + 1], y = ys[i + 1], c = g.d >= 0 ? DG : DR;
+    days.forEach(function(g, i){ var x = xs[i + 1], y = ys[i + 1], c = (o.tone ? (o.tone === 'up' ? DG : DR) : (g.d >= 0 ? DG : DR));
       if(sty === 'lollipop') lp += '<line class="cm-bar" style="animation-delay:' + (i * 50) + 'ms" x1="' + x.toFixed(1) + '" y1="' + base + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="' + c + '" stroke-width="2.6" stroke-linecap="round" vector-effect="non-scaling-stroke" stroke-opacity=".75"/>';
       lp += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (sty === 'dots' ? (i === days.length - 1 ? 6 : 5) : (i === days.length - 1 ? 5.5 : 4.6)) + '" fill="' + c + '" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke">' + tip(g) + '</circle>'; });
     return done(lp);
   }
   if(sty === 'gauge'){
     var ch2 = pts[n - 1] - pts[0], pc2 = pts[0] > 0 ? ch2 / pts[0] * 100 : null, c2 = ch2 >= 0 ? DG : DR;
+    if(typeof o.gaugePct === 'number'){ pc2 = o.gaugePct; ch2 = o.gaugePct; } if(o.tone) c2 = o.tone === 'up' ? DG : DR;
     var frac = pc2 === null ? (ch2 === 0 ? 0 : 1) : Math.min(1, Math.abs(pc2) / 100), cx = 150, cy = 50, r = 40;
     var pa = function(a){ return (cx + r * Math.cos(a)).toFixed(1) + ' ' + (cy - r * Math.sin(a)).toFixed(1); };
     var g2 = '<path d="M' + pa(Math.PI) + ' A' + r + ' ' + r + ' 0 0 1 ' + pa(0) + '" fill="none" stroke="rgba(128,128,128,.28)" stroke-width="9" stroke-linecap="round"/>';
@@ -8211,7 +8285,7 @@ function zigPaint(svg, cap, o){
   var d = xs.map(function(x, i){ return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + ys[i].toFixed(1); }).join(' ');
   if(sty === 'smooth' || sty === 'area'){ d = 'M' + xs[0].toFixed(1) + ' ' + ys[0].toFixed(1); for(var r2 = 1; r2 < n; r2++){ var mx2 = (xs[r2 - 1] + xs[r2]) / 2; d += ' C' + mx2.toFixed(1) + ' ' + ys[r2 - 1].toFixed(1) + ' ' + mx2.toFixed(1) + ' ' + ys[r2].toFixed(1) + ' ' + xs[r2].toFixed(1) + ' ' + ys[r2].toFixed(1); } }
   if(sty === 'step'){ d = 'M' + xs[0].toFixed(1) + ' ' + ys[0].toFixed(1); for(var q = 1; q < n; q++){ d += ' L' + xs[q].toFixed(1) + ' ' + ys[q - 1].toFixed(1) + ' L' + xs[q].toFixed(1) + ' ' + ys[q].toFixed(1); } }
-  var area = sty === 'area', dots = days.map(function(g, i){ var c = g.d >= 0 ? DG : DR, last = i === days.length - 1;
+  var area = sty === 'area', dots = days.map(function(g, i){ var c = (o.tone ? (o.tone === 'up' ? DG : DR) : (g.d >= 0 ? DG : DR)), last = i === days.length - 1;
     if(area && !last) return '';
     return '<circle cx="' + xs[i + 1].toFixed(1) + '" cy="' + ys[i + 1].toFixed(1) + '" r="' + (last ? 5 : 3.6) + '" fill="#fff" stroke="' + c + '" stroke-width="2.4" vector-effect="non-scaling-stroke">' + tip(g) + '</circle>'; }).join('');
   return done('<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + col + '" stop-opacity="' + (area ? '.55' : '.26') + '"/><stop offset="1" stop-color="' + col + '" stop-opacity="0"/></linearGradient></defs>' +
@@ -10314,6 +10388,7 @@ function renderDetail(){
     avgPct = dailyIncomeAvg > 0 ? Math.min(100, (avgSpend/dailyIncomeAvg)*100) : (avgSpend>0 ? 100 : 0);
   }
   document.getElementById('avgSpendBar').style.width = avgPct + '%';
+  try{ avgZigRender(m, i, avgSpend, dailyLimit, daysElapsed, overLimit, avgPct); }catch(e){ console.error(e); }
   const incomeExcluded = incomeExcludedTotal(m);
   const incomeExcludedLine = document.getElementById('incomeExcludedLine');
   if(incomeExcluded > 0){
@@ -10734,6 +10809,32 @@ function closeMonthlyReport(){
   document.getElementById('monthlyReportOverlay').classList.remove('open');
 }
 
+var _avgZigArgs = null;
+/* لون المؤشر حسب نسبة الإنفاق من الحد (أو من متوسط الدخل لو مفيش حد): أخضر ← أصفر ← برتقالي ← أحمر عند الإنفاق الزائد جدًا (١٥٠٪ فأكتر) */
+function avgSeverityColor(r){
+  const st = [[0, [22,168,112]], [0.55, [200,180,0]], [0.85, [240,138,0]], [1, [240,96,0]], [1.5, [214,22,43]]];
+  r = Math.max(0, Math.min(1.5, Number(r) || 0));
+  for(let k = 1; k < st.length; k++){
+    if(r <= st[k][0]){ const a = st[k-1], b = st[k], t = (r - a[0]) / (b[0] - a[0]); return 'rgb(' + [0,1,2].map(j => Math.round(a[1][j] + (b[1][j] - a[1][j]) * t)).join(',') + ')'; }
+  }
+  return 'rgb(214,22,43)';
+}
+function avgZigRender(m, i, avgSpend, dailyLimit, daysElapsed, over, pct){
+  if(m) _avgZigArgs = [m, i, avgSpend, dailyLimit, daysElapsed, over, pct];
+  const a = _avgZigArgs, svg = document.getElementById('avgZig'); if(!a || !svg) return;
+  m = a[0]; i = a[1]; daysElapsed = a[4]; over = a[5]; pct = a[6];
+  if(zigStyleOf('avg') === 'off'){ zigHide(svg, null); return; }
+  const n = Math.max(1, daysElapsed), vals = new Array(n).fill(0);
+  collectAllExpenses(m.groups).forEach(e=>{
+    if(!e.date || e.counted === false) return;
+    const d = new Date(e.date);
+    if(d.getFullYear() === currentYear && d.getMonth() === i){ const k = d.getDate() - 1; if(k >= 0 && k < n) vals[k] += Number(e.amount || 0); }
+  });
+  let cum = 0; const days = [];
+  vals.forEach((v, k) => { if(v > 0){ cum += v; days.push({t: new Date(currentYear, i, k + 1).getTime(), d: v, bal: cum, k: 'x'}); } });
+  zigPaint(svg, null, {days: days, empty: '', style: zigStyleOf('avg'), period: 'day', H: 84, tone: over ? 'dn' : 'up', spend: true, gaugePct: pct, color: avgSeverityColor(a[3] > 0 ? a[2] / a[3] : (pct || 0) / 100)});
+}
+function avgZigRedraw(){ try{ avgZigRender(); }catch(e){} }
 function openDailyReport(){
   if(currentMonth === null){ showToast('افتح أي شهر الأول', false); return; }
   const mon = data[currentYear][currentMonth];
