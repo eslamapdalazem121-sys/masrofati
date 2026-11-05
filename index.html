@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-05.8288">
+<meta name="app-version" content="2026-11-05.8299">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -1798,6 +1798,19 @@ html.perf .plus-badge::after{opacity:0 !important;}
 .ico-t:active{transform:scale(.95);}
 .ico-t.on{background:linear-gradient(180deg,rgba(47,123,255,.2),rgba(47,123,255,.08)); outline:2.5px solid var(--accent,#2f7bff);}
 .ico-t .ico-n{font-size:calc(10px * var(--fs,1)); font-weight:800; line-height:1.25; text-align:center; overflow-wrap:anywhere;}
+
+/* 8298: مربعات المؤشرات (نفس نظام الأيقونات) */
+.zg-hub{grid-template-columns:repeat(3,minmax(0,1fr));}
+.zg-hub .ico-sq{padding:10px 6px 9px; gap:7px;}
+.zg-art{width:100%; display:block; min-height:calc(34px * var(--fs,1)); color:var(--text);}
+.zg-art svg{width:100%; height:auto; display:block; overflow:visible;}
+.zg-off{display:grid; place-items:center; min-height:calc(40px * var(--fs,1)); font-size:calc(26px * var(--fs,1)); opacity:.75;}
+.zg-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important; max-height:60vh;}
+.zg-grid .ico-t{padding:9px 6px 7px; gap:6px;}
+.zg-grid .ico-t .ico-n{font-size:calc(12px * var(--fs,1));}
+.zg-per{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 2px 10px;}
+.dr-nav{display:flex; gap:8px; justify-content:center; margin:10px 0 0; flex-wrap:wrap;}
+.zg-per > b{font-size:calc(12px * var(--fs,1)); color:var(--muted); font-weight:800; margin-inline-end:2px;}
 .ico-adv .ico-grp{box-shadow:none; background:rgba(127,127,127,.07); margin-bottom:8px;}
 .reports-home{margin:14px 0 4px;}
 .reports-home .reports-row{margin-bottom:8px;}
@@ -4370,7 +4383,11 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     </div>
 
     <div class="settings-section" id="zigStyleSection">
-      <h4>📈 شكل المؤشرات</h4>
+ <h4>📈 شكل المؤشرات</h4>
+ <p class="ico-note">دوس على أي مربع وهتلاقي كل أشكال المؤشرات في مكان واحد (بمعاينة حيّة بأرقام تجريبية) — اختار الشكل، واضبط الفترة (يومي / شهري / سنوي) من نفس الصفحة.</p>
+ <div class="ico-hub zg-hub" id="zigHub"></div>
+ <div class="ico-pick" id="zigPick" style="display:none;"></div>
+ <div id="zigLegacy" style="display:none;">
       <p style="font-size:12px; color:var(--muted); margin:0 0 4px; line-height:1.6;">اختار الشكل والفترة (يومي = آخر ١٠ أيام فيها حركة، شهري = آخر ١٢ شهر، سنوي = آخر ٨ سنين) لكل بطاقة. التغيير بيظهر فورًا. «📉 بورصة» = مؤشر زي شاشات البورصة: خط بتدرّج تحته، خط متقطع عند نقطة البداية، محور تواريخ وشبكة، ونقطة حيّة نابضة عند آخر قيمة.</p>
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">💵 إجمالي الأموال</div>
       <div class="opt-row" id="optZig_total"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('total','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('total','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('total','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('total','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('total','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('total','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('total','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('total','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('total','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('total','off')">🚫 بدون</button></div>
@@ -4391,6 +4408,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">📊 متوسط الإنفاق اليومي (صفحة الشهر)</div>
       <div class="opt-row" id="optZig_avg"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('avg','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('avg','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('avg','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('avg','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('avg','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('avg','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('avg','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('avg','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('avg','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('avg','off')">🚫 بدون</button></div>
     </div>
+ </div>
 
 <div class="settings-section">
       <h4>🎲 تجربة المؤشرات</h4>
@@ -4947,6 +4965,7 @@ document.addEventListener('DOMContentLoaded', perfRefreshUI);
       <h3 id="dailyReportTitle" style="flex:1; margin:0;">📅 التقرير اليومي</h3>
       <button type="button" class="back" style="font-size:calc(16px * var(--fs,1));" onclick="closeDailyReport()">✕</button>
     </div>
+    <div class="dr-nav"><button type="button" class="opt-chip" onclick="dailyReportShiftMonth(-1)">‹ الشهر السابق</button><button type="button" class="opt-chip" onclick="dailyReportShiftMonth(1)">الشهر التالي ›</button></div>
     <div style="font-size:calc(12px * var(--fs,1)); color:var(--muted); margin:8px 2px 0;">👆 دوس على أي يوم لعرض تفاصيله وسجل عملياته</div>
     <div id="dailyReportChart" class="daily-chart"></div>
     <div id="dailyReportGrid" class="daily-report-grid"></div>
@@ -10835,8 +10854,13 @@ function avgZigRender(m, i, avgSpend, dailyLimit, daysElapsed, over, pct){
   zigPaint(svg, null, {days: days, empty: '', style: zigStyleOf('avg'), period: 'day', H: 84, tone: over ? 'dn' : 'up', spend: true, gaugePct: pct, color: avgSeverityColor(a[3] > 0 ? a[2] / a[3] : (pct || 0) / 100)});
 }
 function avgZigRedraw(){ try{ avgZigRender(); }catch(e){} }
+let _dailyAuto = false;
 function openDailyReport(){
-  if(currentMonth === null){ showToast('افتح أي شهر الأول', false); return; }
+  if(currentMonth === null){
+    /* من الصفحة الأولى مفيش شهر مفتوح: نختار الشهر الحالي (أو آخر/أول شهر لو السنة مش الحالية) لحد ما التقرير يتقفل */
+    const n0 = new Date(); _dailyAuto = true;
+    currentMonth = currentYear === n0.getFullYear() ? n0.getMonth() : (currentYear < n0.getFullYear() ? 11 : 0);
+  }
   const mon = data[currentYear][currentMonth];
   const allExpenses = collectAllExpenses(mon.groups);
   const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
@@ -10876,7 +10900,24 @@ function openDailyReport(){
 }
 function closeDailyReport(){
   document.getElementById('dailyReportOverlay').classList.remove('open');
+  dailyAutoRestore();
 }
+function dailyReportShiftMonth(d){
+  if(currentMonth === null) return;
+  const m = currentMonth + d; if(m < 0 || m > 11) return;
+  currentMonth = m; openDailyReport();
+}
+function dailyAutoRestore(){
+  if(!_dailyAuto) return;
+  const o1 = document.getElementById('dailyReportOverlay'), o2 = document.getElementById('dayDetailOverlay');
+  if((o1 && o1.classList.contains('open')) || (o2 && o2.classList.contains('open'))) return;
+  _dailyAuto = false; currentMonth = null;
+}
+(function(){
+  /* لو الشباك اتقفل بأي طريقة تانية (ضغطة بره، زرار الرجوع) نرجّع «مفيش شهر مفتوح» */
+  function wire(){ ['dailyReportOverlay','dayDetailOverlay'].forEach(function(id){ var el = document.getElementById(id); if(el) new MutationObserver(function(){ dailyAutoRestore(); }).observe(el, {attributes:true, attributeFilter:['class']}); }); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+})();
 
 let _currentDayDetail = null;
 function navigateDayDetail(delta){
@@ -15034,6 +15075,61 @@ body.kb-open .fab{display:none !important;}
   var _rsu = window.refreshSettingsUI;
   if(typeof _rsu === 'function') window.refreshSettingsUI = function(s){ var r = _rsu.apply(this, arguments); try{ icoHubRender(s); }catch(e){} return r; };
   try{ icoHubRender(); }catch(e){}
+})();
+</script>
+
+<script>
+/* 8298: مربعات المؤشرات — دوس على أي مربع تظهر كل أشكال المؤشرات (نفس نظام الأيقونات) */
+(function(){
+  var TG = [
+    {c:'total',    n:'إجمالي الأموال',       per:true},
+    {c:'money',    n:'أموال',                 per:true},
+    {c:'gold',     n:'ذهب',                   per:true},
+    {c:'goldpage', n:'صفحة الذهب',            per:true},
+    {c:'avg',      n:'متوسط الإنفاق اليومي',  per:false}
+  ];
+  var STY = [['market','📉 بورصة'],['smooth','〰️ منحنى'],['zig','⚡ زجزاج'],['step','🪜 سلم'],['bars','📊 أعمدة'],['area','🏔️ مساحة'],['lollipop','🍭 عصي'],['dots','⚪ نقاط'],['gauge','🎯 عداد'],['off','🚫 بدون']];
+  var PER = [['day','📅 يومي'],['month','🗓️ شهري'],['year','📆 سنوي']];
+  var _open = null, _sig = '', _dd = null;
+  function esc(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function demo(){
+    if(_dd) return _dd;
+    var rs = 7919, r = function(){ rs = (rs * 16807) % 2147483647; return rs / 2147483647; }, out = [], bal = 30000, DAY = 86400000, n = 640, t0 = Date.now() - n * DAY;
+    for(var i = 0; i < n; i++){ if(r() < 0.5){ var d = Math.round((r() - 0.42) * 500) * 10; bal += d; out.push({t: t0 + i * DAY + 43200000, d: d, bal: bal, k: d >= 0 ? 'dep' : 'out'}); } }
+    return (_dd = out);
+  }
+  function paint(host, style, period){
+    if(style === 'off'){ host.innerHTML = '<div class="zg-off">🚫</div>'; return; }
+    host.innerHTML = '<svg viewBox="0 0 300 56" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>';
+    var svg = host.firstChild;
+    try{ zigPaint(svg, {style:{}, innerHTML:''}, {days: demo(), cap: '', style: style, period: period}); }catch(e){ host.innerHTML = '<div class="zg-off">〰️</div>'; }
+  }
+  function sig(){ var o = []; TG.forEach(function(t){ o.push(zigStyleOf(t.c) + ':' + zigPeriodOf(t.c)); }); return o.join('|') + '#' + (_open === null ? '-' : _open); }
+  window.zigHubRender = function(force){
+    var hub = document.getElementById('zigHub'); if(!hub) return;
+    var sg = sig(); if(!force && sg === _sig && hub.firstChild) return; _sig = sg;
+    hub.innerHTML = TG.map(function(t, i){ return '<button type="button" class="ico-sq' + (_open === i ? ' on' : '') + '" onclick="zigHubOpen(' + i + ')"><span class="zg-art" data-i="' + i + '"></span><span class="ico-n">' + esc(t.n) + '</span></button>'; }).join('');
+    Array.prototype.forEach.call(hub.querySelectorAll('.zg-art'), function(h){ var t = TG[+h.getAttribute('data-i')]; paint(h, zigStyleOf(t.c), zigPeriodOf(t.c)); });
+    if(_open !== null) zigPickRender();
+  };
+  function zigPickRender(){
+    var box = document.getElementById('zigPick'); if(!box || _open === null) return; var t = TG[_open], cs = zigStyleOf(t.c), cp = zigPeriodOf(t.c);
+    var per = t.per ? '<div class="zg-per"><b>الفترة:</b>' + PER.map(function(p){ return '<button type="button" class="opt-chip' + (p[0] === cp ? ' active' : '') + '" onclick="zigSetPeriod(\'' + t.c + '\',\'' + p[0] + '\')">' + p[1] + '</button>'; }).join('') + '</div>' : '';
+    box.innerHTML = '<div class="ico-pick-h"><span>اختار شكل مؤشر «' + esc(t.n) + '»</span><button type="button" class="ico-pick-x" onclick="zigHubClose()" aria-label="إغلاق">✕</button></div>' + per + '<div class="ico-grid zg-grid">' + STY.map(function(s2){ return '<button type="button" class="ico-t' + (s2[0] === cs ? ' on' : '') + '" onclick="zigHubPick(\'' + s2[0] + '\')"><span class="zg-art" data-s="' + s2[0] + '"></span><span class="ico-n">' + s2[1] + '</span></button>'; }).join('') + '</div>';
+    box.style.display = '';
+    Array.prototype.forEach.call(box.querySelectorAll('.zg-art'), function(h){ paint(h, h.getAttribute('data-s'), cp); });
+  }
+  window.zigHubOpen = function(i){
+    if(_open === i){ zigHubClose(); return; }
+    _open = i; zigHubRender(true); var box = document.getElementById('zigPick'); try{ box.scrollIntoView({behavior: 'smooth', block: 'nearest'}); }catch(e){}
+  };
+  window.zigHubClose = function(){ _open = null; var box = document.getElementById('zigPick'); if(box){ box.style.display = 'none'; box.innerHTML = ''; } zigHubRender(true); };
+  window.zigHubPick = function(st){ if(_open === null) return; var c = TG[_open].c; try{ zigSetStyle(c, st); }catch(e){} zigHubClose(); };
+  var _zsu = window.zigSettingsUI;
+  if(typeof _zsu === 'function') window.zigSettingsUI = function(){ var r = _zsu.apply(this, arguments); try{ if(_open !== null){ _sig = ''; } zigHubRender(); }catch(e){} return r; };
+  var _rsu = window.refreshSettingsUI;
+  if(typeof _rsu === 'function') window.refreshSettingsUI = function(){ var r = _rsu.apply(this, arguments); try{ zigHubRender(); }catch(e){} return r; };
+  try{ zigHubRender(true); }catch(e){}
 })();
 </script>
 </body>
