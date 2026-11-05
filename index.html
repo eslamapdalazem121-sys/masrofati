@@ -33,7 +33,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-05.8279">
+<meta name="app-version" content="2026-11-05.8284">
+<script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
 (function(){
@@ -1706,6 +1707,56 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 .ai-cert{--aA:#b78cff; --aB:#7c4ddb; --aE:#4f2a9e; --aS:rgba(124,77,219,.35);}
 .ai-sub{--aA:#38d3a6; --aB:#0f9d78; --aE:#0a6a52; --aS:rgba(15,157,120,.35);}
 .ai-tile.ai-drag{position:relative; z-index:20; transition:none; filter:drop-shadow(0 14px 14px rgba(0,0,0,.3));}
+/* 8281: وضع الأداء (افتراضي شغّال) — يوقف الحركات الدايمة والضبابية عشان اللمس والتمرير يبقوا سلسين. الشكل الثابت زي ما هو. بيتقفل من الإعدادات ← ⚡ وضع الأداء */
+html.perf .plus-badge::after,
+html.perf .zk-main::after,
+html.perf .bn-card::after,
+html.perf .zk-bell,
+html.perf .bn-card.pn.soon,
+html.perf .bn-card.soon,
+html.perf .gi-row.mbk .mb-bell,
+html.perf .gi-row.mc.mc-soon::after,
+html.perf .gi-row.mc .mc-pill.soon .mc-bell,
+html.perf #cmChipBank.due-soon,
+html.perf #cmChipPen.due-soon,
+html.perf .cap-hero .ch-ico svg,
+html.perf .zk-wrap.yr-cap .cap-ico svg,
+html.perf #yrCap .cap-sub .cs-ico svg,
+html.perf .mk-pulse,
+html.perf #capMoneyOverlay .cm-ic,
+html.perf #capMoneyOverlay .cm-ic::after,
+html.perf #capMoneyOverlay .cm-ic > i,
+html.perf #depOverlay .dep-hero-ico,
+html.perf #xfOverlay .xf-hero-ico,
+html.perf #xfOverlay .xf-hero-ico i,
+html.perf #cmOutOverlay .cmo-hero-ico,
+html.perf #cmOutOverlay .cmo-hero-ico i,
+html.perf #cmOutOverlay .cmo-sph,
+html.perf #cmOutOverlay .cmo-sph::after,
+html.perf #cmOutOverlay .cmo-sph i{animation:none !important;}
+html.perf .modal-overlay,
+html.perf #aaOverlay,
+html.perf #yrOverlay,
+html.perf #settingsOverlay.open,
+html.perf #backupOverlay.open,
+html.perf #capMoneyOverlay,
+html.perf #capGoldOverlay,
+html.perf #capMonthsOverlay,
+html.perf #zkcOverlay,
+html.perf #capHeroOverlay,
+html.perf #zakHeroOverlay,
+html.perf #msHeroOverlay,
+html.perf #yiHeroOverlay,
+html.perf #yrCap.cap-subglass .cap-sub,
+html.perf #cmChipAll .cm-all-ico,
+html.perf #cmChipAll .cm-all-body,
+html.perf #capMoneyOverlay #cmChipAll.cm-st-glass,
+html.perf #capMoneyOverlay .cm-ic,
+html.perf #depOverlay .dep-hero .dep-acc,
+html.perf #cmOutOverlay #cmoKinds{-webkit-backdrop-filter:none !important; backdrop-filter:none !important;}
+html.perf .plus-badge::after{opacity:0 !important;}
+.reports-home{margin:14px 0 4px;}
+.reports-home .reports-row{margin-bottom:8px;}
 .ai-bar{flex:1 1 100%; display:flex; align-items:center; gap:8px; margin-top:2px; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;}
 .ai-grip{flex:1; text-align:center; padding:7px 6px; border-radius:14px; font-size:calc(11.5px * var(--fs,1)); font-weight:800; color:var(--muted); background:rgba(127,127,127,.12); border:1px dashed var(--border,#ccd);}
 .ai-mv{flex:none; width:calc(40px * var(--fs,1)); height:calc(34px * var(--fs,1)); border:0; border-radius:12px; cursor:pointer; font-family:inherit; font-size:calc(15px * var(--fs,1)); font-weight:900; color:var(--text); background:var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 3px 0 rgba(0,0,0,.14), 0 6px 8px rgba(30,41,59,.1); -webkit-tap-highlight-color:transparent;}
@@ -3171,9 +3222,9 @@ button,input,select,textarea,optgroup{font-family:inherit;}
   <div class="home-reorder-row"><button type="button" id="homeReorderBtn" class="home-reorder-btn" onclick="toggleHomeReorder()" title="اضغط مطوّلًا على أي بطاقة وحرّكها">↕️ ترتيب البطاقات</button></div>
 
   <div class="cap-hero-wrap" id="yiHeroWrap">
-    <button type="button" class="cap-hero" id="yiHeroBtn" onclick="openYiHero()" data-hold-ok aria-label="الدخل العام السنوي">
+    <button type="button" class="cap-hero" id="yiHeroBtn" onclick="openYiHero()" data-hold-ok aria-label="التقارير">
       <span class="ch-stage"><span class="ch-ico" id="yiHeroIco"></span></span>
-      <span class="ch-lbl">الدخل العام السنوي</span>
+      <span class="ch-lbl">التقارير</span>
     </button>
   </div>
 
@@ -3199,6 +3250,27 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         <span class="val" id="grandDeficit">0</span>
       </div>
     </div>
+  </div>
+  
+  <div class="reports-home" id="reportsHome">
+  <div class="groups-toggle-card" onclick="toggleReportsSection()">
+    <span class="icon">📊</span>
+    <span class="txt">التقارير</span>
+    <span class="plus-badge pb-teal in-card is-open" id="reportsSectionChevron" aria-hidden="true">−</span>
+  </div>
+  <div id="reportsSectionBody">
+    <div class="reports-row">
+      <button type="button" class="report-mini-card" onclick="openDailyReport()">
+        <span class="icon">📅</span><span>يومي</span>
+      </button>
+      <button type="button" class="report-mini-card" onclick="openMonthlyReport()">
+        <span class="icon">🗓️</span><span>شهري</span>
+      </button>
+      <button type="button" class="report-mini-card" onclick="openYearlyReport()">
+        <span class="icon">📆</span><span>سنوي</span>
+      </button>
+    </div>
+  </div>
   </div>
   </div>
 
@@ -3314,7 +3386,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 <div class="modal-overlay" id="yiHeroOverlay">
   <div class="modal-box ch-page">
     <button type="button" class="fs-close" onclick="closeYiHero()" aria-label="رجوع">✕</button>
-    <div class="ch-ptitle">💵 الدخل العام السنوي</div>
+    <div class="ch-ptitle">📊 التقارير</div>
     <div id="yiHeroHost"></div>
   </div>
 </div>
@@ -3360,7 +3432,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       try{ JSON.parse(localStorage.getItem(KEY) || '[]').forEach(function(k){ var el = row.querySelector('.ai-tile[data-k="' + k + '"]'); if(el) row.insertBefore(el, row.querySelector('.ai-bar')); }); }catch(e){}
       function pt(e){ var t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e; return {x: t.clientX, y: t.clientY}; }
       function tiles(){ return Array.prototype.slice.call(row.querySelectorAll('.ai-tile')); }
-      function activate(){ if(!st) return; st.active = true; st.el.classList.add('ai-drag'); try{ if(navigator.vibrate) navigator.vibrate(25); }catch(e){} }
+      function activate(){ if(!st) return; st.active = true; document.addEventListener('touchmove', move, {passive: false}); st.el.classList.add('ai-drag'); try{ if(navigator.vibrate) navigator.vibrate(25); }catch(e){} }
       function start(e){
         if(e.type === 'mousedown' && e.button) return;
         var tl = e.target && e.target.closest ? e.target.closest('.ai-tile') : null; if(!tl) return;
@@ -3384,7 +3456,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         follow(p);
       }
       function end(){
-        if(!st) return; clearTimeout(st.tm);
+        if(!st) return; clearTimeout(st.tm); document.removeEventListener('touchmove', move, {passive: false});
         if(st.active){
           st.el.style.transform = ''; st.el.classList.remove('ai-drag'); suppress = Date.now() + 450;
           try{ localStorage.setItem(KEY, JSON.stringify(tiles().map(function(t){ return t.getAttribute('data-k'); }))); }catch(e){}
@@ -3392,7 +3464,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         st = null;
       }
       row.addEventListener('touchstart', start, {passive: true});
-      document.addEventListener('touchmove', move, {passive: false});
+      row.addEventListener('touchmove', function(e){ if(!st || st.active) return; var p = pt(e); if(Math.abs(p.x - st.x0) > TOL || Math.abs(p.y - st.y0) > TOL){ clearTimeout(st.tm); st = null; } }, {passive: true});
       document.addEventListener('touchend', end); document.addEventListener('touchcancel', end);
       row.addEventListener('mousedown', start); document.addEventListener('mousemove', move); document.addEventListener('mouseup', end);
       row.addEventListener('click', function(e){ if(Date.now() < suppress){ e.stopPropagation(); e.preventDefault(); } }, true);
@@ -4177,6 +4249,12 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       </div>
     </div>
 
+    <div class="settings-section" id="perfSection">
+      <h4>⚡ وضع الأداء</h4>
+      <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.6;">بيوقف الحركات الدايمة (تعويم الأيقونات واللمعان والنبض) والضبابية عشان التطبيق يستجيب للمس والتمرير بسرعة. الشكل المجسم بيفضل زي ما هو.</p>
+      <div class="opt-row" id="optPerf"><button type="button" class="opt-chip" data-val="on" onclick="setPerfMode(true)">⚡ شغّال (أسرع)</button><button type="button" class="opt-chip" data-val="off" onclick="setPerfMode(false)">✨ مقفول (حركات كاملة)</button></div>
+    </div>
+
     <div class="settings-section" id="prevSnapSection">
       <h4>🛟 أمان التحديثات</h4>
       <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.6;">كل ما تتفتح نسخة جديدة من التطبيق بيحتفظ تلقائيًا بنسخة من بيانات وإعدادات النسخة اللي قبلها. لو حاجة اتغيّرت مش عايزها تقدر ترجّعها من هنا.</p>
@@ -4321,7 +4399,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <div class="vol-val" id="msIcoSizeLabel">100%</div>
       <div class="ch-prev" id="msIcoPrev"></div>
 
-      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">💵 أيقونة الدخل العام السنوي <small>(منفصلة عن اللي فوق)</small></div>
+      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">📊 أيقونة التقارير <small>(منفصلة عن اللي فوق)</small></div>
       <div class="opt-row" id="optYiIcon" data-nosound>
         <button type="button" class="opt-chip" data-val="growth" onclick="nfSet('yiIcon','growth')">📈 نمو الدخل</button><button type="button" class="opt-chip" data-val="envelope" onclick="nfSet('yiIcon','envelope')">✉️ ظرف الراتب</button><button type="button" class="opt-chip" data-val="tree" onclick="nfSet('yiIcon','tree')">🌳 شجرة الدخل</button><button type="button" class="opt-chip" data-val="briefcase" onclick="nfSet('yiIcon','briefcase')">💼 حقيبة عمل</button><button type="button" class="opt-chip" data-val="piggy" onclick="nfSet('yiIcon','piggy')">🐷 حصالة</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('yiIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('yiIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('yiIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('yiIcon','btc')">₿ بيتكوين</button>
       </div>
@@ -4765,24 +4843,6 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     <div id="groupsList"></div>
   </div>
 
-  <div class="groups-toggle-card" onclick="toggleReportsSection()">
-    <span class="icon">📊</span>
-    <span class="txt">التقارير</span>
-    <span class="plus-badge pb-teal in-card is-open" id="reportsSectionChevron" aria-hidden="true">−</span>
-  </div>
-  <div id="reportsSectionBody">
-    <div class="reports-row">
-      <button type="button" class="report-mini-card" onclick="openDailyReport()">
-        <span class="icon">📅</span><span>يومي</span>
-      </button>
-      <button type="button" class="report-mini-card" onclick="openMonthlyReport()">
-        <span class="icon">🗓️</span><span>شهري</span>
-      </button>
-      <button type="button" class="report-mini-card" onclick="openYearlyReport()">
-        <span class="icon">📆</span><span>سنوي</span>
-      </button>
-    </div>
-  </div>
   <div class="zk-wrap" id="zkWrap">
     <button type="button" class="zk-main" onclick="toggleZakat()"><span class="zk-ico">🕌</span><span>زكاتي</span><span class="plus-badge in-card zk-plus" onclick="event.stopPropagation(); openZakatTotal()" role="button" aria-label="إضافة للزكاة">+</span><span class="zk-arrow">▼</span></button>
     <div class="zk-row">
@@ -4793,6 +4853,11 @@ button,input,select,textarea,optgroup{font-family:inherit;}
   </div>
 </div>
 
+<script>
+function perfRefreshUI(){ try{ var on = document.documentElement.classList.contains('perf'); Array.prototype.forEach.call(document.querySelectorAll('#optPerf .opt-chip'), function(b){ b.classList.toggle('active', (b.dataset.val === 'on') === on); }); }catch(e){} }
+function setPerfMode(on){ try{ localStorage.setItem('masrofati_perf_v1', on ? 'on' : 'off'); }catch(e){} document.documentElement.classList.toggle('perf', !!on); perfRefreshUI(); try{ if(typeof showToast === 'function') showToast(on ? '⚡ وضع الأداء شغّال' : '✨ الحركات الكاملة شغّالة', true); }catch(e){} }
+document.addEventListener('DOMContentLoaded', perfRefreshUI);
+</script>
 <div class="modal-overlay" id="dailyLimitOverlay">
   <div class="modal-box">
     <h3>🎯 الحد الأقصى للإنفاق اليومي</h3>
@@ -9749,18 +9814,20 @@ function groupItemDates(){
   function anyOpen(){ return !!document.querySelector('.modal-overlay.open'); }
   function lock(){
     if(locked || document.body.classList.contains('scroll-locked')) return; locked = true;
+    document.addEventListener('touchmove', onTM, {passive:false}); document.addEventListener('wheel', onWH, {passive:false});
     savedY = window.pageYOffset || document.documentElement.scrollTop || 0;
     document.body.style.top = (-savedY) + 'px';
     document.body.classList.add('modal-locked');
   }
   function unlock(){
     if(!locked) return; locked = false;
+    document.removeEventListener('touchmove', onTM, {passive:false}); document.removeEventListener('wheel', onWH, {passive:false});
     document.body.classList.remove('modal-locked');
     document.body.style.top = '';
     window.scrollTo(0, savedY);
   }
   function sync(){ anyOpen() ? lock() : unlock(); }
-  new MutationObserver(sync).observe(document.body, {attributes:true, attributeFilter:['class'], subtree:true});
+  var _syncQ = false; new MutationObserver(function(){ if(_syncQ) return; _syncQ = true; requestAnimationFrame(function(){ _syncQ = false; sync(); }); }).observe(document.body, {attributes:true, attributeFilter:['class'], subtree:true});
   // اللمس على الخلفية أو على محتوى مش بيتحرك ما يحرّكش الصفحة اللي تحتيه
   function scrollableUp(el, overlay){
     while(el && el.nodeType === 1){
@@ -9771,16 +9838,16 @@ function groupItemDates(){
     }
     return false;
   }
-  document.addEventListener('touchmove', function(e){
+  function onTM(e){
     if(!locked) return;
     const overlay = e.target.closest ? e.target.closest('.modal-overlay.open, .gp.open') : null;
     if(!overlay || !scrollableUp(e.target, overlay)) e.preventDefault();
-  }, {passive:false});
-  document.addEventListener('wheel', function(e){
+  }
+  function onWH(e){
     if(!locked) return;
     const overlay = e.target.closest ? e.target.closest('.modal-overlay.open, .gp.open') : null;
     if(!overlay || !scrollableUp(e.target, overlay)) e.preventDefault();
-  }, {passive:false});
+  }
   sync();
 })();
 // ===== MODAL SCROLL LOCK JS END =====
@@ -13565,7 +13632,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(!allowed() || !el.isConnected || r.height < 2){ cancel(); return; }
     if((st.kind === 'cap' || st.kind === 'capgrp') && typeof capIsPast === 'function' && capIsPast()){ toast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); cancel(); return; }
     if(st.kind === 'capgrp'){ var gb = el.querySelector(':scope > .cap-grp-body'); if(gb) gb.style.display = 'none'; r = el.getBoundingClientRect(); }   // نطوي المجموعة وقت السحب
-    st.active = true; st.timer = null; st.offY = st.lastY - r.top; st.offX = st.lastX - r.left; st.sc = scrollerOf(el);
+    st.active = true; st.timer = null; document.addEventListener('touchmove', tmoveActive, {passive: false}); st.offY = st.lastY - r.top; st.offX = st.lastX - r.left; st.sc = scrollerOf(el);
     var g = el.cloneNode(true); g.removeAttribute('id'); g.removeAttribute('data-id');
     Array.prototype.forEach.call(g.querySelectorAll('[id]'), function(n){ n.removeAttribute('id'); });
     Array.prototype.forEach.call(g.querySelectorAll('.home-mv'), function(n){ n.remove(); });
@@ -13591,7 +13658,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   }
   function move(y, x){ if(!st || !st.active) return; st.lastY = y; if(typeof x === 'number') st.lastX = x; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; if(st.kind === 'home' && homeGrid()) st.ghost.style.left = (st.lastX - st.offX + st.cx) + 'px'; if(st.kind === 'cap') crossGroup(y); reorder(y); }
   function finish(dropped){
-    if(!st) return; var s0 = st; st = null;
+    if(!st) return; var s0 = st; st = null; document.removeEventListener('touchmove', tmoveActive, {passive: false});
     if(s0.timer) clearTimeout(s0.timer);
     if(s0.raf) cancelAnimationFrame(s0.raf);
     if(!s0.active) return;
@@ -13620,14 +13687,18 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(e.touches.length !== 1){ cancel(); return; }
     var t = e.touches[0]; begin(e.target, t.clientX, t.clientY, t.identifier);
   }, {passive: true});
+  function touchOf(e){ var t = null; for(var i = 0; i < e.touches.length; i++) if(st && e.touches[i].identifier === st.id) t = e.touches[i]; return t; }
   document.addEventListener('touchmove', function(e){
-    if(!st) return;
-    var t = null; for(var i = 0; i < e.touches.length; i++) if(e.touches[i].identifier === st.id) t = e.touches[i];
-    if(!t) return;
-    if(!st.active){ if(Math.abs(t.clientX - st.sx) > TOL || Math.abs(t.clientY - st.sy) > TOL) cancel(); else { st.lastY = t.clientY; st.lastX = t.clientX; } return; }
+    if(!st || st.active) return;
+    var t = touchOf(e); if(!t) return;
+    if(Math.abs(t.clientX - st.sx) > TOL || Math.abs(t.clientY - st.sy) > TOL) cancel(); else { st.lastY = t.clientY; st.lastX = t.clientX; }
+  }, {passive: true});
+  function tmoveActive(e){
+    if(!st || !st.active) return;
+    var t = touchOf(e); if(!t) return;
     if(e.cancelable) e.preventDefault();
     move(t.clientY, t.clientX);
-  }, {passive: false});
+  }
   function tEnd(e){ lastTouchEnd = Date.now(); if(st) finish(e.type === 'touchend'); }
   document.addEventListener('touchend', tEnd, {passive: true});
   document.addEventListener('touchcancel', tEnd, {passive: true});
@@ -13663,13 +13734,6 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 /* منع التكبير/التصغير (آيفون بيتجاهل user-scalable) */
 (function(){
   ['gesturestart','gesturechange','gestureend'].forEach(function(t){ document.addEventListener(t, function(e){ e.preventDefault(); }, {passive:false}); });
-  document.addEventListener('touchmove', function(e){ if(e.touches && e.touches.length > 1 && e.cancelable) e.preventDefault(); }, {passive:false});
-  var last = 0;
-  document.addEventListener('touchend', function(e){
-    var n = Date.now(), t = e.target;
-    if(n - last < 320 && e.cancelable && !(t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]'))) e.preventDefault();
-    last = n;
-  }, {passive:false});
   document.addEventListener('wheel', function(e){ if(e.ctrlKey) e.preventDefault(); }, {passive:false});
 })();
 </script>
