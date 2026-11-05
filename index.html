@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-05.8299">
+<meta name="app-version" content="2026-11-05.8302">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -10851,7 +10851,7 @@ function avgZigRender(m, i, avgSpend, dailyLimit, daysElapsed, over, pct){
   });
   let cum = 0; const days = [];
   vals.forEach((v, k) => { if(v > 0){ cum += v; days.push({t: new Date(currentYear, i, k + 1).getTime(), d: v, bal: cum, k: 'x'}); } });
-  zigPaint(svg, null, {days: days, empty: '', style: zigStyleOf('avg'), period: 'day', H: 84, tone: over ? 'dn' : 'up', spend: true, gaugePct: pct, color: avgSeverityColor(a[3] > 0 ? a[2] / a[3] : (pct || 0) / 100)});
+  zigPaint(svg, null, {days: days, empty: '', style: zigStyleOf('avg'), period: 'day', H: (zigStyleOf('avg') === 'market' ? 35 : 46), tone: over ? 'dn' : 'up', spend: true, gaugePct: pct, color: avgSeverityColor(a[3] > 0 ? a[2] / a[3] : (pct || 0) / 100)});
 }
 function avgZigRedraw(){ try{ avgZigRender(); }catch(e){} }
 let _dailyAuto = false;
