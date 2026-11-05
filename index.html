@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-05.8284">
+<meta name="app-version" content="2026-11-05.8286">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -1755,6 +1755,33 @@ html.perf #capMoneyOverlay .cm-ic,
 html.perf #depOverlay .dep-hero .dep-acc,
 html.perf #cmOutOverlay #cmoKinds{-webkit-backdrop-filter:none !important; backdrop-filter:none !important;}
 html.perf .plus-badge::after{opacity:0 !important;}
+.ico-note{font-size:calc(12px * var(--fs,1)); color:var(--muted); margin:0 0 10px; line-height:1.6;}
+.ico-grp{margin:0 0 10px; border-radius:18px; background:var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 4px 0 rgba(0,0,0,.1), 0 8px 12px rgba(30,41,59,.08); overflow:hidden;}
+.ico-grp > summary{list-style:none; cursor:pointer; padding:13px 14px; font-weight:900; font-size:calc(14.5px * var(--fs,1)); display:flex; align-items:center; gap:8px; -webkit-tap-highlight-color:transparent;}
+.ico-grp > summary::-webkit-details-marker{display:none;}
+.ico-grp > summary::after{content:"＋"; margin-inline-start:auto; width:calc(26px * var(--fs,1)); height:calc(26px * var(--fs,1)); display:grid; place-items:center; border-radius:50%; font-size:calc(17px * var(--fs,1)); color:#fff; background:linear-gradient(180deg,#5aa9ff,#2f7bff); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 2px 0 #1b53b8;}
+.ico-grp[open] > summary::after{content:"−";}
+.ico-grp .ico-body{padding:2px 14px 14px;}
+
+/* 8286: مربعات الأيقونات + مكتبة الأيقونات الموحّدة */
+#optCapIcon, #optMoneyIco, #optGoldIco, #optCmIco, #optZakIcon, #optMsIcon, #optYiIcon{display:none !important;}
+.ico-hub{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:2px 0 12px;}
+.ico-sq{display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:6px; padding:9px 3px 8px; border:0; border-radius:20px; cursor:pointer; font-family:inherit; color:var(--text); background:linear-gradient(160deg,rgba(255,255,255,.5),transparent 55%),var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 4px 0 rgba(0,0,0,.12), 0 9px 12px rgba(30,41,59,.1); -webkit-tap-highlight-color:transparent; min-width:0;}
+.ico-sq:active{transform:translateY(3px); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 1px 0 rgba(0,0,0,.12);}
+.ico-sq.on{outline:3px solid var(--accent,#2f7bff); outline-offset:1px;}
+.ico-sq .ico-art, .ico-t .ico-art{width:100%; max-width:58px; aspect-ratio:1/1; display:block;}
+.ico-sq .ico-art svg, .ico-t .ico-art svg{width:100%; height:100%; display:block;}
+.ico-sq .ico-n{font-size:calc(10.5px * var(--fs,1)); font-weight:900; line-height:1.25; text-align:center; overflow-wrap:anywhere;}
+.ico-pick{margin:0 0 12px; padding:12px 10px 10px; border-radius:20px; background:var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 4px 0 rgba(0,0,0,.1), 0 10px 16px rgba(30,41,59,.1);}
+.ico-pick-h{display:flex; align-items:center; gap:8px; margin:0 2px 10px; font-weight:900; font-size:calc(13.5px * var(--fs,1));}
+.ico-pick-h span{flex:1;}
+.ico-pick-x{border:0; width:calc(32px * var(--fs,1)); height:calc(32px * var(--fs,1)); border-radius:50%; cursor:pointer; font-weight:900; color:#fff; background:linear-gradient(180deg,#ff8a8a,#e03a3a); box-shadow:0 2px 0 #9a1f1f;}
+.ico-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; max-height:58vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px;}
+.ico-t{display:flex; flex-direction:column; align-items:center; gap:4px; padding:7px 2px 6px; border:0; border-radius:16px; cursor:pointer; font-family:inherit; color:var(--text); background:var(--bg2,rgba(127,127,127,.08)); -webkit-tap-highlight-color:transparent; min-width:0;}
+.ico-t:active{transform:scale(.95);}
+.ico-t.on{background:linear-gradient(180deg,rgba(47,123,255,.2),rgba(47,123,255,.08)); outline:2.5px solid var(--accent,#2f7bff);}
+.ico-t .ico-n{font-size:calc(10px * var(--fs,1)); font-weight:800; line-height:1.25; text-align:center; overflow-wrap:anywhere;}
+.ico-adv .ico-grp{box-shadow:none; background:rgba(127,127,127,.07); margin-bottom:8px;}
 .reports-home{margin:14px 0 4px;}
 .reports-home .reports-row{margin-bottom:8px;}
 .ai-bar{flex:1 1 100%; display:flex; align-items:center; gap:8px; margin-top:2px; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;}
@@ -4219,7 +4246,115 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     </div>
 
 
-<div class="settings-section" id="zigStyleSection">
+<div class="settings-section" id="capIcoSection">
+      <h4>🎨 الأيقونات</h4>
+      <p class="ico-note">دوس على أي مربع وهتلاقي كل الأيقونات في مكان واحد (من غير تكرار) — اختار اللي عايزه له.</p>
+      <div class="ico-hub" id="icoHub"></div>
+      <div class="ico-pick" id="icoPick" style="display:none;"></div>
+      <details class="ico-grp ico-adv"><summary>📏 الأحجام وأشكال البطاقات وترتيب الصفحة الأولى</summary><div class="ico-body">
+<details class="ico-grp"><summary>🔲 ترتيب الأيقونات في الصفحة الأولى</summary><div class="ico-body">
+<div class="opt-row" id="optHomeCols" data-nosound>
+        <button type="button" class="opt-chip" data-val="1" onclick="nfSet('homeCols',1)">⬇️ تحت بعض</button><button type="button" class="opt-chip" data-val="2" onclick="nfSet('homeCols',2)">▦ ٢ جنب بعض</button><button type="button" class="opt-chip" data-val="4" onclick="nfSet('homeCols',4)">↔️ الأربعة في صف</button>
+      </div>
+      <div class="nf-sub" style="margin-top:8px;">«تحت بعض»: أيقونة في كل صف · «٢ جنب بعض»: اتنين في الصف · «الأربعة في صف»: كلهم جنب بعض في صف واحد</div>
+      </div></details>
+<details class="ico-grp"><summary>💼 رأس المال — الحجم والبطاقة</summary><div class="ico-body">
+<div class="opt-row" id="optCapIcon" data-nosound>
+        <button type="button" class="opt-chip" data-val="bag" onclick="nfSet('capIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('capIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('capIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('capIcon','btc')">₿ بيتكوين</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(رأس المال بس)</small></div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="capIcoSize" min="60" max="180" step="5" value="100" oninput="capIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="capIcoSizeLabel">100%</div>
+      <div class="ch-prev" id="capIcoPrev"></div>
+      <div class="nf-sub" style="margin-top:14px;">🟪 بطاقة رأس المال <small>(الخلفية البنفسجية حوالين الأيقونة والمبلغ)</small></div>
+      <div class="opt-row" id="optCapBox" data-nosound>
+        <button type="button" class="opt-chip" data-val="off" onclick="nfSet('capCardBox', false)">🚫 من غير بطاقة</button><button type="button" class="opt-chip" data-val="on" onclick="nfSet('capCardBox', true)">🟪 بطاقة ظاهرة</button>
+      </div>
+      </div></details>
+<details class="ico-grp"><summary>💵🪙 الأموال والذهب — الحجم والبطاقة</summary><div class="ico-body">
+<div class="opt-row" id="optMoneyIco" data-nosound>
+        <button type="button" class="opt-chip" data-val="cash" onclick="nfSet('moneyIcon','cash')">💵 فلوس</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('moneyIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('moneyIcon','bank')">🏦 بنك</button>
+      </div>
+      
+      <div class="opt-row" id="optGoldIco" data-nosound>
+        <button type="button" class="opt-chip" data-val="pound" onclick="nfSet('goldIcon','pound')">🪙 جنيه ذهب</button><button type="button" class="opt-chip" data-val="bar" onclick="nfSet('goldIcon','bar')">🧈 سبيكة ذهب</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('goldIcon','coins')">💰 عملات</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم أيقونتي الأموال والذهب</div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="csIcoSize" min="60" max="180" step="5" value="100" oninput="csIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="csIcoSizeLabel">100%</div>
+      <div class="nf-sub" style="margin-top:14px;">🟩 بطاقة الأموال والذهب</div>
+      <div class="opt-row" id="optCapSubBox" data-nosound>
+        <button type="button" class="opt-chip" data-val="glass" onclick="nfSet('capSubStyle','glass')">🫧 شفافة</button><button type="button" class="opt-chip" data-val="none" onclick="nfSet('capSubStyle','none')">🚫 من غير بطاقة</button><button type="button" class="opt-chip" data-val="color" onclick="nfSet('capSubStyle','color')">🟩 ملوّنة</button>
+      </div>
+      </div></details>
+<details class="ico-grp"><summary>💼 إجمالي الأموال — الحجم والبطاقة</summary><div class="ico-body">
+<div class="opt-row" id="optCmIco" data-nosound>
+        <button type="button" class="opt-chip" data-val="cash" onclick="nfSet('cmIcon','cash')">💵 فلوس</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('cmIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('cmIcon','bank')">🏦 بنك</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('cmIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('cmIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('cmIcon','btc')">₿ بيتكوين</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم أيقونة إجمالي الأموال</div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="cmIcoSize" min="60" max="180" step="5" value="100" oninput="cmIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="cmIcoSizeLabel">100%</div>
+      <div class="nf-sub" style="margin-top:14px;">🎨 بطاقة إجمالي الأموال</div>
+      <div class="opt-row" id="optCmCard" data-nosound>
+        <button type="button" class="opt-chip" data-val="violet" onclick="nfSet('cmCardStyle','violet')">🟪 بنفسجي</button><button type="button" class="opt-chip" data-val="green" onclick="nfSet('cmCardStyle','green')">🟩 أخضر</button><button type="button" class="opt-chip" data-val="gold" onclick="nfSet('cmCardStyle','gold')">🟨 ذهبي</button><button type="button" class="opt-chip" data-val="blue" onclick="nfSet('cmCardStyle','blue')">🟦 أزرق</button><button type="button" class="opt-chip" data-val="glass" onclick="nfSet('cmCardStyle','glass')">🫧 شفافة</button><button type="button" class="opt-chip" data-val="none" onclick="nfSet('cmCardStyle','none')">🚫 من غير بطاقة</button>
+      </div>
+      </div></details>
+<details class="ico-grp"><summary>🕌 الزكاة — الحجم</summary><div class="ico-body">
+<div class="opt-row" id="optZakIcon" data-nosound>
+        <button type="button" class="opt-chip" data-val="mosque" onclick="nfSet('zakIcon','mosque')">🕌 جامع ذهبي</button><button type="button" class="opt-chip" data-val="moon" onclick="nfSet('zakIcon','moon')">🌙 هلال ونجمة</button><button type="button" class="opt-chip" data-val="lantern" onclick="nfSet('zakIcon','lantern')">🏮 فانوس</button><button type="button" class="opt-chip" data-val="heart" onclick="nfSet('zakIcon','heart')">💛 قلب الصدقة</button><button type="button" class="opt-chip" data-val="quran" onclick="nfSet('zakIcon','quran')">📖 مصحف</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('zakIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('zakIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('zakIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('zakIcon','btc')">₿ بيتكوين</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(الزكاة بس)</small></div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="zakIcoSize" min="60" max="180" step="5" value="100" oninput="zakIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="zakIcoSizeLabel">100%</div>
+      <div class="ch-prev" id="zakIcoPrev"></div>
+      </div></details>
+<details class="ico-grp"><summary>🗓️ المصروفات الشهرية — الحجم</summary><div class="ico-body">
+<div class="opt-row" id="optMsIcon" data-nosound>
+        <button type="button" class="opt-chip" data-val="cash" onclick="nfSet('msIcon','cash')">💵 أوراق نقدية</button><button type="button" class="opt-chip" data-val="calendar" onclick="nfSet('msIcon','calendar')">🗓️ تقويم شهري</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('msIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="cart" onclick="nfSet('msIcon','cart')">🛒 عربة مصاريف</button><button type="button" class="opt-chip" data-val="receipt" onclick="nfSet('msIcon','receipt')">🧾 فاتورة</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('msIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('msIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('msIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('msIcon','btc')">₿ بيتكوين</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(المصروفات الشهرية بس)</small></div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="msIcoSize" min="60" max="180" step="5" value="100" oninput="msIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="msIcoSizeLabel">100%</div>
+      <div class="ch-prev" id="msIcoPrev"></div>
+      </div></details>
+<details class="ico-grp"><summary>📊 التقارير — الحجم</summary><div class="ico-body">
+<div class="opt-row" id="optYiIcon" data-nosound>
+        <button type="button" class="opt-chip" data-val="growth" onclick="nfSet('yiIcon','growth')">📈 نمو الدخل</button><button type="button" class="opt-chip" data-val="envelope" onclick="nfSet('yiIcon','envelope')">✉️ ظرف الراتب</button><button type="button" class="opt-chip" data-val="tree" onclick="nfSet('yiIcon','tree')">🌳 شجرة الدخل</button><button type="button" class="opt-chip" data-val="briefcase" onclick="nfSet('yiIcon','briefcase')">💼 حقيبة عمل</button><button type="button" class="opt-chip" data-val="piggy" onclick="nfSet('yiIcon','piggy')">🐷 حصالة</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('yiIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('yiIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('yiIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('yiIcon','btc')">₿ بيتكوين</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(الدخل السنوي بس)</small></div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="yiIcoSize" min="60" max="180" step="5" value="100" oninput="yiIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="yiIcoSizeLabel">100%</div>
+      <div class="ch-prev" id="yiIcoPrev"></div>
+      </div></details>
+      </div></details>
+      <div class="nf-sub" style="margin-top:14px;">اضغط على أي أيقونة ضغطة طويلة في الصفحة الأولى وحرّكها لأي مكان بين الأيقونات (فوق وتحت ويمين وشمال حسب الترتيب اللي اخترته)</div>
+    </div>
+
+    <div class="settings-section" id="zigStyleSection">
       <h4>📈 شكل المؤشرات</h4>
       <p style="font-size:12px; color:var(--muted); margin:0 0 4px; line-height:1.6;">اختار الشكل والفترة (يومي = آخر ١٠ أيام فيها حركة، شهري = آخر ١٢ شهر، سنوي = آخر ٨ سنين) لكل بطاقة. التغيير بيظهر فورًا. «📉 بورصة» = مؤشر زي شاشات البورصة: خط بتدرّج تحته، خط متقطع عند نقطة البداية، محور تواريخ وشبكة، ونقطة حيّة نابضة عند آخر قيمة.</p>
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">💵 إجمالي الأموال</div>
@@ -4311,108 +4446,6 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         <button class="opt-chip" data-val="ar" onclick="previewSetting('digits','ar')">عربي ١٢٣</button>
         <button class="opt-chip" data-val="en" onclick="previewSetting('digits','en')">English 123</button>
       </div>
-    </div>
-
-    <div class="settings-section" id="capIcoSection">
-      <h4>أيقونات رأس المال والزكاة والمصروفات والدخل</h4>
-      <div class="nf-sub" style="margin-top:2px;font-weight:900;">🔲 ترتيب الأيقونات في الصفحة الأولى</div>
-      <div class="opt-row" id="optHomeCols" data-nosound>
-        <button type="button" class="opt-chip" data-val="1" onclick="nfSet('homeCols',1)">⬇️ تحت بعض</button><button type="button" class="opt-chip" data-val="2" onclick="nfSet('homeCols',2)">▦ ٢ جنب بعض</button><button type="button" class="opt-chip" data-val="4" onclick="nfSet('homeCols',4)">↔️ الأربعة في صف</button>
-      </div>
-      <div class="nf-sub" style="margin-top:8px;">«تحت بعض»: أيقونة في كل صف · «٢ جنب بعض»: اتنين في الصف · «الأربعة في صف»: كلهم جنب بعض في صف واحد</div>
-      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">💼 أيقونة رأس المال</div>
-      <div class="opt-row" id="optCapIcon" data-nosound>
-        <button type="button" class="opt-chip" data-val="bag" onclick="nfSet('capIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('capIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('capIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('capIcon','btc')">₿ بيتكوين</button>
-      </div>
-      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(رأس المال بس)</small></div>
-      <div class="vol-row" data-nosound>
-        <span class="vol-end">صغيرة</span>
-        <input type="range" id="capIcoSize" min="60" max="180" step="5" value="100" oninput="capIcoSizeInput()">
-        <span class="vol-end">كبيرة</span>
-      </div>
-      <div class="vol-val" id="capIcoSizeLabel">100%</div>
-      <div class="ch-prev" id="capIcoPrev"></div>
-      <div class="nf-sub" style="margin-top:14px;">🟪 بطاقة رأس المال <small>(الخلفية البنفسجية حوالين الأيقونة والمبلغ)</small></div>
-      <div class="opt-row" id="optCapBox" data-nosound>
-        <button type="button" class="opt-chip" data-val="off" onclick="nfSet('capCardBox', false)">🚫 من غير بطاقة</button><button type="button" class="opt-chip" data-val="on" onclick="nfSet('capCardBox', true)">🟪 بطاقة ظاهرة</button>
-      </div>
-
-      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">💵 أيقونة الأموال <small>(داخل رأس المال)</small></div>
-      <div class="opt-row" id="optMoneyIco" data-nosound>
-        <button type="button" class="opt-chip" data-val="cash" onclick="nfSet('moneyIcon','cash')">💵 فلوس</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('moneyIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('moneyIcon','bank')">🏦 بنك</button>
-      </div>
-      <div class="nf-sub" style="margin-top:14px;font-weight:900;">🪙 أيقونة الذهب <small>(داخل رأس المال)</small></div>
-      <div class="opt-row" id="optGoldIco" data-nosound>
-        <button type="button" class="opt-chip" data-val="pound" onclick="nfSet('goldIcon','pound')">🪙 جنيه ذهب</button><button type="button" class="opt-chip" data-val="bar" onclick="nfSet('goldIcon','bar')">🧈 سبيكة ذهب</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('goldIcon','coins')">💰 عملات</button>
-      </div>
-      <div class="nf-sub" style="margin-top:14px;">📏 حجم أيقونتي الأموال والذهب</div>
-      <div class="vol-row" data-nosound>
-        <span class="vol-end">صغيرة</span>
-        <input type="range" id="csIcoSize" min="60" max="180" step="5" value="100" oninput="csIcoSizeInput()">
-        <span class="vol-end">كبيرة</span>
-      </div>
-      <div class="vol-val" id="csIcoSizeLabel">100%</div>
-      <div class="nf-sub" style="margin-top:14px;">🟩 بطاقة الأموال والذهب</div>
-      <div class="opt-row" id="optCapSubBox" data-nosound>
-        <button type="button" class="opt-chip" data-val="glass" onclick="nfSet('capSubStyle','glass')">🫧 شفافة</button><button type="button" class="opt-chip" data-val="none" onclick="nfSet('capSubStyle','none')">🚫 من غير بطاقة</button><button type="button" class="opt-chip" data-val="color" onclick="nfSet('capSubStyle','color')">🟩 ملوّنة</button>
-      </div>
-
-      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">💼 بطاقة إجمالي الأموال <small>(أول بطاقة في صفحة الأموال)</small></div>
-      <div class="opt-row" id="optCmIco" data-nosound>
-        <button type="button" class="opt-chip" data-val="cash" onclick="nfSet('cmIcon','cash')">💵 فلوس</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('cmIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('cmIcon','bank')">🏦 بنك</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('cmIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('cmIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('cmIcon','btc')">₿ بيتكوين</button>
-      </div>
-      <div class="nf-sub" style="margin-top:14px;">📏 حجم أيقونة إجمالي الأموال</div>
-      <div class="vol-row" data-nosound>
-        <span class="vol-end">صغيرة</span>
-        <input type="range" id="cmIcoSize" min="60" max="180" step="5" value="100" oninput="cmIcoSizeInput()">
-        <span class="vol-end">كبيرة</span>
-      </div>
-      <div class="vol-val" id="cmIcoSizeLabel">100%</div>
-      <div class="nf-sub" style="margin-top:14px;">🎨 بطاقة إجمالي الأموال</div>
-      <div class="opt-row" id="optCmCard" data-nosound>
-        <button type="button" class="opt-chip" data-val="violet" onclick="nfSet('cmCardStyle','violet')">🟪 بنفسجي</button><button type="button" class="opt-chip" data-val="green" onclick="nfSet('cmCardStyle','green')">🟩 أخضر</button><button type="button" class="opt-chip" data-val="gold" onclick="nfSet('cmCardStyle','gold')">🟨 ذهبي</button><button type="button" class="opt-chip" data-val="blue" onclick="nfSet('cmCardStyle','blue')">🟦 أزرق</button><button type="button" class="opt-chip" data-val="glass" onclick="nfSet('cmCardStyle','glass')">🫧 شفافة</button><button type="button" class="opt-chip" data-val="none" onclick="nfSet('cmCardStyle','none')">🚫 من غير بطاقة</button>
-      </div>
-
-      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">🕌 أيقونة الزكاة <small>(منفصلة عن رأس المال)</small></div>
-      <div class="opt-row" id="optZakIcon" data-nosound>
-        <button type="button" class="opt-chip" data-val="mosque" onclick="nfSet('zakIcon','mosque')">🕌 جامع ذهبي</button><button type="button" class="opt-chip" data-val="moon" onclick="nfSet('zakIcon','moon')">🌙 هلال ونجمة</button><button type="button" class="opt-chip" data-val="lantern" onclick="nfSet('zakIcon','lantern')">🏮 فانوس</button><button type="button" class="opt-chip" data-val="heart" onclick="nfSet('zakIcon','heart')">💛 قلب الصدقة</button><button type="button" class="opt-chip" data-val="quran" onclick="nfSet('zakIcon','quran')">📖 مصحف</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('zakIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('zakIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('zakIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('zakIcon','btc')">₿ بيتكوين</button>
-      </div>
-      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(الزكاة بس)</small></div>
-      <div class="vol-row" data-nosound>
-        <span class="vol-end">صغيرة</span>
-        <input type="range" id="zakIcoSize" min="60" max="180" step="5" value="100" oninput="zakIcoSizeInput()">
-        <span class="vol-end">كبيرة</span>
-      </div>
-      <div class="vol-val" id="zakIcoSizeLabel">100%</div>
-      <div class="ch-prev" id="zakIcoPrev"></div>
-
-      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">🗓️ أيقونة المصروفات الشهرية <small>(منفصلة عن اللي فوق)</small></div>
-      <div class="opt-row" id="optMsIcon" data-nosound>
-        <button type="button" class="opt-chip" data-val="cash" onclick="nfSet('msIcon','cash')">💵 أوراق نقدية</button><button type="button" class="opt-chip" data-val="calendar" onclick="nfSet('msIcon','calendar')">🗓️ تقويم شهري</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('msIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="cart" onclick="nfSet('msIcon','cart')">🛒 عربة مصاريف</button><button type="button" class="opt-chip" data-val="receipt" onclick="nfSet('msIcon','receipt')">🧾 فاتورة</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('msIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('msIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('msIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('msIcon','btc')">₿ بيتكوين</button>
-      </div>
-      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(المصروفات الشهرية بس)</small></div>
-      <div class="vol-row" data-nosound>
-        <span class="vol-end">صغيرة</span>
-        <input type="range" id="msIcoSize" min="60" max="180" step="5" value="100" oninput="msIcoSizeInput()">
-        <span class="vol-end">كبيرة</span>
-      </div>
-      <div class="vol-val" id="msIcoSizeLabel">100%</div>
-      <div class="ch-prev" id="msIcoPrev"></div>
-
-      <div class="nf-sub" style="margin-top:22px;padding-top:16px;border-top:1px dashed rgba(128,128,128,.4);font-weight:900;">📊 أيقونة التقارير <small>(منفصلة عن اللي فوق)</small></div>
-      <div class="opt-row" id="optYiIcon" data-nosound>
-        <button type="button" class="opt-chip" data-val="growth" onclick="nfSet('yiIcon','growth')">📈 نمو الدخل</button><button type="button" class="opt-chip" data-val="envelope" onclick="nfSet('yiIcon','envelope')">✉️ ظرف الراتب</button><button type="button" class="opt-chip" data-val="tree" onclick="nfSet('yiIcon','tree')">🌳 شجرة الدخل</button><button type="button" class="opt-chip" data-val="briefcase" onclick="nfSet('yiIcon','briefcase')">💼 حقيبة عمل</button><button type="button" class="opt-chip" data-val="piggy" onclick="nfSet('yiIcon','piggy')">🐷 حصالة</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('yiIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('yiIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('yiIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('yiIcon','btc')">₿ بيتكوين</button>
-      </div>
-      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(الدخل السنوي بس)</small></div>
-      <div class="vol-row" data-nosound>
-        <span class="vol-end">صغيرة</span>
-        <input type="range" id="yiIcoSize" min="60" max="180" step="5" value="100" oninput="yiIcoSizeInput()">
-        <span class="vol-end">كبيرة</span>
-      </div>
-      <div class="vol-val" id="yiIcoSizeLabel">100%</div>
-      <div class="ch-prev" id="yiIcoPrev"></div>
-
-      <div class="nf-sub" style="margin-top:14px;">اضغط على أي أيقونة ضغطة طويلة في الصفحة الأولى وحرّكها لأي مكان بين الأيقونات (فوق وتحت ويمين وشمال حسب الترتيب اللي اخترته)</div>
     </div>
 
     <div class="settings-section">
@@ -14895,6 +14928,65 @@ body.kb-open .fab{display:none !important;}
       var a = document.activeElement; if(isField(a)) setTimeout(function(){ show(a); }, 60);
     });
   }
+})();
+</script>
+
+<script>
+/* 8286: مربعات الأيقونات — دوس على أي مربع تظهر كل الأيقونات (مكتبة واحدة من غير تكرار) */
+(function(){
+  try{
+    ['CAPSUB_SVG','ZAKICO_SVG','MSICO_SVG','YIICO_SVG'].forEach(function(n){
+      var lib = window[n] || (function(){ try{ return eval(n); }catch(e){ return null; } })();
+      if(lib) Object.keys(lib).forEach(function(k){ if(!CAPICO_SVG[k]) CAPICO_SVG[k] = lib[k]; });
+    });
+  }catch(e){}
+  var TARGETS = [
+    {key:'capIcon',   n:'رأس المال',        d:'bag',    f:function(k){ return CAPICO_SVG[k]; }},
+    {key:'moneyIcon', n:'الأموال',           d:'cash',   f:function(k){ return capSubMoneySvg(k); }},
+    {key:'goldIcon',  n:'الذهب',             d:'pound',  f:function(k){ return capSubGoldSvg(k); }},
+    {key:'cmIcon',    n:'إجمالي الأموال',    d:'cash',   f:function(k){ return capSubMoneySvg(k); }},
+    {key:'zakIcon',   n:'الزكاة',            d:'mosque', f:function(k){ return zakIcoSvg(k); }},
+    {key:'msIcon',    n:'المصروفات الشهرية', d:'cash',   f:function(k){ return msIcoSvg(k); }},
+    {key:'yiIcon',    n:'التقارير',          d:'growth', f:function(k){ return yiIcoSvg(k); }}
+  ];
+  var ALL = [['bag','كيس نقود'],['bank','مبنى البنك'],['coins','مجموعة نقود'],['btc','بيتكوين'],['cash','فلوس'],['wallet','محفظة'],['pound','جنيه ذهب'],['bar','سبيكة ذهب'],['piggy','حصالة'],['envelope','ظرف الراتب'],['briefcase','حقيبة عمل'],['growth','نمو الدخل'],['tree','شجرة الدخل'],['calendar','تقويم شهري'],['cart','عربة مصاريف'],['receipt','فاتورة'],['mosque','جامع ذهبي'],['moon','هلال ونجمة'],['lantern','فانوس'],['heart','قلب الصدقة'],['quran','مصحف'],
+    ['n4safe','خزنة 4D'],['n4wallet','محفظة 4D'],['n4cash','فلوس 4D'],['n4coin','عملة ذهبية 4D'],['n4goldbar','سبيكة 4D'],['n4piggy','حصالة 4D'],['n4bag','شنطة تسوق 4D'],['n4cart','عربة 4D'],['n4receipt','فاتورة 4D'],['n4calendar','تقويم 4D'],['n4target','هدف 4D'],['n4tree','شجرة فلوس 4D'],['n4medal','ميدالية 4D'],['n4crescent','هلال 4D'],['n4lantern','فانوس 4D'],['n4heart','قلب 4D'],['n4gift','هدية 4D'],['n4mosque','مسجد 4D']];
+  var _open = null, _uc = 0;
+  function cur(s){ return s || (typeof _draftSettings !== 'undefined' && _draftSettings) || settings; }
+  function art(t, k){ var sv = t.f(k) || t.f(t.d) || ''; return String(sv).replace(/__U__/g, 'ih' + (++_uc)); }
+  function esc(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  window.icoHubRender = function(s){
+    var hub = document.getElementById('icoHub'); if(!hub) return; s = cur(s); _uc = 0;
+    hub.innerHTML = TARGETS.map(function(t, i){
+      var k = s[t.key]; if(!t.f(k)) k = t.d;
+      return '<button type="button" class="ico-sq' + (_open === i ? ' on' : '') + '" onclick="icoHubOpen(' + i + ')"><span class="ico-art">' + art(t, k) + '</span><span class="ico-n">' + esc(t.n) + '</span></button>';
+    }).join('');
+    if(_open !== null) icoPickRender(s);
+  };
+  function icoPickRender(s){
+    var box = document.getElementById('icoPick'); if(!box || _open === null) return; var t = TARGETS[_open]; s = cur(s);
+    var k = s[t.key]; if(!t.f(k)) k = t.d;
+    var tiles = ALL.filter(function(a){ return !!t.f(a[0]); }).map(function(a){
+      return '<button type="button" class="ico-t' + (a[0] === k ? ' on' : '') + '" onclick="icoHubPick(\'' + a[0] + '\')"><span class="ico-art">' + art(t, a[0]) + '</span><span class="ico-n">' + esc(a[1]) + '</span></button>';
+    }).join('');
+    box.innerHTML = '<div class="ico-pick-h"><span>اختار أيقونة «' + esc(t.n) + '»</span><button type="button" class="ico-pick-x" onclick="icoHubClose()" aria-label="إغلاق">✕</button></div><div class="ico-grid">' + tiles + '</div>';
+    box.style.display = '';
+  }
+  window.icoHubOpen = function(i){
+    if(_open === i){ icoHubClose(); return; }
+    _open = i; icoHubRender(); var box = document.getElementById('icoPick');
+    try{ box.scrollIntoView({behavior: 'smooth', block: 'nearest'}); }catch(e){}
+  };
+  window.icoHubClose = function(){ _open = null; var box = document.getElementById('icoPick'); if(box){ box.style.display = 'none'; box.innerHTML = ''; } icoHubRender(); };
+  window.icoHubPick = function(k){
+    if(_open === null) return; var t = TARGETS[_open];
+    try{ nfSet(t.key, k); }catch(e){}
+    try{ autoSaveSettings(); }catch(e){}
+    icoHubClose();
+  };
+  var _rsu = window.refreshSettingsUI;
+  if(typeof _rsu === 'function') window.refreshSettingsUI = function(s){ var r = _rsu.apply(this, arguments); try{ icoHubRender(s); }catch(e){} return r; };
+  try{ icoHubRender(); }catch(e){}
 })();
 </script>
 </body>
