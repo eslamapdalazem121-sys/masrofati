@@ -33,7 +33,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-05.8274">
+<meta name="app-version" content="2026-11-05.8279">
+<script>
+/* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
+(function(){
+  var K = ['budget_data_v1', 'budget_settings_v1', 'budget_current_year'], SNAP = 'budget_prev_snapshot_v1', VER = 'budget_last_ver_v1';
+  var cur = (document.querySelector('meta[name="app-version"]') || {}).content || 'dev';
+  try{
+    var last = localStorage.getItem(VER);
+    if(last && last !== cur && localStorage.getItem(K[0])){
+      var o = {ver: last, at: Date.now(), d: {}};
+      K.forEach(function(k){ var v = localStorage.getItem(k); if(v !== null) o.d[k] = v; });
+      try{ localStorage.setItem(SNAP, JSON.stringify(o)); }catch(e){ try{ localStorage.removeItem(SNAP); }catch(e2){} }
+    }
+    localStorage.setItem(VER, cur);
+  }catch(e){}
+  window.prevSnapInfo = function(){ try{ var o = JSON.parse(localStorage.getItem(SNAP) || 'null'); return o && o.d ? o : null; }catch(e){ return null; } };
+  window.prevSnapRestore = function(){
+    var o = window.prevSnapInfo(); if(!o){ alert('مفيش لقطة سابقة محفوظة'); return; }
+    if(!confirm('هترجّع بيانات وإعدادات النسخة ' + o.ver + ' زي ما كانت قبل التحديث. أي تعديل عملته بعد التحديث هيتمسح. تكمّل؟')) return;
+    try{
+      var now = {ver: cur, at: Date.now(), d: {}}; K.forEach(function(k){ var v = localStorage.getItem(k); if(v !== null) now.d[k] = v; });
+      K.forEach(function(k){ if(o.d[k] !== undefined) localStorage.setItem(k, o.d[k]); else localStorage.removeItem(k); });
+      try{ localStorage.setItem(SNAP, JSON.stringify(now)); }catch(e){}
+      location.reload();
+    }catch(e){ alert('تعذّر الاسترجاع'); }
+  };
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.getElementById('prevSnapInfo'); if(!el) return; var o = window.prevSnapInfo();
+    el.textContent = o ? ('آخر لقطة: بيانات النسخة ' + o.ver + ' — اتحفظت ' + new Date(o.at).toLocaleString('ar-EG')) : 'لسه مفيش لقطة — بتتعمل لوحدها أول ما تتحدّث لنسخة جديدة.';
+  });
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -1658,6 +1689,28 @@ body:not(.mv-lock) :is(#groupsList > *, .children-list > *, #cmList .gi-row, #cg
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .mc-banktot .mc-bt-v{color:#fff3c4; text-shadow:none;} :root:not([data-theme="light"]) .mc-banktot{border-color:#d9a526; color:#ffe7a3; background:linear-gradient(180deg,#5b4410,#3f2f08); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 3px 0 rgba(0,0,0,.45);} }
 .mc-addsub{display:block; width:calc(100% - 7px); margin:10px 0 0; margin-inline-start:7px; padding:10px; border:0; cursor:pointer; border-radius:14px; font-family:inherit; font-weight:900; font-size:calc(13.5px * var(--fs,1)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#ff9ec4,#e0457f); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a3204d, 0 9px 12px rgba(224,69,127,.28);}
 .mc-addsub:active{transform:translateY(3px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 1px 0 #a3204d;}
+/* 8277: زرار «＋ حساب فرعي» بألوان وشكل بطاقة البنك (أخضر الحساب الفرعي زي شريط «الحساب الفرعي» + أيقونة مربعة مجسمة وكتابة بيضا واضحة) */
+.mc-addsub{display:flex; align-items:center; justify-content:flex-start; gap:12px; padding:11px 13px; border-radius:20px; min-height:58px; font-size:calc(17px * var(--fs,1)); font-weight:900; color:#fff; text-shadow:0 1px 2px rgba(0,60,40,.55); background:linear-gradient(180deg,#38d3a6,#0f9d78); box-shadow:inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.18), 0 5px 0 #0a6a52, 0 11px 14px rgba(15,157,120,.3);}
+.mc-addsub:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 1px 0 #0a6a52;}
+.mc-addsub .mc-as-plus{display:grid; place-items:center; flex:none; width:calc(42px * var(--fs,1)); height:calc(42px * var(--fs,1)); border-radius:14px; font-size:calc(30px * var(--fs,1)); font-weight:900; line-height:1; color:#fff; text-shadow:0 2px 0 rgba(0,70,50,.5); background:rgba(255,255,255,.25); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.15);}
+.mc-addsub .mc-as-t{flex:1; text-align:start; font-size:inherit; font-weight:900;}
+/* 8278: أيقونات إنشاء حساب بنكي / شهادة / حساب فرعي — ثابتة ومجسمة وجنب بعض وقابلة للتحريك */
+.acc-new.acc-icons{display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 6px; align-items:stretch;}
+.ai-tile{flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:9px; padding:10px 2px 4px; border:0; border-radius:20px; cursor:pointer; font-family:inherit; color:var(--text); background:none; box-shadow:none; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; touch-action:manipulation;}
+.ai-tile .ai-ic{position:relative; width:calc(66px * var(--fs,1)); height:calc(66px * var(--fs,1)); display:grid; place-items:center; border-radius:22px; font-size:calc(34px * var(--fs,1)); line-height:1; background:linear-gradient(180deg,var(--aA),var(--aB)); box-shadow:inset 0 3px 0 rgba(255,255,255,.55), inset 0 -4px 0 rgba(0,0,0,.18), 0 6px 0 var(--aE), 0 13px 14px var(--aS); transition:transform .1s, box-shadow .1s;}
+.ai-tile .ai-ic > i{font-style:normal; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));}
+.ai-tile .ai-ic::after{content:"＋"; position:absolute; top:-8px; left:-8px; width:calc(26px * var(--fs,1)); height:calc(26px * var(--fs,1)); display:grid; place-items:center; border-radius:50%; font-size:calc(19px * var(--fs,1)); font-weight:900; line-height:1; color:var(--aB); background:linear-gradient(180deg,#fff,#e9eef6); box-shadow:0 2px 0 rgba(0,0,0,.18), 0 4px 6px rgba(0,0,0,.2);}
+.ai-tile .ai-lb{font-size:calc(12.5px * var(--fs,1)); font-weight:900; line-height:1.35; text-align:center; overflow-wrap:anywhere; padding:0 2px;}
+.ai-tile:active .ai-ic{transform:translateY(5px); box-shadow:inset 0 3px 0 rgba(255,255,255,.45), 0 1px 0 var(--aE), 0 3px 5px var(--aS);}
+.ai-acc{--aA:#5aa9ff; --aB:#2f7bff; --aE:#1b53b8; --aS:rgba(47,123,255,.35);}
+.ai-cert{--aA:#b78cff; --aB:#7c4ddb; --aE:#4f2a9e; --aS:rgba(124,77,219,.35);}
+.ai-sub{--aA:#38d3a6; --aB:#0f9d78; --aE:#0a6a52; --aS:rgba(15,157,120,.35);}
+.ai-tile.ai-drag{position:relative; z-index:20; transition:none; filter:drop-shadow(0 14px 14px rgba(0,0,0,.3));}
+.ai-bar{flex:1 1 100%; display:flex; align-items:center; gap:8px; margin-top:2px; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;}
+.ai-grip{flex:1; text-align:center; padding:7px 6px; border-radius:14px; font-size:calc(11.5px * var(--fs,1)); font-weight:800; color:var(--muted); background:rgba(127,127,127,.12); border:1px dashed var(--border,#ccd);}
+.ai-mv{flex:none; width:calc(40px * var(--fs,1)); height:calc(34px * var(--fs,1)); border:0; border-radius:12px; cursor:pointer; font-family:inherit; font-size:calc(15px * var(--fs,1)); font-weight:900; color:var(--text); background:var(--card); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 3px 0 rgba(0,0,0,.14), 0 6px 8px rgba(30,41,59,.1); -webkit-tap-highlight-color:transparent;}
+.ai-mv:active{transform:translateY(3px); box-shadow:0 0 0 rgba(0,0,0,0);}
+
 :root[data-theme="dark"] .gi-row.mc.mc-sub{--mce:#5a2040; --mct:#3a2030;}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .gi-row.mc.mc-sub{--mce:#5a2040; --mct:#3a2030;} }
 
@@ -3297,8 +3350,69 @@ button,input,select,textarea,optgroup{font-family:inherit;}
     <div id="cmInterest" data-id="blk:int" style="display:none;"></div>
     <div class="gi-rows" id="cmList" data-id="blk:list"></div>
     <div id="cmAddLog" data-id="blk:log"></div>
-    <div class="date-row grp-new" id="cmGrpRow"><input type="text" id="cmGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('money')">إنشاء مجموعة</button></div>
-    <div class="acc-new" id="cmAccRow" style="display:none;"><button type="button" class="acc-new-btn" onclick="openCapAcc()">🏦 إنشاء حساب بنكي</button><button type="button" class="acc-new-btn cert" onclick="openCapCert()">📜 إنشاء شهادة بنكية</button><button type="button" class="acc-new-btn sub" onclick="openCapSub()">🗂 إنشاء حساب فرعي (بفايدته ومبلغه)</button></div>
+    <div class="date-row grp-new" id="cmGrpRow" data-id="blk:grp"><input type="text" id="cmGrpName" placeholder="📁 اسم مجموعة جديدة"><button type="button" class="mini-btn" onclick="createCapGroup('money')">إنشاء مجموعة</button></div>
+    <div class="acc-new acc-icons" id="cmAccRow" data-id="blk:newrow" style="display:none;"><button type="button" class="ai-tile ai-acc" data-k="acc" onclick="openCapAcc()" aria-label="إنشاء حساب بنكي"><span class="ai-ic"><i>🏦</i></span><span class="ai-lb">حساب بنكي</span></button><button type="button" class="ai-tile ai-cert" data-k="cert" onclick="openCapCert()" aria-label="إنشاء شهادة بنكية"><span class="ai-ic"><i>📜</i></span><span class="ai-lb">شهادة بنكية</span></button><button type="button" class="ai-tile ai-sub" data-k="sub" onclick="openCapSub()" aria-label="إنشاء حساب فرعي"><span class="ai-ic"><i>🗂</i></span><span class="ai-lb">حساب فرعي</span></button><div class="ai-bar"><button type="button" class="ai-mv" onclick="moveNewRow(-1)" aria-label="نقل الأيقونات لأعلى">▲</button><span class="ai-grip">⠿ اضغط مطوّلًا هنا واسحب لنقل الأيقونات فوق وتحت</span><button type="button" class="ai-mv" onclick="moveNewRow(1)" aria-label="نقل الأيقونات لأسفل">▼</button></div></div>
+    <script>
+    /* 8278: ترتيب أيقونات «إنشاء حساب / شهادة / حساب فرعي» بالضغط المطوّل والسحب (الترتيب بيتحفظ) */
+    (function(){
+      var row = document.getElementById('cmAccRow'); if(!row) return;
+      var KEY = 'masrofati_newrow_order_v1', HOLD = 350, TOL = 10, st = null, suppress = 0;
+      try{ JSON.parse(localStorage.getItem(KEY) || '[]').forEach(function(k){ var el = row.querySelector('.ai-tile[data-k="' + k + '"]'); if(el) row.insertBefore(el, row.querySelector('.ai-bar')); }); }catch(e){}
+      function pt(e){ var t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e; return {x: t.clientX, y: t.clientY}; }
+      function tiles(){ return Array.prototype.slice.call(row.querySelectorAll('.ai-tile')); }
+      function activate(){ if(!st) return; st.active = true; st.el.classList.add('ai-drag'); try{ if(navigator.vibrate) navigator.vibrate(25); }catch(e){} }
+      function start(e){
+        if(e.type === 'mousedown' && e.button) return;
+        var tl = e.target && e.target.closest ? e.target.closest('.ai-tile') : null; if(!tl) return;
+        var p = pt(e); st = {el: tl, x0: p.x, y0: p.y, active: false, tm: setTimeout(activate, HOLD)};
+      }
+      function follow(p){
+        var el = st.el; el.style.transform = ''; var r = el.getBoundingClientRect();
+        el.style.transform = 'translate(' + (p.x - (r.left + r.width / 2)) + 'px,' + (p.y - (r.top + r.height / 2)) + 'px) scale(1.07)';
+      }
+      function move(e){
+        if(!st) return; var p = pt(e);
+        if(!st.active){ if(Math.abs(p.x - st.x0) > TOL || Math.abs(p.y - st.y0) > TOL){ clearTimeout(st.tm); st = null; } return; }
+        if(e.cancelable) e.preventDefault();
+        var all = tiles(), me = all.indexOf(st.el);
+        st.el.style.transform = '';
+        for(var i = 0; i < all.length; i++){
+          var c = all[i]; if(c === st.el) continue;
+          var r = c.getBoundingClientRect();
+          if(p.x >= r.left && p.x <= r.right){ if(i > me) row.insertBefore(st.el, c.nextSibling); else row.insertBefore(st.el, c); break; }
+        }
+        follow(p);
+      }
+      function end(){
+        if(!st) return; clearTimeout(st.tm);
+        if(st.active){
+          st.el.style.transform = ''; st.el.classList.remove('ai-drag'); suppress = Date.now() + 450;
+          try{ localStorage.setItem(KEY, JSON.stringify(tiles().map(function(t){ return t.getAttribute('data-k'); }))); }catch(e){}
+        }
+        st = null;
+      }
+      row.addEventListener('touchstart', start, {passive: true});
+      document.addEventListener('touchmove', move, {passive: false});
+      document.addEventListener('touchend', end); document.addEventListener('touchcancel', end);
+      row.addEventListener('mousedown', start); document.addEventListener('mousemove', move); document.addEventListener('mouseup', end);
+      row.addEventListener('click', function(e){ if(Date.now() < suppress){ e.stopPropagation(); e.preventDefault(); } }, true);
+      row.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+      /* نقل الأيقونات كلها فوق/تحت بين بطاقات صفحة أموال (بالأسهم، أو بالضغط المطوّل على الشريط واسحب) */
+      window.moveNewRow = function(dir){
+        try{
+          var box = document.getElementById('cmBox'); if(!box) return;
+          var vis = function(el){ return el.getBoundingClientRect().height > 1; };
+          var blk = function(c){ return c.dataset && c.dataset.id && c.dataset.id.indexOf('blk:') === 0; };
+          var n = dir > 0 ? row.nextElementSibling : row.previousElementSibling;
+          while(n && !(blk(n) && vis(n))) n = dir > 0 ? n.nextElementSibling : n.previousElementSibling;
+          if(!n){ if(typeof showToast === 'function') showToast(dir > 0 ? 'الأيقونات في آخر الصفحة' : 'الأيقونات في أول الصفحة', true); return; }
+          if(dir > 0) box.insertBefore(row, n.nextSibling); else box.insertBefore(row, n);
+          data.cmOrder = Array.prototype.filter.call(box.children, blk).map(function(c){ return c.dataset.id; }); save();
+          try{ row.scrollIntoView({behavior: 'smooth', block: 'center'}); }catch(e){}
+        }catch(e){}
+      };
+    })();
+    </script>
     <div class="gi-dest"><button type="button" id="cmSubCash" class="active" onclick="setCmSub('cash')">💵 نقدي</button><button type="button" id="cmSubBank" onclick="setCmSub('bank')">🏦 بنوك</button><button type="button" id="cmSubPen" onclick="setCmSub('pension')">💳 معاش</button></div>
     <div id="cmForm" style="display:none;">
     <div class="field"><label id="cmNameLbl">الاسم</label><input type="text" id="cmName" placeholder="مثال: كاش بالبيت"></div>
@@ -4061,6 +4175,13 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         <button type="button" class="opt-chip" onclick="zigDemoRoll()">🎲 أرقام عشوائية جديدة</button>
         <button type="button" class="opt-chip" onclick="zigDemoOff()">↩️ الأرقام الحقيقية</button>
       </div>
+    </div>
+
+    <div class="settings-section" id="prevSnapSection">
+      <h4>🛟 أمان التحديثات</h4>
+      <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.6;">كل ما تتفتح نسخة جديدة من التطبيق بيحتفظ تلقائيًا بنسخة من بيانات وإعدادات النسخة اللي قبلها. لو حاجة اتغيّرت مش عايزها تقدر ترجّعها من هنا.</p>
+      <p id="prevSnapInfo" style="font-size:12px; font-weight:800; margin:0 0 8px;"></p>
+      <div class="opt-row"><button type="button" class="opt-chip" onclick="prevSnapRestore()">↩️ رجّع بيانات النسخة السابقة</button></div>
     </div>
 
     <div class="settings-section" id="nfSection">
@@ -7797,7 +7918,7 @@ function cmAccCerts(card, acc, certs, base, box){
     bar.children[1].textContent = pr.length ? pr.join(' · ') : '📜 مفيش شهادات أو حسابات فرعية'; }
   bar.children[2].textContent = certs.length ? fmt(tot) : '';
   card.appendChild(bar); card.classList.add('mc-acc-tap');
-  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.textContent = '➕ حساب فرعي بفايدته ومبلغه';
+  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.innerHTML = '<span class="mc-as-plus" aria-hidden="true">＋</span><span class="mc-as-t">حساب فرعي</span>';
   addSub.addEventListener('click', function(e){ e.stopPropagation(); openCapSub(acc.id); });
   card.appendChild(addSub);
   const kids = certs.map(function(c){
@@ -7863,7 +7984,7 @@ function mbCard(b, base){
     const penM = b.pens.reduce(function(t, p){ return t + (Number(p.amount) || 0); }, 0);
     kind('k-pen', '💳', 'المعاش', (b.pens.length === 1 ? 'معاش واحد' : toArabicDigits(b.pens.length) + ' معاشات') + ' · شهريًا في الحساب الأساسي', penM, b.pens, K + '|p');
   }
-  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.textContent = '➕ حساب فرعي بفايدته ومبلغه';
+  const addSub = document.createElement('button'); addSub.type = 'button'; addSub.className = 'mc-addsub'; addSub.innerHTML = '<span class="mc-as-plus" aria-hidden="true">＋</span><span class="mc-as-t">حساب فرعي</span>';
   addSub.addEventListener('click', function(e){ e.stopPropagation(); openCapSub(first.id); });
   body.appendChild(addSub);
   { let best = null; b.accs.concat(b.subs, b.certs, b.pens || []).forEach(function(x){ let ds = null; try{ ds = cmPastView() ? null : dueSoonOf(x); }catch(e){} if(ds && (!best || ds.days < best.days)) best = ds; });
