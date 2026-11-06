@@ -2882,6 +2882,16 @@ html{ overscroll-behavior:none; }
 button,input,select,textarea,optgroup{font-family:inherit;}
 #capGoldOverlay .modal-box.gd{font-family:inherit !important;}
 .year-switcher select{font-family:Arial,Helvetica,sans-serif !important;}
+/* 8318: السنة بتتختار بالضغط على التاريخ (شاشة سنوات) بدل السهمين */
+.year-switcher select{display:none !important;}
+.year-switcher .year-btn{display:inline-flex; align-items:center; gap:8px; border:0; background:none; cursor:pointer; color:var(--text); font-family:Arial,Helvetica,sans-serif; font-size:min(11vw,44px); font-weight:800; letter-spacing:2px; line-height:1.1; direction:ltr; padding:2px 10px; border-radius:16px; -webkit-tap-highlight-color:transparent;}
+.year-switcher .year-btn::after{content:"▾"; font-size:.5em; color:var(--accent); letter-spacing:0;}
+.year-switcher .year-btn:active{transform:scale(.94);}
+.yp-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:6px 0 14px; max-height:52vh; overflow-y:auto;}
+.yp-chip{border:0; cursor:pointer; padding:14px 6px; border-radius:16px; font-family:Arial,Helvetica,sans-serif; font-size:calc(20px * var(--fs,1)); font-weight:800; color:var(--text); background:var(--bg); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 4px 0 rgba(0,0,0,.14), 0 8px 12px rgba(0,0,0,.12); -webkit-tap-highlight-color:transparent;}
+.yp-chip:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.14);}
+.yp-chip.sel{background:var(--accent); color:#fff; box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 rgba(0,0,0,.25), 0 8px 12px rgba(0,0,0,.18);}
+.yp-chip.yp-new{grid-column:1 / -1; font-family:inherit; font-size:calc(15px * var(--fs,1)); color:var(--accent);}
 .font-prev{margin-top:10px; padding:11px 14px; border-radius:12px; background:var(--bg); border:1.5px dashed var(--border); font-size:calc(15px * var(--fs-app,1)); font-weight:700; line-height:1.7; text-align:center;}
 #optFont .opt-chip{font-size:calc(14px * var(--fs,1));}
 /* وحدة العملة / الجرام أصغر من الرقم */
@@ -3326,13 +3336,12 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 <div id="homeExtras">
   <button type="button" class="backup-fab" onclick="openBackupPage()" title="النسخ الاحتياطي">💾<span class="dot" id="backupFabDot" style="display:none;"></span></button>
   <div class="year-switcher">
-    <button type="button" class="nav-btn" onclick="shiftYear(-1)">›</button>
     <span class="icon">📅</span>
     <div class="year-switcher-main">
       <span class="fy-label">السنة المالية</span>
       <select id="yearSelect" onchange="onYearSelectChange()"></select>
+      <button type="button" class="year-btn" id="yearBtn" onclick="openYearPicker()" aria-label="اختيار السنة"></button>
     </div>
-    <button type="button" class="nav-btn" onclick="shiftYear(1)">‹</button>
   </div>
 
   <div class="home-reorder-row"><button type="button" id="homeReorderBtn" class="home-reorder-btn" onclick="toggleHomeReorder()" title="اضغط مطوّلًا على أي بطاقة وحرّكها">↕️ ترتيب البطاقات</button></div>
@@ -4207,6 +4216,14 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <button class="btn-cancel" onclick="closeEditIncomeSource()">إلغاء</button>
       <button class="btn-save" onclick="saveEditIncomeSource()">حفظ</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="yearPickOverlay" onclick="if(event.target===this) closeYearPicker()">
+  <div class="modal-box">
+    <h3>📅 اختار السنة</h3>
+    <div class="yp-grid" id="yearPickGrid"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeYearPicker()">إغلاق</button></div>
   </div>
 </div>
 
@@ -5692,6 +5709,7 @@ function setCurrentYear(y){
 }
 
 function populateYearSelect(){
+  yearBtnRefresh();
   const sel = document.getElementById('yearSelect');
   if(!sel) return;
   const years = Object.keys(data).map(Number).filter(n=> !isNaN(n)).sort((a,b)=> b-a);
@@ -5700,6 +5718,23 @@ function populateYearSelect(){
     + `<option value="__new__">＋ سنة جديدة</option>`;
 }
 
+function yearBtnRefresh(){ const b = document.getElementById('yearBtn'); if(b) b.textContent = String(currentYear); }
+function openYearPicker(){
+  const years = Object.keys(data).map(Number).filter(n=> !isNaN(n)).sort((a,b)=> b-a);
+  if(!years.includes(currentYear)) years.unshift(currentYear);
+  document.getElementById('yearPickGrid').innerHTML = years.map(y=> '<button type="button" class="yp-chip' + (y === currentYear ? ' sel' : '') + '" onclick="pickYear(' + y + ')">' + y + '</button>').join('')
+    + '<button type="button" class="yp-chip yp-new" onclick="closeYearPicker(); openNewYear()">＋ سنة جديدة</button>';
+  document.getElementById('yearPickOverlay').classList.add('open');
+}
+function closeYearPicker(){ document.getElementById('yearPickOverlay').classList.remove('open'); }
+function pickYear(y){
+  closeYearPicker();
+  if(y === currentYear) return;
+  if(!data[y]) ensureYear(y);
+  setCurrentYear(y);
+  renderMonths();
+  showToast('تم التبديل لسنة ' + toArabicDigits(y), true);
+}
 function toArabicDigits(n){
   if(DIGITS_MODE === 'en') return String(n);
   return String(n).replace(/[0-9]/g, d=> '٠١٢٣٤٥٦٧٨٩'[d]);
