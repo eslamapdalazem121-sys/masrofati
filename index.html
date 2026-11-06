@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8321">
+<meta name="app-version" content="2026-11-06.8322">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3696,6 +3696,8 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 #xfOverlay .xf-del{border:0; width:38px; height:38px; border-radius:12px; cursor:pointer; background:#ffe4e4;}
 
 .mc-dep{display:flex; align-items:center; justify-content:center; gap:9px; width:100%; margin:10px 0 0; padding:13px 10px; border:0; cursor:pointer; border-radius:16px; font-family:inherit; font-weight:900; font-size:calc(17px * var(--fs,1)); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#3ee0a4,#06a56f); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), 0 5px 0 #047a52, 0 11px 16px rgba(6,165,111,.32);}
+/* 8322: كلمة «إيداع» بلون أخضر غامق واضح (كانت بيضا وبتختفي على الخلفية الفاتحة) */
+.mc-dep > span:not(.mc-dep-ic){color:#064e3b !important; text-shadow:0 1px 0 rgba(255,255,255,.55) !important;}
 .mc-dep:active{transform:translateY(4px); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 1px 0 #047a52;}
 .mc-dep .mc-dep-ic{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:#fff; color:#06a56f; font-size:calc(19px * var(--fs,1)); line-height:1; text-shadow:none; box-shadow:0 2px 0 rgba(0,0,0,.18);}
 #depOverlay{--xfc:#ffffff; --xfb:rgba(30,41,59,.13);}
