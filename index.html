@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8304">
+<meta name="app-version" content="2026-11-06.8307">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -5974,12 +5974,20 @@ function bankPoolRaw(x, eod){   // الفوايد المتضافة اللي لس
   try{ if(x.intBack !== 'all' && x.intDepDone && typeof x.intDepDone === 'object') certIntDues(x, eod).forEach(function(d){ const r = x.intDepDone[d.k]; if(r && r.init && !(Number(r.a) > 0)) ex += d.a; }); }catch(e){}
   return Math.max(0, cgInt(bankIntSince(x, eod, x.ik ? function(y, m){ return ikAt(x, y, m); } : null) - ex - (Number(x.intSpent) || 0)));
 }
-function certDepTarget(x, list){   // الحساب الأساسي اللي فايدة البند دخلة فيه: نفسه (لو أساسي) / المربوط بيه / أو أول حساب أساسي بنفس اسم البنك
+function certDepTarget(x, list){   // الحساب الأساسي اللي فايدة البند دخلة فيه: نفسه (لو أساسي) / المربوط بيه (أو الأساسي بتاع الحساب الفرعي المربوط) / أو حساب أساسي بنفس اسم البنك / أو الحساب الأساسي الوحيد
   if(x.isAcc === true) return x;
   const ok = function(z){ return z && z.id !== x.id && z.isAcc === true && capCatOf(z) === 'money' && capSubOf(z) === 'bank'; };
-  if(x.accId){ const a = list.find(function(z){ return ok(z) && z.id === x.accId; }); if(a) return a; }
-  const bk = String(x.bank || '').trim().toLowerCase(); if(!bk) return null;
-  return list.find(function(z){ return ok(z) && String(z.bank || '').trim().toLowerCase() === bk; }) || null;
+  const mains = list.filter(ok);
+  if(x.accId){
+    const a = mains.find(function(z){ return z.id === x.accId; }); if(a) return a;
+    const sb = list.find(function(z){ return z && z.id === x.accId && z.isSub === true && z.accId; });   // الشهادة مربوطة بحساب فرعي: الفايدة تروح لأساسيه
+    if(sb){ const pa = mains.find(function(z){ return z.id === sb.accId; }); if(pa) return pa; }
+  }
+  const nm = function(v){ return String(v || '').trim().toLowerCase(); };
+  const bks = [nm(x.bank)];   // الشهادة ما بتخزّنش اسم البنك لوحده: بنطلّعه من اسمها («اسم الشهادة · اسم البنك»)
+  String(x.name || '').split('·').forEach(function(t){ bks.push(nm(t)); });
+  for(let i = 0; i < bks.length; i++){ if(!bks[i]) continue; const f = mains.find(function(z){ return nm(z.bank) === bks[i]; }); if(f) return f; }
+  return mains.length === 1 ? mains[0] : null;   // مفيش غير حساب أساسي واحد: الفايدة تروح له
 }
 function certPoolSync(){   // تنظيف: لو نسخة سابقة نقلت «فوايد متضافة» لرصيد حساب، بنرجّعها مكانها (بتتحسب من وقت التفعيل بس)
   let ch = false;
@@ -6000,14 +6008,24 @@ function certPoolSync(){   // تنظيف: لو نسخة سابقة نقلت «ف
 function certIntDepositSync(){
   let ch = false;
   try{
+    capRaw().forEach(function(z){ if(z && Array.isArray(z.chg)) z.chg.forEach(function(c){ if(c && c.dep === true && typeof c.id === 'string' && c.id.indexOf('cd:') === 0 && Number(c.e) > Number(c.t)){ c.e = Number(c.t); ch = true; } }); });   // 8310: فوايد اتضافت متأخر كانت متسجّلة بوقت فتح التطبيق فبتتشال من أساس الفايدة، بنرجّعها لميعادها
     const list = capRaw(), now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999), sod = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     list.forEach(function(x){
       if(!x || capCatOf(x) !== 'money' || capSubOf(x) !== 'bank' || (x.isCert !== true && x.isSub !== true && x.isAcc !== true)) return;
       if(!ikEver(x)){ if(certIntUndo(x, list)) ch = true; return; }
       if(x.ik){ if(certIntUndo(x, list, function(k){ const q = k.split('-'); return q.length === 2 && !ikAt(x, +q[0], +q[1]); })) ch = true; }   // شهور اتحوّلت للدخل: رجّع اللي اتحط في الحساب
+      try{   // 8310: لو ميعاد الاستحقاق اتغيّر (مثلًا من ٧ لـ ٦ أو العكس): أي فايدة اتضافت على الميعاد القديم بتتشال من الحساب وتتلغى، وبعدها بتتضاف على الميعاد الجديد (لو حل) في نفس اللحظة
+        if(x.intDepDone && typeof x.intDepDone === 'object'){
+          const okT = {}; certIntDues(x, eod).forEach(function(d){ const q = d.k.split('-'); if(x.ik && !ikAt(x, +q[0], +q[1])) return; okT[d.k] = d.t; }); var okT0 = okT;
+          const stale = Object.keys(x.intDepDone).filter(function(k){ const r = x.intDepDone[k]; return r && !r.init && Number(r.a) > 0 && k.indexOf('pool') !== 0 && okT[k] !== Number(r.t); });
+          if(stale.length && certIntUndo(x, list, function(k){ return stale.indexOf(k) >= 0; })) ch = true;
+        }
+        if(x.intDepDone && typeof x.intDepDone === 'object'){ Object.keys(x.intDepDone).forEach(function(k){ const r = x.intDepDone[k]; if(r && r.hold && Number(r.t) !== Number(okT0[k])){ delete x.intDepDone[k]; ch = true; } }); }   // فايدة ملغاة (لسه منزلتش) وميعادها اتغيّر: بتتحسب من الأول على الميعاد الجديد
+      }catch(e){ console.error('certIntDepSchedule', e); }
       const acc = certDepTarget(x, list);
       if(!acc) return;
-      let dues = certIntDues(x, eod); if(x.ik) dues = dues.filter(function(d){ const q = d.k.split('-'); return ikAt(x, +q[0], +q[1]); }); if(!dues.length) return;
+      let dues = certIntDues(x, eod); if(x.ik) dues = dues.filter(function(d){ const q = d.k.split('-'); return ikAt(x, +q[0], +q[1]); });
+      if(!dues.length){ if(!x.intDepDone || typeof x.intDepDone !== 'object'){ x.intDepDone = {}; ch = true; } return; }   // 8306: التفعيل بيتسجّل حتى لو أول استحقاق لسه ما جاش — عشان أول فايدة ما تضيعش لو التطبيق اتفتح بعد ميعادها
       if(!Array.isArray(acc.chg)) acc.chg = [];
       if(!x.intDepDone || typeof x.intDepDone !== 'object'){
         x.intDepDone = {}; ch = true;
@@ -6018,7 +6036,7 @@ function certIntDepositSync(){
           if(pool > 0){
             const ld = dues[dues.length - 1];
             acc.amount = cgInt((Number(acc.amount) || 0) + pool);
-            acc.chg.push({id: 'cd:' + x.id + ':init', t: ld.t, e: Math.max(ld.t, Date.now()), delta: pool, dep: true});
+            acc.chg.push({id: 'cd:' + x.id + ':init', t: ld.t, e: ld.t, delta: pool, dep: true});
             x.intDepDone[ld.k] = {a: pool, t: ld.t, to: acc.id, init: 1};
           }
           return;
@@ -6028,10 +6046,12 @@ function certIntDepositSync(){
       }
       dues.forEach(function(d){
         if(x.intDepDone[d.k] || !(d.a > 0)) return;
-        acc.amount = cgInt((Number(acc.amount) || 0) + d.a);
-        acc.chg.push({id: 'cd:' + x.id + ':' + d.k, t: d.t, e: Math.max(d.t, Date.now()), delta: d.a, dep: true});
-        x.intSpent = cgInt((Number(x.intSpent) || 0) + d.a);
-        x.intDepDone[d.k] = {a: d.a, t: d.t, to: acc.id}; ch = true;
+        let amt = d.a;   // 8310: فايدة الشهور اللي قبلها (اللي اتضافت في نفس الدفعة) داخلة في أساس الحساب
+        if(acc === x){ try{ const r2 = cgInt(bankMonthlyAt(x, new Date(d.t))); if(r2 > 0) amt = r2; }catch(e){} }
+        acc.amount = cgInt((Number(acc.amount) || 0) + amt);
+        acc.chg.push({id: 'cd:' + x.id + ':' + d.k, t: d.t, e: d.t, delta: amt, dep: true});   // 8310: بتبدأ تتحسب عليها فايدة من ميعاد الفايدة اللي بعد ميعادها هي (مش من لحظة فتح التطبيق)
+        x.intSpent = cgInt((Number(x.intSpent) || 0) + amt);
+        x.intDepDone[d.k] = {a: amt, t: d.t, to: acc.id}; ch = true;
       });
     });
   }catch(e){ console.error('certIntDepositSync', e); }
@@ -6049,7 +6069,7 @@ function certIntDepReconcile(opt){
       if(!x || !x.intDepDone || typeof x.intDepDone !== 'object') return;
       if(opt.id && x.id !== opt.id) return;
       certIntDues(x, eod).forEach(function(d){
-        const r = x.intDepDone[d.k]; if(!r || r.init || !(Number(r.a) > 0) || !(d.a > 0)) return;
+        const r = x.intDepDone[d.k]; if(!r || r.init || r.man || !(Number(r.a) > 0) || !(d.a > 0)) return;
         const was = cgInt(Number(r.a) || 0); if(was === d.a) return;
         const q = d.k.split('-'); if(q.length !== 2) return;
         if(opt.id){ if(typeof opt.oldAt === 'function' && cgInt(opt.oldAt(new Date(d.t))) !== was) return; }
@@ -7897,18 +7917,19 @@ function aaOpening(x){
 }
 function aaEvents(x){
   const ev = [], T12 = function(d){ return new Date(String(d) + 'T12:00:00').getTime() || 0; };
-  (data.moneyDeposits || []).forEach(function(r){ if(r && r.to === x.id) ev.push({k: 'dep', t: T12(r.date), ts: r.ts || 0, amt: Number(r.amount) || 0, title: 'إيداع', note: r.note || ''}); });
-  (data.moneyOut || []).forEach(function(r){ if(r && r.itemId === x.id && r.kind === 'bank'){ let lb = ''; try{ lb = cmoDestLbl(r); }catch(e){} ev.push({k: 'out', t: T12(r.date), ts: r.ts || 0, amt: -(Number(r.amount) || 0), title: 'صرف', note: (lb ? lb : '') + (r.note ? ' · ' + r.note : '')}); } });
+  (data.moneyDeposits || []).forEach(function(r){ if(r && r.to === x.id) ev.push({k: 'dep', t: T12(r.date), ts: r.ts || 0, amt: Number(r.amount) || 0, title: 'إيداع', note: r.note || '', ref: {type: 'dep', id: r.id}}); });
+  (data.moneyOut || []).forEach(function(r){ if(r && r.itemId === x.id && r.kind === 'bank'){ let lb = ''; try{ lb = cmoDestLbl(r); }catch(e){} ev.push({k: 'out', t: T12(r.date), ts: r.ts || 0, amt: -(Number(r.amount) || 0), title: 'صرف', note: (lb ? lb : '') + (r.note ? ' · ' + r.note : ''), ref: {type: 'out', id: r.id}}); } });
   (data.moneyXfer || []).forEach(function(r){
     if(!r) return;
-    if(r.from === x.id) ev.push({k: 'xout', t: T12(r.date), ts: r.ts || 0, amt: -(Number(r.amount) || 0), title: 'تحويل إلى «' + (r.tn || '') + '»', note: r.note || ''});
-    if(r.to === x.id) ev.push({k: 'xin', t: T12(r.date), ts: r.ts || 0, amt: Number(r.amount) || 0, title: 'تحويل من «' + (r.fn || '') + '»', note: r.note || ''});
+    if(r.from === x.id) ev.push({k: 'xout', t: T12(r.date), ts: r.ts || 0, amt: -(Number(r.amount) || 0), title: 'تحويل إلى «' + (r.tn || '') + '»', note: r.note || '', ref: {type: 'xf', id: r.id}});
+    if(r.to === x.id) ev.push({k: 'xin', t: T12(r.date), ts: r.ts || 0, amt: Number(r.amount) || 0, title: 'تحويل من «' + (r.fn || '') + '»', note: r.note || '', ref: {type: 'xf', id: r.id}});
   });
   (Array.isArray(x.chg) ? x.chg : []).forEach(function(c){
     if(!c || c.dep !== true || typeof c.id !== 'string') return;
-    if(c.id.indexOf('cd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'فايدة اتضافت للرصيد', note: ''});
-    else if(c.id.indexOf('pd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'معاش اتضاف للرصيد', note: ''});
+    if(c.id.indexOf('cd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'فايدة اتضافت للرصيد', note: '', ref: {type: 'int', id: c.id}});
+    else if(c.id.indexOf('pd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'معاش اتضاف للرصيد', note: '', ref: {type: 'pd', id: c.id}});
   });
+  try{ const all = capRaw(); all.forEach(function(sx){ if(!sx || !sx.intDepDone || typeof sx.intDepDone !== 'object') return; const hk = Object.keys(sx.intDepDone).filter(function(k){ const r = sx.intDepDone[k]; return r && r.hold; }); if(!hk.length) return; const tg = certDepTarget(sx, all); if(!tg || tg.id !== x.id) return; hk.forEach(function(k){ const r = sx.intDepDone[k]; let a = 0; try{ a = cgInt(bankMonthlyAt(sx, new Date(r.t))); }catch(e){} ev.push({k: 'hold', t: Number(r.t) || 0, ts: 0, amt: null, title: 'فايدة ملغاة — لسه منزلتش', note: a > 0 ? 'قيمتها ' + fmt(a) + ' · متجمّعة في الفوايد' : 'متجمّعة في الفوايد', ref: {type: 'hold', id: sx.id + '|' + k}}); }); }); }catch(e){}
   (Array.isArray(x.act) ? x.act : []).forEach(function(a){ ev.push({k: 'edit', t: Number(a.t) || 0, ts: Number(a.t) || 0, amt: null, title: 'تعديل', note: a.m || '', lines: a.c || []}); });
   const op = aaOpening(x); ev.push({k: 'open', t: Number(x.date) || 0, ts: -1, amt: op > 0 ? op : null, title: x.isSub ? 'فتح الحساب الفرعي' : 'فتح الحساب', note: ''});
   const dayOf = function(t){ const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
@@ -7944,9 +7965,9 @@ function aaRender(){
     b.onclick = function(){ _aaState.f = c[0]; aaRender(); }; chips.appendChild(b);
   });
   const list = document.getElementById('aaList'); list.innerHTML = '';
-  const ok = function(e){ const f = _aaState.f; return f === 'all' || (f === 'xf' ? (e.k === 'xin' || e.k === 'xout') : e.k === f); };
+  const ok = function(e){ const f = _aaState.f; return f === 'all' || (f === 'xf' ? (e.k === 'xin' || e.k === 'xout') : (e.k === f || (f === 'int' && e.k === 'hold'))); };
   const rows = ev.filter(ok); if(!rows.length){ list.appendChild(aaEl('div', 'aa-empty', 'مفيش حركات هنا لسه')); return; }
-  const ICON = {dep: '⬇️', out: '⬆️', xin: '📥', xout: '📤', int: '🏦', edit: '✏️', open: '🌱'};
+  const ICON = {dep: '⬇️', out: '⬆️', xin: '📥', xout: '📤', int: '🏦', hold: '⏳', edit: '✏️', open: '🌱'};
   let cur = '';
   rows.forEach(function(e){
     const d = new Date(e.t), mk = d.getFullYear() + '-' + d.getMonth();
@@ -7961,8 +7982,169 @@ function aaRender(){
     }
     r.appendChild(ic); r.appendChild(tx);
     if(e.amt !== null && e.amt !== undefined) r.appendChild(aaEl('div', 'aa-am ' + (e.amt >= 0 ? 'pos' : 'neg'), (e.amt >= 0 ? '+' : '−') + fmt(Math.abs(e.amt))));
+    if(e.ref){   // 8311: مسح / تعديل أي حركة من نشاط الحساب والحساب يرجع لأصله
+      const bx = aaEl('div', 'aa-acts'); bx.style.cssText = 'display:flex; flex-direction:column; gap:6px; flex:none;';
+      const mk = function(ic, lb, fn){ const b = aaEl('button', 'aa-act', ic); b.type = 'button'; b.setAttribute('aria-label', lb); b.style.cssText = 'width:36px; height:36px; border:0; border-radius:12px; font-size:16px; cursor:pointer; background:rgba(120,130,150,.16);'; b.onclick = function(ev2){ ev2.stopPropagation(); fn(); }; bx.appendChild(b); };
+      if(e.ref.type === 'hold'){ mk('↩️', 'نزّلها تاني', function(){ aaHoldRedrop(e.ref.id); }); mk('🗑', 'مسح نهائي', function(){ aaHoldForget(e.ref.id); }); }
+      else { if(e.ref.type !== 'out' && e.ref.type !== 'pd') mk('✏️', 'تعديل', function(){ aaEditOpen(x.id, e); }); mk('🗑', 'مسح', function(){ aaDelAsk(x.id, e); }); }
+      r.appendChild(bx);
+    }
     list.appendChild(r);
   });
+}
+// ===== 8311: مسح / تعديل إيداع أو تحويل أو فايدة اتضافت من «نشاط الحساب» — الحساب بيرجع لأصله ومفيش حاجة بتتكرر =====
+function aaAfterChange(){
+  try{ autoIncSync(); }catch(e){}
+  try{ save(); }catch(e){}
+  try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ renderZakat(); }catch(e){}
+  try{ if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
+  try{ aaRender(); }catch(e){}
+}
+function aaChgOf(acc, id){ return (Array.isArray(acc.chg) ? acc.chg : []).find(function(c){ return c && c.id === id; }); }
+function aaIntParse(chgId){ const p = String(chgId).split(':'); return {src: p[1], k: p.slice(2).join(':')}; }
+function aaIntDel(accId, chgId, mode){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return false; }
+  const list = capRaw(), acc = list.find(function(z){ return z && z.id === accId; }); if(!acc) return false;
+  const c = aaChgOf(acc, chgId); if(!c){ showToast('الحركة دي مش موجودة', false); return false; }
+  const a = Number(c.delta) || 0;
+  if((Number(acc.amount) || 0) + 0.001 < a){ showToast('رصيد الحساب أقل من الفايدة دي — اتصرف منه بعد كده، فمينفعش تتلغي', false); return false; }
+  const q = aaIntParse(chgId), src = list.find(function(z){ return z && z.id === q.src; });
+  acc.amount = cgInt((Number(acc.amount) || 0) - a);
+  acc.chg = acc.chg.filter(function(z){ return z !== c; });
+  if(chgId.indexOf('pd:') === 0){
+    if(src){ if(!src.depDone || typeof src.depDone !== 'object') src.depDone = {}; src.depDone[q.k] = {a: 0, t: c.t, to: acc.id, skip: 1}; }
+  } else if(src){
+    if(!src.intDepDone || typeof src.intDepDone !== 'object') src.intDepDone = {};
+    let sp = a; { const r0 = q.k === 'init' ? Object.keys(src.intDepDone).map(function(kk){ return src.intDepDone[kk]; }).find(function(r){ return r && r.init && Number(r.a) > 0 && r.to === acc.id; }) : src.intDepDone[q.k]; if(r0 && Number(r0.sp) > 0) sp = Number(r0.sp); }   // المبلغ اللي اتحسب فعلًا في «المتضاف» (قبل أي تعديل يدوي)
+    src.intSpent = Math.max(0, cgInt((Number(src.intSpent) || 0) - sp));
+    if(q.k === 'init'){ Object.keys(src.intDepDone).forEach(function(kk){ const r = src.intDepDone[kk]; if(r && r.init && Number(r.a) > 0 && r.to === acc.id){ r.a = 0; delete r.to; } }); }
+    else if(mode === 'hold') src.intDepDone[q.k] = {a: 0, t: c.t, hold: 1};   // «إلغاء العملية»: الفايدة لسه منزلتش (بتفضل متجمّعة وتقدر تنزّلها تاني من النشاط)
+    else src.intDepDone[q.k] = {a: 0, t: c.t, init: 1};   // «مسح الفايدة»: ما بتتضافش تاني ولا بتتحسب في الفوايد المتجمّعة
+  }
+  return true;
+}
+function aaIntEdit(accId, chgId, na){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return false; }
+  const list = capRaw(), acc = list.find(function(z){ return z && z.id === accId; }); if(!acc) return false;
+  const c = aaChgOf(acc, chgId); if(!c) return false;
+  const old = Number(c.delta) || 0, diff = cgInt(na - old);
+  if((Number(acc.amount) || 0) + diff < -0.001){ showToast('رصيد الحساب مش كفاية للتعديل ده', false); return false; }
+  const q = aaIntParse(chgId), src = list.find(function(z){ return z && z.id === q.src; });
+  acc.amount = cgInt((Number(acc.amount) || 0) + diff); c.delta = na;
+  if(src){
+    const dn = src.intDepDone;   // «المتضاف» (intSpent) بيفضل زي ما هو عشان الفرق ما يبانش كفوايد متجمّعة وهمية
+    if(dn && typeof dn === 'object'){ if(q.k === 'init'){ Object.keys(dn).forEach(function(kk){ const r = dn[kk]; if(r && r.init && Number(r.a) > 0 && r.to === acc.id){ r.sp = r.sp || r.a; r.a = na; } }); } else if(dn[q.k]){ dn[q.k].sp = dn[q.k].sp || dn[q.k].a; dn[q.k].a = na; dn[q.k].man = 1; } }
+  }
+  return true;
+}
+function aaChoose(title, msg, opts){
+  let ov = document.getElementById('aaChooseOv');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'aaChooseOv'; ov.className = 'modal-overlay'; ov.style.zIndex = '99999'; document.body.appendChild(ov); }
+  ov.innerHTML = '';
+  const box = aaEl('div', 'modal-box'); box.style.cssText = 'padding:18px; max-width:420px;';
+  box.appendChild(aaEl('h3', '', title)); const m = aaEl('div', '', msg); m.style.cssText = 'margin:8px 0 14px; line-height:1.8; font-weight:700;'; box.appendChild(m);
+  opts.forEach(function(o){
+    const b = aaEl('button', '', o.label); b.type = 'button';
+    b.style.cssText = 'display:block; width:100%; margin:0 0 10px; padding:13px; border:0; border-radius:14px; font:inherit; font-weight:900; cursor:pointer; text-align:center; line-height:1.5; background:' + (o.bg || 'rgba(120,130,150,.2)') + '; color:' + (o.fg || 'inherit') + ';';
+    if(o.sub){ const sm = aaEl('small', '', o.sub); sm.style.cssText = 'display:block; font-weight:700; opacity:.85;'; b.appendChild(sm); }
+    b.onclick = function(){ ov.classList.remove('open'); if(o.fn) o.fn(); };
+    box.appendChild(b);
+  });
+  ov.appendChild(box); ov.classList.add('open');
+}
+function aaHoldParse(id){ const p = String(id).split('|'); return {src: p[0], k: p.slice(1).join('|')}; }
+function aaHoldRedrop(id){   // نزّل الفايدة الملغاة تاني: بتتحسب وتتضاف على موعدها (لو حل)
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return; }
+  const q = aaHoldParse(id), src = capRaw().find(function(z){ return z && z.id === q.src; });
+  if(!src || !src.intDepDone || !src.intDepDone[q.k]) return;
+  delete src.intDepDone[q.k]; aaAfterChange(); showToast('الفايدة نزلت في الحساب تاني ✅', true);
+}
+function aaHoldForget(id){   // مسح نهائي للفايدة الملغاة
+  const q = aaHoldParse(id), src = capRaw().find(function(z){ return z && z.id === q.src; });
+  if(!src || !src.intDepDone || !src.intDepDone[q.k]) return;
+  openConfirm('مسح الفايدة نهائيًا', 'الفايدة دي هتتشال من الفوايد المتجمّعة وما بتنزلش تاني.', function(){ src.intDepDone[q.k] = {a: 0, t: src.intDepDone[q.k].t, init: 1}; aaAfterChange(); showToast('اتمسحت الفايدة ✅', true); });
+}
+function aaDelAsk(accId, e){
+  const ref = e.ref, am = fmt(Math.abs(e.amt));
+  const done = function(ok){ if(ok) aaAfterChange(); else try{ aaRender(); }catch(e2){} };
+  if(ref.type === 'dep'){
+    aaChoose('🗑 مسح الإيداع (' + am + ')', 'تحب تعمل إيه؟', [
+      {label: '↩️ إلغاء العملية', sub: 'المبلغ يتشال من الحساب والحساب يرجع زي ما كان', bg: '#e8590c', fg: '#fff', fn: function(){ const n0 = (data.moneyDeposits || []).length; depDel(ref.id); done((data.moneyDeposits || []).length < n0); }},
+      {label: '🧹 مسح من السجل فقط', sub: 'الإيداع يفضل في الرصيد زي ما هو', fn: function(){ const i = (data.moneyDeposits || []).findIndex(function(r){ return r.id === ref.id; }); if(i >= 0){ data.moneyDeposits.splice(i, 1); done(true); showToast('اتمسح من السجل والرصيد زي ما هو ✅', true); } }},
+      {label: 'إلغاء'}]);
+  } else if(ref.type === 'xf'){
+    aaChoose('🗑 مسح التحويل (' + am + ')', 'تحب تعمل إيه؟', [
+      {label: '↩️ إلغاء العملية', sub: 'المبلغ يرجع لمكانه الأصلي في الحسابين', bg: '#e8590c', fg: '#fff', fn: function(){ const n0 = (data.moneyXfer || []).length; xfDel(ref.id); done((data.moneyXfer || []).length < n0); }},
+      {label: '🧹 مسح من السجل فقط', sub: 'التحويل يفضل زي ما هو والأرصدة ما تتغيّرش', fn: function(){ const i = (data.moneyXfer || []).findIndex(function(r){ return r.id === ref.id; }); if(i >= 0){ data.moneyXfer.splice(i, 1); done(true); showToast('اتمسح من السجل والأرصدة زي ما هي ✅', true); } }},
+      {label: 'إلغاء'}]);
+  } else if(ref.type === 'out'){
+    openConfirm('مسح الصرف', 'هتتلغي الصرف (' + am + ') والمبلغ يرجع للحساب.', function(){ const n0 = (data.moneyOut || []).length; cmOutDel(ref.id); done((data.moneyOut || []).length < n0); });
+  } else if(ref.type === 'int' && aaIntParse(ref.id).k !== 'init'){
+    aaChoose('🗑 مسح فايدة (' + am + ')', 'تحب تعمل إيه؟', [
+      {label: '↩️ إلغاء العملية', sub: 'الفايدة تتشال من الحساب وتبقى «لسه منزلتش» — تقدر تنزّلها تاني من النشاط (↩️)', bg: '#e8590c', fg: '#fff', fn: function(){ const ok = aaIntDel(accId, ref.id, 'hold'); if(ok) showToast('اتلغت العملية — الفايدة لسه منزلتش ✅', true); done(ok); }},
+      {label: '🧹 مسح الفايدة فقط', sub: 'الفايدة تتشال من الحساب وما بتتحسبش في أي مكان (الشهور الجاية بتنزل عادي)', fn: function(){ const ok = aaIntDel(accId, ref.id, 'skip'); if(ok) showToast('اتمسحت الفايدة ✅', true); done(ok); }},
+      {label: 'إلغاء'}]);
+  } else {
+    openConfirm('مسح الحركة', 'هتتشال الحركة (' + am + ') من رصيد الحساب وتتلغي من السجل.', function(){ const ok = aaIntDel(accId, ref.id, 'skip'); if(ok) showToast('اتلغت الحركة ورجع الرصيد ✅', true); done(ok); });
+  }
+}
+function aaEditOpen(accId, e){
+  const ref = e.ref; let amt = Math.abs(e.amt), date = '', note = '';
+  if(ref.type === 'dep'){ const r = (data.moneyDeposits || []).find(function(z){ return z.id === ref.id; }); if(!r) return; date = r.date; note = r.note || ''; }
+  else if(ref.type === 'xf'){ const r = (data.moneyXfer || []).find(function(z){ return z.id === ref.id; }); if(!r) return; amt = Number(r.amount) || 0; date = r.date; note = r.note || ''; }
+  let ov = document.getElementById('aaEditOv');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'aaEditOv'; ov.className = 'modal-overlay'; ov.style.zIndex = '99999'; document.body.appendChild(ov); }
+  ov.innerHTML = '';
+  const box = aaEl('div', 'modal-box'); box.style.cssText = 'padding:18px; max-width:420px;';
+  const mkIn = function(lbl, type, val, id){ const w = aaEl('label'); w.style.cssText = 'display:block; margin:10px 0; font-weight:800;'; w.appendChild(aaEl('span', '', lbl)); const i = document.createElement('input'); i.type = type; i.id = id; i.value = val; i.style.cssText = 'display:block; width:100%; box-sizing:border-box; margin-top:6px; padding:12px; border-radius:14px; border:1px solid var(--border); background:var(--card); color:inherit; font:inherit;'; if(type === 'number'){ i.inputMode = 'decimal'; i.min = '0'; } w.appendChild(i); box.appendChild(w); return i; };
+  const ttl = ref.type === 'dep' ? 'تعديل الإيداع' : (ref.type === 'xf' ? 'تعديل التحويل' : 'تعديل الفايدة');
+  box.appendChild(aaEl('h3', '', '✏️ ' + ttl));
+  mkIn('المبلغ', 'number', String(amt), 'aaEdAmt');
+  if(ref.type !== 'int'){ mkIn('التاريخ', 'date', date, 'aaEdDate'); mkIn('ملاحظة', 'text', note, 'aaEdNote'); }
+  const row = aaEl('div'); row.style.cssText = 'display:flex; gap:10px; margin-top:14px;';
+  const sv = aaEl('button', '', 'حفظ'), cn = aaEl('button', '', 'إلغاء');
+  [sv, cn].forEach(function(b){ b.type = 'button'; b.style.cssText = 'flex:1; padding:13px; border:0; border-radius:14px; font:inherit; font-weight:900; cursor:pointer;'; });
+  sv.style.background = '#1ea672'; sv.style.color = '#fff'; cn.style.background = 'rgba(120,130,150,.2)'; cn.style.color = 'inherit';
+  cn.onclick = function(){ ov.classList.remove('open'); };
+  sv.onclick = function(){
+    const na = cgInt(Number(document.getElementById('aaEdAmt').value) || 0);
+    if(!(na > 0)){ showToast('اكتب مبلغ صحيح', false); return; }
+    let ok = false;
+    if(ref.type === 'int') ok = aaIntEdit(accId, ref.id, na);
+    else {
+      const nd = document.getElementById('aaEdDate').value || date, nn = document.getElementById('aaEdNote').value.trim();
+      if(nd > dateToInputValue(Date.now())){ showToast('التاريخ مينفعش يكون في المستقبل', false); return; }
+      ok = ref.type === 'dep' ? aaDepEdit(ref.id, na, nd, nn) : aaXfEdit(ref.id, na, nd, nn);
+    }
+    if(ok){ ov.classList.remove('open'); aaAfterChange(); showToast('اتعدّل ✅ والرصيد اتظبط', true); }
+  };
+  row.appendChild(sv); row.appendChild(cn); box.appendChild(row); ov.appendChild(box); ov.classList.add('open');
+}
+function aaDepEdit(id, na, nd, nn){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return false; }
+  const r = (data.moneyDeposits || []).find(function(z){ return z.id === id; }); if(!r) return false;
+  const x = capRaw().find(function(z){ return z && z.id === r.to; });
+  const diff = na - (Number(r.amount) || 0), t = new Date(nd + 'T12:00:00').getTime();
+  if(x){
+    if((Number(x.amount) || 0) + diff < -0.001){ showToast('رصيد «' + x.name + '» مش كفاية للتعديل ده — اتصرف منه بعد الإيداع', false); return false; }
+    x.amount = cgInt((Number(x.amount) || 0) + diff);
+    const c = aaChgOf(x, id + 'd'); if(c){ c.delta = na; c.t = t; }
+  }
+  r.amount = na; r.date = nd; r.note = nn; r.ts = r.ts || Date.now();
+  return true;
+}
+function aaXfEdit(id, na, nd, nn){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return false; }
+  const r = (data.moneyXfer || []).find(function(z){ return z.id === id; }); if(!r) return false;
+  const list = capRaw(), a = list.find(function(z){ return z && z.id === r.from; }), b = list.find(function(z){ return z && z.id === r.to; });
+  const diff = na - (Number(r.amount) || 0), t = new Date(nd + 'T12:00:00').getTime();
+  if(a && diff > 0 && (Number(a.amount) || 0) + 0.001 < diff){ showToast('رصيد «' + a.name + '» مش كفاية للزيادة دي', false); return false; }
+  if(b && diff < 0 && (Number(b.amount) || 0) + 0.001 < -diff){ showToast('رصيد «' + b.name + '» أقل من الفرق — اتصرف منه بعد التحويل', false); return false; }
+  const isB = function(z){ return capSubOf(z) === 'bank'; };
+  if(a){ a.amount = (isB(a) ? cgInt : cgRound)((Number(a.amount) || 0) - diff); const c = aaChgOf(a, id + 'o'); if(c){ c.delta = -na; c.t = t; } }
+  if(b){ b.amount = (isB(b) ? cgInt : cgRound)((Number(b.amount) || 0) + diff); const c = aaChgOf(b, id + 'i'); if(c){ c.delta = na; c.t = t; } }
+  r.amount = na; r.date = nd; r.note = nn;
+  return true;
 }
 function mcCard(x, o){
   o = o || {};
@@ -7993,14 +8175,14 @@ function mcCard(x, o){
       mcCell(grid, 'ann', '📆 سنويًا', fmt(bankAnnualAny(x)), per === 3 ? 'إجمالي' : 'بتتصرف مرة في السنة');
       const r = bankIntMonth(x, y, m, now);
       if(r.exp > 0) mcPill(d, r.got > 0 ? 'ok' : 'wait', (r.got > 0 ? (ikAt(x, y, m) ? '✅ أُضيفت لرصيد الحساب' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعدها') + ' — فائدة ' + MONTHS[m] + ': ' + fmt(r.exp) + (r.got > 0 ? '' : ' · يوم ' + toArabicDigits(r.due.getDate())));
-      else { const f0 = bankFirstDue(x); if(f0 > now) mcPill(d, 'wait', '⏳ أول فائدة: ' + f0.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long', year: 'numeric'})); }
+      else { const f0 = bankFirstDue(x); if(f0 > now) mcPill(d, 'wait', '⏳ أول فائدة: ' + f0.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long', year: 'numeric'})); } try{ mcRatePill(d, x, y, m); }catch(e){}
     } else if(mon > 0){
       grid.style.setProperty('--n', x.rate ? 3 : 2);
       if(x.rate) mcCell(grid, 'rate', '📊 الفائدة', toArabicDigits(Number(x.rate)) + '٪', 'سنويًا');
-      mcCell(grid, 'mon', '🗓 شهريًا', fmt(mon), 'كل يوم ' + toArabicDigits(bankDay(x)));
+      { let gp = null; try{ gp = capRateGap(x, y, m); }catch(e){} mcCell(grid, 'mon', '🗓 شهريًا', fmt(mon), gp ? ('من ' + MONTHS[(m + 1) % 12] + ' · ' + MONTHS[m] + ' ' + fmt(gp.oldAmt)) : 'كل يوم ' + toArabicDigits(bankDay(x))); }
       mcCell(grid, 'ann', '📆 سنويًا', fmt(bankAnnualAny(x)), 'متوقعة');
       const r = bankIntMonth(x, y, m, now);
-      if(r.exp > 0) mcPill(d, r.got > 0 ? 'ok' : 'wait', (r.got > 0 ? (ikAt(x, y, m) ? '✅ أُضيفت لرصيد البنك' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعدها') + ' — فوائد ' + MONTHS[m] + ': ' + fmt(r.exp) + (r.got > 0 ? '' : ' · يوم ' + toArabicDigits(r.due.getDate())));
+      if(r.exp > 0) mcPill(d, r.got > 0 ? 'ok' : 'wait', (r.got > 0 ? (ikAt(x, y, m) ? '✅ أُضيفت لرصيد البنك' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعدها') + ' — فوائد ' + MONTHS[m] + ': ' + fmt(r.exp) + (r.got > 0 ? '' : ' · يوم ' + toArabicDigits(r.due.getDate()))); try{ mcRatePill(d, x, y, m); }catch(e){}
     }
   } else if(sub === 'pension'){
     vl.textContent = 'المعاش الشهري';
@@ -14278,8 +14460,8 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
   // ===== اختيارات «تتحسب من إمتى؟» تحت النسبة وتحت الرصيد =====
   var EDM = {};   // prefix → {id, rate0, amt0}
   var IDS = {acc: ['accRate', 'accAmt'], cert: ['certRate', 'certAmt'], cm: ['cmRate', 'cmAmt']}, KEEPID = {acc: 'accIntOut', cert: 'certIntOut', cm: 'cmIntOut'};
-  function defMode(x){   // الافتراضي = نفس السلوك القديم: لو ميعاد الفايدة الشهر ده لسه ما عدّاش بيسري من الشهر الحالي، وإلا من الشهر الجاي
-    try{ var n = new Date(), T = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime(); return bankDueOf(x, n.getFullYear(), n.getMonth()).getTime() >= T ? 'cur' : 'next'; }catch(e){ return 'next'; }
+  function defMode(x){   // 8309: الافتراضي «من الشهر الحالي والشهور القادمة» دايمًا (كان بيبقى «من الشهور القادمة» لو ميعاد الفايدة الشهر ده عدّى، فالنسبة الجديدة ما كانتش بتبان إلا الشهر الجاي)
+    return 'cur';
   }
   function boxHtml(p, kind, def){
     var rate = kind === 'R', nm = p + kind;
@@ -14371,6 +14553,7 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
         try{ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
         try{ showToast(capIsPast() ? 'التعديل أثّر على سنة ' + toArabicDigits(currentYear) + ' بس' : (typeof done === 'string' ? done : 'التعديل ساري من النهارده، والشهور اللي فاتت زي ما هي') + (ikm ? ' · ' + ikm : '') + depMsg, true); }catch(e){}
       } else if(ikm){ try{ showToast('اتطبّق ✅ ' + ikm, true); }catch(e){} }
+      if(!done && id && !capIsPast()){ try{ if(autoIncSync()){ save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); } }catch(e){} }   // 8310: أي تعديل (حتى ميعاد الاستحقاق) يتطبّق في لحظته
       return res;
     };
   }
@@ -14399,6 +14582,46 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     wrap('addCapMoney', function(){ return _cmEditId; }, function(){ return _cmSub === 'bank' ? readModes('cm') : null; });
   }, 0); });
 })();
+</script>
+<script>
+/* 8305: بطاقة الشهادة / الحساب: لو فايدة الشهر الحالي لسه محسوبة بالنسبة القديمة (النسبة الجديدة اتسجّلت تسري من الشهر الجاي) بنوضّح ده وبنديك زرار يطبّق النسبة الجديدة على الشهر الحالي كمان — ويصلّح الفايدة اللي اتضافت لرصيد الحساب بالنسبة القديمة. */
+function capRateGap(x, y, m){
+  try{
+    if(!x || capIsPast() || (typeof mvPast === 'function' && mvPast())) return null;
+    const n = new Date(); if(y !== n.getFullYear() || m !== n.getMonth()) return null;
+    const rx = capRaw().find(function(z){ return z && z.id === x.id; }); if(!rx || !Array.isArray(rx.rv) || !rx.rv.length) return null;
+    if(!bankActive(rx, y, m)) return null;
+    const due = bankDueOf(rx, y, m), v = capVerAt(rx, due); if(!v || !v.it || Number(v.p) === 2) return null;
+    const ro = Number(v.it.rate) || 0, rn = Number(rx.rate) || 0;
+    if(!(rn > 0) || !(ro > 0) || Math.abs(ro - rn) < 1e-9) return null;
+    let oa = 0, na = 0; try{ oa = bankMonthlyAt(rx, due); const cl = Object.assign({}, rx); delete cl.rv; na = bankMonthlyAtCore(cl, due); }catch(e){}
+    return {id: rx.id, oldR: ro, newR: rn, due: due, oldAmt: oa, newAmt: na};
+  }catch(e){ return null; }
+}
+function mcRatePill(d, x, y, m){
+  const g = capRateGap(x, y, m); if(!g) return;
+  const p = mcPill(d, 'wait', 'ℹ️ فايدة ' + MONTHS[m] + ' ' + fmt(g.oldAmt) + ' (بالنسبة القديمة ' + toArabicDigits(g.oldR) + '٪) — وبعدها ' + fmt(g.newAmt) + ' كل شهر (بالنسبة الجديدة ' + toArabicDigits(g.newR) + '٪) من الشهر الجاي.');
+  const b = document.createElement('button'); b.type = 'button'; b.type = 'button'; b.textContent = '✅ طبّق ' + toArabicDigits(g.newR) + '٪ على ' + MONTHS[m] + ' كمان (' + fmt(g.newAmt) + ')';
+  b.style.cssText = 'display:block; width:100%; margin-top:9px; padding:10px 12px; border:0; border-radius:12px; background:#7a5600; color:#fff; font:inherit; font-weight:800; cursor:pointer;';
+  let _bt = 0; const fire = function(ev){ try{ ev.stopPropagation(); ev.preventDefault(); }catch(e){} const t = Date.now(); if(t - _bt < 700) return; _bt = t; capApplyRateNow(g.id); };
+  b.addEventListener('click', fire); b.addEventListener('touchend', fire);
+  p.appendChild(b);
+}
+function capApplyRateNow(id, skipAsk){
+  const x = capRaw().find(function(z){ return z && z.id === id; }); if(!x || capIsPast()) return;
+  if(!skipAsk){
+    const g = capRateGap(x, new Date().getFullYear(), new Date().getMonth());
+    openConfirm('تطبيق النسبة الجديدة على الشهر الحالي', 'فايدة ' + MONTHS[new Date().getMonth()] + ' هتتحسب بنسبة ' + toArabicDigits(g ? g.newR : x.rate) + '٪' + (g ? ' = ' + fmt(g.newAmt) : '') + ' بدل ' + toArabicDigits(g ? g.oldR : '') + '٪' + (g ? ' = ' + fmt(g.oldAmt) : '') + '. الشهور اللي فاتت قبلها تفضل زي ما هي، ولو الفايدة اتضافت لرصيد الحساب هتتصحّح.',
+      function(){ capApplyRateNow(id, true); }, 'طبّق', 'إلغاء', function(){});
+    return;
+  }
+  const before = capItemClone(x), oldRv = Array.isArray(x.rv) ? JSON.parse(JSON.stringify(x.rv)) : [], oldItem = Object.assign({}, before, oldRv.length ? {rv: oldRv} : {});
+  const now = new Date(), MS = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  capRebuildRv(x, before, [{keys: ['rate', 'monthlyInt', 'remInt'], b: MS}]);
+  try{ certIntDepReconcile({id: id, oldAt: function(dt){ return bankMonthlyAt(oldItem, dt); }}); }catch(e){ console.error('rateNowReconcile', e); }
+  try{ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
+  try{ showToast('✅ فايدة ' + MONTHS[now.getMonth()] + ' اتحسبت بالنسبة الجديدة ' + toArabicDigits(Number(x.rate)) + '٪', true); }catch(e){}
+}
 </script>
 <script>
 /* ===== إشعارات والتطبيق مقفول (FCM) =====
