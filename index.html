@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8307">
+<meta name="app-version" content="2026-11-06.8304">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -6007,8 +6007,7 @@ function certIntDepositSync(){
       if(x.ik){ if(certIntUndo(x, list, function(k){ const q = k.split('-'); return q.length === 2 && !ikAt(x, +q[0], +q[1]); })) ch = true; }   // شهور اتحوّلت للدخل: رجّع اللي اتحط في الحساب
       const acc = certDepTarget(x, list);
       if(!acc) return;
-      let dues = certIntDues(x, eod); if(x.ik) dues = dues.filter(function(d){ const q = d.k.split('-'); return ikAt(x, +q[0], +q[1]); });
-      if(!dues.length){ if(!x.intDepDone || typeof x.intDepDone !== 'object'){ x.intDepDone = {}; ch = true; } return; }   // 8306: التفعيل بيتسجّل حتى لو أول استحقاق لسه ما جاش — عشان أول فايدة ما تضيعش لو التطبيق اتفتح بعد ميعادها
+      let dues = certIntDues(x, eod); if(x.ik) dues = dues.filter(function(d){ const q = d.k.split('-'); return ikAt(x, +q[0], +q[1]); }); if(!dues.length) return;
       if(!Array.isArray(acc.chg)) acc.chg = [];
       if(!x.intDepDone || typeof x.intDepDone !== 'object'){
         x.intDepDone = {}; ch = true;
@@ -7994,14 +7993,14 @@ function mcCard(x, o){
       mcCell(grid, 'ann', '📆 سنويًا', fmt(bankAnnualAny(x)), per === 3 ? 'إجمالي' : 'بتتصرف مرة في السنة');
       const r = bankIntMonth(x, y, m, now);
       if(r.exp > 0) mcPill(d, r.got > 0 ? 'ok' : 'wait', (r.got > 0 ? (ikAt(x, y, m) ? '✅ أُضيفت لرصيد الحساب' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعدها') + ' — فائدة ' + MONTHS[m] + ': ' + fmt(r.exp) + (r.got > 0 ? '' : ' · يوم ' + toArabicDigits(r.due.getDate())));
-      else { const f0 = bankFirstDue(x); if(f0 > now) mcPill(d, 'wait', '⏳ أول فائدة: ' + f0.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long', year: 'numeric'})); } try{ mcRatePill(d, x, y, m); }catch(e){}
+      else { const f0 = bankFirstDue(x); if(f0 > now) mcPill(d, 'wait', '⏳ أول فائدة: ' + f0.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long', year: 'numeric'})); }
     } else if(mon > 0){
       grid.style.setProperty('--n', x.rate ? 3 : 2);
       if(x.rate) mcCell(grid, 'rate', '📊 الفائدة', toArabicDigits(Number(x.rate)) + '٪', 'سنويًا');
-      { let gp = null; try{ gp = capRateGap(x, y, m); }catch(e){} mcCell(grid, 'mon', '🗓 شهريًا', fmt(mon), gp ? ('من ' + MONTHS[(m + 1) % 12] + ' · ' + MONTHS[m] + ' ' + fmt(gp.oldAmt)) : 'كل يوم ' + toArabicDigits(bankDay(x))); }
+      mcCell(grid, 'mon', '🗓 شهريًا', fmt(mon), 'كل يوم ' + toArabicDigits(bankDay(x)));
       mcCell(grid, 'ann', '📆 سنويًا', fmt(bankAnnualAny(x)), 'متوقعة');
       const r = bankIntMonth(x, y, m, now);
-      if(r.exp > 0) mcPill(d, r.got > 0 ? 'ok' : 'wait', (r.got > 0 ? (ikAt(x, y, m) ? '✅ أُضيفت لرصيد البنك' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعدها') + ' — فوائد ' + MONTHS[m] + ': ' + fmt(r.exp) + (r.got > 0 ? '' : ' · يوم ' + toArabicDigits(r.due.getDate()))); try{ mcRatePill(d, x, y, m); }catch(e){}
+      if(r.exp > 0) mcPill(d, r.got > 0 ? 'ok' : 'wait', (r.got > 0 ? (ikAt(x, y, m) ? '✅ أُضيفت لرصيد البنك' : '✅ تم التحويل والصرف') : '⏳ لسه ما جاش موعدها') + ' — فوائد ' + MONTHS[m] + ': ' + fmt(r.exp) + (r.got > 0 ? '' : ' · يوم ' + toArabicDigits(r.due.getDate())));
     }
   } else if(sub === 'pension'){
     vl.textContent = 'المعاش الشهري';
@@ -14400,46 +14399,6 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     wrap('addCapMoney', function(){ return _cmEditId; }, function(){ return _cmSub === 'bank' ? readModes('cm') : null; });
   }, 0); });
 })();
-</script>
-<script>
-/* 8305: بطاقة الشهادة / الحساب: لو فايدة الشهر الحالي لسه محسوبة بالنسبة القديمة (النسبة الجديدة اتسجّلت تسري من الشهر الجاي) بنوضّح ده وبنديك زرار يطبّق النسبة الجديدة على الشهر الحالي كمان — ويصلّح الفايدة اللي اتضافت لرصيد الحساب بالنسبة القديمة. */
-function capRateGap(x, y, m){
-  try{
-    if(!x || capIsPast() || (typeof mvPast === 'function' && mvPast())) return null;
-    const n = new Date(); if(y !== n.getFullYear() || m !== n.getMonth()) return null;
-    const rx = capRaw().find(function(z){ return z && z.id === x.id; }); if(!rx || !Array.isArray(rx.rv) || !rx.rv.length) return null;
-    if(!bankActive(rx, y, m)) return null;
-    const due = bankDueOf(rx, y, m), v = capVerAt(rx, due); if(!v || !v.it || Number(v.p) === 2) return null;
-    const ro = Number(v.it.rate) || 0, rn = Number(rx.rate) || 0;
-    if(!(rn > 0) || !(ro > 0) || Math.abs(ro - rn) < 1e-9) return null;
-    let oa = 0, na = 0; try{ oa = bankMonthlyAt(rx, due); const cl = Object.assign({}, rx); delete cl.rv; na = bankMonthlyAtCore(cl, due); }catch(e){}
-    return {id: rx.id, oldR: ro, newR: rn, due: due, oldAmt: oa, newAmt: na};
-  }catch(e){ return null; }
-}
-function mcRatePill(d, x, y, m){
-  const g = capRateGap(x, y, m); if(!g) return;
-  const p = mcPill(d, 'wait', 'ℹ️ فايدة ' + MONTHS[m] + ' ' + fmt(g.oldAmt) + ' (بالنسبة القديمة ' + toArabicDigits(g.oldR) + '٪) — وبعدها ' + fmt(g.newAmt) + ' كل شهر (بالنسبة الجديدة ' + toArabicDigits(g.newR) + '٪) من الشهر الجاي.');
-  const b = document.createElement('button'); b.type = 'button'; b.type = 'button'; b.textContent = '✅ طبّق ' + toArabicDigits(g.newR) + '٪ على ' + MONTHS[m] + ' كمان (' + fmt(g.newAmt) + ')';
-  b.style.cssText = 'display:block; width:100%; margin-top:9px; padding:10px 12px; border:0; border-radius:12px; background:#7a5600; color:#fff; font:inherit; font-weight:800; cursor:pointer;';
-  let _bt = 0; const fire = function(ev){ try{ ev.stopPropagation(); ev.preventDefault(); }catch(e){} const t = Date.now(); if(t - _bt < 700) return; _bt = t; capApplyRateNow(g.id); };
-  b.addEventListener('click', fire); b.addEventListener('touchend', fire);
-  p.appendChild(b);
-}
-function capApplyRateNow(id, skipAsk){
-  const x = capRaw().find(function(z){ return z && z.id === id; }); if(!x || capIsPast()) return;
-  if(!skipAsk){
-    const g = capRateGap(x, new Date().getFullYear(), new Date().getMonth());
-    openConfirm('تطبيق النسبة الجديدة على الشهر الحالي', 'فايدة ' + MONTHS[new Date().getMonth()] + ' هتتحسب بنسبة ' + toArabicDigits(g ? g.newR : x.rate) + '٪' + (g ? ' = ' + fmt(g.newAmt) : '') + ' بدل ' + toArabicDigits(g ? g.oldR : '') + '٪' + (g ? ' = ' + fmt(g.oldAmt) : '') + '. الشهور اللي فاتت قبلها تفضل زي ما هي، ولو الفايدة اتضافت لرصيد الحساب هتتصحّح.',
-      function(){ capApplyRateNow(id, true); }, 'طبّق', 'إلغاء', function(){});
-    return;
-  }
-  const before = capItemClone(x), oldRv = Array.isArray(x.rv) ? JSON.parse(JSON.stringify(x.rv)) : [], oldItem = Object.assign({}, before, oldRv.length ? {rv: oldRv} : {});
-  const now = new Date(), MS = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  capRebuildRv(x, before, [{keys: ['rate', 'monthlyInt', 'remInt'], b: MS}]);
-  try{ certIntDepReconcile({id: id, oldAt: function(dt){ return bankMonthlyAt(oldItem, dt); }}); }catch(e){ console.error('rateNowReconcile', e); }
-  try{ autoIncSync(); save(); renderCapMoney(); renderCap(); if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
-  try{ showToast('✅ فايدة ' + MONTHS[now.getMonth()] + ' اتحسبت بالنسبة الجديدة ' + toArabicDigits(Number(x.rate)) + '٪', true); }catch(e){}
-}
 </script>
 <script>
 /* ===== إشعارات والتطبيق مقفول (FCM) =====
