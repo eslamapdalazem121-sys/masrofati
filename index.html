@@ -5971,7 +5971,7 @@ function certIntUndo(x, list, pred){   // يرجّع اللي اتحط في ال
 }
 function bankPoolRaw(x, eod){   // الفوايد المتضافة اللي لسه برّه رصيد أي حساب: من وقت تفعيل العلامة بس (اللي استحق قبل كده واتحوّل للدخل العام مش بيتحسب)
   let ex = 0;
-  try{ if(x.intBack !== 'all' && x.intDepDone && typeof x.intDepDone === 'object') certIntDues(x, eod).forEach(function(d){ const r = x.intDepDone[d.k]; if(r && r.init && !(Number(r.a) > 0)) ex += d.a; }); }catch(e){}
+  try{ if(x.intBack !== 'all' && x.intDepDone && typeof x.intDepDone === 'object') certIntDues(x, eod).forEach(function(d){ const r = x.intDepDone[d.k]; if(r && (r.init || r.hold) && !(Number(r.a) > 0)) ex += d.a; }); }catch(e){}   // الفايدة الملغاة (لسه منزلتش) مش محسوبة في الإجمالي لحد ما تنزّلها
   return Math.max(0, cgInt(bankIntSince(x, eod, x.ik ? function(y, m){ return ikAt(x, y, m); } : null) - ex - (Number(x.intSpent) || 0)));
 }
 function certDepTarget(x, list){   // الحساب الأساسي اللي فايدة البند دخلة فيه: نفسه (لو أساسي) / المربوط بيه (أو الأساسي بتاع الحساب الفرعي المربوط) / أو حساب أساسي بنفس اسم البنك / أو الحساب الأساسي الوحيد
@@ -7191,7 +7191,43 @@ function bankMonthly(x){
 }
 function bankAnnualAny(x){ return Number(x.rate) > 0 ? bankAnnual(x) : cgInt(bankMonthly(x) * 12); }
 function bankDay(x){ return new Date(x.date || Date.now()).getDate(); }
-function bankDueOf(x, y, m){ return new Date(y, m, Math.min(bankDay(x), new Date(y, m + 1, 0).getDate())); }
+function bankDueOf(x, y, m){
+  const nat = new Date(y, m, Math.min(bankDay(x), new Date(y, m + 1, 0).getDate()));
+  const o = x && x.dueOv && typeof x.dueOv === 'object' ? Number(x.dueOv[y + '-' + m]) : 0;   // 8313: «نزّل الفايدة النهارده» — البنك نزّلها قبل ميعادها
+  return (o > 0 && o < nat.getTime()) ? new Date(o) : nat;
+}
+function bankNextDueEarly(x){   // أقرب فايدة لسه ما جاش ميعادها الأصلي (فايدة واحدة بس) + هل اتنزّلت بدري ولا لأ، ولازم تكون خلال ٧ أيام
+  const now = new Date(), eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+  const f = bankFirstDue(x); let y = f.getFullYear(), m = f.getMonth();
+  for(let i = 0; i < 1200; i++){
+    const nat = new Date(y, m, Math.min(bankDay(x), new Date(y, m + 1, 0).getDate()));
+    if(nat.getTime() > eod){
+      if(!bankActive(x, y, m)) return null;
+      if(nat.getTime() - eod > 7 * 86400000) return null;
+      const k = y + '-' + m, ov = !!(x.dueOv && Number(x.dueOv[k]) > 0 && Number(x.dueOv[k]) <= eod);
+      return {y: y, m: m, k: k, nat: nat, done: ov};
+    }
+    if(++m > 11){ m = 0; y++; }
+  }
+  return null;
+}
+function bankDropToday(id){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return; }
+  const x = capRaw().find(function(z){ return z && z.id === id; }); if(!x) return;
+  const nd = bankNextDueEarly(x); if(!nd){ showToast('مفيش فايدة جاية تتنزّل', false); return; }
+  if(nd.done){ showToast('تم تنزيل الفايدة بالفعل ✅', true); return; }
+  const now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const amt = cgInt(bankMonthlyAt(x, new Date(t0)));
+  if(!(amt > 0)){ showToast('مفيش فايدة متوقعة للموعد ده', false); return; }
+  openConfirm('⚡ نزّل الفايدة النهارده', 'فايدة ' + MONTHS[nd.m] + ' (' + fmt(amt) + ') ميعادها الأصلي ' + toArabicDigits(nd.nat.getDate()) + ' ' + MONTHS[nd.m] + ' — هتتسجّل النهارده كأن البنك نزّلها بدري.', function(){
+    if(!x.dueOv || typeof x.dueOv !== 'object') x.dueOv = {};
+    x.dueOv[nd.k] = t0;
+    try{ autoIncSync(); }catch(e){} try{ save(); }catch(e){}
+    try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ renderZakat(); }catch(e){}
+    try{ if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
+    showToast('اتنزّلت الفايدة النهارده ✅ ' + fmt(amt), true);
+  });
+}
 // ===== مدة الشهادة وتجديدها: x.term (شهور) · x.autoRenew (تجديد تلقائي) · x.ext (عدد مرات التجديد اليدوي) =====
 // شهادة من غير مدة = مفتوحة زي ما كانت. شهادة بمدة وبدون تجديد تلقائي: الفوائد بتقف بعد يوم الانتهاء (وآخر فايدة بتتصرف يوم الانتهاء نفسه).
 function certTermM(x){ const t = Math.round(Number(x && x.term) || 0); return x && x.isCert && t > 0 ? t : 0; }
@@ -7929,7 +7965,7 @@ function aaEvents(x){
     if(c.id.indexOf('cd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'فايدة اتضافت للرصيد', note: '', ref: {type: 'int', id: c.id}});
     else if(c.id.indexOf('pd:') === 0) ev.push({k: 'int', t: Number(c.t) || 0, ts: 0, amt: Number(c.delta) || 0, title: 'معاش اتضاف للرصيد', note: '', ref: {type: 'pd', id: c.id}});
   });
-  try{ const all = capRaw(); all.forEach(function(sx){ if(!sx || !sx.intDepDone || typeof sx.intDepDone !== 'object') return; const hk = Object.keys(sx.intDepDone).filter(function(k){ const r = sx.intDepDone[k]; return r && r.hold; }); if(!hk.length) return; const tg = certDepTarget(sx, all); if(!tg || tg.id !== x.id) return; hk.forEach(function(k){ const r = sx.intDepDone[k]; let a = 0; try{ a = cgInt(bankMonthlyAt(sx, new Date(r.t))); }catch(e){} ev.push({k: 'hold', t: Number(r.t) || 0, ts: 0, amt: null, title: 'فايدة ملغاة — لسه منزلتش', note: a > 0 ? 'قيمتها ' + fmt(a) + ' · متجمّعة في الفوايد' : 'متجمّعة في الفوايد', ref: {type: 'hold', id: sx.id + '|' + k}}); }); }); }catch(e){}
+  try{ const all = capRaw(); all.forEach(function(sx){ if(!sx || !sx.intDepDone || typeof sx.intDepDone !== 'object') return; const hk = Object.keys(sx.intDepDone).filter(function(k){ const r = sx.intDepDone[k]; return r && r.hold; }); if(!hk.length) return; const tg = certDepTarget(sx, all); if(!tg || tg.id !== x.id) return; hk.forEach(function(k){ const r = sx.intDepDone[k]; let a = 0; try{ a = cgInt(bankMonthlyAt(sx, new Date(r.t))); }catch(e){} ev.push({k: 'hold', t: Number(r.t) || 0, ts: 0, amt: null, title: 'فايدة ملغاة — لسه منزلتش', note: a > 0 ? 'قيمتها ' + fmt(a) + ' · مش محسوبة في الإجمالي' : 'مش محسوبة في الإجمالي', ref: {type: 'hold', id: sx.id + '|' + k}}); }); }); }catch(e){}
   (Array.isArray(x.act) ? x.act : []).forEach(function(a){ ev.push({k: 'edit', t: Number(a.t) || 0, ts: Number(a.t) || 0, amt: null, title: 'تعديل', note: a.m || '', lines: a.c || []}); });
   const op = aaOpening(x); ev.push({k: 'open', t: Number(x.date) || 0, ts: -1, amt: op > 0 ? op : null, title: x.isSub ? 'فتح الحساب الفرعي' : 'فتح الحساب', note: ''});
   const dayOf = function(t){ const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
@@ -8081,7 +8117,7 @@ function aaDelAsk(accId, e){
     openConfirm('مسح الصرف', 'هتتلغي الصرف (' + am + ') والمبلغ يرجع للحساب.', function(){ const n0 = (data.moneyOut || []).length; cmOutDel(ref.id); done((data.moneyOut || []).length < n0); });
   } else if(ref.type === 'int' && aaIntParse(ref.id).k !== 'init'){
     aaChoose('🗑 مسح فايدة (' + am + ')', 'تحب تعمل إيه؟', [
-      {label: '↩️ إلغاء العملية', sub: 'الفايدة تتشال من الحساب وتبقى «لسه منزلتش» — تقدر تنزّلها تاني من النشاط (↩️)', bg: '#e8590c', fg: '#fff', fn: function(){ const ok = aaIntDel(accId, ref.id, 'hold'); if(ok) showToast('اتلغت العملية — الفايدة لسه منزلتش ✅', true); done(ok); }},
+      {label: '↩️ إلغاء العملية', sub: 'الفايدة تتشال من الحساب ومن الإجمالي وتبقى «لسه منزلتش» — تقدر تنزّلها تاني من النشاط (↩️)', bg: '#e8590c', fg: '#fff', fn: function(){ const ok = aaIntDel(accId, ref.id, 'hold'); if(ok) showToast('اتلغت العملية — الفايدة لسه منزلتش ✅', true); done(ok); }},
       {label: '🧹 مسح الفايدة فقط', sub: 'الفايدة تتشال من الحساب وما بتتحسبش في أي مكان (الشهور الجاية بتنزل عادي)', fn: function(){ const ok = aaIntDel(accId, ref.id, 'skip'); if(ok) showToast('اتمسحت الفايدة ✅', true); done(ok); }},
       {label: 'إلغاء'}]);
   } else {
@@ -8208,6 +8244,12 @@ function mcCard(x, o){
   if(x.isAcc){   // المعاشات اللي بتتحط في الحساب الأساسي ده
     const lp = capRaw().filter(function(p){ return p && capCatOf(p) === 'money' && capSubOf(p) === 'pension' && p.payAcc === x.id; });
     if(lp.length) mcPill(d, 'ok', '💳 المعاش بيتحط هنا كل شهر: ' + lp.map(function(p){ return '«' + p.name + '» ' + fmt(Number(p.amount) || 0) + ' (يوم ' + toArabicDigits(penDay(p)) + ')'; }).join(' · '));
+  }
+  if(sub === 'bank' && !cmPastView() && (x.isCert || x.isAcc || x.isSub) && o.acts){   // 8313: زرار «نزّل الفايدة النهارده»
+    try{ const nd = bankNextDueEarly(x), am = nd ? cgInt(bankMonthlyAt(x, new Date())) : 0;
+      if(nd && (am > 0 || nd.done)){ const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'mc-dropnow'; bt.textContent = nd.done ? '✅ تم تنزيل فايدة ' + MONTHS[nd.m] : '⚡ نزّل فايدة ' + MONTHS[nd.m] + ' النهارده (' + fmt(am) + ')'; if(nd.done){ bt.disabled = true; bt.style.opacity = '.75'; }
+        bt.style.cssText += 'display:block; width:100%; margin-top:10px; padding:11px; border:0; border-radius:14px; font:inherit; font-weight:900; cursor:' + (nd.done ? 'default' : 'pointer') + '; background:rgba(30,166,114,.16); color:inherit;';
+        bt.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); bankDropToday(x.id); }); d.appendChild(bt); } }catch(e){}
   }
   if(x.isCert && certTermM(x) && !cmPastView()){
     const ci = certMatInfo(x);
