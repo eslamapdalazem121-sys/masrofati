@@ -3554,6 +3554,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <div class="check-row"><input type="checkbox" id="cmIntOut" checked><label for="cmIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد البنك)</label></div>
       <div class="edmode" id="cmKeepMode" style="display:none;"></div>
     </div>
+    <div class="date-row" id="cmNextOvWrap" style="display:none;"><label for="cmNextOv">✍️ قيمة الفايدة / المعاش القادم يدويًا (اختياري)</label><input type="number" id="cmNextOv" placeholder="تلقائي" step="any" inputmode="decimal"><div class="hint" style="margin-top:6px;">لو المبلغ اللي بيتنزّل فعليًا بيختلف عن التلقائي، اكتبه هنا لأقرب موعد. تقدر تغيّره كل شهر من الكارت.</div></div>
     <div class="date-row" id="cmGrpWrap"><label for="cmGrp">📁 المجموعة</label><select id="cmGrp"></select></div>
     <div class="date-row" id="cmPayAccWrap" style="display:none;"><label for="cmPayAcc">🏦 البنك اللي المعاش يتحط في حسابه الأساسي</label><select id="cmPayAcc" onchange="cmPayHint()"></select></div>
     <div class="hint" id="cmPayAccHint" style="display:none;"></div>
@@ -3586,6 +3587,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <div class="field"><label for="accAmt">الرصيد الافتتاحي (اختياري)</label><input type="number" id="accAmt" placeholder="0" inputmode="decimal" oninput="accCalc()"></div>
       <div class="edmode" id="accAmtMode" style="display:none;"></div>
       <div class="field"><label for="accDate">📅 تاريخ فتح الحساب (منه بيتحدد يوم الفائدة)</label><input type="date" id="accDate" onchange="accCalc()"></div>
+      <div class="field"><label for="accNextOv">✍️ قيمة الفايدة القادمة يدويًا (اختياري)</label><input type="number" id="accNextOv" placeholder="تلقائي" step="any" inputmode="decimal"><div class="hint" style="margin-top:6px;">لو مبلغ الفايدة اللي البنك بينزّله بيختلف شوية عن الحساب التلقائي، اكتبه هنا لأقرب موعد. تقدر تغيّره كل شهر من كارت الحساب.</div></div>
       <div class="acc-sum" id="accSum"></div>
       <div class="check-row"><input type="checkbox" id="accIntOut" checked><label for="accIntOut" id="accIntOutLbl" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو مش متعلّمة: الفايدة بتتضاف لرصيد الحساب)</label></div>
       <div class="edmode" id="accKeepMode" style="display:none;"></div>
@@ -3614,6 +3616,7 @@ button,input,select,textarea,optgroup{font-family:inherit;}
         <input type="number" id="certTermCustom" placeholder="عدد الشهور" inputmode="numeric" min="1" max="600" style="display:none; margin-top:8px;" oninput="certCalc()">
         <div class="hint" id="certEndHint" style="margin-top:6px;"></div></div>
       <div class="check-row" id="certRenewRow" style="display:none;"><input type="checkbox" id="certRenew" onchange="certCalc()"><label for="certRenew" style="margin:0;">🔄 تجديد تلقائي عند الانتهاء (الشهادة بتكمل لمدة جديدة والفوائد ما بتقفش)</label></div>
+      <div class="field"><label for="certNextOv">✍️ قيمة الفايدة القادمة يدويًا (اختياري)</label><input type="number" id="certNextOv" placeholder="تلقائي" step="any" inputmode="decimal"><div class="hint" style="margin-top:6px;">لو مبلغ الفايدة اللي البنك بينزّله بيختلف شوية عن الحساب التلقائي، اكتبه هنا لأقرب موعد. تقدر تغيّره كل شهر من كارت الشهادة.</div></div>
       <div class="acc-sum" id="certSum"></div>
       <div class="check-row"><input type="checkbox" id="certIntOut" checked><label for="certIntOut" style="margin:0;">تحويل الفايدة وصرفها من الدخل العام الشهري (لو شلت العلامة: الفايدة بتتضاف كل شهر لرصيد الحساب الأساسي المربوط بالشهادة — اختار الحساب فوق)</label></div>
       <div class="edmode" id="certKeepMode" style="display:none;"></div>
@@ -7168,8 +7171,11 @@ function capVerAt(x, due){
   });
   return y || h;
 }
-function bankMonthlyAt(x, due){ const v = capVerAt(x, due); return bankMonthlyAtCore(v ? v.it : x, due); }
-function penAmtAt(x, due){ const v = capVerAt(x, due); return Number((v ? v.it : x).amount) || 0; }
+function intOvAt(x, due){   // 8316: قيمة فايدة/معاش الشهر ده مكتوبة يدويًا (البنك بينزّل مبلغ مختلف شوية)
+  try{ const o = x && x.intAmtOv; if(!o || typeof o !== 'object') return null; const d = new Date(due), v = o[d.getFullYear() + '-' + d.getMonth()]; return (v === undefined || v === null || v === '' || !isFinite(Number(v)) || Number(v) <= 0) ? null : cgInt(Number(v)); }catch(e){ return null; }
+}
+function bankMonthlyAt(x, due){ const ov = intOvAt(x, due); if(ov !== null) return ov; const v = capVerAt(x, due); return bankMonthlyAtCore(v ? v.it : x, due); }
+function penAmtAt(x, due){ const ov = intOvAt(x, due); if(ov !== null) return ov; const v = capVerAt(x, due); return Number((v ? v.it : x).amount) || 0; }
 function bankMonthlyAtCore(x, due){
   if(bankAnnualPay(x)) return Number(x.rate) > 0 ? cgInt(bankAmtAt(x, due) * Number(x.rate) / 100 * bankPer(x) / 12) : 0;   // فايدة كل 3 شهور / سنوية: المبلغ المستحق في كل موعد
   const ch = Array.isArray(x.chg) ? x.chg : [], cur = Number(x.amount) || 0;
@@ -7319,6 +7325,7 @@ function openCapAcc(x, opt){
   document.getElementById('accIntOut').checked = !(x && x.intKeep === true);
   { const il = document.getElementById('accIntOutLbl'); if(il) il.textContent = _accSub ? 'تحويل الفايدة وصرفها من الدخل العام الشهري (لو شلت العلامة: الفايدة بتتضاف كل شهر لرصيد الحساب الأساسي)' : 'تحويل الفايدة وصرفها من الدخل العام الشهري (لو شلت العلامة: الفايدة بتتضاف كل شهر لرصيد الحساب)'; }
   document.getElementById('accZk').checked = !(x && x.noZk === true);
+  try{ ovFormFill('accNextOv', x); }catch(e){}
   document.getElementById('accSaveBtn').textContent = x ? '💾 حفظ التعديل' : (_accSub ? '🗂 إنشاء الحساب الفرعي' : '🏦 فتح الحساب');
   accPick('type', x && x.accType === 'current' ? 'current' : 'savings');
   accPick('freq', x && x.payFreq === 'annual' ? 'annual' : 'monthly');
@@ -7358,6 +7365,7 @@ function saveCapAcc(backChoice){
   else { capList().push(Object.assign({id: uid()}, rec)); savedX = capList()[capList().length - 1]; }
   if(savedX && (savedX.isSub === true || savedX.isAcc === true) && rec.intKeep === true && savedX.intBack === undefined) savedX.intBack = (backChoice === 'all') ? 'all' : 'none';
   if(savedX && (savedX.isSub === true || savedX.isAcc === true) && rec.intKeep === true && backChoice !== undefined && !savedX.intDepDone) savedX.intBack = (backChoice === 'all') ? 'all' : 'none';
+  try{ ovFormApply('accNextOv', savedX, edit); }catch(e){}
   try{ autoIncSync(); }catch(e){}
   save(); closeCapAcc(); _cmFilter = 'bank'; renderCapMoney(); renderCap();
   showToast(edit ? 'تم حفظ التعديل' : (par ? 'تم إنشاء الحساب الفرعي تحت «' + (par.accName || par.name) + '»' : 'تم فتح الحساب في ' + bk), true);
@@ -7410,6 +7418,7 @@ function openCapCert(x){
   document.getElementById('certDate').value = dateToInputValue(x && x.date ? x.date : Date.now());
   document.getElementById('certIntOut').checked = !(x && x.intKeep === true);
   document.getElementById('certZk').checked = !(x && x.noZk === true);
+  try{ ovFormFill('certNextOv', x); }catch(e){}
   { const tm = x ? certTermM(x) : 0, ts = document.getElementById('certTerm'), tc = document.getElementById('certTermCustom');
     ts.value = String(tm); if(ts.value !== String(tm)){ ts.value = 'custom'; tc.value = tm; } else tc.value = '';
     tc.style.display = ts.value === 'custom' ? '' : 'none';
@@ -7454,6 +7463,7 @@ function saveCapCert(backChoice){
   } }
   else capList().push(Object.assign({id: uid()}, rec));
   try{ const cx = edit ? capList().find(z=> z.id === _certEditId) : capList()[capList().length - 1]; if(cx && rec.intKeep === true){ cx.intBack = (backChoice === 'all') ? 'all' : 'none'; } }catch(e){}
+  try{ const cx2 = edit ? capList().find(z=> z.id === _certEditId) : capList()[capList().length - 1]; ovFormApply('certNextOv', cx2, edit); }catch(e){}
   try{ autoIncSync(); }catch(e){}
   save(); closeCapCert(); _cmFilter = 'bank'; renderCapMoney(); renderCap();
   showToast(edit ? 'تم حفظ التعديل' : 'تم إنشاء الشهادة', true);
@@ -7826,10 +7836,11 @@ function penDepositSync(){
       while((y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) && g++ < 240){
         const due = penDueOf(x, y, m).getTime(), k = y + '-' + m;
         if(due >= f.getTime() && due <= eod && !x.depDone[k]){
-          acc.amount = cgInt((Number(acc.amount) || 0) + amt);
+          const ovK = intOvAt(x, new Date(due)), amtK = ovK !== null ? ovK : amt;   // 8316: قيمة يدوية للشهر ده
+          acc.amount = cgInt((Number(acc.amount) || 0) + amtK);
           if(!Array.isArray(acc.chg)) acc.chg = [];
-          acc.chg.push({id: 'pd:' + x.id + ':' + k, t: due, delta: amt, dep: true});
-          x.depDone[k] = {a: amt, t: due, to: acc.id}; ch = true;
+          acc.chg.push({id: 'pd:' + x.id + ':' + k, t: due, delta: amtK, dep: true});
+          x.depDone[k] = {a: amtK, t: due, to: acc.id}; ch = true;
         }
         m++; if(m > 11){ m = 0; y++; }
       }
@@ -7877,6 +7888,7 @@ function cmSubUI(c){
   document.getElementById('cmAmtLbl').textContent = c === 'pension' ? 'المبلغ الشهري' : 'المبلغ';
   document.getElementById('cmNameLbl').textContent = c === 'bank' ? 'اسم البنك / الحساب' : (c === 'pension' ? 'اسم المعاش' : 'الاسم');
   document.getElementById('cmBankFields').style.display = c === 'bank' ? 'block' : 'none';
+  { const nw = document.getElementById('cmNextOvWrap'); if(nw) nw.style.display = (c === 'bank' || c === 'pension') ? '' : 'none'; }
   document.getElementById('cmDateLbl').textContent = c === 'bank' ? '📅 تاريخ بداية الوديعة (منه بيتحدد يوم الفائدة)' : (c === 'pension' ? '📅 تاريخ الاستحقاق (أول موعد، وبيتكرر في نفس اليوم كل شهر)' : '📅 التاريخ');
   cmPayUI(c);
   document.getElementById('cmName').placeholder = c === 'bank' ? 'مثال: البنك الأهلي' : (c === 'pension' ? 'مثال: معاش التأمينات' : 'مثال: كاش بالبيت');
@@ -7891,7 +7903,7 @@ function setCmFilter(f){ _cmFilter = (f === _cmFilter) ? null : f; renderCapMone
 function cmReset(){
   _cmEditId = null;
   document.getElementById('cmName').value = ''; document.getElementById('cmAmt').value = '';
-  document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; _cmRemTouched = false; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = true; } { const zc = document.getElementById('cmZk'); if(zc) zc.checked = true; }
+  document.getElementById('cmRate').value = ''; document.getElementById('cmRem').value = ''; { const nv = document.getElementById('cmNextOv'); if(nv) nv.value = ''; } _cmRemTouched = false; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = true; } { const zc = document.getElementById('cmZk'); if(zc) zc.checked = true; }
   { const pg = document.getElementById('cmPenGen'); if(pg) pg.checked = true; _cmPenGenTouched = false; }
   document.getElementById('cmDate').value = mvInputDate();
   document.getElementById('cmSaveBtn').textContent = '＋ إضافة';
@@ -7916,6 +7928,7 @@ function cmEditItem(x){
   document.getElementById('cmName').value = x.name; document.getElementById('cmAmt').value = x.amount; cmCalcInt(); { const io = document.getElementById('cmIntOut'); if(io) io.checked = x.intKeep !== true; } { const zc = document.getElementById('cmZk'); if(zc) zc.checked = x.noZk !== true; }
   document.getElementById('cmDate').value = dateToInputValue(x.date || Date.now());
   fillGrpSel('cmGrp', 'money', x.grp || '');
+  try{ ovFormFill('cmNextOv', x); }catch(e){}
   if(capSubOf(x) === 'pension'){ cmPayAccFill(x.payAcc || ''); const pg = document.getElementById('cmPenGen'); if(pg){ const n0 = new Date(); const f0 = penFutureFrom(); pg.checked = penGenAt(x, f0, new Date(f0).getFullYear(), new Date(f0).getMonth()); _cmPenGenTouched = true; } }
   document.getElementById('cmSaveBtn').textContent = '💾 حفظ التعديل';
   document.getElementById('cmName').scrollIntoView({block:'center'});
@@ -8182,6 +8195,63 @@ function aaXfEdit(id, na, nd, nn){
   r.amount = na; r.date = nd; r.note = nn;
   return true;
 }
+// ===== 8316: قيمة الفايدة / المعاش يدويًا لموعد معيّن (مبلغ البنك بيزيد أو بينقص) — للحسابات والشهادات والمعاش =====
+function ovTarget(x){   // أقرب موعد (النهارده أو الجاي) تتحط له قيمة يدوية
+  try{
+    const now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    if(capSubOf(x) === 'pension'){ let y = now.getFullYear(), m = now.getMonth(); for(let i = 0; i < 26; i++){ if(penActive(x, y, m)){ const due = penDueOf(x, y, m); if(due.getTime() >= t0) return {y: y, m: m, k: y + '-' + m, due: due}; } if(++m > 11){ m = 0; y++; } } return null; }
+    const f = bankFirstDue(x); let y = f.getFullYear(), m = f.getMonth();
+    for(let i = 0; i < 1200; i++){ if(bankActive(x, y, m)){ const due = bankDueOf(x, y, m); if(due.getTime() >= t0) return {y: y, m: m, k: y + '-' + m, due: due}; } if(++m > 11){ m = 0; y++; } }
+  }catch(e){}
+  return null;
+}
+function setIntOv(x, tg, amount, quiet){
+  if(!x.intAmtOv || typeof x.intAmtOv !== 'object') x.intAmtOv = {};
+  if(amount === null || amount === undefined) delete x.intAmtOv[tg.k]; else x.intAmtOv[tg.k] = cgInt(amount);
+  if(!Object.keys(x.intAmtOv).length) delete x.intAmtOv;
+  try{   // لو الفايدة/المعاش ده اتضاف فعلًا لرصيد حساب: نظبّط الرصيد بالفرق
+    const list = capRaw();
+    if(capSubOf(x) === 'pension'){
+      const r = x.depDone && x.depDone[tg.k];
+      if(r && Number(r.a) > 0){ const na = intOvAt(x, tg.due) !== null ? intOvAt(x, tg.due) : cgInt(x.amount), acc = list.find(function(z){ return z && z.id === r.to; });
+        if(acc && na > 0 && na !== Number(r.a)){ const diff = na - Number(r.a); acc.amount = Math.max(0, cgInt((Number(acc.amount) || 0) + diff)); const c = aaChgOf(acc, 'pd:' + x.id + ':' + tg.k); if(c) c.delta = na; r.a = na; } }
+    } else {
+      const r = x.intDepDone && x.intDepDone[tg.k];
+      if(r && !r.init && !r.hold && Number(r.a) > 0){ const na = cgInt(bankMonthlyAt(x, tg.due)), acc = list.find(function(z){ return z && z.id === r.to; });
+        if(acc && na > 0 && na !== Number(r.a)){ const diff = na - Number(r.a); acc.amount = Math.max(0, cgInt((Number(acc.amount) || 0) + diff)); const c = aaChgOf(acc, 'cd:' + x.id + ':' + tg.k); if(c) c.delta = na; x.intSpent = Math.max(0, cgInt((Number(x.intSpent) || 0) + diff)); r.a = na; } }
+    }
+  }catch(e){ console.error('setIntOv', e); }
+  if(!quiet) aaAfterChange();
+}
+function ovFormFill(inputId, x){ const el = document.getElementById(inputId); if(!el) return; let v = ''; try{ const tg = x ? ovTarget(x) : null; const o = tg ? intOvAt(x, tg.due) : null; if(o !== null) v = o; }catch(e){} el.value = v; }
+function ovFormApply(inputId, x, edit){
+  const el = document.getElementById(inputId); if(!el || !x) return;
+  const v = String(el.value || '').trim(), tg = ovTarget(x); if(!tg) return;
+  if(v === ''){ if(edit && intOvAt(x, tg.due) !== null) setIntOv(x, tg, null, true); return; }
+  const n = Number(v); if(n > 0) setIntOv(x, tg, n, true);
+}
+function ovOpen(id){
+  if(capIsPast()){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒', false); return; }
+  const x = capRaw().find(function(z){ return z && z.id === id; }); if(!x) return;
+  const tg = ovTarget(x); if(!tg){ showToast('مفيش موعد جاي', false); return; }
+  const pen = capSubOf(x) === 'pension', ov = intOvAt(x, tg.due);
+  let auto = 0; try{ const keep = x.intAmtOv; if(keep){ const sv = keep[tg.k]; delete keep[tg.k]; auto = pen ? cgInt(penAmtAt(x, tg.due)) : cgInt(bankMonthlyAt(x, tg.due)); keep[tg.k] = sv; } else auto = pen ? cgInt(penAmtAt(x, tg.due)) : cgInt(bankMonthlyAt(x, tg.due)); }catch(e){}
+  let ovr = document.getElementById('ovOv');
+  if(!ovr){ ovr = document.createElement('div'); ovr.id = 'ovOv'; ovr.className = 'modal-overlay'; ovr.style.zIndex = '99999'; document.body.appendChild(ovr); }
+  ovr.innerHTML = '';
+  const box = aaEl('div', 'modal-box'); box.style.cssText = 'padding:18px; max-width:420px;';
+  box.appendChild(aaEl('h3', '', '✏️ ' + (pen ? 'قيمة المعاش يدويًا' : 'قيمة الفايدة يدويًا')));
+  const info = aaEl('div', '', (pen ? 'معاش ' : 'فايدة ') + MONTHS[tg.m] + ' — ميعادها ' + toArabicDigits(tg.due.getDate()) + ' ' + MONTHS[tg.m] + (auto > 0 ? ' · التلقائي ' + fmt(auto) : '')); info.style.cssText = 'margin:6px 0 10px; font-weight:700; line-height:1.7;'; box.appendChild(info);
+  const inp = document.createElement('input'); inp.type = 'number'; inp.inputMode = 'decimal'; inp.min = '0'; inp.step = 'any'; inp.value = ov !== null ? ov : (auto > 0 ? auto : ''); inp.placeholder = 'اكتب المبلغ اللي البنك نزّله';
+  inp.style.cssText = 'display:block; width:100%; box-sizing:border-box; padding:12px; border-radius:14px; border:1px solid var(--border); background:var(--card); color:inherit; font:inherit;'; box.appendChild(inp);
+  const hint = aaEl('div', '', 'الشهور اللي بعده بترجع تلقائي. لو الفايدة نزلت فعلًا، الرصيد بيتظبط بالفرق.'); hint.style.cssText = 'margin:8px 0 12px; font-size:.85em; opacity:.8; line-height:1.6;'; box.appendChild(hint);
+  const row = aaEl('div'); row.style.cssText = 'display:flex; flex-direction:column; gap:10px;';
+  const mkb = function(t, bg, fg, fn){ const b = aaEl('button', '', t); b.type = 'button'; b.style.cssText = 'padding:13px; border:0; border-radius:14px; font:inherit; font-weight:900; cursor:pointer; background:' + bg + '; color:' + fg + ';'; b.onclick = fn; row.appendChild(b); };
+  mkb('حفظ', '#1ea672', '#fff', function(){ const n = Number(inp.value); if(!(n > 0)){ showToast('اكتب مبلغ صحيح', false); return; } ovr.classList.remove('open'); setIntOv(x, tg, n); showToast('اتسجّلت القيمة اليدوية ✅ ' + fmt(cgInt(n)), true); });
+  if(ov !== null) mkb('↩️ رجوع للتلقائي', 'rgba(120,130,150,.2)', 'inherit', function(){ ovr.classList.remove('open'); setIntOv(x, tg, null); showToast('رجعت القيمة للتلقائي ✅', true); });
+  mkb('إلغاء', 'rgba(120,130,150,.12)', 'inherit', function(){ ovr.classList.remove('open'); });
+  box.appendChild(row); ovr.appendChild(box); ovr.classList.add('open');
+}
 function mcCard(x, o){
   o = o || {};
   const sub = capSubOf(x), now = new Date(), y = now.getFullYear(), m = now.getMonth(), dt = x.date ? formatDate(x.date) : '';
@@ -8250,6 +8320,12 @@ function mcCard(x, o){
       if(nd && (am > 0 || nd.done)){ const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'mc-dropnow'; bt.textContent = nd.done ? '✅ تم تنزيل فايدة ' + MONTHS[nd.m] : '⚡ نزّل فايدة ' + MONTHS[nd.m] + ' النهارده (' + fmt(am) + ')'; if(nd.done){ bt.disabled = true; bt.style.opacity = '.75'; }
         bt.style.cssText += 'display:block; width:100%; margin-top:10px; padding:11px; border:0; border-radius:14px; font:inherit; font-weight:900; cursor:' + (nd.done ? 'default' : 'pointer') + '; background:rgba(30,166,114,.16); color:inherit;';
         bt.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); bankDropToday(x.id); }); d.appendChild(bt); } }catch(e){}
+  }
+  if(!cmPastView() && o.acts && ((sub === 'bank' && (x.isCert || x.isAcc || x.isSub) && (Number(x.rate) > 0 || bankMonthly(x) > 0 || x.intAmtOv)) || sub === 'pension')){   // 8316: قيمة الفايدة/المعاش يدويًا
+    try{ const tg2 = ovTarget(x); if(tg2){ const ovv = intOvAt(x, tg2.due), bt2 = document.createElement('button'); bt2.type = 'button'; bt2.className = 'mc-ovbtn';
+      bt2.textContent = (sub === 'pension' ? '✏️ قيمة المعاش يدويًا' : '✏️ قيمة الفايدة يدويًا') + ' (' + MONTHS[tg2.m] + ')' + (ovv !== null ? ' — ' + fmt(ovv) + ' يدوي' : '');
+      bt2.style.cssText = 'display:block; width:100%; margin-top:8px; padding:11px; border:0; border-radius:14px; font:inherit; font-weight:900; cursor:pointer; background:' + (ovv !== null ? 'rgba(232,160,30,.22)' : 'rgba(120,130,150,.14)') + '; color:inherit;';
+      bt2.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); ovOpen(x.id); }); d.appendChild(bt2); } }catch(e){}
   }
   if(x.isCert && certTermM(x) && !cmPastView()){
     const ci = certMatInfo(x);
@@ -9241,6 +9317,7 @@ function addCapMoney(backChoice){
   if(newLink){ rec.payFrom = linkFrom; rec.depBack = 1; }
   if(wasEdit){ const x = oldX; if(x){ const oldPay = x.payAcc; delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; let penH0 = null, penOld = true, penF = penFutureFrom(); if(_cmSub === 'pension'){ penH0 = Array.isArray(x.penGenH) ? x.penGenH.slice() : []; if(!penH0.length && (x.penGen === true || x.penGen === false)) penH0.push({f: 0, v: x.penGen}); penOld = penGenAt(Object.assign({}, x, {penGenH: penH0}), penF, new Date(penF).getFullYear(), new Date(penF).getMonth()); } delete x.penGen; if(_cmSub === 'pension'){ delete x.payAcc; } Object.assign(x, rec); if(_cmSub === 'pension'){ if(wantGen !== penOld || penH0.length){ const last = penH0[penH0.length - 1]; if(wantGen !== penOld){ if(last && last.f === penF) last.v = wantGen; else penH0.push({f: penF, v: wantGen}); } x.penGenH = penH0; } } } }
   else { if(_cmSub === 'pension') rec.penGenH = [{f: 0, v: wantGen}]; capList().push(Object.assign({id: uid()}, rec)); }
+  try{ if(_cmSub === 'bank' || _cmSub === 'pension'){ const it2 = wasEdit ? oldX : capList()[capList().length - 1]; ovFormApply('cmNextOv', it2, wasEdit); } }catch(e){}
   try{ if(penDepositSync()) save(); }catch(e){}
   save(); cmReset(); renderCapMoney(); renderCap();
   showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت الإضافة إلى ' + (_cmSub === 'bank' ? 'البنوك' : (_cmSub === 'pension' ? 'المعاشات' : 'النقدي')) + (nAdded ? ' — واتضاف ' + toArabicDigits(nAdded) + (nAdded === 1 ? ' شهر' : ' شهور') + ' (' + fmt(nAdded * cgInt(amt)) + ') لرصيد الحساب' : ''), true);
