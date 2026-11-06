@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8307">
+<meta name="app-version" content="2026-11-06.8317">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3164,6 +3164,14 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 #cmOutOverlay .cmo-stats{margin:0 0 20px; gap:14px;}
 #cmOutOverlay .cmo-stat{border-radius:22px; box-shadow:0 2px 0 rgba(255,255,255,.8) inset, 0 7px 0 var(--stD), 0 18px 22px rgba(0,0,0,.16);}
 #cmOutOverlay .cmo-card{margin-top:2px;}
+/* 8317: صفحة «صرف من الأموال» — أيقونات نوع الصرف (المتاح / نقدي / حسابات / فوايد / معاش) بقت أيقونات بس من غير دايرة */
+#cmOutOverlay #cmoKinds .cmo-sph{width:auto; height:auto; min-width:46px; min-height:44px; border-radius:0; border:0; background:none !important; box-shadow:none !important; font-size:calc(34px * var(--fs,1)); animation:none; transition:transform .18s;}
+#cmOutOverlay #cmoKinds .cmo-sph::before,#cmOutOverlay #cmoKinds .cmo-sph::after{content:none !important; display:none !important;}
+#cmOutOverlay #cmoKinds .cmo-sph i{filter:drop-shadow(0 3px 3px rgba(0,0,0,.28));}
+#cmOutOverlay #cmoKinds button.cmo-ic .cmo-sph{filter:saturate(.75) opacity(.72); transform:none;}
+#cmOutOverlay #cmoKinds button.cmo-ic.active .cmo-sph{filter:none; transform:scale(1.22); box-shadow:none !important;}
+#cmOutOverlay #cmoKinds button.cmo-ic.active .cmo-sph i{filter:drop-shadow(0 0 9px var(--sg)) drop-shadow(0 3px 3px rgba(0,0,0,.3));}
+#cmOutOverlay #cmoKinds button.cmo-ic:active .cmo-sph{transform:translateY(3px) scale(.94);}
 /* ===== SPEND PAGE: SEPARATE CARDS END ===== */
 
 /* ===== SPEND PAGE: DEST ROW BACK TO BOXES START ===== */
