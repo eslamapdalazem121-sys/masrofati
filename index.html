@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8319">
+<meta name="app-version" content="2026-11-06.8321">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -2891,6 +2891,13 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 .yp-chip{border:0; cursor:pointer; padding:14px 6px; border-radius:16px; font-family:Arial,Helvetica,sans-serif; font-size:calc(20px * var(--fs,1)); font-weight:800; color:var(--text); background:var(--bg); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 4px 0 rgba(0,0,0,.14), 0 8px 12px rgba(0,0,0,.12); -webkit-tap-highlight-color:transparent;}
 .yp-chip:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.14);}
 .yp-chip.sel{background:var(--accent); color:#fff; box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 rgba(0,0,0,.25), 0 8px 12px rgba(0,0,0,.18);}
+/* 8321: رسالة اكتمال الزكاة */
+.zkdone-box{text-align:center;}
+.zkdone-ic{font-size:60px; line-height:1.1; margin:4px 0 6px; animation:zkdonePop .7s cubic-bezier(.2,1.4,.4,1) both;}
+.zkdone-msg{font-size:calc(15px * var(--fs,1)); line-height:1.9; color:var(--text); margin:6px 4px 14px; font-weight:700;}
+.zkdone-msg small{display:block; color:var(--muted); font-weight:600; margin-top:6px;}
+.zkdone-btn{width:100%;}
+@keyframes zkdonePop{0%{transform:scale(.2) rotate(-12deg); opacity:0;} 100%{transform:scale(1) rotate(0); opacity:1;}}
 .yp-chip.yp-new{grid-column:1 / -1; font-family:inherit; font-size:calc(15px * var(--fs,1)); color:var(--accent);}
 .font-prev{margin-top:10px; padding:11px 14px; border-radius:12px; background:var(--bg); border:1.5px dashed var(--border); font-size:calc(15px * var(--fs-app,1)); font-weight:700; line-height:1.7; text-align:center;}
 #optFont .opt-chip{font-size:calc(14px * var(--fs,1));}
@@ -3942,6 +3949,15 @@ button,input,select,textarea,optgroup{font-family:inherit;}
       <button class="btn-cancel" onclick="closeZakat()">إغلاق</button>
       <button class="btn-save" onclick="addZakatItem()">＋ إضافة</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="zkDoneOverlay" onclick="if(event.target===this) closeZkDone()">
+  <div class="modal-box zkdone-box">
+    <div class="zkdone-ic">🌙✨</div>
+    <h3 id="zkDoneT">تقبّل الله منك 🤲</h3>
+    <p class="zkdone-msg" id="zkDoneMsg"></p>
+    <div class="modal-actions"><button type="button" class="btn-save zkdone-btn" onclick="closeZkDone()">الحمد لله 🤍</button></div>
   </div>
 </div>
 
@@ -7275,7 +7291,7 @@ function bankDropToday(id){
     try{ renderCapMoney(); }catch(e){} try{ renderCap(); }catch(e){} try{ renderZakat(); }catch(e){}
     try{ if(typeof renderMonths === 'function' && currentYear && data[currentYear]) renderMonths(); }catch(e){}
     showToast('اتنزّلت الفايدة النهارده ✅ ' + fmt(amt), true);
-  });
+  }, 'نزّلها');
 }
 // ===== مدة الشهادة وتجديدها: x.term (شهور) · x.autoRenew (تجديد تلقائي) · x.ext (عدد مرات التجديد اليدوي) =====
 // شهادة من غير مدة = مفتوحة زي ما كانت. شهادة بمدة وبدون تجديد تلقائي: الفوائد بتقف بعد يوم الانتهاء (وآخر فايدة بتتصرف يوم الانتهاء نفسه).
@@ -8836,7 +8852,7 @@ function renderCmAddLog(){
       d.children[0].textContent = o.dep ? '➕' : sb[0]; d.children[1].children[0].textContent = (o.dep ? 'إيداع · ' : '') + x.name;
       d.children[1].children[1].textContent = o.dep ? ('إيداع في حساب بنكي' + (o.dep.note ? ' · ' + o.dep.note : '')) : (sb[1] + (gr ? ' · 📁 ' + gr.name : '') + (capZkIn(x) ? '' : ' · 🚫 خارج الزكاة'));
       d.children[2].textContent = '+' + fmt(o.a);
-      if(d.children[3]){ if(o.dep){ d.children[3].children[0].textContent = '🗑'; d.children[3].children[0].onclick = ()=> openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(o.a) + ' ويتخصم من رصيد الحساب؟', ()=> depDel(o.dep.id)); } else d.children[3].children[0].onclick = ()=> cmEditItem(x); }
+      if(d.children[3]){ if(o.dep){ d.children[3].children[0].textContent = '🗑'; d.children[3].children[0].onclick = ()=> openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(o.a) + ' ويتخصم من رصيد الحساب؟', ()=> depDel(o.dep.id), 'إلغاء الإيداع'); } else d.children[3].children[0].onclick = ()=> cmEditItem(x); }
       body.appendChild(d);
     });
   });
@@ -9219,7 +9235,7 @@ function xfLog(){
     d.children[0].children[0].textContent = r.fn + ' ← ' + r.tn;
     d.children[0].children[1].textContent = '📅 ' + r.date + (r.note ? ' · ' + r.note : '');
     d.children[1].textContent = fmt(r.amount);
-    d.children[2].onclick = function(){ openConfirm('حذف التحويل', 'هل تريد إلغاء التحويل ده؟ المبلغ هيرجع لمكانه الأصلي.', function(){ xfDel(r.id); }); };
+    d.children[2].onclick = function(){ openConfirm('إلغاء التحويل', 'هل تريد إلغاء التحويل ده؟ المبلغ هيرجع لمكانه الأصلي.', function(){ xfDel(r.id); }, 'إلغاء التحويل'); };
     box.appendChild(d);
   });
 }
@@ -9329,7 +9345,7 @@ function depLog(){
     d.innerHTML = '<div class="dep-mid"><b></b><small></small></div><span class="dep-amt"></span><button type="button" class="dep-del" aria-label="إلغاء الإيداع">🗑</button>';
     d.children[0].children[0].textContent = '➕ إيداع'; d.children[0].children[1].textContent = cmoDayLbl(r.date) + (r.note ? ' · ' + r.note : '');
     d.children[1].textContent = '+' + fmt(r.amount);
-    d.children[2].onclick = function(){ openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(r.amount) + ' ويتخصم من رصيد الحساب؟', function(){ depDel(r.id); }); };
+    d.children[2].onclick = function(){ openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(r.amount) + ' ويتخصم من رصيد الحساب؟', function(){ depDel(r.id); }, 'إلغاء الإيداع'); };
     box.appendChild(d);
   });
 }
@@ -10472,6 +10488,20 @@ function zfAdd(){
 }
 function zfEdit(x){ const q = x.p; openGenEdit('✏️ تعديل رصيد الزكاة', 'المصدر', q.name, q.amount, function(n, a){ q.name = n || q.name || 'رصيد زكاة'; q.amount = a; zpAfter(); }); }
 function zfDel(x){ openConfirm('حذف رصيد الزكاة', 'هل تريد حذف الرصيد ده؟ هيتخصم من الرصيد المتاح.', function(){ x.bucket.adds = x.bucket.adds.filter(function(q){ return q.id !== x.p.id; }); zpAfter(); }); }
+/* 8321: لما المتبقي من زكاة السنة يوصل صفر نطلّع رسالة تهنئة */
+function zkLeftFor(y){ return zpZmOf(y) - zmPaidFor(y); }
+function zkDoneCheck(y, before){
+  try{
+    if(!(zpZmOf(y) > 0) || !(before > 0.5)) return;
+    const left = zkLeftFor(y); if(left > 0.5) return;
+    document.getElementById('zkDoneMsg').innerHTML = '';
+    const m = document.getElementById('zkDoneMsg');
+    m.appendChild(document.createTextNode('تمّ أداء زكاة سنة ' + toArabicDigits(y) + ' بالكامل ✅'));
+    const sm = document.createElement('small'); sm.textContent = left < -0.5 ? 'وصرفت ' + fmt(-left) + ' زيادة عن الواجب — جعلها الله صدقة مقبولة.' : 'المتبقي ٠ — جعلها الله في ميزان حسناتك.'; m.appendChild(sm);
+    document.getElementById('zkDoneOverlay').classList.add('open');
+  }catch(e){}
+}
+function closeZkDone(){ document.getElementById('zkDoneOverlay').classList.remove('open'); }
 function zpAfter(){ save(); try{ renderZM(); }catch(e){} try{ renderZakat(); }catch(e){} try{ renderZmPay(); }catch(e){} }
 function zpAdd(){
   const dest = document.getElementById('zpDest').value.trim(), amt = Number(document.getElementById('zpAmt').value) || 0, date = document.getElementById('zpDate').value || dateToInputValue(Date.now());
@@ -10480,17 +10510,20 @@ function zpAdd(){
   const zy = _zpYear || currentYear, dy = Number(date.slice(0, 4)), dm = Number(date.slice(5, 7)) - 1;
   if(!(dy > 2000) || !(dm >= 0 && dm <= 11)){ showToast('التاريخ مش صح', false); return; }
   const doAdd = function(){
+    const lf0 = zkLeftFor(zy);
     zkGetAt(zy, zpMonthFor(date, zy)).payments.push({id: uid(), amount: amt, note: dest, date: date});
     document.getElementById('zpDest').value = ''; document.getElementById('zpAmt').value = ''; document.getElementById('zpDate').value = dateToInputValue(Date.now());
     zpAfter(); showToast('تم الصرف وخصمه من الرصيد المتاح لزكاة ' + toArabicDigits(zy) + ' ✅', true);
+    zkDoneCheck(zy, lf0);
   };
   const av = zmAvailFor(zy);
-  if(amt > av + 0.5){ openConfirm('الرصيد المتاح مش كفاية', 'المتاح ' + fmt(Math.max(av, 0)) + ' والمطلوب صرفه ' + fmt(amt) + '. هيبقى الرصيد بالسالب. تكمل؟', doAdd); return; }
+  if(amt > av + 0.5){ openConfirm('الرصيد المتاح مش كفاية', 'المتاح ' + fmt(Math.max(av, 0)) + ' والمطلوب صرفه ' + fmt(amt) + '. هيبقى الرصيد بالسالب. تكمل؟', doAdd, 'كمّل'); return; }
   doAdd();
 }
 function zpEdit(x){
   const p = x.p, ts = p.date ? new Date(p.date + 'T12:00:00').getTime() : Date.now();
   openGenEdit('✏️ تعديل صرف الزكاة', 'جهة الصرف', p.note, p.amount, function(n, a, dt){
+    const lf0 = zkLeftFor(_zpYear || currentYear);
     p.note = n || p.note || 'دفعة زكاة'; p.amount = a;
     if(dt){
       const nd = dateToInputValue(dt), zy = _zpYear || currentYear, nm = zpMonthFor(nd, zy);
@@ -10498,6 +10531,7 @@ function zpEdit(x){
       if(nm !== x.m){ x.bucket.payments = x.bucket.payments.filter(function(q){ return q.id !== p.id; }); zkGetAt(zy, nm).payments.push(p); }
     }
     zpAfter();
+    zkDoneCheck(_zpYear || currentYear, lf0);
   }, ts);
 }
 function zpDel(x){ openConfirm('حذف صرف الزكاة', 'هل تريد حذف الصرف ده؟ المبلغ هيرجع للمتبقي من الزكاة.', function(){ x.bucket.payments = x.bucket.payments.filter(function(q){ return q.id !== x.p.id; }); zpAfter(); }); }
