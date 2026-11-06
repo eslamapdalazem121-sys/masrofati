@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8317">
+<meta name="app-version" content="2026-11-06.8319">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -12268,7 +12268,7 @@ if(navigator.serviceWorker){ navigator.serviceWorker.addEventListener('controlle
     const hadCtl = !!navigator.serviceWorker.controller; let shown = false;
     navigator.serviceWorker.addEventListener('controllerchange', function(){
       if(!hadCtl || shown) return; shown = true;
-      try{ showToast('🔄 نزلت نسخة جديدة من التطبيق — اقفله وافتحه تاني عشان تشتغل', true); }catch(e){}
+      try{ reloadForUpdateWhenIdle('sw-' + Date.now()); }catch(e){ try{ showToast('🔄 نزلت نسخة جديدة من التطبيق — اقفله وافتحه تاني', true); }catch(_){} }
     });
   }catch(e){}
 })();
@@ -12499,8 +12499,39 @@ async function checkForNewVersion(){
     if(r && r.version && r.version !== APP_VERSION){
       _latestVersion = r.version;
       updateVersionUI();
-      showToast('🔄 فيه نسخة أحدث من التطبيق — افتح الإعدادات وادوس «تحديث التطبيق»', true);
+      autoApplyUpdate(r);   // 8319: بيتحدّث لوحده من غير ما تروح الإعدادات
     }
+  }catch(e){}
+}
+/* 8319: تحديث تلقائي — لما نلاقي نسخة أحدث بنحدّث الكاش وبنعيد تشغيل التطبيق لوحده في وقت آمن (مفيش نافذة مفتوحة ولا كتابة جارية، أو لما التطبيق يتخبّى) */
+function updateIdleOk(){
+  try{
+    if(document.visibilityState === 'hidden') return true;
+    if(document.querySelector('.modal-overlay.open')) return false;
+    const a = document.activeElement; if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return false;
+    return true;
+  }catch(e){ return true; }
+}
+function reloadForUpdateWhenIdle(ver){
+  try{ if(sessionStorage.getItem('amwali_auto_upd') === ver) return; }catch(e){}   // مرة واحدة لكل نسخة (يمنع التكرار لو الكاش ما اتبدّلش)
+  const go = function(){
+    if(!updateIdleOk()) return false;
+    try{ sessionStorage.setItem('amwali_auto_upd', ver); }catch(e){}
+    try{ showToast('🔄 بنحدّث التطبيق للنسخة الأحدث…', true); }catch(e){}
+    setTimeout(function(){ location.reload(); }, 700);
+    return true;
+  };
+  if(go()) return;
+  const t = setInterval(function(){ if(go()) clearInterval(t); }, 4000);
+}
+async function autoApplyUpdate(r){
+  try{
+    const keys = await caches.keys();
+    const pre = 'amwali-' + new URL('./', location.href).href.replace(/[^a-z0-9]+/gi, '-') + '-';
+    for(const k of keys){
+      if(k.indexOf(pre) === 0){ const c = await caches.open(k); await c.put(r.url, new Response(r.html, {status:200, headers:{'content-type':'text/html; charset=utf-8'}})); }
+    }
+    reloadForUpdateWhenIdle(r.version);
   }catch(e){}
 }
 async function updateAppNow(){
@@ -12793,14 +12824,14 @@ function cloudDeviceLabel(){
 }
 
 // ---- أول مرة: فيه بيانات على الجهاز وفي الحساب — المستخدم يختار ----
-function cloudAskFirstChoice(remote){
+function cloudAskFirstChoice(remote, conflict){
   cloud.pendingChoice = remote;
   const remoteRes = remote.__decoded;
   const mine = countExpensesInData(data);
   const theirs = remoteRes ? remoteRes.entries : '?';
   openConfirm(
-    'فيه بيانات في حسابك',
-    'عندك بيانات على الجهاز ده (' + toArabicDigits(mine) + ' مصروف) وبيانات تانية محفوظة في حسابك (' + toArabicDigits(theirs) + ' مصروف). تستخدم أنهي واحدة؟ (الاتنين بيتحفظ منهم نسخة أمان)',
+    conflict ? 'البيانات اتغيّرت على جهازين' : 'فيه بيانات في حسابك',
+    (conflict ? 'اتعدّلت بيانات على الجهاز ده وكمان على جهاز تاني قبل ما يتزامنوا. ' : '') + 'عندك بيانات على الجهاز ده (' + toArabicDigits(mine) + ' مصروف) وبيانات تانية محفوظة في حسابك (' + toArabicDigits(theirs) + ' مصروف). تستخدم أنهي واحدة؟ (الاتنين بيتحفظ منهم نسخة أمان)',
     async ()=>{ // استخدم اللي في الحساب
       cloud.pendingChoice = null;
       try{ await cloudApplyRemote(remote); cloudSetStatus(null, true); showToast('اتحمّلت بيانات حسابك ✅', true); }
@@ -12833,8 +12864,16 @@ async function cloudReconcile(remote){
     cloudAskFirstChoice(remote);
     return 'asked';
   }
-  if(rt > lt && rt > st){ await cloudApplyRemote(remote); showToast('اتحدّثت بياناتك من حسابك ☁️', true); return 'pulled'; }
-  if(lt > rt){ await cloudPush(); return 'pushed'; }
+  // 8319: القرار بحسب مين اتغيّر من آخر مزامنة (مش بحسب أحدث وقت بس): الحساب اتغيّر وانت ما عدّلتش → نسحب من الحساب. انت عدّلت والحساب ما اتغيّرش → نرفع. الاتنين اتغيّروا → نسألك.
+  const remoteChanged = rt > 0 && rt !== st, localChanged = lt > st;
+  if(remoteChanged && !localChanged){ await cloudApplyRemote(remote); showToast('اتحدّثت بياناتك من حسابك ☁️', true); return 'pulled'; }
+  if(!remoteChanged && localChanged){ await cloudPush(); return 'pushed'; }
+  if(remoteChanged && localChanged){
+    if(cloud.pendingChoice) return 'asked';
+    try{ remote.__decoded = await decodeTransferCode(remote.blob); }catch(e){}
+    cloudAskFirstChoice(remote, true);
+    return 'asked';
+  }
   return 'same';
 }
 async function cloudSync(reason){
@@ -12878,8 +12917,13 @@ function cloudSchedulePush(){
   clearTimeout(cloud.pushTimer);
   cloud.pushTimer = setTimeout(()=> cloudSync('local'), 2500);
 }
+window.__cloudAutoDepth = 0;
+['autoIncSync', 'autoIncRefresh', 'grpCarrySync'].forEach(function(n){   // 8319: الكتابة التلقائية مش بتبدّل «وقت آخر تعديل»
+  try{ const f = window[n]; if(typeof f !== 'function') return; window[n] = function(){ window.__cloudAutoDepth++; try{ return f.apply(this, arguments); } finally { window.__cloudAutoDepth--; } }; }catch(e){}
+});
 window.__onDataSaved = function(){
   if(cloud.applying) return;
+  if(window.__cloudAutoDepth > 0) return;
   cloudSetKey(CLOUD_KEYS.updated, Date.now());
   cloudSchedulePush();
 };
@@ -13006,6 +13050,7 @@ function cloudSkipLogin(){
 window.__afterStart = function(){
   updateCloudUI();
   cloudInit();
+  try{ setInterval(function(){ if(document.visibilityState === 'visible') checkForNewVersion(); }, 20*60*1000); document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') checkForNewVersion(); }); }catch(e){}
   window.addEventListener('online', ()=>{ if(cloud.sdk && cloud.user) cloudSync('online'); else if(!cloud.sdk) cloudInit(); else cloudMaybeShowGate(); updateCloudUI(); });
   window.addEventListener('offline', ()=>{ cloudSetStatus(null, false); updateCloudUI(); });
   // لما ترجع للتطبيق: لو فيه خطأ قديم نجرّب فورًا، وإلا نشوف لو فيه تحديث جاي من جهاز تاني
