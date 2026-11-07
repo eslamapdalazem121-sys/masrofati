@@ -1,5 +1,5 @@
 /* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
-const VERSION = '2026-11-07.8329';
+const VERSION = '2026-11-07.8331';
 // كاش مستقل لكل نسخة/مجلد (مش بيمسح كاش النسخ التانية)
 const SCOPE_ID = ((self.registration && self.registration.scope) || self.location.href).replace(/[^a-z0-9]+/gi, '-');
 const CACHE_PREFIX = 'amwali-' + SCOPE_ID + '-';
@@ -114,15 +114,40 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
+  const d = event.data;
+  if (d && d.type === 'AM_QN') event.waitUntil(qnSet(d.on ? d.n : null));   // حفظ/مسح إعداد الإشعار الثابت
 });
 
+/* 8331: إشعار «الإضافة السريعة» الثابت: أزراره (مصروف جديد / دفع زكاة / أموال) بتفتح التطبيق على الصفحة المطلوبة */
+const QN_TAG = 'am-quick', QN_CACHE = 'am-flags';
+async function qnGet() {
+  try { const c = await caches.open(QN_CACHE), r = await c.match('qn'); return r ? await r.json() : null; } catch (e) { return null; }
+}
+async function qnSet(n) {
+  try { const c = await caches.open(QN_CACHE); if (n) await c.put('qn', new Response(JSON.stringify(n))); else await c.delete('qn'); } catch (e) {}
+}
+async function qnShow() {
+  const n = await qnGet();
+  if (n && n.title) { try { await self.registration.showNotification(n.title, n.opts || {}); } catch (e) {} }
+}
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
+  const n = event.notification, isQn = n.tag === QN_TAG;
+  let act = event.action || '';
+  if (!act && isQn && n.data && n.data.bodyAct) act = n.data.bodyAct;
+  if (act !== 'exp' && act !== 'zk' && act !== 'mn') act = '';
+  if (!isQn) n.close();
   event.waitUntil((async () => {
     const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const c of list) { if ('focus' in c) return c.focus(); }
-    if (self.clients.openWindow) return self.clients.openWindow('./');
+    let done = false;
+    for (const c of list) {
+      if ('focus' in c) { try { await c.focus(); } catch (e) {} if (act) { try { c.postMessage({ type: 'AM_ACT', a: act }); } catch (e) {} } done = true; break; }
+    }
+    if (!done && self.clients.openWindow) { try { await self.clients.openWindow(act ? './?a=' + act : './'); } catch (e) {} }
+    if (isQn) { n.close(); await qnShow(); }   // الإشعار الثابت يرجع يظهر بعد الضغط عليه
   })());
+});
+self.addEventListener('notificationclose', (event) => {
+  if (event.notification.tag === QN_TAG) event.waitUntil(qnShow());   // لو اتشال بالسحب يرجع تاني (طول ما الخاصية شغالة)
 });
 
 // إشعارات السيرفر (FCM) حتى والتطبيق مقفول. لو التطبيق مفتوح قدامك بنسيبه هو اللي ينبّه.

@@ -29,5 +29,46 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "مصروف جديد",
+      "short_name": "مصروف",
+      "description": "إضافة مصروف جديد",
+      "url": "./?a=exp",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "دفع زكاة",
+      "short_name": "زكاة",
+      "description": "صرف من الزكاة",
+      "url": "./?a=zk",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "أموال",
+      "short_name": "أموال",
+      "description": "صفحة الأموال",
+      "url": "./?a=mn",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

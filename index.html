@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-07.8329">
+<meta name="app-version" content="2026-11-07.8331">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -4081,6 +4081,139 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 
 <button class="fab" onclick="openQuickAdd()" title="إضافة مصروف">＋</button>
 
+<style id="v8330">
+/* 8330: الزر العائم «أموالي» — بيفتح مصروف جديد / دفع زكاة / أموال، والتحكم فيه من الإعدادات */
+.am-fab{position:fixed; bottom:calc(22px + env(safe-area-inset-bottom,0px)); z-index:60; display:none; flex-direction:column; gap:12px;}
+.am-fab[data-side="right"]{right:18px; align-items:flex-end;}
+.am-fab[data-side="left"]{left:18px; align-items:flex-start;}
+.am-back{position:fixed; inset:0; z-index:-1; background:rgba(10,12,16,.38); backdrop-filter:blur(1.5px); opacity:0; pointer-events:none; transition:opacity .18s ease;}
+.am-fab.open .am-back{opacity:1; pointer-events:auto;}
+.am-menu{display:flex; flex-direction:column-reverse; gap:10px; align-items:inherit;}
+.am-item{display:flex; align-items:center; gap:10px; padding:9px 14px 9px 18px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:inherit; font-weight:800; font-size:calc(14.5px * var(--fs,1)); cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.22); opacity:0; transform:translateY(14px) scale(.94); pointer-events:none; transition:opacity .16s ease, transform .18s ease;}
+.am-fab.open .am-item{opacity:1; transform:none; pointer-events:auto;}
+.am-fab.open .am-item:nth-child(2){transition-delay:.04s;}
+.am-fab.open .am-item:nth-child(3){transition-delay:.08s;}
+.am-item:active{transform:scale(.96) !important;}
+.am-ic{width:30px; height:30px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--accent-soft); font-size:calc(17px * var(--fs,1));}
+.am-main{display:flex; align-items:center; gap:8px; height:54px; padding:0 20px 0 18px; border-radius:999px; border:none; color:#fff; font-family:inherit; font-weight:900; font-size:calc(16px * var(--fs,1)); cursor:pointer; background:linear-gradient(135deg, var(--accent-dark), var(--accent)); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), inset 0 -4px 0 rgba(0,0,0,.18), 0 5px 0 rgba(0,0,0,.28), 0 16px 26px -8px rgba(0,0,0,.4); transition:transform .12s ease, box-shadow .12s ease;}
+.am-main:active{transform:translateY(3px); box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 2px 0 rgba(0,0,0,.28), 0 8px 12px -6px rgba(0,0,0,.4);}
+.am-main-ic{display:inline-block; transition:transform .2s ease;}
+.am-fab.open .am-main-ic{transform:rotate(90deg);}
+body.fab-am-on .fab{display:none !important;}
+body.kb-open .am-fab{display:none !important;}
+#fabItemsBox.off{opacity:.45; pointer-events:none;}
+@media (prefers-reduced-motion: reduce){ .am-item, .am-back, .am-main-ic{transition:none;} }
+</style>
+<div class="am-fab" id="amFab" data-side="right">
+  <div class="am-back" onclick="amFabClose()"></div>
+  <div class="am-menu" id="amFabMenu">
+    <button type="button" class="am-item" data-am="exp" onclick="amFabGo('exp')"><span class="am-ic">🧾</span><span>مصروف جديد</span></button>
+    <button type="button" class="am-item" data-am="zk" onclick="amFabGo('zk')"><span class="am-ic">🤲</span><span>دفع زكاة</span></button>
+    <button type="button" class="am-item" data-am="mn" onclick="amFabGo('mn')"><span class="am-ic">💵</span><span>أموال</span></button>
+  </div>
+  <button type="button" class="am-main" id="amFabBtn" aria-haspopup="true" aria-expanded="false" onclick="amFabToggle()"><span class="am-main-ic" id="amFabIco">💼</span><span>أموالي</span></button>
+</div>
+<script>
+/* 8330: منطق الزر العائم «أموالي» */
+function fabCfg(s){
+  s = s || (typeof _draftSettings !== 'undefined' && _draftSettings) || settings || {};
+  return {on: s.fabOn !== false, exp: s.fabExp !== false, zk: s.fabZk !== false, mn: s.fabMn !== false, side: s.fabSide === 'left' ? 'left' : 'right'};
+}
+function fabApply(s){
+  var el = document.getElementById('amFab'); if(!el) return;
+  var c = fabCfg(s), show = c.on && (c.exp || c.zk || c.mn);
+  el.style.display = show ? 'flex' : 'none';
+  el.dataset.side = c.side;
+  ['exp','zk','mn'].forEach(function(k){ var b = el.querySelector('[data-am="' + k + '"]'); if(b) b.style.display = c[k] ? '' : 'none'; });
+  document.body.classList.toggle('fab-am-on', show);
+  if(!show) amFabClose();
+}
+function fabSettingsUI(s){
+  var c = fabCfg(s), m = {fabOnToggle: c.on, fabExpChk: c.exp, fabZkChk: c.zk, fabMnChk: c.mn};
+  Object.keys(m).forEach(function(id){ var e = document.getElementById(id); if(e) e.checked = !!m[id]; });
+  var box = document.getElementById('fabItemsBox'); if(box) box.classList.toggle('off', !c.on);
+  { var qc = document.getElementById('qnChk'); if(qc) qc.checked = !!(s && s.qnOn === true) && (typeof Notification !== 'undefined' && Notification.permission === 'granted'); }
+  var sb = document.getElementById('optFabSide'); if(sb) Array.from(sb.children).forEach(function(b){ b.classList.toggle('active', b.dataset.val === c.side); });
+}
+function amFabOpen(){ var el = document.getElementById('amFab'); if(!el) return; el.classList.add('open'); document.getElementById('amFabBtn').setAttribute('aria-expanded','true'); document.getElementById('amFabIco').textContent = '✕'; }
+function amFabClose(){ var el = document.getElementById('amFab'); if(!el) return; el.classList.remove('open'); var b = document.getElementById('amFabBtn'); if(b) b.setAttribute('aria-expanded','false'); var i = document.getElementById('amFabIco'); if(i) i.textContent = '💼'; }
+function amFabToggle(){ var el = document.getElementById('amFab'); if(el && el.classList.contains('open')) amFabClose(); else amFabOpen(); }
+function amFabGo(k){
+  amFabClose();
+  try{
+    if(k === 'exp') openQuickAdd();
+    else if(k === 'zk') openZmPay();
+    else if(k === 'mn') openCapMoney();
+  }catch(e){ console.error(e); try{ showToast('مقدرتش أفتح الصفحة دي', false); }catch(_){} }
+}
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') amFabClose(); });
+try{ fabApply(settings); }catch(e){}
+</script>
+<script>
+/* 8331: الوصول السريع من بره التطبيق — (١) اختصارات أيقونة التطبيق ?a=exp|zk|mn  (٢) إشعار ثابت بأزرار */
+function amRun(a){ if(a === 'exp') openQuickAdd(); else if(a === 'zk') openZmPay(); else if(a === 'mn') openCapMoney(); }
+function amWhenReady(a){
+  if(a !== 'exp' && a !== 'zk' && a !== 'mn') return;
+  var n = 0;
+  (function t(){
+    n++;
+    var lk = document.getElementById('lockScreen'), locked = false, sp = document.getElementById('aSplash');
+    try{ locked = !!lk && getComputedStyle(lk).display !== 'none'; }catch(e){}
+    var ready = false; try{ ready = typeof openQuickAdd === 'function' && typeof data === 'object' && !!data; }catch(e){}
+    if(ready && !locked && !sp){ try{ amRun(a); }catch(e){ console.error(e); } return; }
+    if(n < 600) setTimeout(t, 300);   // بيستنى القفل (PIN) والمقدمة لحد ما يخلصوا
+  })();
+}
+(function(){
+  try{
+    var q = new URLSearchParams(location.search).get('a');
+    if(q === 'exp' || q === 'zk' || q === 'mn'){ amWhenReady(q); try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} }
+  }catch(e){}
+  try{ if(navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', function(e){ if(e.data && e.data.type === 'AM_ACT') amWhenReady(e.data.a); }); }catch(e){}
+})();
+function qnBuild(){
+  var max = 2; try{ if(typeof Notification !== 'undefined' && Notification.maxActions) max = Notification.maxActions; }catch(e){}
+  var all = [{action:'exp', title:'🧾 مصروف جديد'}, {action:'zk', title:'🤲 دفع زكاة'}, {action:'mn', title:'💵 أموال'}];
+  var acts = all.slice(0, Math.max(1, Math.min(3, max)));
+  var bodyAct = acts.length < 3 ? 'mn' : '';   // لو الموبيل بيعرض زرين بس: الضغط على الإشعار نفسه بيفتح «أموال»
+  return {title: 'أموالي — إضافة سريعة', opts: {body: bodyAct ? 'دوس على الإشعار لفتح «أموال»' : 'اختار من الأزرار تحت', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'am-quick', renotify: false, silent: true, requireInteraction: true, lang: 'ar', dir: 'rtl', actions: acts, data: {bodyAct: bodyAct}}};
+}
+async function qnShow(){
+  if(typeof Notification === 'undefined' || Notification.permission !== 'granted' || !navigator.serviceWorker) return false;
+  var reg = await navigator.serviceWorker.getRegistration(); if(!reg) return false;
+  reg = await navigator.serviceWorker.ready;
+  var n = qnBuild();
+  try{ if(reg.active) reg.active.postMessage({type:'AM_QN', on:true, n:n}); }catch(e){}
+  await reg.showNotification(n.title, n.opts);
+  return true;
+}
+async function qnHide(){
+  try{
+    var reg = await navigator.serviceWorker.getRegistration(); if(!reg) return;
+    if(reg.active) reg.active.postMessage({type:'AM_QN', on:false});
+    (await reg.getNotifications({tag:'am-quick'})).forEach(function(x){ x.close(); });
+  }catch(e){}
+}
+async function toggleQuickNotif(on){
+  var chk = document.getElementById('qnChk'), hint = document.getElementById('qnHint');
+  if(on){
+    if(typeof Notification === 'undefined' || !navigator.serviceWorker){ chk.checked = false; hint.textContent = 'المتصفح ده مش بيدعم الإشعارات. على الآيفون الإشعار مش بيعرض أزرار.'; return; }
+    var perm = Notification.permission;
+    if(perm !== 'granted'){ try{ perm = await Notification.requestPermission(); }catch(e){ perm = 'denied'; } }
+    if(perm !== 'granted'){ chk.checked = false; hint.textContent = 'الإذن مرفوض. فعّل الإشعارات للتطبيق من إعدادات الموبيل وجرّب تاني.'; return; }
+    var ok = false; try{ ok = await qnShow(); }catch(e){ console.error(e); }
+    if(!ok){ chk.checked = false; hint.textContent = 'الإشعار محتاج التطبيق يكون متثبّت ومفتوح من رابط https. جرّب بعد ما تثبّته.'; return; }
+    hint.textContent = 'شغّال ✅ شوف الإشعار في شريط الإشعارات.';
+    previewSetting('qnOn', true);
+  } else {
+    previewSetting('qnOn', false);
+    hint.textContent = '';
+    qnHide();
+  }
+}
+window.addEventListener('load', function(){ setTimeout(function(){ try{ if(settings && settings.qnOn === true) qnShow().catch(function(){}); }catch(e){} }, 1500); });
+</script>
+
 <div class="modal-overlay" id="quickAddOverlay">
   <div class="modal-box">
     <div class="ys-top"><button type="button" class="ys-back" onclick="closeQuickAdd()">› رجوع</button><h3 class="ys-ttl">🧾 إضافة مصروف</h3></div>
@@ -4550,6 +4683,43 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
         <button class="opt-chip" data-val="mid" onclick="previewSetting('depth','mid')">متوسط</button>
         <button class="opt-chip" data-val="strong" onclick="previewSetting('depth','strong')">قوي</button>
       </div>
+    </div>
+
+    <div class="settings-section" id="fabSection">
+      <h4>🔘 الزر العائم «أموالي»</h4>
+      <div class="check-row" style="margin:6px 0 12px;">
+        <input type="checkbox" id="fabOnToggle" onchange="previewSetting('fabOn', this.checked)">
+        <label for="fabOnToggle" style="margin:0;">إظهار الزر العائم على الشاشة</label>
+      </div>
+      <div id="fabItemsBox">
+        <div class="check-row" style="margin:0 0 8px;">
+          <input type="checkbox" id="fabExpChk" onchange="previewSetting('fabExp', this.checked)">
+          <label for="fabExpChk" style="margin:0;">🧾 مصروف جديد</label>
+        </div>
+        <div class="check-row" style="margin:0 0 8px;">
+          <input type="checkbox" id="fabZkChk" onchange="previewSetting('fabZk', this.checked)">
+          <label for="fabZkChk" style="margin:0;">🤲 دفع زكاة</label>
+        </div>
+        <div class="check-row" style="margin:0 0 12px;">
+          <input type="checkbox" id="fabMnChk" onchange="previewSetting('fabMn', this.checked)">
+          <label for="fabMnChk" style="margin:0;">💵 أموال</label>
+        </div>
+        <div class="opt-row" id="optFabSide">
+          <button type="button" class="opt-chip" data-val="right" onclick="previewSetting('fabSide','right')">⬅️ يمين الشاشة</button>
+          <button type="button" class="opt-chip" data-val="left" onclick="previewSetting('fabSide','left')">شمال الشاشة ➡️</button>
+        </div>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin:6px 0 0;">الزر بيظهر في الصفحة الرئيسية وصفحات الشهور، ولما تدوس عليه بيفتح البنود اللي مفعّلها. لما يكون شغّال، زر ＋ القديم بيختفي لأن «مصروف جديد» جواه.</p>
+    </div>
+
+    <div class="settings-section" id="qnSection">
+      <h4>⚡ الوصول السريع من بره التطبيق</h4>
+      <div class="check-row" style="margin:6px 0 8px;">
+        <input type="checkbox" id="qnChk" onchange="toggleQuickNotif(this.checked)">
+        <label for="qnChk" style="margin:0;">إشعار ثابت فيه أزرار (مصروف جديد / دفع زكاة / أموال)</label>
+      </div>
+      <p id="qnHint" style="font-size:12px; color:var(--muted); margin:0 0 8px;"></p>
+      <p style="font-size:12px; color:var(--muted); margin:0;">الإشعار بيظهر في شريط الإشعارات حتى لو التطبيق مقفول، والأزرار بتفتح الصفحة مباشرة (أندرويد). لو بعض الأزرار مش ظاهرة، اسحب الإشعار لتحت عشان يتوسّع.<br>وكمان: دوس مطوّلًا على أيقونة التطبيق في شاشة الموبيل هتلاقي نفس الاختصارات التلاتة.</p>
     </div>
 
     <div class="settings-section" id="moveSection">
@@ -5222,6 +5392,7 @@ function applySettings(s){
   try{ zakIcoApply(s); }catch(e){}
   try{ msIcoApply(s); }catch(e){}
   try{ yiIcoApply(s); }catch(e){}
+  try{ fabApply(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
   const root = document.documentElement;
   const newMode = s.digits === 'en' ? 'en' : 'ar';
@@ -5317,6 +5488,7 @@ function refreshSettingsUI(s){
   try{ zakIcoRender(s); }catch(e){}
   try{ msIcoRender(s); }catch(e){}
   try{ yiIcoRender(s); }catch(e){}
+  try{ fabSettingsUI(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
   ['theme','accent','font','depth','digits','clickType','introSound'].forEach(key=>{
     const containerId = 'opt' + key.charAt(0).toUpperCase() + key.slice(1);
