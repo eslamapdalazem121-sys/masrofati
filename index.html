@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8327">
+<meta name="app-version" content="2026-11-06.8328">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -5164,7 +5164,7 @@ let settings = {
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
-var ZIG_STYLES = ['smooth','zig','step','bars','area','lollipop','dots','gauge','market','off'], ZIG_PERIODS = ['live','day','week','month','quarter','half','year'];
+var ZIG_STYLES = ['smooth','zig','step','bars','area','lollipop','dots','gauge','market','dual','off'], ZIG_PERIODS = ['live','day','week','month','quarter','half','year'];
 function zigStyleOf(card){
   try{ var z = (_draftSettings || settings).zig || {}, v = z[card]; return ZIG_STYLES.indexOf(v) >= 0 ? v : ((card === 'avg' || card === 'gdual') ? 'market' : 'smooth'); }catch(e){ return 'smooth'; }
 }
@@ -8638,11 +8638,12 @@ function gdualRender(){
     var c = r[0], svg = document.getElementById(r[1]), cap = document.getElementById(r[2]), val = document.getElementById(r[3]);
     if(!svg) return;
     var days = __zigDemo ? gdDemoDays(c === 'gx' ? _gdDemo.X : _gdDemo.P, c === 'gx' ? _gdDemo.x : _gdDemo.p) : gdDays(c), cur = r[5], prevV = days.length > 1 ? days[days.length - 2].bal : null, ch = (cur !== null && prevV !== null) ? cur - prevV : 0;
+    var stale = false; if(cur === null && !__zigDemo && days.length){ cur = days[days.length - 1].bal; stale = true; }
     if(val){
       if(cur === null) val.innerHTML = '<span class="gd-na">—</span>';
       else{
         var up = c === 'gx' ? ch >= 0 : cur >= 0, col = up ? GD_BLUE : GD_RED, txt = c === 'gx' ? '$' + toArabicDigits(fmt(Math.round(cur * 100) / 100)) : (cur >= 0 ? '+' : '−') + toArabicDigits(fmt(Math.round(Math.abs(cur))));
-        val.innerHTML = '<span style="color:' + col + '">' + txt + '</span>' + (prevV !== null && Math.abs(ch) > 0.0001 ? ' <small style="color:' + (ch >= 0 ? GD_BLUE : GD_RED) + '">' + (ch >= 0 ? '▲' : '▼') + ' ' + toArabicDigits(fmt(Math.round(Math.abs(ch) * 100) / 100)) + '</small>' : '');
+        val.innerHTML = '<span style="color:' + col + '">' + txt + '</span>' + (prevV !== null && Math.abs(ch) > 0.0001 ? ' <small style="color:' + (ch >= 0 ? GD_BLUE : GD_RED) + '">' + (ch >= 0 ? '▲' : '▼') + ' ' + toArabicDigits(fmt(Math.round(Math.abs(ch) * 100) / 100)) + '</small>' : '') + (stale ? ' <small class="gd-na">⏱ آخر قراءة</small>' : '');
       }
     }
     zigPaint(svg, cap, {days: days, cap: (__zigDemo ? '' : ''), style: st, period: per, card: __zigDemo ? c + 'd' : c, empty: r[6], upCol: GD_BLUE, dnCol: GD_RED, demoLive: true});
@@ -8704,7 +8705,8 @@ function zigLiveSeries(o){
 function zigLiveAny(){ return ['total','money','gold','goldpage','gdual'].some(function(c){ return zigPeriodOf(c) === 'live' && zigStyleOf(c) !== 'off'; }); }
 async function zigLiveLoop(){
   try{
-    if(!zigLiveAny() || document.visibilityState !== 'visible') return;
+    if(!zigLiveAny()){ if(document.visibilityState === 'visible' && goldScreenOpen()) gdualRender(); return; }
+    if(document.visibilityState !== 'visible') return;
     if(['gold','goldpage','gdual'].some(function(c){ return zigPeriodOf(c) === 'live'; }) && navigator.onLine && !goldScreenOpen() && !__zigDemo) await goldTick();
   }catch(e){}
   try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} try{ capZigRender(); }catch(e){} try{ gdualRender(); }catch(e){}
@@ -8712,7 +8714,7 @@ async function zigLiveLoop(){
 function zigPaint(svg, cap, o){
   if(!svg) return;
   var per = o.period || 'day'; if(__zigDemo && per === 'live' && !o.demoLive) per = 'day';
-  var all = per === 'live' ? zigLiveSeries(o) : zigGroup(o.days || [], per), days = all.slice(zigSliceOf(per)), W = 300, H = (o.H && o.style !== 'gauge') ? o.H : 56, P = 7;
+  var all = per === 'live' ? zigLiveSeries(o) : zigGroup(o.days || [], per), days = all.slice(zigSliceOf(per)), W = 300, H = o.style === 'dual' ? Math.max(o.H || 0, 92) : ((o.H && o.style !== 'gauge') ? o.H : 56), P = 7;
   if(cap) cap.style.display = '';
   svg.style.display = '';
   svg.setAttribute('viewBox', '0 0 300 ' + H);
@@ -8790,6 +8792,28 @@ function zigPaint(svg, cap, o){
     mk += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3" fill="' + DOT + '" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke">' + tip(days[days.length - 1]) + '</circle>';
     svg.setAttribute('viewBox', '0 0 300 ' + MH);
     return done(mk);
+  }
+  if(sty === 'dual'){
+    /* 8328: مؤشر مزدوج — فوق: خط القيمة (كل جزء أزرق لو زاد وأحمر لو نزل) · تحت: أعمدة التغيّر في كل فترة (أزرق فوق الخط / أحمر تحته) */
+    var UPc = o.upCol || '#2f6fed', DNc = o.dnCol || '#e03131', topB = Math.round(H * 0.56), botT = Math.round(H * 0.68), botB = H - P, midY = (botT + botB) / 2;
+    var yT = pts.map(function(v){ return P + (1 - (v - mn) / rg) * (topB - P); });
+    var mxd = Math.max.apply(null, days.map(function(g){ return Math.abs(g.d); })) || 1, segs = '', full = 'M' + xs[0].toFixed(1) + ' ' + yT[0].toFixed(1), k2, cx2;
+    for(k2 = 1; k2 < n; k2++){
+      cx2 = (xs[k2 - 1] + xs[k2]) / 2;
+      var seg = ' C' + cx2.toFixed(1) + ' ' + yT[k2 - 1].toFixed(1) + ' ' + cx2.toFixed(1) + ' ' + yT[k2].toFixed(1) + ' ' + xs[k2].toFixed(1) + ' ' + yT[k2].toFixed(1);
+      full += seg;
+      segs += '<path class="cm-zl" pathLength="1" d="M' + xs[k2 - 1].toFixed(1) + ' ' + yT[k2 - 1].toFixed(1) + seg + '" fill="none" stroke="' + (pts[k2] >= pts[k2 - 1] ? UPc : DNc) + '" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+    }
+    var lastC = pts[n - 1] >= pts[0] ? UPc : DNc, bwd = Math.min(16, (W - 2 * P) / days.length * 0.6), brs = '';
+    days.forEach(function(g, i){ var x = xs[i + 1], h = Math.max(1.5, Math.abs(g.d) / mxd * (botB - botT) / 2); brs += '<rect class="cm-bar" style="animation-delay:' + (i * 40) + 'ms" x="' + (x - bwd / 2).toFixed(1) + '" y="' + (g.d >= 0 ? midY - h : midY).toFixed(1) + '" width="' + bwd.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2.5" fill="' + (g.d >= 0 ? UPc : DNc) + '" fill-opacity="' + (i === days.length - 1 ? 1 : 0.8) + '">' + tip(g) + '</rect>'; });
+    var lx = xs[n - 1], ly = yT[n - 1];
+    return done('<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + lastC + '" stop-opacity=".32"/><stop offset="1" stop-color="' + lastC + '" stop-opacity="0"/></linearGradient></defs>'
+      + '<path d="' + full + ' L' + xs[n - 1].toFixed(1) + ' ' + topB + ' L' + xs[0].toFixed(1) + ' ' + topB + ' Z" fill="url(#' + uid + ')"/>'
+      + '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + ((topB + botT) / 2).toFixed(1) + '" y2="' + ((topB + botT) / 2).toFixed(1) + '" stroke="rgba(128,128,128,.35)" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>'
+      + '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + midY.toFixed(1) + '" y2="' + midY.toFixed(1) + '" stroke="rgba(128,128,128,.5)" stroke-width="1" vector-effect="non-scaling-stroke"/>'
+      + segs + brs
+      + '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="4" fill="' + lastC + '" opacity=".35"><animate attributeName="r" values="4;10;4" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values=".45;0;.45" dur="1.8s" repeatCount="indefinite"/></circle>'
+      + '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3.8" fill="' + lastC + '" stroke="#fff" stroke-width="1.6" vector-effect="non-scaling-stroke">' + tip(days[days.length - 1]) + '</circle>');
   }
   if(sty === 'bars'){
     var bw = Math.min(22, (W - 2 * P) / days.length * 0.62), bars = '', lo = mn >= 0 ? mn - ((mx - mn) || mx || 1) * 0.45 : mn, rg2 = (mx - lo) || 1;
@@ -8869,6 +8893,7 @@ function cmZigRender(){
   zigPaint(svg, cap, {days: tl.days, cap: zigMoneyCap(tl), empty: 'ضيف إيداعات أو مصروفات وهيظهر المؤشر هنا', style: zigStyleOf('total'), period: zigPeriodOf('total'), card: 'total'});
 }
 function goldPageZigRender(){
+  try{ gdualRender(); }catch(e){}   // 8328: المؤشر المزدوج يترسم فورًا مع كل رسم لصفحة الذهب
   var svg = document.getElementById('glZig'), cap = document.getElementById('glZigCap'); if(!svg) return;
   var gm, hide = false; try{ hide = (typeof mvPast === 'function' && !!mvPast()) || capIsPast(); }catch(e){}
   if((hide && !__zigDemo) || zigStyleOf('goldpage') === 'off'){ zigHide(svg, cap); return; }
@@ -13211,6 +13236,7 @@ window.__afterStart = function(){
   updateCloudUI();
   cloudInit();
   try{ setInterval(zigLiveLoop, 6000); }catch(e){}
+  try{ setInterval(function(){ var b = document.getElementById('gdXz'), ov = document.getElementById('capGoldOverlay'); if(b && !b.firstChild && ov && ov.classList.contains('open')) gdualRender(); }, 1000); }catch(e){}
   try{ setInterval(function(){ if(document.visibilityState === 'visible') checkForNewVersion(); }, 20*60*1000); document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') checkForNewVersion(); }); }catch(e){}
   window.addEventListener('online', ()=>{ if(cloud.sdk && cloud.user) cloudSync('online'); else if(!cloud.sdk) cloudInit(); else cloudMaybeShowGate(); updateCloudUI(); });
   window.addEventListener('offline', ()=>{ cloudSetStatus(null, false); updateCloudUI(); });
@@ -15736,7 +15762,7 @@ body.kb-open .fab{display:none !important;}
     {c:'avg',      n:'متوسط الإنفاق اليومي',  per:false},
     {c:'gdual',    n:'مؤشر الذهب والأرباح (مزدوج)', per:true}
   ];
-  var STY = [['market','📉 بورصة'],['smooth','〰️ منحنى'],['zig','⚡ زجزاج'],['step','🪜 سلم'],['bars','📊 أعمدة'],['area','🏔️ مساحة'],['lollipop','🍭 عصي'],['dots','⚪ نقاط'],['gauge','🎯 عداد'],['off','🚫 بدون']];
+  var STY = [['market','📉 بورصة'],['dual','🔀 مزدوج'],['smooth','〰️ منحنى'],['zig','⚡ زجزاج'],['step','🪜 سلم'],['bars','📊 أعمدة'],['area','🏔️ مساحة'],['lollipop','🍭 عصي'],['dots','⚪ نقاط'],['gauge','🎯 عداد'],['off','🚫 بدون']];
   var PER = [['live','📡 لحظي'],['day','📅 يومي'],['week','🗓️ أسبوعي'],['month','🗓️ شهري'],['quarter','🗓️ ربع سنوي'],['half','🗓️ نصف سنوي'],['year','📆 سنوي']];
   var _open = null, _sig = '', _dd = null;
   function esc(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
