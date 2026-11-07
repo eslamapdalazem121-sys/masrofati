@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-07.8334">
+<meta name="app-version" content="2026-11-07.8339">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3155,6 +3155,13 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 :root[data-theme="dark"] #cmOutOverlay .cmo-stat:nth-child(2) .cmo-st b{color:#6ef0bd;}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #cmOutOverlay .cmo-stat:nth-child(1) .cmo-st b{color:#c9b3ff;} :root:not([data-theme="light"]) #cmOutOverlay .cmo-stat:nth-child(2) .cmo-st b{color:#6ef0bd;} }
 /* ===== SPEND PAGE: STATIC ICONS + STAT BOXES END ===== */
+/* ===== 8335: بطاقة «صرف جديد» = أيقونة النقود + الاسم بس (من غير دايرة ولا مستطيل) START ===== */
+#cmOutOverlay .cmo-hero{background:none !important; box-shadow:none !important; border:0 !important; border-radius:0 !important; padding:6px 0 !important; margin:2px 0 14px !important; color:var(--text) !important;}
+#cmOutOverlay .cmo-hero::before{display:none !important;}
+#cmOutOverlay .cmo-hero-ico{width:auto !important; height:auto !important; margin:0 auto 2px !important; border-radius:0 !important; background:none !important; border:0 !important; box-shadow:none !important; font-size:calc(44px * var(--fs,1)) !important;}
+#cmOutOverlay .cmo-hero-ico i{filter:none !important;}
+#cmOutOverlay .cmo-hero-t{color:var(--text) !important; text-shadow:none !important;}
+/* ===== 8335 END ===== */
 
 /* ===== SPEND PAGE: GLASS ROW + VIVID ICONS + TIDY STATS START ===== */
 .sp-blue{--sa:#bcdcff; --sb:#2f7bff; --sg:rgba(30,100,230,.55); --ss:rgba(30,100,230,.4);}
@@ -3664,11 +3671,11 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
   <div class="modal-box cmo-page">
     <div class="ys-top"><button type="button" class="ys-back" onclick="closeCmOut()">› رجوع</button><h3 class="ys-ttl">💸 صرف من الأموال</h3></div>
     <div class="ys-wrap cmo-wrap">
-    <div class="ys-hero cmo-hero"><div class="cmo-hero-ico"><i>💸</i></div><div class="cmo-hero-t">صرف جديد</div></div>
+    <div class="ys-hero cmo-hero" data-id="cmo:hero"><div class="cmo-hero-ico"><i>💸</i></div><div class="cmo-hero-t">صرف جديد</div></div>
     <div class="cmo-editbar" id="cmoEditBar" style="display:none;"><span>✏️ بتعدّل صرف قديم — غيّر اللي عايزه واضغط «حفظ التعديل»</span><button type="button" onclick="cmoCancelEdit()">إلغاء</button></div>
-    <div class="gi-dest" id="cmoKinds" style="margin:6px 0 10px;"><button type="button" class="cmo-ic sp-gold active" onclick="cmoSetKind('all')"><span class="cmo-sph"><i>⭐</i></span><span class="cmo-lb">المتاح</span></button><button type="button" class="cmo-ic sp-green" onclick="cmoSetKind('cash')"><span class="cmo-sph"><i>💵</i></span><span class="cmo-lb">نقدي</span></button><button type="button" class="cmo-ic sp-blue" onclick="cmoSetKind('bank')"><span class="cmo-sph"><i>🏦</i></span><span class="cmo-lb">حسابات</span></button><button type="button" class="cmo-ic sp-amber" onclick="cmoSetKind('int')"><span class="cmo-sph"><i>🪙</i></span><span class="cmo-lb">فوائد</span></button><button type="button" class="cmo-ic sp-violet" onclick="cmoSetKind('pension')"><span class="cmo-sph"><i>💳</i></span><span class="cmo-lb">معاش</span></button></div>
-    <div class="cmo-stats" id="cmoTotalRow"><span class="cmo-stat"><span class="cmo-sph sp-violet"><i>💼</i></span><span class="cmo-st"><small id="cmoTotLbl">💵 إجمالي النقدي</small><b id="cmoTot">0</b></span></span><span class="cmo-stat"><span class="cmo-sph sp-green"><i>✅</i></span><span class="cmo-st"><small>المتبقي بعد الصرف</small><b id="cmoAfter">0</b></span></span></div>
-    <div class="cmo-card">
+    <div class="gi-dest" id="cmoKinds" data-id="cmo:kinds" style="margin:6px 0 10px;"><button type="button" class="cmo-ic sp-gold active" data-id="all" data-hold-ok="1" onclick="cmoSetKind('all')"><span class="cmo-sph"><i>⭐</i></span><span class="cmo-lb">المتاح</span></button><button type="button" class="cmo-ic sp-green" data-id="cash" data-hold-ok="1" onclick="cmoSetKind('cash')"><span class="cmo-sph"><i>💵</i></span><span class="cmo-lb">نقدي</span></button><button type="button" class="cmo-ic sp-blue" data-id="bank" data-hold-ok="1" onclick="cmoSetKind('bank')"><span class="cmo-sph"><i>🏦</i></span><span class="cmo-lb">حسابات</span></button><button type="button" class="cmo-ic sp-amber" data-id="int" data-hold-ok="1" onclick="cmoSetKind('int')"><span class="cmo-sph"><i>🪙</i></span><span class="cmo-lb">فوائد</span></button><button type="button" class="cmo-ic sp-violet" data-id="pension" data-hold-ok="1" onclick="cmoSetKind('pension')"><span class="cmo-sph"><i>💳</i></span><span class="cmo-lb">معاش</span></button></div>
+    <div class="cmo-stats" id="cmoTotalRow" data-id="cmo:stats"><span class="cmo-stat" id="cmoStatCard"><span class="cmo-sph sp-green"><i>💰</i></span><span class="cmo-st"><small id="cmoTotLbl">⭐ إجمالي المتاح للصرف</small><b id="cmoTot">0</b><em id="cmoTotSub"></em></span></span></div>
+    <div class="cmo-card" data-id="cmo:form">
     <div class="field"><label>الصرف من (كل بند وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
     <div class="hint" id="cmoAvail" style="white-space:pre-line;"></div>
     <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
@@ -3679,8 +3686,10 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
     </div>
+    <div id="cmoLogBlk" data-id="cmo:log">
     <h4 class="cmo-logh">🧾 سجل الصرف <small>(كل يوم بتاريخه)</small></h4>
     <div class="cmo-log" id="cmoLog"></div>
+    </div>
     </div>
   </div>
 </div>
@@ -9051,6 +9060,14 @@ function applyCmOrder(){   // ترتيب بطاقات صفحة أموال (ال�
   const sorted = els.slice().sort((a, b)=> ix(a.dataset.id) - ix(b.dataset.id));
   const ref = els[els.length - 1].nextSibling; sorted.forEach(e=> box.insertBefore(e, ref));
 }
+/* 8339: ترتيب بطاقات وأيقونات صفحة «صرف من الأموال» زي ما حدده المستخدم بالضغط المطوّل والسحب */
+function applyCmoOrder(){
+  try{
+    const sortBy = (box, order, pick)=>{ if(!box || !Array.isArray(order) || !order.length) return; const els = Array.from(box.children).filter(pick); if(els.length < 2) return; const ix = id=>{ const i = order.indexOf(id); return i < 0 ? 999 : i; }; const sorted = els.slice().sort((a, b)=> ix(a.dataset.id) - ix(b.dataset.id)); const ref = els[els.length - 1].nextSibling; sorted.forEach(e=> box.insertBefore(e, ref)); };
+    sortBy(document.querySelector('#cmOutOverlay .cmo-wrap'), data.cmoBlkOrder, c=> c.dataset && c.dataset.id && c.dataset.id.indexOf('cmo:') === 0);
+    sortBy(document.getElementById('cmoKinds'), data.cmoKindOrder, c=> c.tagName === 'BUTTON' && c.dataset && c.dataset.id);
+  }catch(e){ console.error(e); }
+}
 var _cmAddLogOpen = false;
 function toggleCmAddLog(){ _cmAddLogOpen = !_cmAddLogOpen; renderCmAddLog(); }
 function cmAddedAmt(x){   // المبلغ اللي اتضاف أصلًا (الرصيد الحالي + اللي اتصرف منه بعد كده)
@@ -9122,7 +9139,7 @@ function cmoZkPick(v){
 function openCmOutZk(y){   // من صفحة زكاة سنة ماضية: سداد من رأس المال الحالي
   closeZkCalc(); _cmoEditId = null; document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'cash'; _cmoDest = 'zakat'; _cmoZkYear = String(y);
   const l = cmoZkLeft(Number(y)); document.getElementById('cmoAmt').value = l > 0 ? l : ''; document.getElementById('cmoNote').value = '';
-  cmoRender(); document.getElementById('cmOutOverlay').classList.add('open');
+  cmoRender(); applyCmoOrder(); document.getElementById('cmOutOverlay').classList.add('open');
 }
 function giRecAt(y, m){ const sy = currentYear, sm = currentMonth; currentYear = y; currentMonth = m; try{ return giRec(); } finally{ currentYear = sy; currentMonth = sm; } }
 // ===== حسابات البنوك والفوائد: بدون قروش (أرقام صحيحة بس) =====
@@ -9172,7 +9189,7 @@ function cmoAvailOf(kind, x){
 }
 function cmoEditItemId(){ if(!_cmoEditId) return ''; const o = (data.moneyOut || []).find(r=> r.id === _cmoEditId); return o ? o.itemId : ''; }
 function cmoItems(kind){ return capRaw().filter(x=> capCatOf(x) === 'money' && (kind === 'bank' ? (x.isCert !== true || x.id === cmoEditItemId()) : true) && (kind === 'int' ? (capSubOf(x) === 'bank' && (bankMonthly(x) > 0 || (bankAnnualPay(x) && Number(x.rate) > 0) || (Array.isArray(x.chg) && x.chg.length > 0))) : capSubOf(x) === kind)); }
-function openCmOut(){ _cmoEditId = null; _cmoSub = 'home'; _cmoGrp = ''; try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'all'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); document.getElementById('cmOutOverlay').classList.add('open'); }
+function openCmOut(){ _cmoEditId = null; _cmoSub = 'home'; _cmoGrp = ''; try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'all'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); applyCmoOrder(); document.getElementById('cmOutOverlay').classList.add('open'); }
 function closeCmOut(){ _cmoEditId = null; document.getElementById('cmOutOverlay').classList.remove('open'); }
 function cmoSetKind(k){ if(_cmoEditId){ showToast('النوع مينفعش يتغيّر وإنت بتعدّل — احذف الصرف واعمله من جديد', false); return; } _cmoKind = k; cmoRender(); }
 function cmoSetDest(d){ _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other','gen'][i] === _cmoDest)); cmoGenRender(); }
@@ -9250,9 +9267,11 @@ function cmoTotals(){
   const lbl = {all: '⭐ إجمالي المتاح للصرف', cash: '💵 إجمالي النقدي', bank: '🏦 إجمالي الحسابات (الأساسية والفرعية)', int: '🪙 إجمالي الفوائد المتاحة', pension: '💳 إجمالي المعاش المتاح'};
   const items = cmoEntries(_cmoKind), tot = cgRound(items.reduce((a, e)=> a + cmoAvailE(e.k, e.x), 0)), amt = Number((document.getElementById('cmoAmt') || {}).value) || 0;
   document.getElementById('cmoTotLbl').textContent = lbl[_cmoKind] + (items.length > 1 ? ' (' + toArabicDigits(items.length) + ' بنود)' : '');
-  document.getElementById('cmoTot').textContent = fmt(tot);
-  const left = cgRound(tot - amt), el = document.getElementById('cmoAfter'); el.textContent = fmt(Math.abs(left)); el.style.color = left < 0 ? '#e03131' : '';
-  if(left < 0) el.textContent = '−' + el.textContent;
+  // 8338: بطاقة المتاح بس — أي مبلغ بتكتبه بيتخصم منها على طول، وبعد الحفظ بيفضل متخصوم
+  const left = cgRound(tot - amt), el = document.getElementById('cmoTot'), sub = document.getElementById('cmoTotSub'), card = document.getElementById('cmoStatCard');
+  el.textContent = (left < 0 ? '−' : '') + fmt(Math.abs(left));
+  if(card) card.classList.toggle('neg', left < 0);
+  if(sub) sub.textContent = amt > 0 ? ('المتاح قبل الصرف ' + fmt(tot) + ' − المبلغ ' + fmt(amt)) : '';
 }
 function cmoAvail(){
   const sel = document.getElementById('cmoItem'), el = document.getElementById('cmoAvail'), ents = cmoEntries(_cmoKind);
@@ -9271,7 +9290,7 @@ function cmoAvail(){
   el.textContent = t;
 }
 function cmoRender(){
-  [...document.querySelectorAll('#cmoKinds button')].forEach((b,i)=> b.classList.toggle('active', ['all','cash','bank','int','pension'][i] === _cmoKind));
+  [...document.querySelectorAll('#cmoKinds button')].forEach(b=> b.classList.toggle('active', b.dataset.id === _cmoKind));
   [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other','gen'][i] === _cmoDest));
   const sel = document.getElementById('cmoItem'), keepSel = sel.value; sel.innerHTML = '';
   { const its = cmoEntries(_cmoKind), isAll = _cmoKind === 'all';
@@ -14353,6 +14372,8 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(p.id === 'homeExtras') return IDS.indexOf(el.id) > -1 ? 'home' : null;
     if(!el.dataset || !el.dataset.id) return null;
     if(p.id === 'cmBox') return 'cmblk';
+    if(p.classList && p.classList.contains('cmo-wrap')) return 'cmoblk';
+    if(p.id === 'cmoKinds') return 'cmokind';
     if(p.id === 'groupsList' || (p.classList && p.classList.contains('children-list'))) return (typeof arrayForContainer === 'function' && arrayForContainer(p)) ? 'detail' : null;
     if(p.id === 'cmList' || p.id === 'cgList'){ return (el.classList && el.classList.contains('cap-grp-wrap')) ? 'capgrp' : 'cap'; }
     if(p.classList && p.classList.contains('cap-grp-body')) return 'cap';
@@ -14390,7 +14411,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   function reorderGrid(y){   // أيقونات جنب بعض: العنصر بياخد مكان الأيقونة اللي الصباع فوقها
     var x = st.lastX, all = Array.prototype.slice.call(st.parent.children);
     for(var i = 0; i < all.length; i++){
-      var c = all[i]; if(c === st.el || kindOf(c, st.parent) !== 'home' || !visible(c)) continue;
+      var c = all[i]; if(c === st.el || kindOf(c, st.parent) !== st.kind || !visible(c)) continue;
       var r = c.getBoundingClientRect();
       if(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom){
         if(i > all.indexOf(st.el)) st.parent.insertBefore(st.el, c.nextSibling); else st.parent.insertBefore(st.el, c);
@@ -14400,7 +14421,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   }
   function reorder(y){
     if(!st) return;
-    if(st.kind === 'home' && homeGrid()){ reorderGrid(y); return; }
+    if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind'){ reorderGrid(y); return; }
     for(var i = 0; i < 14; i++){
       var nx = neighbor(1), pv = neighbor(-1), moved = false, r;
       if(nx){ r = nx.getBoundingClientRect(); if(y > r.top + r.height * 0.5){ st.parent.insertBefore(st.el, nx.nextSibling); moved = true; } }
@@ -14444,6 +14465,8 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
         if(ok){ save(); if(p.id === 'cgList' || (p.closest && p.closest('#cgList'))) renderCapGold(); else renderCapMoney(); if(gmsg) toast(gmsg, true); }
       }
       else if(k === 'cmblk'){ data.cmOrder = ids; save(); }
+      else if(k === 'cmoblk'){ data.cmoBlkOrder = ids; save(); }
+      else if(k === 'cmokind'){ data.cmoKindOrder = ids; save(); }
       else if(k === 'capgrp'){ ok = reorderSubset(capGroups(), ids); if(ok){ save(); if(p.id === 'cgList') renderCapGold(); else renderCapMoney(); } }
       else if(k === 'zk'){ ok = reorderSubset(zkGet()[_zkMode], ids); if(ok){ save(); renderZakatList(); } }
       else if(k === 'gisrc'){ ok = reorderSubset(giRec().src, ids); if(ok){ save(); renderGISources(); } }
@@ -14482,7 +14505,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     for(var j = 0; j < kids.length; j++){ var rr = kids[j].getBoundingClientRect(); if(y < rr.top + rr.height * 0.5){ before = kids[j]; break; } }
     body.insertBefore(st.el, before); st.parent = body; st.cross = true; st.crossAt = Date.now();
   }
-  function move(y, x){ if(!st || !st.active) return; st.lastY = y; if(typeof x === 'number') st.lastX = x; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; if(st.kind === 'home' && homeGrid()) st.ghost.style.left = (st.lastX - st.offX + st.cx) + 'px'; if(st.kind === 'cap') crossGroup(y); reorder(y); }
+  function move(y, x){ if(!st || !st.active) return; st.lastY = y; if(typeof x === 'number') st.lastX = x; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind') st.ghost.style.left = (st.lastX - st.offX + st.cx) + 'px'; if(st.kind === 'cap') crossGroup(y); reorder(y); }
   function finish(dropped){
     if(!st) return; var s0 = st; st = null; document.removeEventListener('touchmove', tmoveActive, {passive: false});
     if(s0.timer) clearTimeout(s0.timer);
@@ -14490,7 +14513,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(!s0.active) return;
     document.body.classList.remove('hc-dragging');
     suppressUntil = Date.now() + 500;
-    var el = s0.el, g = s0.ghost, animate = (s0.kind === 'home' && dropped);
+    var el = s0.el, g = s0.ghost, animate = ((s0.kind === 'home' || s0.kind === 'cmokind') && dropped);
     if(animate && el.isConnected){
       var r = el.getBoundingClientRect();
       g.style.transition = 'top .16s ease, left .16s ease, transform .16s ease, box-shadow .16s ease';
@@ -15752,6 +15775,29 @@ body.kb-open .fab{display:none !important;}
 .group-head .g-ico{background:linear-gradient(145deg,color-mix(in srgb,#ffffff 60%,var(--card)),color-mix(in srgb,#9edcff 55%,var(--card))) !important;}
 .group-head .gtotal{background:linear-gradient(180deg,color-mix(in srgb,#ffffff 55%,var(--card)),color-mix(in srgb,#bfe6ff 40%,var(--card))) !important; color:#0b6aa8 !important; box-shadow:inset 0 1px 0 var(--edge-light,#fff), 0 3px 0 rgba(74,174,230,.35) !important;}
 .item-row{background:var(--card) !important;}
+/* ===== 8337: المستطيل الكبير اللي جواه (المتاح / نقدي / حسابات / فوائد / معاش) شفاف بالكامل START ===== */
+#cmOutOverlay #cmoKinds,
+:root[data-theme="dark"] #cmOutOverlay #cmoKinds,
+:root[data-theme="light"] #cmOutOverlay #cmoKinds{background:transparent !important; border:0 !important; box-shadow:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #cmOutOverlay #cmoKinds{background:transparent !important; border:0 !important; box-shadow:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important;} }
+#cmOutOverlay #cmoKinds::before,#cmOutOverlay #cmoKinds::after{display:none !important;}
+/* ===== 8337 END ===== */
+/* ===== 8338: بطاقة «المتاح» وحدها — 3D منسقة، وأي مبلغ بيتخصم منها START ===== */
+#cmOutOverlay .cmo-stats{display:block !important; margin:0 0 20px !important;}
+#cmOutOverlay .cmo-stat#cmoStatCard{display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:center; gap:14px !important; width:100%; padding:16px 18px 18px !important; border-radius:26px !important; border:0 !important; color:#fff; text-align:start;
+  background:linear-gradient(145deg,#2fe0a2 0%,#12b27a 48%,#0a7a58 100%) !important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -5px 0 rgba(0,0,0,.18), 0 8px 0 #07553d, 0 18px 26px rgba(10,122,88,.38) !important; transition:background .25s, box-shadow .25s;}
+#cmOutOverlay .cmo-stat#cmoStatCard::before{content:""; position:absolute; inset:0 0 52% 0; background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0)); pointer-events:none;}
+#cmOutOverlay .cmo-stat#cmoStatCard.neg{background:linear-gradient(145deg,#ff8a8a 0%,#e03131 48%,#a51d1d 100%) !important; box-shadow:inset 0 2px 0 rgba(255,255,255,.45), inset 0 -5px 0 rgba(0,0,0,.18), 0 8px 0 #6e1111, 0 18px 26px rgba(224,49,49,.35) !important;}
+#cmOutOverlay #cmoStatCard .cmo-sph{position:relative !important; flex:0 0 auto; width:56px !important; height:56px !important; margin:0 !important; font-size:calc(30px * var(--fs,1)) !important; background:none !important; box-shadow:none !important; border:0 !important;}
+#cmOutOverlay #cmoStatCard .cmo-sph::before,#cmOutOverlay #cmoStatCard .cmo-sph::after{display:none !important;}
+#cmOutOverlay #cmoStatCard .cmo-sph i{filter:drop-shadow(0 4px 3px rgba(0,0,0,.3));}
+#cmOutOverlay #cmoStatCard .cmo-st{position:relative; flex:1 1 auto; align-items:flex-start !important; text-align:start !important; padding:0 !important; gap:2px !important; width:auto !important; min-width:0;}
+#cmOutOverlay #cmoStatCard .cmo-st small{display:block !important; min-height:0 !important; justify-content:flex-start !important; color:#fff !important; opacity:.95 !important; font-size:calc(14px * var(--fs,1)) !important; text-shadow:0 2px 0 rgba(0,0,0,.22); padding:0 !important;}
+#cmOutOverlay #cmoStatCard .cmo-st b{color:#fff !important; border:0 !important; padding:0 !important; width:auto !important; text-align:start !important; font-size:calc(34px * var(--fs,1)) !important; text-shadow:0 3px 0 rgba(0,0,0,.25);}
+#cmOutOverlay #cmoStatCard .cmo-st em{display:block; font-style:normal; font-weight:800; font-size:calc(11.5px * var(--fs,1)); color:#fff; opacity:.9; min-height:0;}
+#cmOutOverlay #cmoStatCard .cmo-st em:empty{display:none;}
+/* ===== 8338 END ===== */
 </style>
 <script>
 /* 8269: الحقل اللي بتكتب فيه يفضل ظاهر فوق الكيبورد، وزر ＋ العايم يختفي وقت الكتابة */
