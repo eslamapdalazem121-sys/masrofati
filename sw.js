@@ -1,5 +1,5 @@
 /* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
-const VERSION = '2026-11-07.8333';
+const VERSION = '2026-11-07.8334';
 // كاش مستقل لكل نسخة/مجلد (مش بيمسح كاش النسخ التانية)
 const SCOPE_ID = ((self.registration && self.registration.scope) || self.location.href).replace(/[^a-z0-9]+/gi, '-');
 const CACHE_PREFIX = 'amwali-' + SCOPE_ID + '-';
@@ -134,7 +134,7 @@ self.addEventListener('notificationclick', (event) => {
   const n = event.notification, isQn = n.tag === QN_TAG;
   let act = event.action || '';
   if (!act && isQn && n.data && n.data.bodyAct) act = n.data.bodyAct;
-  if (act !== 'exp' && act !== 'zk' && act !== 'mn') act = '';
+  if (act !== 'exp' && act !== 'zk') act = '';
   if (!isQn) n.close();
   event.waitUntil((async () => {
     const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });

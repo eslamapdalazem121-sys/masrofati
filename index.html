@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-07.8333">
+<meta name="app-version" content="2026-11-07.8334">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -4089,9 +4089,9 @@ function fabSettingsUI(s){
 </script>
 <script>
 /* 8331: الوصول السريع من بره التطبيق — (١) اختصارات أيقونة التطبيق ?a=exp|zk|mn  (٢) إشعار ثابت بأزرار */
-function amRun(a){ if(a === 'exp') openQuickAdd(); else if(a === 'zk') openZmPay(); else if(a === 'mn') openCapMoney(); }
+function amRun(a){ if(a === 'exp') openQuickAdd(); else if(a === 'zk') openZmPay(); }   // 8334: «أموال» اتشالت من الوصول السريع (حتى لو إشعار أو اختصار قديم بعتها)
 function amWhenReady(a){
-  if(a !== 'exp' && a !== 'zk' && a !== 'mn') return;
+  if(a !== 'exp' && a !== 'zk') return;
   var n = 0;
   (function t(){
     n++;
