@@ -1,5 +1,5 @@
 /* Service Worker — أموالي AtoZ (العمل بدون إنترنت) */
-const VERSION = '2026-11-07.8331';
+const VERSION = '2026-11-07.8333';
 // كاش مستقل لكل نسخة/مجلد (مش بيمسح كاش النسخ التانية)
 const SCOPE_ID = ((self.registration && self.registration.scope) || self.location.href).replace(/[^a-z0-9]+/gi, '-');
 const CACHE_PREFIX = 'amwali-' + SCOPE_ID + '-';
@@ -118,7 +118,7 @@ self.addEventListener('message', (event) => {
   if (d && d.type === 'AM_QN') event.waitUntil(qnSet(d.on ? d.n : null));   // حفظ/مسح إعداد الإشعار الثابت
 });
 
-/* 8331: إشعار «الإضافة السريعة» الثابت: أزراره (مصروف جديد / دفع زكاة / أموال) بتفتح التطبيق على الصفحة المطلوبة */
+/* 8331: إشعار «الإضافة السريعة» الثابت: أزراره (مصروف جديد / دفع زكاة) بتفتح التطبيق على الصفحة المطلوبة */
 const QN_TAG = 'am-quick', QN_CACHE = 'am-flags';
 async function qnGet() {
   try { const c = await caches.open(QN_CACHE), r = await c.match('qn'); return r ? await r.json() : null; } catch (e) { return null; }
