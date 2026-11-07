@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8328">
+<meta name="app-version" content="2026-11-07.8329">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -11387,9 +11387,9 @@ function closeMonthlyReport(){
 }
 
 var _avgZigArgs = null;
-/* لون المؤشر حسب نسبة الإنفاق من الحد (أو من متوسط الدخل لو مفيش حد): أخضر ← أصفر ← برتقالي ← أحمر عند الإنفاق الزائد جدًا (١٥٠٪ فأكتر) */
+/* 8329: لون المؤشر متدرج حسب نسبة الإنفاق من الحد (أو من متوسط الدخل لو مفيش حد): أزرق (إنفاق قليل جدًا) ← أخضر ← أصفر ← برتقالي ← أحمر عند الإنفاق الزائد جدًا (١٥٠٪ فأكتر) */
 function avgSeverityColor(r){
-  const st = [[0, [22,168,112]], [0.55, [200,180,0]], [0.85, [240,138,0]], [1, [240,96,0]], [1.5, [214,22,43]]];
+  const st = [[0, [33,125,224]], [0.3, [22,168,112]], [0.55, [200,180,0]], [0.85, [240,138,0]], [1, [240,96,0]], [1.5, [214,22,43]]];
   r = Math.max(0, Math.min(1.5, Number(r) || 0));
   for(let k = 1; k < st.length; k++){
     if(r <= st[k][0]){ const a = st[k-1], b = st[k], t = (r - a[0]) / (b[0] - a[0]); return 'rgb(' + [0,1,2].map(j => Math.round(a[1][j] + (b[1][j] - a[1][j]) * t)).join(',') + ')'; }
