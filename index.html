@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-07.8339">
+<meta name="app-version" content="2026-11-07.8341">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3673,7 +3673,7 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <div class="ys-wrap cmo-wrap">
     <div class="ys-hero cmo-hero" data-id="cmo:hero"><div class="cmo-hero-ico"><i>💸</i></div><div class="cmo-hero-t">صرف جديد</div></div>
     <div class="cmo-editbar" id="cmoEditBar" style="display:none;"><span>✏️ بتعدّل صرف قديم — غيّر اللي عايزه واضغط «حفظ التعديل»</span><button type="button" onclick="cmoCancelEdit()">إلغاء</button></div>
-    <div class="gi-dest" id="cmoKinds" data-id="cmo:kinds" style="margin:6px 0 10px;"><button type="button" class="cmo-ic sp-gold active" data-id="all" data-hold-ok="1" onclick="cmoSetKind('all')"><span class="cmo-sph"><i>⭐</i></span><span class="cmo-lb">المتاح</span></button><button type="button" class="cmo-ic sp-green" data-id="cash" data-hold-ok="1" onclick="cmoSetKind('cash')"><span class="cmo-sph"><i>💵</i></span><span class="cmo-lb">نقدي</span></button><button type="button" class="cmo-ic sp-blue" data-id="bank" data-hold-ok="1" onclick="cmoSetKind('bank')"><span class="cmo-sph"><i>🏦</i></span><span class="cmo-lb">حسابات</span></button><button type="button" class="cmo-ic sp-amber" data-id="int" data-hold-ok="1" onclick="cmoSetKind('int')"><span class="cmo-sph"><i>🪙</i></span><span class="cmo-lb">فوائد</span></button><button type="button" class="cmo-ic sp-violet" data-id="pension" data-hold-ok="1" onclick="cmoSetKind('pension')"><span class="cmo-sph"><i>💳</i></span><span class="cmo-lb">معاش</span></button></div>
+    <div class="gi-dest" id="cmoKinds" data-id="cmo:kinds" style="margin:6px 0 10px;"><button type="button" class="cmo-ic sp-gold active" data-id="all" data-hold-ok="1" onclick="cmoSetKind('all')"><span class="cmo-sph"><i>⭐</i></span><span class="cmo-lb">المتاح</span></button><button type="button" class="cmo-ic sp-green" data-id="cash" data-hold-ok="1" onclick="cmoSetKind('cash')"><span class="cmo-sph"><i>💵</i></span><span class="cmo-lb">نقدي</span></button><button type="button" class="cmo-ic sp-blue" data-id="bank" data-hold-ok="1" onclick="cmoSetKind('bank')"><span class="cmo-sph"><i>🏦</i></span><span class="cmo-lb">حسابات</span></button></div>
     <div class="cmo-stats" id="cmoTotalRow" data-id="cmo:stats"><span class="cmo-stat" id="cmoStatCard"><span class="cmo-sph sp-green"><i>💰</i></span><span class="cmo-st"><small id="cmoTotLbl">⭐ إجمالي المتاح للصرف</small><b id="cmoTot">0</b><em id="cmoTotSub"></em></span></span></div>
     <div class="cmo-card" data-id="cmo:form">
     <div class="field"><label>الصرف من (كل بند وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
@@ -15798,6 +15798,13 @@ body.kb-open .fab{display:none !important;}
 #cmOutOverlay #cmoStatCard .cmo-st em{display:block; font-style:normal; font-weight:800; font-size:calc(11.5px * var(--fs,1)); color:#fff; opacity:.9; min-height:0;}
 #cmOutOverlay #cmoStatCard .cmo-st em:empty{display:none;}
 /* ===== 8338 END ===== */
+/* ===== 8341: أيقونات نوع الصرف (المتاح / نقدي / حسابات) — أصغر شوية + إصلاح القص (الأيقونة والاسم كانوا بيتقطعوا) START ===== */
+#cmOutOverlay #cmoKinds{justify-content:space-around; overflow:visible !important; height:auto !important; max-height:none !important;}
+#cmOutOverlay #cmoKinds button.cmo-ic{height:auto !important; min-height:0 !important; width:auto; gap:8px; overflow:visible;}
+#cmOutOverlay #cmoKinds .cmo-sph{min-width:60px; min-height:56px; font-size:calc(46px * var(--fs,1)); overflow:visible;}
+#cmOutOverlay #cmoKinds button.cmo-ic .cmo-lb{font-size:calc(14px * var(--fs,1)); font-weight:900;}
+#cmOutOverlay #cmoKinds button.cmo-ic.active .cmo-sph{transform:scale(1.08);}
+/* ===== 8341 END ===== */
 </style>
 <script>
 /* 8269: الحقل اللي بتكتب فيه يفضل ظاهر فوق الكيبورد، وزر ＋ العايم يختفي وقت الكتابة */
