@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-07.8344">
+<meta name="app-version" content="2026-11-08.8347">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3675,16 +3675,22 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <div class="cmo-editbar" id="cmoEditBar" style="display:none;"><span>✏️ بتعدّل صرف قديم — غيّر اللي عايزه واضغط «حفظ التعديل»</span><button type="button" onclick="cmoCancelEdit()">إلغاء</button></div>
     <div class="gi-dest" id="cmoKinds" data-id="cmo:kinds" style="margin:6px 0 10px;"><button type="button" class="cmo-ic sp-green" data-id="cash" data-hold-ok="1" onclick="cmoSetKind('cash')"><span class="cmo-sph"><i>💵</i></span><span class="cmo-lb">نقدي</span></button><button type="button" class="cmo-ic sp-blue" data-id="bank" data-hold-ok="1" onclick="cmoSetKind('bank')"><span class="cmo-sph"><i>🏦</i></span><span class="cmo-lb">حسابات</span></button></div>
     <div class="cmo-stats" id="cmoTotalRow" data-id="cmo:stats"><span class="cmo-stat" id="cmoStatCard"><span class="cmo-sph sp-green"><i>💰</i></span><span class="cmo-st"><small id="cmoTotLbl">⭐ إجمالي المتاح للصرف</small><b id="cmoTot">0</b><em id="cmoTotSub"></em></span></span></div>
-    <div class="cmo-card" data-id="cmo:form">
-    <div class="field"><label>الصرف من (كل بند وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
+    <div class="cmo-card cmo-split" data-id="cmo:form">
+    <h4 class="cmo-sec-ttl">الصرف من</h4>
+    <div class="cmo-sec" id="cmoFromCard">
+    <div class="field"><label>اختر البند (وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
     <div class="hint" id="cmoAvail" style="white-space:pre-line;"></div>
-    <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
+    <div class="field" style="margin-bottom:0;"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
+    </div>
+    <div class="cmo-arrow" aria-hidden="true"><span class="cmo-arr-ico">⬇</span><span class="cmo-arr-lbl">الصرف إلى</span></div>
+    <div class="cmo-sec" id="cmoToCard">
     <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')"><i class="cmo-di">💰</i><span class="cmo-dl">المصروف المنزلي</span></button><button type="button" onclick="cmoSetDest('zakat')"><i class="cmo-di">🕌</i><span class="cmo-dl">زكاتي</span></button><button type="button" onclick="cmoSetDest('other')"><i class="cmo-di">📦</i><span class="cmo-dl">أخرى</span></button><button type="button" onclick="cmoSetDest('gen')"><i class="cmo-di">💵</i><span class="cmo-dl">الدخل العام الشهري</span></button></div>
-    <div class="field" id="cmoGenRow" style="display:none;"><label>💵 المبلغ بعد ما يدخل الدخل العام الشهري يستقر فين؟</label><div class="cmo-sub" id="cmoSub"><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام بس</span></button><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المصروف المنزلي</span></button><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">مجموعة منه</span></button></div><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStlRow" style="margin-top:8px;"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div id="cmoStgRow" style="margin-top:8px;display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div><div class="hint" id="cmoGenHint"></div></div>
+    <div class="field" id="cmoGenRow" style="display:none;"><label>💵 يستقر فين؟</label><div class="cmo-sub" id="cmoSub"><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام</span></button><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المنزلي</span></button><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">المصروفات</span></button></div><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStlRow" style="margin-top:8px;"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div id="cmoStgRow" style="margin-top:8px;display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div><div class="hint" id="cmoGenHint"></div></div>
     <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
     <div class="field"><label>📅 تاريخ الصرف</label><input type="date" id="cmoDate" onchange="cmoGenRender()"></div>
     <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
+    </div>
     </div>
     <div id="cmoLogBlk" data-id="cmo:log">
     <h4 class="cmo-logh">🧾 سجل الصرف <small>(كل يوم بتاريخه)</small></h4>
@@ -15839,6 +15845,25 @@ body.kb-open .fab{display:none !important;}
 #cmOutOverlay #cmoGenRow select{margin-top:2px;}
 #cmOutOverlay #cmoGenRow .hint{margin:12px 4px 0; line-height:1.9;}
 /* ===== 8343 END ===== */
+/* ===== 8345: صفحة «صرف من الأموال» — تقسيم: بطاقة «الصرف من» (الاختيار + المبلغ) ثم سهم «الصرف إلى» ثم الأيقونات وباقي الصفحة START ===== */
+#cmOutOverlay .cmo-card.cmo-split{background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; margin-top:2px;}
+#cmOutOverlay .cmo-sec-ttl{margin:4px 0 10px; text-align:center; font-weight:900; font-size:calc(18px * var(--fs,1)); color:var(--text);}
+#cmOutOverlay .cmo-sec{background:var(--card); border:1px solid var(--border); border-radius:24px; padding:14px 12px 16px; box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 7px 0 rgba(0,0,0,.12), 0 18px 24px rgba(0,0,0,.12);}
+#cmOutOverlay .cmo-arrow{display:flex; flex-direction:column; align-items:center; gap:2px; margin:12px 0 10px; color:var(--text);}
+#cmOutOverlay .cmo-arr-ico{font-size:calc(40px * var(--fs,1)); line-height:1; font-weight:900; color:#12b27a;}
+#cmOutOverlay .cmo-arr-lbl{font-weight:900; font-size:calc(15px * var(--fs,1));}
+/* ===== 8345 END ===== */
+/* ===== 8347: «يستقر فين؟» — ٣ أيقونات فقط من غير مربعات ولا دوائر START ===== */
+#cmOutOverlay #cmoGenRow .cmo-sub{gap:4px !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic,#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic.active{background:none !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:6px 2px 12px !important; gap:4px;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic .cmo-sph{width:auto !important; height:auto !important; border-radius:0 !important; background:none !important; border:0 !important; box-shadow:none !important; font-size:calc(38px * var(--fs,1)); line-height:1.15; filter:saturate(.75) opacity(.75) drop-shadow(0 3px 2px rgba(0,0,0,.22)); transition:transform .18s, filter .18s;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic .cmo-sph::before,#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic .cmo-sph::after{content:none !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic .cmo-lb{font-size:calc(12px * var(--fs,1)); opacity:.8;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic.active .cmo-sph{filter:drop-shadow(0 0 9px var(--sg)) drop-shadow(0 3px 3px rgba(0,0,0,.28)); transform:scale(1.18) !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic.active .cmo-lb{opacity:1; font-weight:900;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic.active::after{display:block !important; content:""; position:absolute; bottom:0; left:50%; width:24px; height:4px; margin-left:-12px; border-radius:4px; background:var(--sg);}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic:active{transform:none !important;}
+/* ===== 8347 END ===== */
 </style>
 <script>
 /* 8269: الحقل اللي بتكتب فيه يفضل ظاهر فوق الكيبورد، وزر ＋ العايم يختفي وقت الكتابة */
