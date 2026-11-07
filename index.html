@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-06.8325">
+<meta name="app-version" content="2026-11-06.8327">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -2898,6 +2898,13 @@ button,input,select,textarea,optgroup{font-family:inherit;}
 .zkdone-msg small{display:block; color:var(--muted); font-weight:600; margin-top:6px;}
 .zkdone-btn{width:100%;}
 @keyframes zkdonePop{0%{transform:scale(.2) rotate(-12deg); opacity:0;} 100%{transform:scale(1) rotate(0); opacity:1;}}
+/* 8326: المؤشر المزدوج (الذهب العالمي + أرباحي) */
+#capGoldOverlay .gdual{margin:10px 0 4px; padding:8px 10px; border-radius:18px; background:rgba(255,255,255,.62); box-shadow:inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 rgba(90,63,0,.18); color:#3b2a00;}
+#capGoldOverlay .gdual .gd-r + .gd-r{margin-top:8px; padding-top:8px; border-top:1px dashed rgba(90,63,0,.3);}
+#capGoldOverlay .gdual .gd-h{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-weight:800; font-size:calc(13px * var(--fs,1));}
+#capGoldOverlay .gdual .gd-h small{font-weight:600; opacity:.7;} #capGoldOverlay .gdual .gd-h b{font-size:calc(17px * var(--fs,1)); direction:ltr;} #capGoldOverlay .gdual .gd-h b small{font-size:.7em; opacity:1; margin-inline-start:4px;}
+#capGoldOverlay .gdual svg{display:block; width:100%; height:auto; overflow:visible; margin-top:4px; color:#3b2a00;}
+#capGoldOverlay .gdual .gd-zcap{font-size:calc(11.5px * var(--fs,1));} #capGoldOverlay .gdual .cz-ch.up{color:#1f4fd8 !important;} #capGoldOverlay .gdual .cz-ch.dn{color:#c92a2a !important;}
 .cz-live{color:#e03131; font-weight:900; font-size:.9em; animation:czLiveBlink 1.4s ease-in-out infinite;}
 @keyframes czLiveBlink{0%,100%{opacity:1;} 50%{opacity:.35;}}
 svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;}
@@ -3767,6 +3774,10 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
       <small>إجمالي الذهب الآن</small>
       <b class="gd-big" id="cgTotal">0</b>
       <svg id="glZig" class="gd-zig" viewBox="0 0 300 56" role="img" aria-label="قيمة الذهب"></svg><div id="glZigCap" class="gd-zcap"></div>
+      <div class="gdual" id="gdual">
+        <div class="gd-r"><div class="gd-h"><span>🌍 الذهب العالمي <small>(دولار/أونصة)</small></span><b id="gdXv"></b></div><svg id="gdXz" viewBox="0 0 300 56" role="img" aria-label="سعر الذهب العالمي"></svg><div id="gdXc" class="gd-zcap"></div></div>
+        <div class="gd-r"><div class="gd-h"><span>💰 أرباحي من الذهب</span><b id="gdPv"></b></div><svg id="gdPz" viewBox="0 0 300 56" role="img" aria-label="أرباحي"></svg><div id="gdPc" class="gd-zcap"></div></div>
+      </div>
       <div class="gd-mini">
         <div><small>⚖️ الوزن</small><b id="cgGrams">0</b></div>
         <div><small>🛒 الشراء</small><b id="glBuy">0</b></div>
@@ -4461,7 +4472,7 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 
 <div class="settings-section">
       <h4>🎲 تجربة المؤشرات</h4>
-      <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.6;">بتعرض مؤشرات «إجمالي الأموال» و«أموال» و«ذهب» بأرقام عشوائية للتجربة بس. بياناتك الحقيقية مش بتتغير ولا بتتحفظ، والتجربة بتقفل لوحدها لما تقفل التطبيق.</p>
+      <p style="font-size:12px; color:var(--muted); margin:0 0 8px; line-height:1.6;">بتعرض مؤشرات «إجمالي الأموال» و«أموال» و«ذهب» و«الذهب والأرباح (المزدوج)» بأرقام عشوائية للتجربة بس (المزدوج بيتحرك لحظي وبيتغيّر كل ٦ ثواني). بياناتك الحقيقية مش بتتغير ولا بتتحفظ، والتجربة بتقفل لوحدها لما تقفل التطبيق.</p>
       <div class="opt-row">
         <button type="button" class="opt-chip" onclick="zigDemoRoll()">🎲 أرقام عشوائية جديدة</button>
         <button type="button" class="opt-chip" onclick="zigDemoOff()">↩️ الأرقام الحقيقية</button>
@@ -5155,10 +5166,10 @@ let settings = {
 let _draftSettings = null;
 var ZIG_STYLES = ['smooth','zig','step','bars','area','lollipop','dots','gauge','market','off'], ZIG_PERIODS = ['live','day','week','month','quarter','half','year'];
 function zigStyleOf(card){
-  try{ var z = (_draftSettings || settings).zig || {}, v = z[card]; return ZIG_STYLES.indexOf(v) >= 0 ? v : (card === 'avg' ? 'market' : 'smooth'); }catch(e){ return 'smooth'; }
+  try{ var z = (_draftSettings || settings).zig || {}, v = z[card]; return ZIG_STYLES.indexOf(v) >= 0 ? v : ((card === 'avg' || card === 'gdual') ? 'market' : 'smooth'); }catch(e){ return 'smooth'; }
 }
 function zigPeriodOf(card){
-  try{ var z = (_draftSettings || settings).zigP || {}, v = z[card]; return ZIG_PERIODS.indexOf(v) >= 0 ? v : 'day'; }catch(e){ return 'day'; }
+  try{ var z = (_draftSettings || settings).zigP || {}, v = z[card]; return ZIG_PERIODS.indexOf(v) >= 0 ? v : (card === 'gdual' ? 'live' : 'day'); }catch(e){ return 'day'; }
 }
 function zigSetPeriod(card, per){
   if(!_draftSettings) _draftSettings = cloneSettings(settings);
@@ -8575,12 +8586,69 @@ function zdGold(){
   return {days: days, ok: true, pnl: mkt - cost, pct: (mkt - cost) / cost * 100, g30: g30, grams: grams, last: last};
 }
 function zigDemoData(){ if(!_zdCache) _zdCache = {money: zdMoney(), gold: zdGold()}; return _zdCache; }
-function zigRefresh(){ try{ if(typeof renderCap === 'function') renderCap(); }catch(e){} try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} try{ avgZigRedraw(); }catch(e){} }
-function zigDemoRoll(){ __zigDemo = true; _zdSeed = (Date.now() % 2147483646) + 1; _zdCache = null; zigRefresh(); showToast('🎲 المؤشرات شغّالة بأرقام تجريبية — اقفل الإعدادات وافتح رأس المال', true); }
-function zigDemoOff(){ __zigDemo = false; _zdCache = null; zigRefresh(); showToast('رجعت للأرقام الحقيقية', true); }
+function zigRefresh(){ try{ gdualRender(); }catch(e){} try{ if(typeof renderCap === 'function') renderCap(); }catch(e){} try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} try{ avgZigRedraw(); }catch(e){} }
+function zigDemoRoll(){ __zigDemo = true; _zdSeed = (Date.now() % 2147483646) + 1; _zdCache = null; _gdDemo = null; try{ var zb = zlLoad(); delete zb.gxd; delete zb.gpd; }catch(e){} zigRefresh(); showToast('🎲 المؤشرات شغّالة بأرقام تجريبية — اقفل الإعدادات وافتح رأس المال وصفحة الذهب', true); }
+function zigDemoOff(){ __zigDemo = false; _zdCache = null; _gdDemo = null; try{ var zb = zlLoad(); delete zb.gxd; delete zb.gpd; }catch(e){} zigRefresh(); showToast('رجعت للأرقام الحقيقية', true); }
 function zigAr(n){ return toArabicDigits(fmt(Math.round(Math.abs(n)))); }
 function zigDate(t){ return new Date(t).toLocaleDateString(dateLocale(), {day: 'numeric', month: 'long'}); }
 /* رسم زجزاج عام: o.days = [{t, d, bal, k}] بالترتيب الزمني، o.cap = HTML التعليق */
+/* ===== 8326: المؤشر المزدوج «الذهب العالمي + أرباحي» — الزيادة أزرق والنزول أحمر ===== */
+var GD_BLUE = '#2f6fed', GD_RED = '#e03131', GD_KEY = 'amwali_gd_daily_v1', _gdD = null, _gdSaveT = 0;
+function gdLoad(){ if(_gdD) return _gdD; try{ _gdD = JSON.parse(localStorage.getItem(GD_KEY) || '{}') || {}; }catch(e){ _gdD = {}; } _gdD.gx = _gdD.gx || {}; _gdD.gp = _gdD.gp || {}; return _gdD; }
+function gdValues(){
+  var gx = 0, gp = null;
+  try{ gx = Number((_gl && _gl.usd) || 0); }catch(e){}
+  try{ var pl = goldPnl(); if(pl && pl.ok) gp = Number(pl.pnl) || 0; }catch(e){}
+  return {gx: gx > 0 ? gx : null, gp: gp};
+}
+function gdDayKey(t){ var d = new Date(t); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function gdSample(){
+  var v = gdValues(), D = gdLoad(), now = Date.now(), k = gdDayKey(now);
+  if(v.gx !== null) D.gx[k] = v.gx;
+  if(v.gp !== null) D.gp[k] = v.gp;
+  ['gx', 'gp'].forEach(function(c){ var ks = Object.keys(D[c]).sort(); while(ks.length > 800) delete D[c][ks.shift()]; });
+  if(now - _gdSaveT > 20000){ _gdSaveT = now; try{ localStorage.setItem(GD_KEY, JSON.stringify(D)); }catch(e){} }
+  return v;
+}
+function gdDays(c){
+  var m = gdLoad()[c] || {}, ks = Object.keys(m).sort(), out = [], prev = null;
+  ks.forEach(function(k){ var p = k.split('-'), v = m[k]; out.push({t: new Date(+p[0], +p[1] - 1, +p[2], 12).getTime(), d: prev === null ? 0 : v - prev, bal: v, k: 'tick'}); prev = v; });
+  return out;
+}
+var _gdDemo = null;
+function gdDemoInit(){
+  var DAY = 86400000, now = Date.now(), x = 2300 + zdRand() * 200, p = -600 + zdRand() * 800, X = [], P = [], i, t;
+  for(i = 400; i >= 1; i--){ x *= 1 + (zdRand() - 0.47) * 0.012; p += (zdRand() - 0.47) * 260; t = new Date(now - i * DAY); t.setHours(12, 0, 0, 0); X.push({t: t.getTime(), bal: x}); P.push({t: t.getTime(), bal: p}); }
+  _gdDemo = {X: X, P: P, x: x, p: p};
+}
+function gdDemoDays(arr, cur){
+  var out = [], prev = null;
+  arr.concat([{t: Date.now(), bal: cur}]).forEach(function(g){ out.push({t: g.t, d: prev === null ? 0 : g.bal - prev, bal: g.bal, k: 'tick'}); prev = g.bal; });
+  return out;
+}
+function gdualRender(){
+  var box = document.getElementById('gdual'); if(!box) return;
+  var st = zigStyleOf('gdual'), hide = false; try{ hide = (typeof mvPast === 'function' && !!mvPast()) || capIsPast(); }catch(e){}
+  if(st === 'off' || hide){ box.style.display = 'none'; return; }
+  box.style.display = '';
+  var per = zigPeriodOf('gdual'), v;
+  if(__zigDemo){ if(!_gdDemo) gdDemoInit(); _gdDemo.x *= 1 + (zdRand() - 0.5) * 0.0016; _gdDemo.p += (zdRand() - 0.5) * 40; v = {gx: _gdDemo.x, gp: _gdDemo.p}; }
+  else v = gdSample();
+  [['gx', 'gdXz', 'gdXc', 'gdXv', 'gdXh', v.gx, 'السعر العالمي مش متاح دلوقتي'], ['gp', 'gdPz', 'gdPc', 'gdPv', 'gdPh', v.gp, 'ضيف ذهب وسعر الذهب لازم يكون متاح']].forEach(function(r){
+    var c = r[0], svg = document.getElementById(r[1]), cap = document.getElementById(r[2]), val = document.getElementById(r[3]);
+    if(!svg) return;
+    var days = __zigDemo ? gdDemoDays(c === 'gx' ? _gdDemo.X : _gdDemo.P, c === 'gx' ? _gdDemo.x : _gdDemo.p) : gdDays(c), cur = r[5], prevV = days.length > 1 ? days[days.length - 2].bal : null, ch = (cur !== null && prevV !== null) ? cur - prevV : 0;
+    if(val){
+      if(cur === null) val.innerHTML = '<span class="gd-na">—</span>';
+      else{
+        var up = c === 'gx' ? ch >= 0 : cur >= 0, col = up ? GD_BLUE : GD_RED, txt = c === 'gx' ? '$' + toArabicDigits(fmt(Math.round(cur * 100) / 100)) : (cur >= 0 ? '+' : '−') + toArabicDigits(fmt(Math.round(Math.abs(cur))));
+        val.innerHTML = '<span style="color:' + col + '">' + txt + '</span>' + (prevV !== null && Math.abs(ch) > 0.0001 ? ' <small style="color:' + (ch >= 0 ? GD_BLUE : GD_RED) + '">' + (ch >= 0 ? '▲' : '▼') + ' ' + toArabicDigits(fmt(Math.round(Math.abs(ch) * 100) / 100)) + '</small>' : '');
+      }
+    }
+    zigPaint(svg, cap, {days: days, cap: (__zigDemo ? '' : ''), style: st, period: per, card: __zigDemo ? c + 'd' : c, empty: r[6], upCol: GD_BLUE, dnCol: GD_RED, demoLive: true});
+  });
+}
+(function(){ var f = window.glRefreshUI; if(typeof f === 'function') window.glRefreshUI = function(){ var r = f.apply(this, arguments); try{ gdualRender(); }catch(e){} return r; }; })();
 function zigGroup(days, per){
   if(['week','month','quarter','half','year'].indexOf(per) < 0) return days;
   var out = [], map = {};
@@ -8633,17 +8701,17 @@ function zigLiveSeries(o){
   tk.forEach(function(q){ out.push({t: q[0], d: prev === null ? 0 : q[1] - prev, bal: q[1], k: 'tick'}); prev = q[1]; });
   return out;
 }
-function zigLiveAny(){ return ['total','money','gold','goldpage'].some(function(c){ return zigPeriodOf(c) === 'live' && zigStyleOf(c) !== 'off'; }); }
+function zigLiveAny(){ return ['total','money','gold','goldpage','gdual'].some(function(c){ return zigPeriodOf(c) === 'live' && zigStyleOf(c) !== 'off'; }); }
 async function zigLiveLoop(){
   try{
     if(!zigLiveAny() || document.visibilityState !== 'visible') return;
-    if(['gold','goldpage'].some(function(c){ return zigPeriodOf(c) === 'live'; }) && navigator.onLine && !goldScreenOpen()) await goldTick();
+    if(['gold','goldpage','gdual'].some(function(c){ return zigPeriodOf(c) === 'live'; }) && navigator.onLine && !goldScreenOpen() && !__zigDemo) await goldTick();
   }catch(e){}
-  try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} try{ capZigRender(); }catch(e){}
+  try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} try{ capZigRender(); }catch(e){} try{ gdualRender(); }catch(e){}
 }
 function zigPaint(svg, cap, o){
   if(!svg) return;
-  var per = o.period || 'day'; if(__zigDemo && per === 'live') per = 'day';
+  var per = o.period || 'day'; if(__zigDemo && per === 'live' && !o.demoLive) per = 'day';
   var all = per === 'live' ? zigLiveSeries(o) : zigGroup(o.days || [], per), days = all.slice(zigSliceOf(per)), W = 300, H = (o.H && o.style !== 'gauge') ? o.H : 56, P = 7;
   if(cap) cap.style.display = '';
   svg.style.display = '';
@@ -8659,6 +8727,7 @@ function zigPaint(svg, cap, o){
   var ys = pts.map(function(v){ return H - P - ((v - mn) / rg) * (H - 2 * P); });
   var up = o.tone ? o.tone === 'up' : pts[n - 1] >= pts[0], col = up ? '#0f9d78' : '#d6336c', uid = 'zg' + Math.floor(Math.random() * 1e6), sty = o.style || 'smooth';
   var DG = '#0f9d78', DR = '#d6336c'; if(o.color){ col = o.color; DG = o.color; DR = o.color; }
+  if(o.upCol || o.dnCol){ DG = o.upCol || DG; DR = o.dnCol || DR; col = up ? DG : DR; }   // 8326: لونين: زيادة / نزول
   // الكابشن: لو الفترة شهري/سنوي بنحسب التغيير من نفس الرسم
   var capHtml = o.cap || '';
   if(per !== 'day' && per !== 'live'){
@@ -8699,7 +8768,7 @@ function zigPaint(svg, cap, o){
     }
     var ln = xy.map(function(q, i){ return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' ');
     var lx = xy[xy.length - 1][0], ly = xy[xy.length - 1][1], fx = xy[0][0];
-    var LINE = o.color || '#3f80c6', DOT = o.color || '#12b3d6', K = small ? 3 : 5, mk = '';
+    var LINE = o.color || (o.upCol ? col : '#3f80c6'), DOT = o.color || (o.upCol ? col : '#12b3d6'), K = small ? 3 : 5, mk = '';
     var tl = function(t){ var dt = new Date(t); if(per === 'live') return dt.toLocaleTimeString(dateLocale(), {hour: 'numeric', minute: '2-digit'}); if(per === 'year') return toArabicDigits(dt.getFullYear()); if(per === 'month' || per === 'quarter' || per === 'half') return dt.toLocaleDateString(dateLocale(), {month: 'short', year: '2-digit'}); return dt.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'short'}); };
     var prevLab = null, gi;
     for(gi = 0; gi < K; gi++){
@@ -15664,7 +15733,8 @@ body.kb-open .fab{display:none !important;}
     {c:'money',    n:'أموال',                 per:true},
     {c:'gold',     n:'ذهب',                   per:true},
     {c:'goldpage', n:'صفحة الذهب',            per:true},
-    {c:'avg',      n:'متوسط الإنفاق اليومي',  per:false}
+    {c:'avg',      n:'متوسط الإنفاق اليومي',  per:false},
+    {c:'gdual',    n:'مؤشر الذهب والأرباح (مزدوج)', per:true}
   ];
   var STY = [['market','📉 بورصة'],['smooth','〰️ منحنى'],['zig','⚡ زجزاج'],['step','🪜 سلم'],['bars','📊 أعمدة'],['area','🏔️ مساحة'],['lollipop','🍭 عصي'],['dots','⚪ نقاط'],['gauge','🎯 عداد'],['off','🚫 بدون']];
   var PER = [['live','📡 لحظي'],['day','📅 يومي'],['week','🗓️ أسبوعي'],['month','🗓️ شهري'],['quarter','🗓️ ربع سنوي'],['half','🗓️ نصف سنوي'],['year','📆 سنوي']];
