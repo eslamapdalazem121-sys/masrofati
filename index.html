@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-08.8353">
+<meta name="app-version" content="2026-11-08.8354">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16083,7 +16083,7 @@ body.kb-open .fab{display:none !important;}
     <label>الموديل</label>
     <input type="text" id="aiModel" placeholder="gemini-flash-latest">
     <div class="ai-note">مجاني من غير كارت: ادخل aistudio.google.com/apikey بحساب Google واضغط Create API key. المفتاح بيتحفظ على جهازك بس.<br>تنبيه: في الخطة المجانية جوجل ممكن تستخدم الأسئلة والردود لتحسين موديلاتها.</div>
-    <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiClear()">مسح المحادثة</button></div>
+    <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiTest()">اختبار الاتصال</button><button class="ai-btn" onclick="aiClear()">مسح المحادثة</button></div><div id="aiTestOut" class="ai-note" style="display:none; font-weight:800; opacity:1; direction:rtl; word-break:break-word;"></div>
   </div>
   <div id="aiMsgs"></div>
   <div id="aiPrev"><img id="aiPrevImg" alt=""><button class="ai-btn" onclick="aiDropImg()">✕</button></div>
@@ -16160,21 +16160,38 @@ body.kb-open .fab{display:none !important;}
   /* ===== الاتصال بـ Gemini (مجاني) ===== */
   function gNorm(h){ var out = []; h.forEach(function(m){ var l = out[out.length - 1]; if(l && l.role === m.role) l.parts = l.parts.concat(m.parts); else out.push({role: m.role, parts: m.parts.slice()}); }); return out; }
   function trimHist(){ var h = hist.slice(-14); while(h.length && (h[0].role !== 'user' || h[0].parts.some(function(p){ return p.functionResponse; }))) h.shift(); return gNorm(h); }
-  async function callAI(){
+  var TMO = 40000;
+  async function gfetch(body){
     var key = lsGet(KEYK, ''); if(!key) throw new Error('NOKEY');
-    var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(lsGet(MODK, DEFMOD)) + ':generateContent', {method: 'POST', headers: {'content-type': 'application/json', 'x-goog-api-key': key},
-      body: JSON.stringify({systemInstruction: {parts: [{text: SYS + '\n\n=== بيانات المستخدم ===\n' + buildCtx()}]}, contents: trimHist(), tools: GTOOLS, generationConfig: {maxOutputTokens: 1500}})});
+    var ctl = new AbortController(), tm = setTimeout(function(){ ctl.abort(); }, TMO), r;
+    try{
+      r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(lsGet(MODK, DEFMOD)) + ':generateContent', {method: 'POST', signal: ctl.signal, headers: {'content-type': 'application/json', 'x-goog-api-key': key}, body: JSON.stringify(body)});
+    }catch(e){ clearTimeout(tm); var er0 = new Error(e && e.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK'); er0.raw = String(e && e.message || e); throw er0; }
+    clearTimeout(tm);
     if(!r.ok){ var t = ''; try{ t = (await r.json()).error.message; }catch(e){} var er = new Error('HTTP' + r.status); er.status = r.status; er.msg = t; throw er; }
     return r.json();
   }
+  async function callAI(){
+    return gfetch({systemInstruction: {parts: [{text: SYS + '\n\n=== بيانات المستخدم ===\n' + buildCtx()}]}, contents: trimHist(), tools: GTOOLS, generationConfig: {maxOutputTokens: 1500}});
+  }
+  window.aiTest = async function(){
+    var o = $('aiTestOut'); o.style.display = 'block'; o.textContent = '… بجرّب الاتصال';
+    try{
+      lsSet(KEYK, $('aiKey').value.trim() || lsGet(KEYK, '')); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
+      var res = await gfetch({contents: [{role: 'user', parts: [{text: 'رد بكلمة واحدة بس: تمام'}]}], generationConfig: {maxOutputTokens: 40}});
+      var p = (((res.candidates || [])[0] || {}).content || {}).parts || [], tx = p.map(function(x){ return x.text || ''; }).join('').trim();
+      o.textContent = '✅ شغال' + (tx ? ' — الرد: ' + tx : '');
+    }catch(e){ o.textContent = '❌ ' + errText(e) + (e && e.status ? '  [كود ' + e.status + ']' : '') + (e && e.raw ? '  [' + e.raw.slice(0, 80) + ']' : ''); }
+  };
   function errText(e){
     if(e && e.message === 'NOKEY') return 'حط مفتاح Gemini الأول من ⚙️ فوق.';
     if(e && (e.status === 401 || e.status === 403 || (e.status === 400 && /api key/i.test(e.msg || '')))) return 'المفتاح غلط أو مش شغال. راجعه من ⚙️.';
     if(e && e.status === 404) return 'اسم الموديل غلط. غيّره من ⚙️ (مثلًا gemini-flash-latest).';
     if(e && e.status === 429) return 'الحصة المجانية خلصت دلوقتي (الدقيقة أو اليوم). جرّب بعد شوية.';
     if(e && (e.status === 500 || e.status === 503)) return 'سيرفر Gemini مشغول، جرّب تاني بعد شوية.';
+    if(e && e.message === 'TIMEOUT') return 'الطلب اتأخر أكتر من ٤٠ ثانية واتقفل. اتأكد من النت وجرّب تاني، أو اضغط «اختبار الاتصال» من ⚙️.';
     if(e && e.status) return 'حصلت مشكلة (' + e.status + '). ' + (e.msg || '');
-    return 'مفيش اتصال بالنت أو الطلب اتقفل. جرّب تاني.';
+    return 'مفيش اتصال بجوجل (النت أو الطلب اتمنع). اضغط «اختبار الاتصال» من ⚙️ عشان نعرف السبب.';
   }
 
   /* ===== الصور ===== */
