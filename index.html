@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-08.8351">
+<meta name="app-version" content="2026-11-08.8353">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16029,5 +16029,232 @@ body.kb-open .fab{display:none !important;}
   try{ zigHubRender(true); }catch(e){}
 })();
 </script>
+<!-- ===== 8352: مساعد مصروفاتي بالذكاء الاصطناعي START ===== -->
+<style>
+.ai-fab{position:fixed; left:18px; bottom:22px; z-index:49; width:58px; height:58px; border-radius:50%; border:0; cursor:pointer; font-size:28px; line-height:1; color:#fff; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 32% 24%,#c9b6ff 0%,#8b5cf6 40%,#5b2fd1 100%); box-shadow:inset 0 2px 3px rgba(255,255,255,.7), 0 6px 0 #3b1a99, 0 12px 18px rgba(60,30,150,.35); -webkit-tap-highlight-color:transparent;}
+.ai-fab:active{transform:translateY(4px); box-shadow:inset 0 2px 3px rgba(255,255,255,.7), 0 2px 0 #3b1a99;}
+#aiOv{position:fixed; inset:0; z-index:120; display:none; flex-direction:column; background:var(--bg,#eef1f6); color:var(--text,#161a22); direction:rtl; font-family:inherit;}
+#aiOv.open{display:flex;}
+#aiOv .ai-top{display:flex; align-items:center; gap:8px; padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px; background:var(--card,#fff); box-shadow:0 2px 10px rgba(0,0,0,.08);}
+#aiOv .ai-top h3{flex:1; margin:0; font-size:18px; font-weight:900; text-align:center;}
+#aiOv .ai-btn{border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; padding:9px 13px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.12);}
+#aiOv .ai-btn:active{transform:translateY(3px); box-shadow:none;}
+#aiSet{display:none; padding:12px; background:var(--card,#fff); border-bottom:1px solid var(--border,#e8eaf0);}
+#aiSet.open{display:block;}
+#aiSet label{display:block; font-weight:800; font-size:13px; margin:8px 4px 5px; opacity:.8;}
+#aiSet input{width:100%; box-sizing:border-box; padding:12px; border-radius:14px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-size:15px; font-family:inherit; direction:ltr; text-align:left;}
+#aiSet .ai-note{font-size:12.5px; opacity:.75; line-height:1.6; margin:8px 4px 2px;}
+#aiMsgs{flex:1; overflow-y:auto; padding:14px 12px 8px; display:flex; flex-direction:column; gap:10px; -webkit-overflow-scrolling:touch;}
+#aiMsgs .ai-b{max-width:86%; padding:11px 14px; border-radius:18px; font-size:15.5px; line-height:1.7; white-space:pre-wrap; word-break:break-word; box-shadow:0 3px 0 rgba(0,0,0,.08);}
+#aiMsgs .ai-b.u{align-self:flex-start; background:linear-gradient(160deg,#8b5cf6,#6d3fe0); color:#fff; border-bottom-right-radius:6px;}
+#aiMsgs .ai-b.a{align-self:flex-end; background:var(--card,#fff); border-bottom-left-radius:6px;}
+#aiMsgs .ai-b img{display:block; max-width:100%; max-height:160px; border-radius:12px; margin-bottom:6px;}
+#aiMsgs .ai-b.err{background:#fff1f0; color:#b42318;}
+#aiMsgs .ai-typing{align-self:flex-end; opacity:.6; font-size:20px; letter-spacing:3px;}
+#aiMsgs .ai-sug{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;}
+#aiMsgs .ai-sug button{border:0; background:var(--card,#fff); color:inherit; border-radius:16px; padding:10px 14px; font-size:14px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.12);}
+#aiMsgs .ai-card{align-self:stretch; background:var(--card,#fff); border:2px solid #8b5cf6; border-radius:20px; padding:12px; box-shadow:0 5px 0 rgba(91,47,209,.35);}
+#aiMsgs .ai-card h4{margin:0 0 8px; font-size:15px; font-weight:900;}
+#aiMsgs .ai-card label{display:block; font-size:12.5px; font-weight:800; opacity:.75; margin:8px 4px 4px;}
+#aiMsgs .ai-card input,#aiMsgs .ai-card select{width:100%; box-sizing:border-box; padding:11px; border-radius:12px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-size:15px; font-family:inherit;}
+#aiMsgs .ai-card .ai-row{display:flex; gap:8px; margin-top:12px;}
+#aiMsgs .ai-card .ai-ok{flex:1; border:0; border-radius:14px; padding:12px; font-size:16px; font-weight:900; font-family:inherit; color:#fff; cursor:pointer; background:linear-gradient(180deg,#58e3ab,#12b27a); box-shadow:0 4px 0 #0b7a55;}
+#aiMsgs .ai-card .ai-no{border:0; border-radius:14px; padding:12px 16px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer; background:var(--bg,#eef1f6); color:inherit; box-shadow:0 4px 0 rgba(0,0,0,.12);}
+#aiMsgs .ai-card.done{border-color:#12b27a; box-shadow:0 5px 0 rgba(18,178,122,.35);}
+#aiPrev{display:none; padding:6px 12px 0; align-items:center; gap:8px;}
+#aiPrev.open{display:flex;}
+#aiPrev img{height:54px; border-radius:10px;}
+#aiBar{display:flex; align-items:center; gap:8px; padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px); background:var(--card,#fff); box-shadow:0 -2px 10px rgba(0,0,0,.06);}
+#aiBar input[type=text]{flex:1; min-width:0; padding:13px 14px; border-radius:20px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-size:16px; font-family:inherit;}
+#aiBar .ai-ic{flex:none; width:46px; height:46px; border-radius:50%; border:0; font-size:21px; cursor:pointer; display:flex; align-items:center; justify-content:center; background:var(--bg,#eef1f6); color:inherit; box-shadow:0 3px 0 rgba(0,0,0,.12);}
+#aiBar .ai-send{background:linear-gradient(160deg,#8b5cf6,#6d3fe0); color:#fff; box-shadow:0 3px 0 #3b1a99;}
+#aiBar .ai-ic:active{transform:translateY(3px); box-shadow:none;}
+</style>
+<button class="ai-fab" id="aiFab" onclick="aiOpen()" title="المساعد الذكي" aria-label="المساعد الذكي">🤖</button>
+<div id="aiOv" dir="rtl">
+  <div class="ai-top">
+    <button class="ai-btn" onclick="aiClose()">‹ رجوع</button>
+    <h3>🤖 مساعد مصروفاتي</h3>
+    <button class="ai-btn" onclick="aiToggleSet()" aria-label="إعدادات">⚙️</button>
+  </div>
+  <div id="aiSet">
+    <label>مفتاح Gemini (مجاني)</label>
+    <input type="password" id="aiKey" placeholder="AIza..." autocomplete="off">
+    <label>الموديل</label>
+    <input type="text" id="aiModel" placeholder="gemini-flash-latest">
+    <div class="ai-note">مجاني من غير كارت: ادخل aistudio.google.com/apikey بحساب Google واضغط Create API key. المفتاح بيتحفظ على جهازك بس.<br>تنبيه: في الخطة المجانية جوجل ممكن تستخدم الأسئلة والردود لتحسين موديلاتها.</div>
+    <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiClear()">مسح المحادثة</button></div>
+  </div>
+  <div id="aiMsgs"></div>
+  <div id="aiPrev"><img id="aiPrevImg" alt=""><button class="ai-btn" onclick="aiDropImg()">✕</button></div>
+  <div id="aiBar">
+    <button class="ai-ic" onclick="document.getElementById('aiFile').click()" aria-label="صورة فاتورة">📷</button>
+    <input type="file" id="aiFile" accept="image/*" style="display:none" onchange="aiPickImg(this)">
+    <input type="text" id="aiIn" placeholder="اكتب: صرفت ٢٠٠ كهرباء…" onkeydown="if(event.key==='Enter'){aiSend();}">
+    <button class="ai-ic ai-send" onclick="aiSend()" aria-label="إرسال">➤</button>
+  </div>
+</div>
+<script>
+(function(){
+  var KEYK = 'masrofati_ai_gkey', MODK = 'masrofati_ai_gmodel', DEFMOD = 'gemini-flash-latest';
+  var hist = [], busy = false, pendImg = null, started = false;
+  function $(id){ return document.getElementById(id); }
+  function lsGet(k, d){ try{ return localStorage.getItem(k) || d; }catch(e){ return d; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function toast(m, ok){ try{ showToast(m, ok); }catch(e){} }
+  function endScroll(){ var b = $('aiMsgs'); setTimeout(function(){ b.scrollTop = b.scrollHeight; }, 30); }
+  function norm(t){ return String(t || '').replace(/[\u064B-\u0652]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\bال/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+
+  window.aiOpen = function(){
+    $('aiOv').classList.add('open');
+    if(!started){ started = true; welcome(); }
+    if(!lsGet(KEYK, '')) $('aiSet').classList.add('open');
+    $('aiKey').value = lsGet(KEYK, ''); $('aiModel').value = lsGet(MODK, DEFMOD);
+    endScroll();
+  };
+  window.aiClose = function(){ $('aiOv').classList.remove('open'); };
+  window.aiToggleSet = function(){ $('aiSet').classList.toggle('open'); $('aiKey').value = lsGet(KEYK, ''); $('aiModel').value = lsGet(MODK, DEFMOD); };
+  window.aiSaveSet = function(){ lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD); $('aiSet').classList.remove('open'); toast('اتحفظت إعدادات المساعد ✅', true); };
+  window.aiClear = function(){ hist = []; $('aiMsgs').innerHTML = ''; welcome(); $('aiSet').classList.remove('open'); };
+
+  function bubble(cls, html){ var d = document.createElement('div'); d.className = 'ai-b ' + cls; d.innerHTML = html; $('aiMsgs').appendChild(d); endScroll(); return d; }
+  function fmtTxt(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+  function welcome(){
+    bubble('a', 'أهلًا 👋 أنا مساعد مصروفاتك. اكتب صرفتك بجملة، أو صوّر الفاتورة، أو اسألني عن مصروفاتك وهجاوبك.');
+    var s = document.createElement('div'); s.className = 'ai-sug';
+    ['حلّل مصروفات الشهر ده', 'أكتر حاجة صرفت عليها؟', 'إزاي أوفّر؟'].forEach(function(t){ var b = document.createElement('button'); b.textContent = t; b.onclick = function(){ $('aiIn').value = t; aiSend(); }; s.appendChild(b); });
+    $('aiMsgs').appendChild(s);
+  }
+
+  /* ===== بيانات المستخدم اللي بتتبعت للمساعد ===== */
+  function groupsOf(mon){ var out = []; (function walk(nodes, path){ (nodes || []).forEach(function(n){ if(n && n.type === 'group'){ var p = path ? path + ' › ' + n.name : n.name; out.push({id: n.id, name: n.name, path: p}); walk(n.children, p); } }); })(mon && mon.groups, ''); return out; }
+  function curMonthIdx(){ var now = new Date(); return (currentYear === now.getFullYear()) ? now.getMonth() : (typeof currentMonth === 'number' ? currentMonth : 0); }
+  function monthLines(y, i, lim){
+    var mon = (data[y] || {})[i]; if(!mon) return [];
+    var rows = collectExpensesWithGroup(mon.groups || []).filter(function(e){ return e && e.type === 'expense'; });
+    rows.sort(function(a, b){ return (b.date || 0) - (a.date || 0); });
+    return rows.slice(0, lim).map(function(e){ return '- ' + e.name + ' | ' + fmt(Number(e.amount) || 0) + ' | ' + (e.date ? dateToInputValue(e.date) : '') + ' | ' + e.groupName + (e.counted === false ? ' | (مش محسوب)' : ''); });
+  }
+  function buildCtx(){
+    var now = new Date(), y = currentYear, mi = curMonthIdx(), L = [];
+    L.push('تاريخ النهاردة: ' + dateToInputValue(now.getTime()) + ' | السنة المعروضة: ' + y);
+    L.push('ملخص شهور السنة (دخل / مصروفات / أكبر مجموعات):');
+    for(var i = 0; i < 12; i++){
+      var mon = (data[y] || {})[i]; if(!mon) continue;
+      var inc = totalIncome(mon), exp = monthExpenses(i); if(!inc && !exp) continue;
+      var gs = (mon.groups || []).map(function(g){ return {n: g.name, v: nodeTotal(g)}; }).filter(function(g){ return g.v > 0; }).sort(function(a, b){ return b.v - a.v; }).slice(0, 6).map(function(g){ return g.n + ' ' + fmt(g.v); }).join('، ');
+      L.push('- ' + MONTHS[i] + ': دخل ' + fmt(inc) + ' / مصروفات ' + fmt(exp) + (gs ? ' / ' + gs : ''));
+    }
+    L.push('مصروفات شهر ' + MONTHS[mi] + ' بالتفصيل (اسم | مبلغ | تاريخ | مجموعة):');
+    L = L.concat(monthLines(y, mi, 120));
+    if(mi > 0){ L.push('مصروفات شهر ' + MONTHS[mi - 1] + ' بالتفصيل:'); L = L.concat(monthLines(y, mi - 1, 80)); }
+    var gl = groupsOf((data[y] || {})[mi]).map(function(g){ return g.path; });
+    L.push('المجموعات المتاحة لتسجيل مصروف في الشهر ده: ' + (gl.join(' ، ') || '(مفيش مجموعات)'));
+    try{ var m = []; ['cash', 'bank'].forEach(function(k){ cmoEntries(k).forEach(function(e){ m.push((e.x.name || e.x.title || 'بند') + ': ' + fmt(cmoAvailE(e.k, e.x))); }); }); if(m.length) L.push('الأموال المتاحة (نقدي/حسابات): ' + m.join('، ')); }catch(e){}
+    var t = L.join('\n'); return t.length > 14000 ? t.slice(0, 14000) + '\n…' : t;
+  }
+  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة.';
+  var GTOOLS = [{functionDeclarations: [{name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم المصروف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}]}];
+
+  /* ===== الاتصال بـ Gemini (مجاني) ===== */
+  function gNorm(h){ var out = []; h.forEach(function(m){ var l = out[out.length - 1]; if(l && l.role === m.role) l.parts = l.parts.concat(m.parts); else out.push({role: m.role, parts: m.parts.slice()}); }); return out; }
+  function trimHist(){ var h = hist.slice(-14); while(h.length && (h[0].role !== 'user' || h[0].parts.some(function(p){ return p.functionResponse; }))) h.shift(); return gNorm(h); }
+  async function callAI(){
+    var key = lsGet(KEYK, ''); if(!key) throw new Error('NOKEY');
+    var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(lsGet(MODK, DEFMOD)) + ':generateContent', {method: 'POST', headers: {'content-type': 'application/json', 'x-goog-api-key': key},
+      body: JSON.stringify({systemInstruction: {parts: [{text: SYS + '\n\n=== بيانات المستخدم ===\n' + buildCtx()}]}, contents: trimHist(), tools: GTOOLS, generationConfig: {maxOutputTokens: 1500}})});
+    if(!r.ok){ var t = ''; try{ t = (await r.json()).error.message; }catch(e){} var er = new Error('HTTP' + r.status); er.status = r.status; er.msg = t; throw er; }
+    return r.json();
+  }
+  function errText(e){
+    if(e && e.message === 'NOKEY') return 'حط مفتاح Gemini الأول من ⚙️ فوق.';
+    if(e && (e.status === 401 || e.status === 403 || (e.status === 400 && /api key/i.test(e.msg || '')))) return 'المفتاح غلط أو مش شغال. راجعه من ⚙️.';
+    if(e && e.status === 404) return 'اسم الموديل غلط. غيّره من ⚙️ (مثلًا gemini-flash-latest).';
+    if(e && e.status === 429) return 'الحصة المجانية خلصت دلوقتي (الدقيقة أو اليوم). جرّب بعد شوية.';
+    if(e && (e.status === 500 || e.status === 503)) return 'سيرفر Gemini مشغول، جرّب تاني بعد شوية.';
+    if(e && e.status) return 'حصلت مشكلة (' + e.status + '). ' + (e.msg || '');
+    return 'مفيش اتصال بالنت أو الطلب اتقفل. جرّب تاني.';
+  }
+
+  /* ===== الصور ===== */
+  window.aiPickImg = function(inp){
+    var f = inp.files && inp.files[0]; inp.value = ''; if(!f) return;
+    var fr = new FileReader();
+    fr.onload = function(){ var im = new Image(); im.onload = function(){
+      var s = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      var u = c.toDataURL('image/jpeg', 0.8); pendImg = u.split(',')[1]; $('aiPrevImg').src = u; $('aiPrev').classList.add('open');
+    }; im.onerror = function(){ toast('الصورة مش مفهومة، جرّب صورة تانية', false); }; im.src = fr.result; };
+    fr.readAsDataURL(f);
+  };
+  window.aiDropImg = function(){ pendImg = null; $('aiPrev').classList.remove('open'); };
+
+  /* ===== الإرسال ===== */
+  window.aiSend = async function(){
+    if(busy) return;
+    var txt = $('aiIn').value.trim(), img = pendImg; if(!txt && !img) return;
+    $('aiIn').value = ''; pendImg = null; $('aiPrev').classList.remove('open');
+    var sg = document.querySelector('#aiMsgs .ai-sug'); if(sg) sg.remove();
+    var shown = (img ? '<img src="data:image/jpeg;base64,' + img + '" alt="">' : '') + fmtTxt(txt || 'اقرأ الفاتورة دي وسجّلها');
+    bubble('u', shown);
+    var uparts = img ? [{inlineData: {mimeType: 'image/jpeg', data: img}}, {text: txt || 'اقرأ الفاتورة دي وسجّلها'}] : [{text: txt}];
+    hist.push({role: 'user', parts: uparts});
+    busy = true; var ty = document.createElement('div'); ty.className = 'ai-typing'; ty.textContent = '● ● ●'; $('aiMsgs').appendChild(ty); endScroll();
+    try{
+      var res = await callAI(); ty.remove();
+      if(img){ hist[hist.length - 1] = {role: 'user', parts: [{text: (txt || 'اقرأ الفاتورة دي وسجّلها') + ' [صورة فاتورة اتبعتت]'}]}; }
+      var cand = (res.candidates || [])[0], parts = cand && cand.content && cand.content.parts || [];
+      if(!parts.length){ hist.pop(); bubble('a err', 'المساعد مردّش (ممكن الرد اتحجب). جرّب صياغة تانية.'); busy = false; return; }
+      var tools = [], said = false;
+      parts.forEach(function(p){ if(p.thought) return; if(p.text && p.text.trim()){ bubble('a', fmtTxt(p.text)); said = true; } else if(p.functionCall) tools.push(p.functionCall); });
+      hist.push({role: 'model', parts: parts});
+      if(tools.length){
+        tools.forEach(function(fc){ if(fc.name === 'add_expense') expenseCard(fc.args || {}); });
+        hist.push({role: 'user', parts: tools.map(function(fc){ return {functionResponse: {name: fc.name, response: {result: 'اتعرضت بطاقة تأكيد على المستخدم'}}}; })});
+        if(!said) bubble('a', 'راجع البطاقة وأكّد 👇');
+      }
+    }catch(e){ ty.remove(); hist.pop(); bubble('a err', esc(errText(e))); }
+    busy = false;
+  };
+
+  /* ===== بطاقة تأكيد تسجيل المصروف ===== */
+  function matchGroup(list, name){
+    if(!list.length) return ''; var n = norm(name); if(!n) return '';
+    var ex = list.find(function(g){ return norm(g.name) === n || norm(g.path) === n; }); if(ex) return ex.id;
+    var part = list.find(function(g){ var a = norm(g.name); return a && (a.indexOf(n) > -1 || n.indexOf(a) > -1); }); return part ? part.id : '';
+  }
+  function expenseCard(inp){
+    var today = dateToInputValue(Date.now()), date = /^\d{4}-\d{2}-\d{2}$/.test(inp.date || '') ? inp.date : today;
+    var card = document.createElement('div'); card.className = 'ai-card';
+    card.innerHTML = '<h4>🧾 تسجيل مصروف — راجع وأكّد</h4><label>الاسم</label><input type="text" class="c-name"><label>المبلغ</label><input type="number" class="c-amt" inputmode="decimal" step="any"><label>المجموعة</label><select class="c-grp"></select><label>التاريخ</label><input type="date" class="c-date"><div class="ai-row"><button class="ai-ok">✅ سجّل</button><button class="ai-no">إلغاء</button></div>';
+    var q = function(c){ return card.querySelector(c); };
+    q('.c-name').value = inp.name || ''; q('.c-amt').value = Number(inp.amount) || ''; q('.c-date').value = date;
+    function fillGroups(keep){
+      var d = q('.c-date').value || today, mon = (data[+d.slice(0, 4)] || {})[+d.slice(5, 7) - 1], list = groupsOf(mon), sel = q('.c-grp');
+      sel.innerHTML = list.length ? '<option value="">— اختار المجموعة —</option>' : '<option value="">مفيش مجموعات في الشهر ده</option>';
+      list.forEach(function(g){ var o = document.createElement('option'); o.value = g.id; o.textContent = g.path; sel.appendChild(o); });
+      sel.value = keep && list.some(function(g){ return g.id === keep; }) ? keep : matchGroup(list, inp.group_name);
+    }
+    fillGroups(''); q('.c-date').onchange = function(){ fillGroups(q('.c-grp').value); };
+    q('.ai-no').onclick = function(){ card.remove(); };
+    q('.ai-ok').onclick = function(){
+      var name = q('.c-name').value.trim(), amt = Number(q('.c-amt').value), gid = q('.c-grp').value, d = q('.c-date').value || today;
+      if(!name || !(amt > 0)){ toast('اكتب الاسم والمبلغ', false); return; }
+      var y = +d.slice(0, 4), m = +d.slice(5, 7) - 1, mon = (data[y] || {})[m];
+      if(!mon){ toast('السنة دي مش متاحة للتسجيل — غيّر السنة من الشاشة الرئيسية', false); return; }
+      if(!gid){ toast('اختار المجموعة', false); return; }
+      var f = findNode(mon.groups, gid); if(!f){ toast('المجموعة مش موجودة', false); return; }
+      var now = Date.now();
+      f.node.children.push({id: uid(), type: 'expense', name: name, amount: amt, counted: true, date: inputValueToDate(d, now), createdAt: now, icon: '🧾'});
+      save(); try{ renderMonths(); }catch(e){}
+      card.classList.add('done'); card.innerHTML = '<h4>✅ اتسجّل: ' + esc(name) + ' — ' + esc(fmt(amt)) + '</h4><div style="opacity:.75;font-size:13.5px;">في «' + esc(f.node.name) + '» — ' + esc(d) + '</div>';
+      hist.push({role: 'user', parts: [{text: '[تم تسجيل المصروف: ' + name + ' ' + amt + ' في ' + f.node.name + ']'}]}); toast('اتسجّل المصروف ✅', true);
+    };
+    $('aiMsgs').appendChild(card); endScroll();
+  }
+})();
+</script>
+<!-- ===== 8352 END ===== -->
 </body>
 </html>
