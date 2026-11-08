@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-08.8354">
+<meta name="app-version" content="2026-11-08.8355">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16161,15 +16161,23 @@ body.kb-open .fab{display:none !important;}
   function gNorm(h){ var out = []; h.forEach(function(m){ var l = out[out.length - 1]; if(l && l.role === m.role) l.parts = l.parts.concat(m.parts); else out.push({role: m.role, parts: m.parts.slice()}); }); return out; }
   function trimHist(){ var h = hist.slice(-14); while(h.length && (h[0].role !== 'user' || h[0].parts.some(function(p){ return p.functionResponse; }))) h.shift(); return gNorm(h); }
   var TMO = 40000;
+  var FALLBACKS = ['gemini-flash-lite-latest'];
   async function gfetch(body){
     var key = lsGet(KEYK, ''); if(!key) throw new Error('NOKEY');
-    var ctl = new AbortController(), tm = setTimeout(function(){ ctl.abort(); }, TMO), r;
-    try{
-      r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(lsGet(MODK, DEFMOD)) + ':generateContent', {method: 'POST', signal: ctl.signal, headers: {'content-type': 'application/json', 'x-goog-api-key': key}, body: JSON.stringify(body)});
-    }catch(e){ clearTimeout(tm); var er0 = new Error(e && e.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK'); er0.raw = String(e && e.message || e); throw er0; }
-    clearTimeout(tm);
-    if(!r.ok){ var t = ''; try{ t = (await r.json()).error.message; }catch(e){} var er = new Error('HTTP' + r.status); er.status = r.status; er.msg = t; throw er; }
-    return r.json();
+    var first = lsGet(MODK, DEFMOD), models = [first].concat(FALLBACKS.filter(function(m){ return m !== first; })), lastErr = null;
+    for(var i = 0; i < models.length; i++){
+      var ctl = new AbortController(), tm = setTimeout(function(){ ctl.abort(); }, TMO), r;
+      try{
+        r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(models[i]) + ':generateContent', {method: 'POST', signal: ctl.signal, headers: {'content-type': 'application/json', 'x-goog-api-key': key}, body: JSON.stringify(body)});
+      }catch(e){ clearTimeout(tm); var er0 = new Error(e && e.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK'); er0.raw = String(e && e.message || e); lastErr = er0; if(er0.message === 'TIMEOUT' && i < models.length - 1) continue; throw er0; }
+      clearTimeout(tm);
+      if(r.ok){ var j = await r.json(); j._model = models[i]; return j; }
+      var t = ''; try{ t = (await r.json()).error.message; }catch(e){}
+      var er = new Error('HTTP' + r.status); er.status = r.status; er.msg = t; lastErr = er;
+      if((r.status === 503 || r.status === 500 || r.status === 429 || r.status === 404) && i < models.length - 1) continue;   // الموديل مشغول أو خلصت حصته: جرّب اللي بعده
+      throw er;
+    }
+    throw lastErr;
   }
   async function callAI(){
     return gfetch({systemInstruction: {parts: [{text: SYS + '\n\n=== بيانات المستخدم ===\n' + buildCtx()}]}, contents: trimHist(), tools: GTOOLS, generationConfig: {maxOutputTokens: 1500}});
@@ -16180,7 +16188,7 @@ body.kb-open .fab{display:none !important;}
       lsSet(KEYK, $('aiKey').value.trim() || lsGet(KEYK, '')); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
       var res = await gfetch({contents: [{role: 'user', parts: [{text: 'رد بكلمة واحدة بس: تمام'}]}], generationConfig: {maxOutputTokens: 40}});
       var p = (((res.candidates || [])[0] || {}).content || {}).parts || [], tx = p.map(function(x){ return x.text || ''; }).join('').trim();
-      o.textContent = '✅ شغال' + (tx ? ' — الرد: ' + tx : '');
+      o.textContent = '✅ شغال (' + (res._model || '') + ')' + (tx ? ' — الرد: ' + tx : '');
     }catch(e){ o.textContent = '❌ ' + errText(e) + (e && e.status ? '  [كود ' + e.status + ']' : '') + (e && e.raw ? '  [' + e.raw.slice(0, 80) + ']' : ''); }
   };
   function errText(e){
