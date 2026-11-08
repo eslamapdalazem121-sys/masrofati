@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-08.8347">
+<meta name="app-version" content="2026-11-08.8348">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3680,15 +3680,15 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <div class="cmo-sec" id="cmoFromCard">
     <div class="field"><label>اختر البند (وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
     <div class="hint" id="cmoAvail" style="white-space:pre-line;"></div>
-    <div class="field" style="margin-bottom:0;"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
+    <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
+    <div class="field"><label>📅 تاريخ الصرف</label><input type="date" id="cmoDate" onchange="cmoGenRender()"></div>
+    <div class="field" style="margin-bottom:0;"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     </div>
     <div class="cmo-arrow" aria-hidden="true"><span class="cmo-arr-ico">⬇</span><span class="cmo-arr-lbl">الصرف إلى</span></div>
     <div class="cmo-sec" id="cmoToCard">
     <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')"><i class="cmo-di">💰</i><span class="cmo-dl">المصروف المنزلي</span></button><button type="button" onclick="cmoSetDest('zakat')"><i class="cmo-di">🕌</i><span class="cmo-dl">زكاتي</span></button><button type="button" onclick="cmoSetDest('other')"><i class="cmo-di">📦</i><span class="cmo-dl">أخرى</span></button><button type="button" onclick="cmoSetDest('gen')"><i class="cmo-di">💵</i><span class="cmo-dl">الدخل العام الشهري</span></button></div>
     <div class="field" id="cmoGenRow" style="display:none;"><label>💵 يستقر فين؟</label><div class="cmo-sub" id="cmoSub"><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام</span></button><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المنزلي</span></button><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">المصروفات</span></button></div><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStlRow" style="margin-top:8px;"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div id="cmoStgRow" style="margin-top:8px;display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div><div class="hint" id="cmoGenHint"></div></div>
     <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
-    <div class="field"><label>📅 تاريخ الصرف</label><input type="date" id="cmoDate" onchange="cmoGenRender()"></div>
-    <div class="field"><label>ملاحظة (اختياري)</label><input type="text" id="cmoNote" placeholder="مثال: فاتورة الكهرباء"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
     </div>
     </div>
@@ -9291,8 +9291,6 @@ function cmoAvail(){
   const av = cmoAvailE(k, x);
   if(cmoLocked(k, x) && av <= 0){ el.textContent = cmoLockedMsg(k); return; }
   let t = 'المتاح للصرف: ' + fmt(av);
-  if(k === 'int') t += ' (فوايد متضافة لرصيد البنك)';
-  if(k === 'bank'){ t += x.isSub ? ' (حساب فرعي)' : (x.isAcc ? ' (حساب أساسي)' : ''); if(x.isAcc && capRaw().some(z=> z && capSubOf(z) === 'pension' && z.payAcc === x.id)) t += ' — شامل المعاش اللي بيتحط فيه'; t += '\nأصل الشهادات مينفعش يتصرف من هنا، وفوايدها بتتصرف من «فوائد» لو متضافة لرصيد الحساب.'; }
   el.textContent = t;
 }
 function cmoRender(){
@@ -9300,8 +9298,7 @@ function cmoRender(){
   [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other','gen'][i] === _cmoDest));
   const sel = document.getElementById('cmoItem'), keepSel = sel.value; sel.innerHTML = '';
   { const its = cmoEntries(_cmoKind), isAll = _cmoKind === 'all';
-    if(its.length > 1 && !_cmoEditId){ const o = document.createElement('option'); o.value = '__all__'; o.textContent = '⭐ الإجمالي كله — متاح ' + fmt(cgRound(its.reduce((a, e)=> a + cmoAvailE(e.k, e.x), 0))) + ' (يتوزّع تلقائي)'; sel.appendChild(o); }
-    its.forEach(e=>{
+        its.forEach(e=>{
       const x = e.x, o = document.createElement('option'); o.value = isAll ? (e.k + '|' + x.id) : x.id;
       o.textContent = (isAll ? cmoEntTitle(e) : x.name) + (cmoLocked(e.k, x) && cmoAvailE(e.k, x) <= 0 ? ' — رصيده ٠ (اتحوّل وصُرف في موعده)' : ' — متاح ' + fmt(cmoAvailE(e.k, x)));
       sel.appendChild(o);
