@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-08.8362">
+<meta name="app-version" content="2026-11-08.8363">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16245,9 +16245,9 @@ body.kb-open .fab{display:none !important;}
   function bubble(cls, html){ var d = document.createElement('div'); d.className = 'ai-b ' + cls; d.innerHTML = html; $('aiMsgs').appendChild(d); endScroll(); return d; }
   function fmtTxt(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
   function welcome(){
-    bubble('a', 'أهلًا 👋 أنا مساعد مصروفاتك. اكتب صرفتك بجملة، أو صوّر الفاتورة، أو اسألني عن مصروفاتك وهجاوبك.');
+    bubble('a', 'أهلًا 👋 أنا مساعد مصروفاتك. اكتب صرفتك بجملة، أو صوّر الفاتورة، أو اسألني عن مصروفاتك والأموال والذهب والزكاة والتقارير وهجاوبك.');
     var s = document.createElement('div'); s.className = 'ai-sug';
-    ['حلّل مصروفات الشهر ده', 'أكتر حاجة صرفت عليها؟', 'إزاي أوفّر؟'].forEach(function(t){ var b = document.createElement('button'); b.textContent = t; b.onclick = function(){ $('aiIn').value = t; aiSend(); }; s.appendChild(b); });
+    ['حلّل مصروفات الشهر ده', 'كام زكاتي؟', 'وضع الذهب بتاعي', 'ملخص رأس المال', 'إزاي أوفّر؟'].forEach(function(t){ var b = document.createElement('button'); b.textContent = t; b.onclick = function(){ $('aiIn').value = t; aiSend(); }; s.appendChild(b); });
     $('aiMsgs').appendChild(s);
   }
 
@@ -16259,6 +16259,72 @@ body.kb-open .fab{display:none !important;}
     var rows = collectExpensesWithGroup(mon.groups || []).filter(function(e){ return e && e.type === 'expense'; });
     rows.sort(function(a, b){ return (b.date || 0) - (a.date || 0); });
     return rows.slice(0, lim).map(function(e){ return '- ' + e.name + ' | ' + fmt(Number(e.amount) || 0) + ' | ' + (e.date ? dateToInputValue(e.date) : '') + ' | ' + e.groupName + (e.counted === false ? ' | (مش محسوب)' : ''); });
+  }
+  /* ===== 8363: معلومات التطبيق كله للمساعد (أموال / رأس مال / ذهب / زكاة / تقارير) ===== */
+  function aiExtraCtx(){
+    var L = [], now = new Date();
+    function S(fn){ try{ fn(); }catch(e){} }
+    function D(v){ try{ var m = (typeof opsMs === 'function') ? opsMs(v) : new Date(v).getTime(); return m ? dateToInputValue(m) : ''; }catch(e){ return ''; } }
+    S(function(){
+      var ys = Object.keys(data).filter(function(k){ return /^\d{4}$/.test(k); }).sort(), rows = [];
+      ys.forEach(function(y){ var inc = 0, exp = 0; for(var i = 0; i < 12; i++){ var mon = (data[y] || {})[i]; if(!mon) continue; inc += totalIncome(mon); exp += (mon.groups || []).reduce(function(s, g){ return s + nodeTotal(g); }, 0); } if(inc || exp) rows.push('- ' + y + ': دخل ' + fmt(inc) + ' / مصروفات ' + fmt(exp) + ' / الصافي ' + fmt(inc - exp)); });
+      if(rows.length){ L.push('التقرير السنوي (إجمالي كل سنة):'); L = L.concat(rows); }
+    });
+    S(function(){
+      var y = currentYear, mi = curMonthIdx(), mon = (data[y] || {})[mi]; if(!mon) return;
+      var rows = collectExpensesWithGroup(mon.groups || []).filter(function(e){ return e && e.type === 'expense' && e.counted !== false; }), by = {}, tot = 0;
+      rows.forEach(function(e){ var d = e.date ? dateToInputValue(e.date) : 'بدون تاريخ', a = Number(e.amount) || 0; by[d] = (by[d] || 0) + a; tot += a; });
+      var ks = Object.keys(by).sort(), days = (y === now.getFullYear() && mi === now.getMonth()) ? now.getDate() : new Date(y, mi + 1, 0).getDate();
+      L.push('التقرير اليومي لشهر ' + MONTHS[mi] + ': إجمالي ' + fmt(tot) + ' | متوسط الإنفاق اليومي ' + fmt(Math.round(tot / Math.max(1, days))) + (Number(mon.dailyLimit) > 0 ? ' | الحد اليومي ' + fmt(Number(mon.dailyLimit)) : ''));
+      if(ks.length) L.push('إنفاق كل يوم: ' + ks.map(function(d){ return d + ' ' + fmt(by[d]); }).join('، '));
+      var inc = (mon.incomeSources || []).map(function(x){ return (x.name || 'دخل') + ' ' + fmt(Number(x.amount) || 0) + (x.counted === false ? ' (مش محسوب)' : ''); });
+      if(inc.length) L.push('مصادر دخل شهر ' + MONTHS[mi] + ': ' + inc.join('، '));
+    });
+    S(function(){
+      var t = capTotals();
+      L.push('— رأس المال والأموال (بالجنيه): نقدي ' + fmt(t.cash) + ' | حسابات بنكية ' + fmt(t.bank) + ' | إجمالي الأموال (نقدي+بنوك) ' + fmt(t.money) + ' | ذهب بسعر البيع الحالي ' + fmt(t.gold) + ' (بسعر الشراء ' + fmt(t.goldBuy) + '، ' + fmt(Math.round((Number(t.grams) || 0) * 100) / 100) + ' جم) | إجمالي رأس المال ' + fmt(t.all) + ' | معاش متاح ' + fmt(t.pension) + ' (شهريًا ' + fmt(t.penMonthly) + ')');
+    });
+    S(function(){
+      var mo = capRaw().filter(function(x){ return capCatOf(x) === 'money'; }), rows = [], mi = 0;
+      mo.slice(0, 40).forEach(function(x){
+        var sub = capSubOf(x), nm = x.certName || x.name || x.title || 'بند', p = [(x.isCert ? 'شهادة' : (sub === 'bank' ? 'حساب بنكي' : (sub === 'pension' ? 'معاش' : 'نقدي'))) + ': ' + nm, 'المبلغ ' + fmt(Number(x.amount) || 0)];
+        try{ p.push('متاح للصرف ' + fmt(cmoAvailE(sub, x))); }catch(e){}
+        if(x.bank) p.push('بنك ' + x.bank);
+        if(Number(x.rate) > 0) p.push('فايدة ' + x.rate + '٪');
+        try{ var bm = bankMonthly(x); if(bm > 0){ p.push('فايدة شهرية ' + fmt(bm)); mi += bm; } }catch(e){}
+        try{ if(x.isCert){ var c = certMatInfo(x); if(c) p.push('استحقاق ' + dateToInputValue(c.end.getTime()) + ' (' + (c.ended ? 'انتهت' : 'باقي ' + c.days + ' يوم') + (c.auto ? '، تجديد تلقائي' : '') + ')'); } }catch(e){}
+        try{ if(!capZkIn(x)) p.push('خارج الزكاة'); }catch(e){}
+        rows.push('- ' + p.join(' | '));
+      });
+      if(rows.length){ L.push('بنود الأموال (نقدي / حسابات / شهادات / معاش):'); L = L.concat(rows); if(mi > 0) L.push('إجمالي الفوائد الشهرية: ' + fmt(Math.round(mi))); }
+    });
+    S(function(){
+      var go = capRaw().filter(function(x){ return capCatOf(x) === 'gold'; }), pr = [];
+      if(glBase24() > 0) pr.push('جرام ٢٤ (بيع) ' + fmt(glSellPpg(24)) + ' | عيار ٢١ ' + fmt(glSellPpg(21)) + ' | عيار ١٨ ' + fmt(glSellPpg(18)));
+      try{ if(typeof _gl === 'object' && _gl){ if(_gl.usd > 0) pr.push('الأونصة عالميًا ' + fmt(Math.round(_gl.usd)) + ' دولار'); if(_gl.rate > 0) pr.push('الدولار في البنوك بيع ' + _gl.rate + (_gl.rateBuy > 0 ? ' / شراء ' + _gl.rateBuy : '')); } }catch(e){}
+      if(pr.length) L.push('أسعار الذهب والدولار دلوقتي: ' + pr.join(' | '));
+      var pl = goldPnl(); if(pl.ok) L.push('الذهب: اشتريته بـ ' + fmt(pl.buy) + ' وقيمته دلوقتي ' + fmt(pl.now) + ' → ' + (pl.pnl >= 0 ? 'ربح ' : 'خسارة ') + fmt(Math.abs(pl.pnl)) + ' (' + toArabicDigits(Math.round(pl.pct)) + '٪)');
+      var rows = go.slice(0, 40).map(function(x){ return '- ' + (x.name || x.title || 'قطعة ذهب') + ' | ' + (Number(x.grams) || 0) + ' جم عيار ' + (x.karat || '؟') + ' | شراء ' + fmt(Number(x.amount) || 0) + (D(x.date) ? ' | ' + D(x.date) : '') + (capZkIn(x) ? '' : ' | خارج الزكاة'); });
+      if(rows.length){ L.push('قطع الذهب:'); L = L.concat(rows); }
+    });
+    S(function(){
+      var z = zkcCompute(), i = zkDueInfo(), p = [];
+      p.push('الزكاة: أموال خاضعة (نقدي+بنوك) ' + fmt(z.zkMoney) + ' + ذهب خاضع ' + fmt(z.goldIn) + ' = وعاء الزكاة ' + fmt(z.base) + ' × نسبة ' + zkRateTxt() + ' = ' + fmt(z.zk));
+      if(z.exMoney > 0 || z.exGold > 0) p.push('مستبعد من الزكاة: أموال ' + fmt(z.exMoney) + ' / ذهب ' + fmt(z.exGold));
+      if(i.state === 'unset') p.push('موعد الزكاة لسه ماتحددش');
+      else p.push('موعد الزكاة: ' + (i.state === 'paid' ? 'اتسدّدت' : (i.state === 'wait' ? 'لسه (باقي ' + i.days + ' يوم)' : 'مستحقة')) + (i.due ? ' — تاريخ الاستحقاق ' + zkIso(i.due) : '') + (i.state === 'due' ? ' (باقي ' + i.days + ' يوم على نهاية فترة السداد)' : ''));
+      L.push(p.join(' | '));
+      try{ var pc = zkPrevCard(); if(pc && pc.txt) L.push('السنة اللي فاتت: ' + String(pc.txt).replace(/\n/g, ' ')); }catch(e){}
+      try{ var zm = data.zakatMal || {}, ks = Object.keys(zm).filter(function(k){ return Number(zm[k]) > 0; }).sort(); if(ks.length) L.push('زكاة مثبتة لكل سنة: ' + ks.map(function(k){ return k + ' ' + fmt(Number(zm[k])); }).join('، ')); }catch(e){}
+      try{ var pd = Object.keys(data.zakatPaidD || {}).filter(function(k){ return data.zakatPaidD[k]; }).sort(); if(pd.length) L.push('مواعيد زكاة اتسدّدت: ' + pd.join('، ')); }catch(e){}
+    });
+    S(function(){
+      var arr = (data.moneyOut || []).slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 15);
+      if(!arr.length) return;
+      L.push('آخر عمليات الصرف من الأموال:');
+      arr.forEach(function(r){ var lb = ''; try{ lb = cmoDestLbl(r); }catch(e){} L.push('- ' + r.date + ' | ' + fmt(Number(r.amount) || 0) + (lb ? ' | ' + lb : '') + (r.note ? ' | ' + r.note : '')); });
+    });
+    return L;
   }
   function buildCtx(){
     var now = new Date(), y = currentYear, mi = curMonthIdx(), L = [];
@@ -16276,9 +16342,10 @@ body.kb-open .fab{display:none !important;}
     var gl = groupsOf((data[y] || {})[mi]).map(function(g){ return g.path; });
     L.push('المجموعات المتاحة لتسجيل مصروف في الشهر ده: ' + (gl.join(' ، ') || '(مفيش مجموعات)'));
     try{ var m = []; ['cash', 'bank'].forEach(function(k){ cmoEntries(k).forEach(function(e){ m.push((e.x.name || e.x.title || 'بند') + ': ' + fmt(cmoAvailE(e.k, e.x))); }); }); if(m.length) L.push('الأموال المتاحة (نقدي/حسابات): ' + m.join('، ')); }catch(e){}
-    var t = L.join('\n'); return t.length > 14000 ? t.slice(0, 14000) + '\n…' : t;
+    try{ L = L.concat(aiExtraCtx()); }catch(e){}
+    var t = L.join('\n'); return t.length > 36000 ? t.slice(0, 36000) + '\n…' : t;
   }
-  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة.';
+  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى.';
   var GTOOLS = [{functionDeclarations: [{name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم المصروف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}]}];
 
   /* ===== الاتصال بـ Gemini (مجاني) ===== */
