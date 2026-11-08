@@ -33,7 +33,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-08.8348">
+<meta name="app-version" content="2026-11-08.8351">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3686,8 +3686,8 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     </div>
     <div class="cmo-arrow" aria-hidden="true"><span class="cmo-arr-ico">⬇</span><span class="cmo-arr-lbl">الصرف إلى</span></div>
     <div class="cmo-sec" id="cmoToCard">
-    <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" class="active" onclick="cmoSetDest('income')"><i class="cmo-di">💰</i><span class="cmo-dl">المصروف المنزلي</span></button><button type="button" onclick="cmoSetDest('zakat')"><i class="cmo-di">🕌</i><span class="cmo-dl">زكاتي</span></button><button type="button" onclick="cmoSetDest('other')"><i class="cmo-di">📦</i><span class="cmo-dl">أخرى</span></button><button type="button" onclick="cmoSetDest('gen')"><i class="cmo-di">💵</i><span class="cmo-dl">الدخل العام الشهري</span></button></div>
-    <div class="field" id="cmoGenRow" style="display:none;"><label>💵 يستقر فين؟</label><div class="cmo-sub" id="cmoSub"><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام</span></button><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المنزلي</span></button><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">المصروفات</span></button></div><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStlRow" style="margin-top:8px;"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div id="cmoStgRow" style="margin-top:8px;display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div><div class="hint" id="cmoGenHint"></div></div>
+    <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" data-id="income" data-hold-ok="1" class="active" onclick="cmoSetDest('income')"><i class="cmo-di">💰</i><span class="cmo-dl">المصروف المنزلي</span></button><button type="button" data-id="zakat" data-hold-ok="1" onclick="cmoSetDest('zakat')"><i class="cmo-di">🕌</i><span class="cmo-dl">زكاتي</span></button><button type="button" data-id="other" data-hold-ok="1" onclick="cmoSetDest('other')"><i class="cmo-di">📦</i><span class="cmo-dl">أخرى</span></button><button type="button" data-id="gen" data-hold-ok="1" onclick="cmoSetDest('gen')"><i class="cmo-di">💵</i><span class="cmo-dl">الدخل العام الشهري</span></button></div>
+    <div class="field" id="cmoGenRow" style="display:none;"><div class="cmo-sub cmo-flow" id="cmoSub"><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg1)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام</span></button><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg2)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المنزلي</span></button><div id="cmoStlRow" class="cmo-flow-in"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg3)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">المصروفات</span></button><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStgRow" class="cmo-flow-in" style="display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div></div><div class="hint" id="cmoGenHint"></div></div>
     <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
     </div>
@@ -9072,6 +9072,7 @@ function applyCmoOrder(){
     const sortBy = (box, order, pick)=>{ if(!box || !Array.isArray(order) || !order.length) return; const els = Array.from(box.children).filter(pick); if(els.length < 2) return; const ix = id=>{ const i = order.indexOf(id); return i < 0 ? 999 : i; }; const sorted = els.slice().sort((a, b)=> ix(a.dataset.id) - ix(b.dataset.id)); const ref = els[els.length - 1].nextSibling; sorted.forEach(e=> box.insertBefore(e, ref)); };
     sortBy(document.querySelector('#cmOutOverlay .cmo-wrap'), data.cmoBlkOrder, c=> c.dataset && c.dataset.id && c.dataset.id.indexOf('cmo:') === 0);
     sortBy(document.getElementById('cmoKinds'), data.cmoKindOrder, c=> c.tagName === 'BUTTON' && c.dataset && c.dataset.id);
+    sortBy(document.getElementById('cmoDest'), data.cmoDestOrder, c=> c.tagName === 'BUTTON' && c.dataset && c.dataset.id);
   }catch(e){ console.error(e); }
 }
 var _cmAddLogOpen = false;
@@ -9198,7 +9199,7 @@ function cmoItems(kind){ return capRaw().filter(x=> capCatOf(x) === 'money' && (
 function openCmOut(){ _cmoEditId = null; _cmoSub = 'home'; _cmoGrp = ''; try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'all'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); applyCmoOrder(); document.getElementById('cmOutOverlay').classList.add('open'); }
 function closeCmOut(){ _cmoEditId = null; document.getElementById('cmOutOverlay').classList.remove('open'); }
 function cmoSetKind(k){ if(_cmoEditId){ showToast('النوع مينفعش يتغيّر وإنت بتعدّل — احذف الصرف واعمله من جديد', false); return; } _cmoKind = k; cmoRender(); }
-function cmoSetDest(d){ _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other','gen'][i] === _cmoDest)); cmoGenRender(); }
+function cmoSetDest(d){ _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach(b=> b.classList.toggle('active', b.dataset.id === _cmoDest)); cmoGenRender(); }
 // ===== الدخل العام الشهري: يدخل الدخل العام الأول وبعدها يستقر في المصروف المنزلي أو في مجموعة من مجموعاته =====
 const CMO_SEP = '\u001f';
 function cmoDateYM(){ const v = (document.getElementById('cmoDate') || {}).value || cmoToday(); return {y: Number(v.slice(0, 4)), m: Number(v.slice(5, 7)) - 1}; }
@@ -9225,7 +9226,7 @@ function cmoGenRender(){
   const row = document.getElementById('cmoGenRow'); if(!row) return;
   row.style.display = _cmoDest === 'gen' ? '' : 'none';
   if(_cmoDest !== 'gen') return;
-  [...document.querySelectorAll('#cmoSub button')].forEach((b,i)=> b.classList.toggle('active', ['gi','home','grp'][i] === _cmoSub));
+  { const ix = ['gi','home','grp'].indexOf(_cmoSub); [...document.querySelectorAll('#cmoSub button')].forEach((b,i)=>{ b.classList.toggle('active', i === ix); b.classList.toggle('chain', i < ix); }); }
   const sel = document.getElementById('cmoGrp'), h = document.getElementById('cmoGenHint'), d = cmoDateYM(), mn = MONTHS[d.m];
   sel.style.display = _cmoSub === 'grp' ? '' : 'none';
   document.getElementById('cmoStlRow').style.display = _cmoSub === 'gi' ? 'none' : '';
@@ -9295,7 +9296,7 @@ function cmoAvail(){
 }
 function cmoRender(){
   [...document.querySelectorAll('#cmoKinds button')].forEach(b=> b.classList.toggle('active', b.dataset.id === _cmoKind));
-  [...document.querySelectorAll('#cmoDest button')].forEach((b,i)=> b.classList.toggle('active', ['income','zakat','other','gen'][i] === _cmoDest));
+  [...document.querySelectorAll('#cmoDest button')].forEach(b=> b.classList.toggle('active', b.dataset.id === _cmoDest));
   const sel = document.getElementById('cmoItem'), keepSel = sel.value; sel.innerHTML = '';
   { const its = cmoEntries(_cmoKind), isAll = _cmoKind === 'all';
         its.forEach(e=>{
@@ -14377,6 +14378,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(p.id === 'cmBox') return 'cmblk';
     if(p.classList && p.classList.contains('cmo-wrap')) return 'cmoblk';
     if(p.id === 'cmoKinds') return 'cmokind';
+    if(p.id === 'cmoDest') return 'cmodest';
     if(p.id === 'groupsList' || (p.classList && p.classList.contains('children-list'))) return (typeof arrayForContainer === 'function' && arrayForContainer(p)) ? 'detail' : null;
     if(p.id === 'cmList' || p.id === 'cgList'){ return (el.classList && el.classList.contains('cap-grp-wrap')) ? 'capgrp' : 'cap'; }
     if(p.classList && p.classList.contains('cap-grp-body')) return 'cap';
@@ -14424,7 +14426,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   }
   function reorder(y){
     if(!st) return;
-    if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind'){ reorderGrid(y); return; }
+    if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind' || st.kind === 'cmodest'){ reorderGrid(y); return; }
     for(var i = 0; i < 14; i++){
       var nx = neighbor(1), pv = neighbor(-1), moved = false, r;
       if(nx){ r = nx.getBoundingClientRect(); if(y > r.top + r.height * 0.5){ st.parent.insertBefore(st.el, nx.nextSibling); moved = true; } }
@@ -14470,6 +14472,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
       else if(k === 'cmblk'){ data.cmOrder = ids; save(); }
       else if(k === 'cmoblk'){ data.cmoBlkOrder = ids; save(); }
       else if(k === 'cmokind'){ data.cmoKindOrder = ids; save(); }
+      else if(k === 'cmodest'){ data.cmoDestOrder = ids; save(); }
       else if(k === 'capgrp'){ ok = reorderSubset(capGroups(), ids); if(ok){ save(); if(p.id === 'cgList') renderCapGold(); else renderCapMoney(); } }
       else if(k === 'zk'){ ok = reorderSubset(zkGet()[_zkMode], ids); if(ok){ save(); renderZakatList(); } }
       else if(k === 'gisrc'){ ok = reorderSubset(giRec().src, ids); if(ok){ save(); renderGISources(); } }
@@ -14508,7 +14511,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     for(var j = 0; j < kids.length; j++){ var rr = kids[j].getBoundingClientRect(); if(y < rr.top + rr.height * 0.5){ before = kids[j]; break; } }
     body.insertBefore(st.el, before); st.parent = body; st.cross = true; st.crossAt = Date.now();
   }
-  function move(y, x){ if(!st || !st.active) return; st.lastY = y; if(typeof x === 'number') st.lastX = x; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind') st.ghost.style.left = (st.lastX - st.offX + st.cx) + 'px'; if(st.kind === 'cap') crossGroup(y); reorder(y); }
+  function move(y, x){ if(!st || !st.active) return; st.lastY = y; if(typeof x === 'number') st.lastX = x; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind' || st.kind === 'cmodest') st.ghost.style.left = (st.lastX - st.offX + st.cx) + 'px'; if(st.kind === 'cap') crossGroup(y); reorder(y); }
   function finish(dropped){
     if(!st) return; var s0 = st; st = null; document.removeEventListener('touchmove', tmoveActive, {passive: false});
     if(s0.timer) clearTimeout(s0.timer);
@@ -14516,7 +14519,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(!s0.active) return;
     document.body.classList.remove('hc-dragging');
     suppressUntil = Date.now() + 500;
-    var el = s0.el, g = s0.ghost, animate = ((s0.kind === 'home' || s0.kind === 'cmokind') && dropped);
+    var el = s0.el, g = s0.ghost, animate = ((s0.kind === 'home' || s0.kind === 'cmokind' || s0.kind === 'cmodest') && dropped);
     if(animate && el.isConnected){
       var r = el.getBoundingClientRect();
       g.style.transition = 'top .16s ease, left .16s ease, transform .16s ease, box-shadow .16s ease';
@@ -15861,6 +15864,35 @@ body.kb-open .fab{display:none !important;}
 #cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic.active::after{display:block !important; content:""; position:absolute; bottom:0; left:50%; width:24px; height:4px; margin-left:-12px; border-radius:4px; background:var(--sg);}
 #cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic:active{transform:none !important;}
 /* ===== 8347 END ===== */
+/* ===== 8349: الدخل العام الشهري → سهم ← الدخل العام ← سهم ← المنزلي والمبلغ ← سهم ← المصروفات START ===== */
+#cmOutOverlay #cmoGenRow{margin:0 0 6px !important; padding:0 !important; background:none !important; box-shadow:none !important; border-radius:0 !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow{display:flex !important; flex-direction:column; align-items:center; gap:0; margin:0 0 6px !important;}
+#cmOutOverlay #cmoGenRow .cmo-flow .cmo-fa{font-size:calc(32px * var(--fs,1)); line-height:1; font-weight:900; color:#12b27a; margin:2px 0;}
+#cmOutOverlay #cmoGenRow .cmo-flow .cmo-flow-in{width:100%; margin:4px 0 0 !important;}
+#cmOutOverlay #cmoGenRow .cmo-flow select{width:100%;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic.chain .cmo-sph{filter:drop-shadow(0 0 7px var(--sg)) drop-shadow(0 3px 2px rgba(0,0,0,.2)); opacity:1;}
+#cmOutOverlay #cmoGenRow .cmo-sub button.cmo-ic.chain .cmo-lb{opacity:1;}
+/* ===== 8349 END ===== */
+/* ===== 8350: تنسيق وشكل 3D لسلسلة الدخل العام ← المنزلي ← المصروفات START ===== */
+#cmOutOverlay #cmoGenRow .cmo-flow .cmo-fa{display:flex; align-items:center; justify-content:center; font-size:0; margin:4px 0 6px; filter:drop-shadow(0 5px 3px rgba(0,0,0,.25));}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow{padding:4px 2px 0;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic{flex:none !important; flex-direction:row; justify-content:center; align-items:center; gap:14px; width:78% !important; max-width:290px; height:auto !important; min-height:0 !important; padding:10px 16px !important; border:2px solid transparent !important; border-radius:22px !important; position:relative; cursor:pointer; transition:transform .12s, box-shadow .12s;
+  background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0) 55%),var(--card) !important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.9), inset 0 -3px 0 rgba(0,0,0,.05), 0 6px 0 rgba(0,0,0,.15), 0 14px 16px rgba(0,0,0,.12) !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic.chain{border-color:var(--sg) !important; opacity:1;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic.active{border-color:var(--sg) !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 50%),linear-gradient(160deg,var(--sa),var(--sb)) !important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.85), inset 0 -3px 0 rgba(0,0,0,.06), 0 6px 0 var(--sg), 0 14px 18px var(--ss) !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic:active{transform:translateY(4px) !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic.active::after{display:none !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic .cmo-sph{flex:none; position:relative; width:54px !important; height:54px !important; border-radius:50% !important; margin:0; font-size:calc(27px * var(--fs,1)); filter:none !important; transform:none !important;
+  background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.95) 0%,var(--sa) 28%,var(--sb) 100%) !important;
+  box-shadow:0 2px 3px rgba(255,255,255,.9) inset, 0 -7px 10px var(--sg) inset, 0 7px 10px var(--ss) !important;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic .cmo-sph::before{content:"" !important; position:absolute; top:5px; left:9px; width:22px; height:12px; border-radius:50%; background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,0)); transform:rotate(-18deg); pointer-events:none;}
+#cmOutOverlay #cmoGenRow .cmo-sub.cmo-flow button.cmo-ic .cmo-lb{font-size:calc(17px * var(--fs,1)); font-weight:900; opacity:1; text-align:start;}
+#cmOutOverlay #cmoGenRow .cmo-flow .cmo-flow-in{width:100%; margin:12px 0 2px !important;}
+#cmOutOverlay #cmoGenRow .cmo-flow select{margin-top:12px;}
+/* ===== 8350 END ===== */
 </style>
 <script>
 /* 8269: الحقل اللي بتكتب فيه يفضل ظاهر فوق الكيبورد، وزر ＋ العايم يختفي وقت الكتابة */
