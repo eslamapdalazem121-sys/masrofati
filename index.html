@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8367">
+<meta name="app-version" content="2026-11-09.8369">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16515,6 +16515,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     <input type="text" id="aiModel" placeholder="gemini-flash-latest">
     <div class="ai-note">مجاني من غير كارت: ادخل aistudio.google.com/apikey بحساب Google واضغط Create API key. المفتاح بيتحفظ على جهازك بس.<br>تنبيه: في الخطة المجانية جوجل ممكن تستخدم الأسئلة والردود لتحسين موديلاتها.</div>
     <div class="ai-chk"><input type="checkbox" id="aiSearch"><label for="aiSearch">🌐 البحث في جوجل (أسعار وأخبار ومعلومات حديثة)</label></div>
+    <div class="ai-chk"><input type="checkbox" id="aiAuto"><label for="aiAuto">🔁 رأي الذكاءات التانية (التاني والتالت) يظهر تلقائيًا بعد كل رد</label></div>
     <div class="ai-sep"></div>
     <label>🤝 ذكاء اصطناعي تاني (اختياري)</label>
     <select id="aiP2" onchange="aiP2Change()"><option value="">بدون</option><option value="groq">Groq (مجاني)</option><option value="openrouter">OpenRouter (فيه موديلات مجانية)</option><option value="mistral">Mistral (فيه خطة مجانية)</option><option value="cerebras">Cerebras (فيه خطة مجانية)</option><option value="deepseek">DeepSeek (رخيص)</option><option value="custom">مخصص (متوافق مع OpenAI)</option></select>
@@ -16552,7 +16553,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 (function(){
   var KEYK = 'masrofati_ai_gkey', MODK = 'masrofati_ai_gmodel', DEFMOD = 'gemini-flash-latest';
   /* 8364: بحث جوجل + ذكاء اصطناعي تاني (متوافق مع OpenAI) */
-  var SRCHK = 'masrofati_ai_search', P2K = 'masrofati_ai_p2', P2KEY = 'masrofati_ai_p2key', P2MOD = 'masrofati_ai_p2model', P2URL = 'masrofati_ai_p2url', P3K = 'masrofati_ai_p3', P3KEY = 'masrofati_ai_p3key', P3MOD = 'masrofati_ai_p3model', P3URL = 'masrofati_ai_p3url';
+  var SRCHK = 'masrofati_ai_search', P2K = 'masrofati_ai_p2', P2KEY = 'masrofati_ai_p2key', P2MOD = 'masrofati_ai_p2model', P2URL = 'masrofati_ai_p2url', P3K = 'masrofati_ai_p3', P3KEY = 'masrofati_ai_p3key', P3MOD = 'masrofati_ai_p3model', P3URL = 'masrofati_ai_p3url', AUTOK = 'masrofati_ai_auto';
   var P2PRE = {
     groq: {name: 'Groq', base: 'https://api.groq.com/openai/v1', model: 'openai/gpt-oss-120b'},
     openrouter: {name: 'OpenRouter', base: 'https://openrouter.ai/api/v1', model: 'openrouter/free'},
@@ -16573,6 +16574,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function $(id){ return document.getElementById(id); }
   function lsGet(k, d){ try{ return localStorage.getItem(k) || d; }catch(e){ return d; } }
   function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  /* ٨٣٦٩: وضع توفير الحصص — البحث والرأي التلقائي مقفولين افتراضيًا (مرة واحدة بس، وتقدر تفعّلهم بعد كده) */
+  if(lsGet('masrofati_ai_lean_v1', '') !== '1'){ lsSet(SRCHK, '0'); lsSet(AUTOK, '0'); lsSet('masrofati_ai_lean_v1', '1'); }
   function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function toast(m, ok){ try{ showToast(m, ok); }catch(e){} }
   function endScroll(){ var b = $('aiMsgs'); setTimeout(function(){ b.scrollTop = b.scrollHeight; }, 30); }
@@ -16589,7 +16592,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function p3cfg(){ return pcfg(P3K, P3KEY, P3MOD, P3URL, 3); }
   function loadSet(){
     $('aiKey').value = lsGet(KEYK, ''); $('aiModel').value = lsGet(MODK, DEFMOD);
-    $('aiSearch').checked = lsGet(SRCHK, '1') !== '0';
+    $('aiSearch').checked = lsGet(SRCHK, '0') === '1'; $('aiAuto').checked = lsGet(AUTOK, '0') === '1';
     $('aiP2').value = lsGet(P2K, ''); $('aiP2Key').value = lsGet(P2KEY, ''); $('aiP2Model').value = lsGet(P2MOD, ''); $('aiP2Url').value = lsGet(P2URL, '');
     window.aiP2Change(true);
     $('aiP3').value = lsGet(P3K, ''); $('aiP3Key').value = lsGet(P3KEY, ''); $('aiP3Model').value = lsGet(P3MOD, ''); $('aiP3Url').value = lsGet(P3URL, '');
@@ -16597,7 +16600,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   function saveSet(){
     lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
-    lsSet(SRCHK, $('aiSearch').checked ? '1' : '0');
+    lsSet(SRCHK, $('aiSearch').checked ? '1' : '0'); lsSet(AUTOK, $('aiAuto').checked ? '1' : '0');
     lsSet(P2K, $('aiP2').value); lsSet(P2KEY, $('aiP2Key').value.trim()); lsSet(P2MOD, $('aiP2Model').value.trim()); lsSet(P2URL, $('aiP2Url').value.trim());
     lsSet(P3K, $('aiP3').value); lsSet(P3KEY, $('aiP3Key').value.trim()); lsSet(P3MOD, $('aiP3Model').value.trim()); lsSet(P3URL, $('aiP3Url').value.trim());
   }
@@ -16634,7 +16637,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function bubble(cls, html){ var d = document.createElement('div'); d.className = 'ai-b ' + cls; d.innerHTML = html; $('aiMsgs').appendChild(d); endScroll(); return d; }
   function fmtTxt(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
   function welcome(){
-    bubble('a', 'أهلًا 👋 أنا مساعد مصروفاتك. اكتب صرفتك بجملة، أو صوّر الفاتورة، أو اسألني عن مصروفاتك والأموال والذهب والزكاة والتقارير وهجاوبك، وأدوّر لك في جوجل لو محتاج معلومة حديثة.');
+    bubble('a', 'أهلًا 👋 أنا مساعد مصروفاتك. اكتب صرفتك بجملة، أو صوّر الفاتورة، أو اسألني عن مصروفاتك والأموال والذهب والزكاة والتقارير وهجاوبك.' + (lsGet(SRCHK, '0') === '1' ? ' وأدوّر لك في جوجل لو محتاج معلومة حديثة.' : ''));
     var s = document.createElement('div'); s.className = 'ai-sug';
     ['حلّل مصروفات الشهر ده', 'كام زكاتي؟', 'وضع الذهب بتاعي', 'ملخص رأس المال', 'إزاي أوفّر؟'].forEach(function(t){ var b = document.createElement('button'); b.textContent = t; b.onclick = function(){ $('aiIn').value = t; aiSend(); }; s.appendChild(b); });
     $('aiMsgs').appendChild(s);
@@ -16896,7 +16899,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   async function geminiRun(mode, hooks){
     if(!lsGet(KEYK, '')) throw new Error('NOKEY');
-    var useSearch = mode === 'chat' && lsGet(SRCHK, '1') !== '0';
+    var useSearch = mode === 'chat' && lsGet(SRCHK, '0') === '1';
     var base = {contents: trimHist(), generationConfig: {maxOutputTokens: 2500}};
     var ctx = '\n\n=== بيانات المستخدم ===\n' + buildCtx();
     var bodyMain = Object.assign({systemInstruction: {parts: [{text: SYS + (useSearch ? SYS_WEB : '') + ctx}]}, tools: useSearch ? [{google_search: {}}] : GTOOLS}, base);
@@ -16956,7 +16959,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 
   /* ===== التوزيع: Gemini أولًا، ولو وقع بيجاوب الذكاء التاني ===== */
   async function converse(mode, hooks, hasImg){
-    var chain = [p2cfg(), p3cfg()].filter(Boolean), needTools = mode === 'tool' || lsGet(SRCHK, '1') === '0';
+    var chain = [p2cfg(), p3cfg()].filter(Boolean), needTools = mode === 'tool' || lsGet(SRCHK, '0') !== '1';
     async function runChain(why){
       var last = null;
       for(var i = 0; i < chain.length; i++){
@@ -16986,7 +16989,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
         var res = await gModels({contents: [{role: 'user', parts: [{text: 'رد بكلمة واحدة بس: تمام'}]}], generationConfig: {maxOutputTokens: 60}}, null, NOHOOK);
         out.push('✅ Gemini شغال (' + (res.model || '') + ')' + (res.text.trim() ? ' — الرد: ' + res.text.trim() : '')); show();
       }catch(e){ bad = true; out.push('❌ Gemini: ' + errCore(e, 'Gemini') + (e && e.status ? '  [كود ' + e.status + ']' : '') + (e && e.raw ? '  [' + e.raw.slice(0, 80) + ']' : '')); show(); }
-      if(!bad && lsGet(SRCHK, '1') !== '0'){
+      if(!bad && lsGet(SRCHK, '0') === '1'){
         out.push('… بجرّب بحث جوجل'); show();
         try{
           var rs = await gModels({tools: [{google_search: {}}], contents: [{role: 'user', parts: [{text: 'دوّر في جوجل وقولي سعر أونصة الذهب عالميًا النهاردة بالدولار، الرقم بس.'}]}], generationConfig: {maxOutputTokens: 400}}, null, NOHOOK);
@@ -17115,7 +17118,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var uparts = img ? [{inlineData: {mimeType: 'image/jpeg', data: img}}, {text: txt || 'اقرأ الفاتورة دي وسجّلها'}] : [{text: txt}];
     hist.push({role: 'user', parts: uparts});
     busy = true;
-    var ty = typingEl(), bub = null, typer = null, pushed = false, mode = isExpenseIntent(txt, img) ? 'tool' : 'chat';
+    var ty = typingEl(), bub = null, typer = null, pushed = false, mode = isExpenseIntent(txt, img) ? 'tool' : 'chat', autoGo = false;
     var hooks = {
       began: function(){ return !!bub; },
       onText: function(t){
@@ -17145,6 +17148,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
         calls.forEach(function(fc){ if(fc.name === 'add_expense') expenseCard(fc.args || {}); });
         if(calls.length && !out) bubble('a', 'راجع البطاقة وأكّد 👇');
         addMeta({g: res.g, viaNote: res.viaNote, why: res.why, noSearch: res.noSearch, swhy: res.searchWhy, answer: out, idx: mIdx});
+        autoGo = mode === 'chat' && !calls.length && !res.viaNote && out.length > 25 && lsGet(AUTOK, '0') === '1';
       }
     }catch(e){
       if(ty.parentNode) ty.remove(); if(typer) typer.skip(); if(bub) bub.onclick = null;
@@ -17152,6 +17156,13 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       bubble('a err', esc(errText(e)));
     }
     busy = false;
+    if(autoGo){   // الذكاء التاني والتالت بيردوا لوحدهم واحد ورا التاني
+      var ms = document.querySelectorAll('#aiMsgs .ai-meta'), lastM = ms[ms.length - 1], bs = lastM ? [].slice.call(lastM.querySelectorAll('button.ai-rev')) : [];
+      for(var bi = 0; bi < bs.length; bi++){
+        if(bs[bi].disabled) continue; bs[bi].click();
+        while(busy) await new Promise(function(r){ setTimeout(r, 200); });
+      }
+    }
   };
 
   /* ===== بطاقة تأكيد تسجيل المصروف ===== */
