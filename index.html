@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8371">
+<meta name="app-version" content="2026-11-09.8372">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3535,6 +3535,11 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
         <span class="icon">📆</span><span>سنوي</span>
       </button>
     </div>
+    <div class="reports-row">
+      <button type="button" class="report-mini-card bd-rc" onclick="bdOpen()"><i class="bd-badge" id="bdBadge"></i><span class="icon">🔔</span><span>تنبيهات الصرف</span></button>
+      <button type="button" class="report-mini-card bd-rc" onclick="bpOpen()"><i class="bd-badge" id="bpBadge"></i><span class="icon">⏳</span><span>معلقة</span></button>
+      <button type="button" class="report-mini-card bd-rc" onclick="zdnOpen()"><span class="icon">🕌</span><span>زكاة وتبرعات</span></button>
+    </div>
   </div>
   </div>
   </div>
@@ -4207,6 +4212,153 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     </div>
   </div>
 </div>
+
+<!-- ===== 8372 START: تنبيهات الصرف اليومي + المدفوعات المعلقة + الزكاة والتبرعات ===== -->
+<style id="bd-style">
+.bd-rc{position:relative;}
+.bd-badge{position:absolute;top:6px;inset-inline-end:8px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#e03131;color:#fff;font:800 11px/18px Tajawal,sans-serif;font-style:normal;text-align:center;display:none;}
+.bd-badge.on{display:block;}
+.gp-hero.pd{background:linear-gradient(145deg,#ffb35c 0%,#f76707 50%,#b34700 100%);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 -8px 0 rgba(0,0,0,.16) inset,0 7px 0 #8a3500,0 24px 34px -10px rgba(247,103,7,.45);}
+.bd-sw{display:flex!important;align-items:center;gap:10px;margin:12px 0 !important;font-size:calc(15px * var(--fs,1))!important;color:var(--text)!important;font-weight:700;}
+.zp-form .bd-sw input{width:24px;height:24px;padding:0;flex:none;}
+.bd-banner{display:none;margin:10px 4px;padding:12px 14px;border-radius:16px;background:linear-gradient(145deg,#ffe3e3,#ffc9c9);color:#8f1a1a;font-weight:800;font-size:calc(14px * var(--fs,1));cursor:pointer;box-shadow:0 4px 0 rgba(143,26,26,.18);}
+.bd-banner.on{display:block;}
+.bd-ai{font-size:54px;text-align:center;line-height:1.1;}
+.bd-am{text-align:center;font-weight:800;font-size:calc(30px * var(--fs,1));margin:6px 0;direction:ltr;}
+.bd-ad{text-align:center;color:var(--muted);font-weight:700;font-size:calc(14px * var(--fs,1));line-height:1.7;}
+.bd-alert.red .bd-am{color:#e03131;} .bd-alert.org .bd-am{color:#f76707;}
+.zdn-due{background:var(--card);color:var(--text);border-radius:22px;padding:14px 16px;margin:18px 0 6px;border-inline-start:8px solid #f2a900;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 6px 0 rgba(0,0,0,.09),0 14px 22px rgba(30,41,59,.1);}
+.zdn-due.ok{border-inline-start-color:#12a56f;} .zdn-due.late{border-inline-start-color:#e03131;}
+.zdn-dh{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:calc(15px * var(--fs,1));}
+.zdn-dd{font-weight:800;font-size:calc(18px * var(--fs,1));margin:8px 0 4px;line-height:1.5;}
+.zdn-dn{color:var(--muted);font-weight:700;font-size:calc(13.5px * var(--fs,1));}
+.zdn-st{padding:3px 12px;border-radius:99px;background:#fff3d6;color:#a86400;font-size:calc(13px * var(--fs,1));}
+.zdn-due.ok .zdn-st{background:#e5f7ef;color:#0e8c5c;} .zdn-due.late .zdn-st{background:#ffe3e3;color:#c92a2a;}
+.gp-btn:disabled{opacity:.55;filter:grayscale(.4);}
+</style>
+
+<!-- تنبيهات الصرف اليومي -->
+<div class="gp" id="bdPage" role="dialog" aria-label="تنبيهات الصرف اليومي">
+  <div class="gp-top"><button type="button" class="gp-back" onclick="bdClose()">› رجوع</button><div class="gp-ttl">🔔 تنبيهات الصرف اليومي<small id="bdSub"></small></div></div>
+  <div class="gp-body">
+    <div class="gp-hero" id="bdHero">
+      <small>🧾 صرف النهارده</small>
+      <span class="gp-big" id="bdToday">0</span>
+      <div class="gp-bar"><i id="bdBar"></i></div>
+      <span class="gp-pct" id="bdPct"></span>
+      <div class="gp-mini"><div><small>🎯 أقرب حد</small><b id="bdNext">—</b></div><div><small id="bdLeftLbl">⏳ باقي للحد</small><b id="bdLeft">—</b></div></div>
+    </div>
+    <div class="zp-form zp-card">
+      <h4>⚙️ إعدادات التنبيه</h4>
+      <label class="bd-sw"><input type="checkbox" id="bdOn" onchange="bdSetOn(this.checked)"><span>تفعيل تنبيه تجاوز الصرف اليومي</span></label>
+      <label class="bd-sw"><input type="checkbox" id="bdNotif" onchange="bdSetNotif(this.checked)"><span>إشعار على الموبايل كمان</span></label>
+      <label>حدود التنبيه (ج.م) — كل حد بينبّهك مرة في اليوم</label>
+      <div class="zp-chips" id="bdLevels"></div>
+      <div class="zp-row2" style="margin-top:12px;align-items:end;">
+        <div><input type="number" id="bdNewLvl" placeholder="مثال: 800" inputmode="decimal"></div>
+        <div><button type="button" class="gp-btn g" style="width:100%;padding:12px 8px;" onclick="bdAddLevel()">＋ إضافة حد</button></div>
+      </div>
+    </div>
+    <div class="gp-h">📅 آخر ١٤ يوم <span id="bdOverCnt"></span></div>
+    <div id="bdDays"></div>
+  </div>
+</div>
+
+<!-- المدفوعات المعلقة -->
+<div class="gp" id="bpPage" role="dialog" aria-label="المدفوعات المعلقة">
+  <div class="gp-top"><button type="button" class="gp-back" onclick="bpClose()">› رجوع</button><div class="gp-ttl">⏳ المدفوعات المعلقة<small>المصروفات «غير المحسوبة» والمؤجلة</small></div></div>
+  <div class="gp-body">
+    <div class="gp-hero pd">
+      <small>⏳ إجمالي المعلق</small>
+      <span class="gp-big" id="bpTotal">0</span>
+      <span class="gp-pct" id="bpNote">المبلغ ده مش داخل في مصروفاتك لحد ما تسوّيه.</span>
+      <div class="gp-mini"><div><small>📦 عدد البنود</small><b id="bpCnt">0</b></div><div><small>⏰ متأخر</small><b id="bpLate">0</b></div></div>
+    </div>
+    <div class="gp-actions" style="grid-template-columns:1fr;"><button type="button" class="gp-btn r" onclick="bpAddNew()">＋ دفعة معلقة جديدة</button></div>
+    <div id="bpList"></div>
+    <div style="text-align:center;margin:10px 0;"><button type="button" class="zp-chips" style="border:0;background:none;color:var(--muted);font-weight:700;cursor:pointer;font-family:inherit;" id="bpHidBtn" onclick="bpToggleHidden()"></button></div>
+  </div>
+</div>
+
+<!-- تقرير الزكاة والتبرعات -->
+<div class="gp" id="zdnPage" role="dialog" aria-label="الزكاة والتبرعات">
+  <div class="gp-top"><button type="button" class="gp-back" onclick="zdnClose()">› رجوع</button><div class="gp-ttl">🕌 الزكاة والتبرعات<small id="zdnSub"></small></div></div>
+  <div class="gp-body">
+    <div class="gp-hero zk">
+      <small id="zdnLbl">🕌 المتبقي من زكاة المال</small>
+      <span class="gp-big" id="zdnLeft">0</span>
+      <div class="gp-bar"><i id="zdnBar"></i></div>
+      <span class="gp-pct" id="zdnPct"></span>
+      <div class="gp-mini"><div><small>⚖️ المستحق</small><b id="zdnZm">0</b></div><div><small>🤲 المنصرف</small><b id="zdnPaid">0</b></div></div>
+    </div>
+    <div class="zp-years" id="zdnYears"></div>
+    <div class="zdn-due" id="zdnDue">
+      <div class="zdn-dh"><span>📅 تاريخ الاستحقاق</span><b class="zdn-st" id="zdnSt"></b></div>
+      <div class="zdn-dd" id="zdnDate"></div>
+      <div class="zdn-dn" id="zdnNote"></div>
+      <button type="button" class="gp-btn g" id="zdnSetBtn" style="display:none;width:100%;margin-top:12px;" onclick="openZkCalc()">📅 حدّد تاريخ الاستحقاق</button>
+    </div>
+    <button type="button" class="gp-btn y" id="zdnPayBtn" onclick="zdnPayOpen()">💸 سداد الزكاة الآن</button>
+    <div class="gp-tiles">
+      <div class="gp-tile"><span class="gp-ic">🎁</span><div><small id="zdnDonYL">تبرعات السنة</small><b id="zdnDonY">0</b></div></div>
+      <div class="gp-tile"><span class="gp-ic">📆</span><div><small id="zdnDonML">تبرعات الشهر</small><b id="zdnDonM">0</b></div></div>
+      <div class="gp-tile" style="grid-column:1/-1;"><span class="gp-ic">🤲</span><div><small>إجمالي العطاء (زكاة + تبرعات)</small><b id="zdnGive">0</b></div></div>
+    </div>
+    <div class="zp-form zp-card">
+      <h4>🎁 تبرع / صدقة جديدة</h4>
+      <label for="zdnDDest">الجهة</label>
+      <input type="text" id="zdnDDest" placeholder="مثال: صدقة، مسجد، جمعية خيرية" autocomplete="off">
+      <div class="zp-chips" id="zdnChips"></div>
+      <div class="zp-row2"><div><label for="zdnDAmt">القيمة</label><input type="number" id="zdnDAmt" placeholder="0" inputmode="decimal" step="any"></div><div><label for="zdnDDate">📅 التاريخ</label><input type="date" id="zdnDDate"></div></div>
+      <button type="button" class="gp-btn y" onclick="zdnDonAdd()">🎁 تسجيل التبرع</button>
+    </div>
+    <div class="gp-h">🎁 سجل التبرعات <span id="zdnDonCnt"></span></div>
+    <div id="zdnDonList"></div>
+    <div class="gp-h">🤲 سداد الزكاة <span id="zdnPayCnt"></span></div>
+    <div id="zdnPayList"></div>
+  </div>
+</div>
+
+<!-- نوافذ -->
+<div class="modal-overlay" id="bdAlertOverlay" onclick="if(event.target===this) bdAlertClose()">
+  <div class="modal-box bd-alert" id="bdAlertBox">
+    <div class="bd-ai" id="bdAi">⚠️</div>
+    <h3 id="bdAt"></h3>
+    <div class="bd-am" id="bdAm"></div>
+    <div class="bd-ad" id="bdAd"></div>
+    <div class="modal-actions"><button type="button" class="btn-cancel" onclick="bdAlertClose()">تمام</button><button type="button" class="btn-save" onclick="bdAlertClose(); bdOpen()">⚙️ الحدود</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="bpSettleOverlay" onclick="if(event.target===this) bpSettleClose()">
+  <div class="modal-box">
+    <h3>✅ تسوية دفعة معلقة</h3>
+    <div class="bd-ad" id="bpSettleInfo" style="margin-bottom:12px;"></div>
+    <div class="modal-actions" style="flex-direction:column;">
+      <button type="button" class="btn-save" onclick="bpSettle(true)">💸 تسوية وتتحسب النهارده</button>
+      <button type="button" class="btn-cancel" onclick="bpSettle(false)">📅 تسوية بتاريخها الأصلي</button>
+      <button type="button" class="btn-cancel" onclick="bpSettleClose()">إلغاء</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="bpDueOverlay" onclick="if(event.target===this) bpDueClose()">
+  <div class="modal-box">
+    <h3>📅 موعد السداد</h3>
+    <div class="field"><label>تاريخ الاستحقاق</label><input type="date" id="bpDueIn"></div>
+    <div class="modal-actions"><button type="button" class="btn-cancel" onclick="bpDueSave(true)">إزالة الموعد</button><button type="button" class="btn-save" onclick="bpDueSave(false)">حفظ</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="zdnPayOverlay" onclick="if(event.target===this) zdnPayClose()">
+  <div class="modal-box">
+    <h3 id="zdnPayT">💸 سداد الزكاة</h3>
+    <div class="bd-ad" id="zdnPayInfo" style="margin-bottom:6px;"></div>
+    <div class="field"><label>جهة الصرف</label><input type="text" id="zdnPDest" placeholder="مثال: أسرة محتاجة" autocomplete="off"></div>
+    <div class="zp-chips" id="zdnPChips"></div>
+    <div class="field"><label>المبلغ (ج.م)</label><input type="number" id="zdnPAmt" inputmode="decimal" step="any"></div>
+    <div class="field"><label>📅 التاريخ</label><input type="date" id="zdnPDate"></div>
+    <div class="modal-actions"><button type="button" class="btn-cancel" onclick="zdnPayClose()">إلغاء</button><button type="button" class="btn-save" onclick="zdnPaySave()">💸 سداد</button></div>
+  </div>
+</div>
+<!-- ===== 8372 END ===== -->
 
 <div id="months" class="months-grid months-off"></div>
 
@@ -5199,6 +5351,7 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
   </div>
   <div class="progress" id="progressWrap"><div id="progressBar" style="width:0%"></div></div>
 
+  <div class="bd-banner" id="bdTodayBanner" onclick="bdOpen()" role="button"></div>
   <div class="avg-spend-card" id="avgSpendCard" onclick="openDailyLimit()" style="cursor:pointer;">
     <span class="plus-badge pb-violet at-left" aria-hidden="true">+</span>
     <div class="avg-spend-icon">📊</div>
@@ -17302,5 +17455,303 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 })();
 </script>
 <!-- ===== 8352 END ===== -->
+<script>
+/* ===== 8372: تنبيهات الصرف اليومي + المدفوعات المعلقة + الزكاة والتبرعات ===== */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var DAY = 864e5;
+  function openPg(id){ var p = $(id); if(p){ p.classList.add('open'); p.scrollTop = 0; } }
+  function closePg(id){ var p = $(id); if(p) p.classList.remove('open'); }
+  function lblDate(ts, long){ try{ return new Date(ts).toLocaleDateString(dateLocale(), long ? {weekday:'long', day:'numeric', month:'long'} : {day:'numeric', month:'short'}); }catch(e){ return ''; } }
+  function afterChange(){ try{ if(currentMonth !== null && data[currentYear]) renderDetail(); }catch(e){} try{ renderMonths(); }catch(e){} try{ renderZM(); }catch(e){} try{ bdBadges(); }catch(e){} }
+
+  /* ---------- 1) تنبيهات الصرف اليومي ---------- */
+  window.bdCfg = function(){
+    if(!data.bdCfg || typeof data.bdCfg !== 'object') data.bdCfg = {on: true, notif: true, levels: [400, 600], fired: {}};
+    var c = data.bdCfg;
+    if(!Array.isArray(c.levels)) c.levels = [400, 600];
+    if(!c.fired || typeof c.fired !== 'object') c.fired = {};
+    if(c.on === undefined) c.on = true; if(c.notif === undefined) c.notif = true;
+    return c;
+  };
+  function bdLevels(){ return bdCfg().levels.map(Number).filter(function(x){ return x > 0; }).sort(function(a, b){ return a - b; }); }
+  function bdDayMap(years){
+    var map = {};
+    years.forEach(function(y){
+      if(!data[y]) return;
+      for(var m = 0; m < 12; m++){
+        var mo = data[y][m]; if(!mo || !Array.isArray(mo.groups)) continue;
+        collectAllExpenses(mo.groups).forEach(function(e){
+          if(e.counted === false) return; var t = e.date || e.createdAt; if(!t) return;
+          var k = dateToInputValue(t); map[k] = (map[k] || 0) + (Number(e.amount) || 0);
+        });
+      }
+    });
+    return map;
+  }
+  window.bdDayTotal = function(ts){ var y = new Date(ts).getFullYear(), mp = bdDayMap([y]); return mp[dateToInputValue(ts)] || 0; };
+  window.bdNotify = function(title, body){
+    try{
+      if(typeof Notification === 'undefined' || Notification.permission !== 'granted' || bdCfg().notif === false) return;
+      if(navigator.serviceWorker && navigator.serviceWorker.ready){
+        navigator.serviceWorker.ready.then(function(r){ r.showNotification(title, {body: body, icon: 'icon-192.png', tag: 'bd-alert', dir: 'rtl', lang: 'ar'}); }).catch(function(){ try{ new Notification(title, {body: body}); }catch(e){} });
+      } else new Notification(title, {body: body});
+    }catch(e){}
+  };
+  window.bdCheckAlert = function(ts){
+    try{
+      var c = bdCfg(); if(!c.on) return; var lv = bdLevels(); if(!lv.length) return;
+      var tot = bdDayTotal(ts), crossed = lv.filter(function(l){ return tot > l; });
+      if(!crossed.length) return;
+      var iso = dateToInputValue(ts), top = crossed[crossed.length - 1];
+      if(c.fired[iso + ':' + top]){ showToast('⚠️ صرف اليوم ' + fmt(tot) + ' فوق حد ' + fmt(top), false); return; }
+      crossed.forEach(function(l){ c.fired[iso + ':' + l] = 1; });
+      var ks = Object.keys(c.fired); if(ks.length > 120){ ks.sort(); ks.slice(0, ks.length - 120).forEach(function(k){ delete c.fired[k]; }); }
+      save(); bdShowAlert(tot, top, lv, iso === dateToInputValue(Date.now()), ts);
+    }catch(e){ console.error(e); }
+  };
+  function bdShowAlert(tot, top, lv, isToday, ts){
+    var isTop = lv.length > 1 && top === lv[lv.length - 1];
+    var day = isToday ? 'النهارده' : 'يوم ' + lblDate(ts);
+    $('bdAi').textContent = isTop ? '🚨' : '⚠️';
+    $('bdAlertBox').className = 'modal-box bd-alert ' + (isTop ? 'red' : 'org');
+    $('bdAt').textContent = 'صرفك ' + day + ' عدّى حد ' + fmt(top) + ' ج.م';
+    $('bdAm').textContent = fmt(tot);
+    var nx = lv.filter(function(l){ return l > tot; })[0];
+    $('bdAd').textContent = 'زيادة ' + fmt(tot - top) + ' ج.م عن الحد' + (nx ? ' — والحد الجاي ' + fmt(nx) : ' — ودي أعلى حدودك');
+    $('bdAlertOverlay').classList.add('open');
+    bdNotify('🔔 تجاوز حد الصرف اليومي', 'صرفك ' + day + ' ' + fmt(tot) + ' ج.م (الحد ' + fmt(top) + ')');
+  }
+  window.bdAlertClose = function(){ $('bdAlertOverlay').classList.remove('open'); };
+  window.bdOpen = function(){ openPg('bdPage'); bdRender(); };
+  window.bdClose = function(){ closePg('bdPage'); try{ afterChange(); }catch(e){} };
+  window.bdSetOn = function(v){ bdCfg().on = !!v; save(); bdRender(); showToast(v ? '🔔 التنبيه شغّال' : 'التنبيه اتقفل', true); };
+  window.bdSetNotif = function(v){
+    var c = bdCfg(); c.notif = !!v; save();
+    if(v && typeof Notification !== 'undefined' && Notification.permission === 'default'){ try{ Notification.requestPermission().then(function(){ bdRender(); }); }catch(e){} }
+    else if(v && typeof Notification !== 'undefined' && Notification.permission === 'denied') showToast('الإشعارات مقفولة من إعدادات الجهاز', false);
+    bdRender();
+  };
+  window.bdAddLevel = function(){
+    var v = Number($('bdNewLvl').value) || 0; if(v <= 0){ showToast('اكتب مبلغ صحيح', false); return; }
+    var c = bdCfg(); if(c.levels.map(Number).indexOf(v) >= 0){ showToast('الحد ده موجود', false); return; }
+    c.levels.push(v); c.levels.sort(function(a, b){ return a - b; }); $('bdNewLvl').value = ''; save(); bdRender();
+  };
+  window.bdDelLevel = function(v){ var c = bdCfg(); c.levels = c.levels.filter(function(x){ return Number(x) !== Number(v); }); save(); bdRender(); };
+  window.bdRender = function(){
+    var c = bdCfg(), lv = bdLevels(), now = Date.now(), tot = bdDayTotal(now);
+    $('bdOn').checked = !!c.on;
+    $('bdNotif').checked = c.notif !== false && typeof Notification !== 'undefined' && Notification.permission === 'granted';
+    $('bdSub').textContent = c.on ? 'شغّال' : 'مقفول';
+    $('bdToday').textContent = fmt(tot);
+    var nx = lv.filter(function(l){ return l > tot; })[0], last = lv[lv.length - 1];
+    $('bdNext').textContent = nx ? fmt(nx) : (lv.length ? 'عدّيت الكل' : '—');
+    $('bdLeftLbl').textContent = nx ? '⏳ باقي للحد' : '⚠️ فوق أعلى حد';
+    $('bdLeft').textContent = nx ? fmt(nx - tot) : (lv.length ? fmt(tot - last) : '—');
+    $('bdBar').style.width = (lv.length ? Math.min(100, tot / (nx || last) * 100) : 0) + '%';
+    var over = lv.length && tot > lv[0];
+    $('bdHero').classList.toggle('bad', !!over);
+    $('bdPct').textContent = !lv.length ? 'مفيش حدود متحددة — أضف حد من تحت' : (over ? '⚠️ فوق حد ' + fmt(lv.filter(function(l){ return tot > l; }).pop()) : '✅ تحت أول حد (' + fmt(lv[0]) + ')');
+    var box = $('bdLevels'); box.innerHTML = '';
+    lv.forEach(function(v){ var b = document.createElement('button'); b.type = 'button'; b.textContent = fmt(v) + '  ✕'; b.onclick = function(){ bdDelLevel(v); }; box.appendChild(b); });
+    if(!lv.length){ var e = document.createElement('span'); e.style.cssText = 'color:var(--muted);font-weight:700;font-size:13px;'; e.textContent = 'مفيش حدود'; box.appendChild(e); }
+    var years = {}; for(var i = 0; i < 14; i++) years[new Date(now - i * DAY).getFullYear()] = 1;
+    var mp = bdDayMap(Object.keys(years).map(Number)), list = $('bdDays'); list.innerHTML = ''; var cnt = 0, shown = 0;
+    for(var j = 0; j < 14; j++){
+      var ts = now - j * DAY, v = mp[dateToInputValue(ts)] || 0; if(!(v > 0)) continue; shown++;
+      var cr = lv.filter(function(l){ return v > l; }), top = cr[cr.length - 1]; if(cr.length) cnt++;
+      list.appendChild(gpRow({cls: cr.length ? 'out' : '', ic: cr.length ? '🚨' : '✅', name: j === 0 ? 'النهارده' : lblDate(ts, true), sub: lblDate(ts), amt: v, tags: cr.length ? [{t: 'فوق حد ' + fmt(top), c: 'w'}] : []}));
+    }
+    if(!shown){ var em = document.createElement('div'); em.className = 'gp-empty'; em.textContent = 'مفيش مصروفات في آخر ١٤ يوم.'; list.appendChild(em); }
+    $('bdOverCnt').textContent = lv.length ? 'أيام فوق الحد: ' + toArabicDigits(cnt) : '';
+  };
+  window.bdBanner = function(){
+    var el = $('bdTodayBanner'); if(!el) return;
+    try{
+      var c = bdCfg(), lv = bdLevels(), now = new Date();
+      if(!c.on || !lv.length || currentYear !== now.getFullYear() || currentMonth !== now.getMonth()){ el.classList.remove('on'); return; }
+      var tot = bdDayTotal(now.getTime()), cr = lv.filter(function(l){ return tot > l; });
+      if(!cr.length){ el.classList.remove('on'); return; }
+      el.textContent = '⚠️ صرف النهارده ' + fmt(tot) + ' ج.م — فوق حد ' + fmt(cr[cr.length - 1]); el.classList.add('on');
+    }catch(e){}
+  };
+
+  /* ---------- 2) المدفوعات المعلقة ---------- */
+  var _bpSel = null, _bpHid = false;
+  function bpAll(){
+    var out = [];
+    Object.keys(data).forEach(function(y){
+      if(!/^\d{4}$/.test(y) || !data[y] || typeof data[y] !== 'object') return;
+      for(var m = 0; m < 12; m++){
+        var mo = data[y][m]; if(!mo || !Array.isArray(mo.groups)) continue;
+        (function walk(nodes, gn){ nodes.forEach(function(n){ if(n.type === 'group') walk(n.children || [], n.name); else if(n.counted === false) out.push({n: n, y: +y, m: m, g: gn || 'بدون مجموعة'}); }); })(mo.groups, '');
+      }
+    });
+    return out;
+  }
+  function bpKey(x){ return Number(x.n.due) || Number(x.n.date) || Number(x.n.createdAt) || 0; }
+  function bpVisible(){ return bpAll().filter(function(x){ return !x.n.bpHide; }); }
+  window.bpOpen = function(){ _bpHid = false; openPg('bpPage'); bpRender(); };
+  window.bpClose = function(){ closePg('bpPage'); afterChange(); };
+  window.bpToggleHidden = function(){ _bpHid = !_bpHid; bpRender(); };
+  window.bpAddNew = function(){
+    try{ openQuickAdd(); var q = $('qaCounted'); if(q) q.checked = false; showToast('اتحدد «غير محسوب» — هيظهر هنا بعد الحفظ', true); }catch(e){}
+  };
+  window.bpRender = function(){
+    var vis = bpVisible().sort(function(a, b){ return bpKey(a) - bpKey(b); }), today0 = new Date(); today0.setHours(0, 0, 0, 0);
+    var sum = 0, late = 0, lateN = 0;
+    vis.forEach(function(x){ var a = Number(x.n.amount) || 0; sum += a; if(x.n.due && Number(x.n.due) < today0.getTime()){ late += a; lateN++; } });
+    $('bpTotal').textContent = fmt(sum); $('bpCnt').textContent = toArabicDigits(vis.length);
+    $('bpLate').textContent = lateN ? fmt(late) + ' (' + toArabicDigits(lateN) + ')' : '0';
+    var box = $('bpList'); box.innerHTML = '';
+    if(!vis.length){ var e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = '✅ مفيش مدفوعات معلقة.'; box.appendChild(e); }
+    vis.forEach(function(x){
+      var due = Number(x.n.due) || 0, tags = [];
+      if(due){ tags.push({t: 'استحقاق ' + lblDate(due), c: 'n'}); var dl = Math.floor((today0.getTime() - due) / DAY); if(dl > 0) tags.push({t: 'متأخر ' + toArabicDigits(dl) + ' يوم', c: 'w'}); }
+      box.appendChild(gpRow({cls: 'pend', ic: '⏳', name: x.n.name || 'دفعة', sub: x.g + ' · ' + lblDate(x.n.date || x.n.createdAt) + ' ' + toArabicDigits(x.y), amt: x.n.amount, tags: tags,
+        acts: [{t: '✅', fn: function(){ bpSettleOpen(x); }}, {t: '📅', fn: function(){ bpDueOpen(x); }}, {t: '🙈', fn: function(){ openConfirm('إخفاء من المعلقة', 'هيفضل «غير محسوب» بس مش هيظهر هنا. تكمل؟', function(){ x.n.bpHide = true; save(); bpRender(); bdBadges(); }, 'إخفاء'); }}]}));
+    });
+    var hid = bpAll().filter(function(x){ return x.n.bpHide; });
+    $('bpHidBtn').style.display = hid.length ? '' : 'none';
+    $('bpHidBtn').textContent = _bpHid ? '▲ إخفاء المخفية' : '▼ المخفية (' + toArabicDigits(hid.length) + ')';
+    if(_bpHid) hid.forEach(function(x){ box.appendChild(gpRow({cls: 'unc', ic: '🙈', name: x.n.name || 'دفعة', sub: x.g, amt: x.n.amount, tags: [{t: 'مخفية', c: 'n'}], acts: [{t: '↩️', fn: function(){ delete x.n.bpHide; save(); bpRender(); bdBadges(); }}]})); });
+  };
+  function bpSettleOpen(x){ _bpSel = x; $('bpSettleInfo').textContent = (x.n.name || 'دفعة') + ' — ' + fmt(x.n.amount) + ' ج.م'; $('bpSettleOverlay').classList.add('open'); }
+  window.bpSettleClose = function(){ _bpSel = null; $('bpSettleOverlay').classList.remove('open'); };
+  window.bpSettle = function(todayDate){
+    var x = _bpSel; if(!x) return; var n = x.n, nowTs = Date.now(), ry = new Date().getFullYear(), rm = new Date().getMonth();
+    n.counted = true; n.settledAt = nowTs; delete n.due; delete n.bpHide;
+    if(todayDate){
+      n.date = inputValueToDate(dateToInputValue(nowTs), nowTs);
+      if(x.y !== ry || x.m !== rm){
+        var f = findNode(data[x.y][x.m].groups, n.id);
+        if(f){ f.arr.splice(f.index, 1); ensureYear(ry); var gs = data[ry][rm].groups, g = gs.filter(function(z){ return z.type === 'group' && z.name === x.g; })[0];
+          if(!g){ g = {id: uid(), type: 'group', name: x.g, icon: '📁', date: nowTs, children: []}; gs.push(g); }
+          g.children.push(n); }
+      }
+    }
+    save(); bpSettleClose(); bpRender(); afterChange(); showToast('✅ اتسوّت واتحسبت في الحسابات', true);
+    if(todayDate) bdCheckAlert(nowTs);
+  };
+  function bpDueOpen(x){ _bpSel = x; $('bpDueIn').value = x.n.due ? dateToInputValue(x.n.due) : ''; $('bpDueOverlay').classList.add('open'); }
+  window.bpDueClose = function(){ _bpSel = null; $('bpDueOverlay').classList.remove('open'); };
+  window.bpDueSave = function(clear){
+    var x = _bpSel; if(!x) return; var v = $('bpDueIn').value;
+    if(clear || !v) delete x.n.due; else x.n.due = inputValueToDate(v, Date.now());
+    save(); bpDueClose(); bpRender(); bdBadges();
+  };
+
+  /* ---------- 3) الزكاة والتبرعات ---------- */
+  var _zdY = null;
+  function zdnDons(){ if(!Array.isArray(data.donations)) data.donations = []; return data.donations; }
+  function zdnDonYear(y){ return zdnDons().filter(function(d){ return String(d.date || '').slice(0, 4) === String(y); }); }
+  var sumA = function(a){ return a.reduce(function(s, x){ return s + (Number(x.amount) || 0); }, 0); };
+  window.zdnOpen = function(){ _zdY = currentYear; $('zdnDDate').value = dateToInputValue(Date.now()); openPg('zdnPage'); zdnRender(); };
+  window.zdnClose = function(){ closePg('zdnPage'); };
+  window.zdnSetYear = function(y){ _zdY = y; zdnRender(); };
+  window.zdnRender = function(){
+    var y = _zdY || currentYear, zm = zpZmOf(y), paid = zmPaidFor(y), left = zm - paid, done = zm > 0 && paid >= zm - 0.5, now = new Date();
+    $('zdnSub').textContent = 'سنة ' + toArabicDigits(y);
+    $('zdnLbl').textContent = done ? '✅ زكاة ' + toArabicDigits(y) + ' اتسدّدت بالكامل' : '🕌 المتبقي من زكاة ' + toArabicDigits(y);
+    $('zdnLeft').textContent = zm > 0 ? fmt(Math.max(left, 0)) : '—';
+    $('zdnZm').textContent = fmt(zm); $('zdnPaid').textContent = fmt(paid);
+    $('zdnBar').style.width = (zm > 0 ? Math.min(100, paid / zm * 100) : 0) + '%';
+    $('zdnPct').textContent = zm > 0 ? 'اتصرف ' + toArabicDigits(Math.round(paid / zm * 100)) + '٪ من الزكاة' : 'زكاة المال لسه مش محسوبة للسنة دي';
+    var yb = $('zdnYears'); yb.innerHTML = '';
+    var ys = zpYears(); if(ys.length > 1) ys.forEach(function(yy){ var b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<span></span><small></small>'; b.children[0].textContent = 'زكاة ' + toArabicDigits(yy); var lf = zpZmOf(yy) - zmPaidFor(yy); b.children[1].textContent = lf > 0.5 ? 'متبقي ' + fmt(lf) : (zpZmOf(yy) > 0 ? '✅ مسدّدة' : '—'); if(yy === y) b.classList.add('active'); b.onclick = function(){ zdnSetYear(yy); }; yb.appendChild(b); });
+    /* تاريخ الاستحقاق */
+    var due = $('zdnDue'), d = null; try{ d = zkYearDue(y); }catch(e){}
+    due.className = 'zdn-due'; $('zdnSetBtn').style.display = 'none';
+    if(!data.zakatStart){ $('zdnSt').textContent = '📅 غير محدد'; $('zdnDate').textContent = 'لسه ما اتحدّدش تاريخ الاستحقاق'; $('zdnNote').textContent = 'حدّده عشان التطبيق يفكّرك بالموعد.'; $('zdnSetBtn').style.display = ''; }
+    else if(!d){ $('zdnSt').textContent = '—'; $('zdnDate').textContent = 'مفيش موعد استحقاق في ' + toArabicDigits(y); $('zdnNote').textContent = ''; }
+    else {
+      $('zdnDate').textContent = zkBoth(d); var days = Math.ceil((d - now) / DAY);
+      if(done){ due.classList.add('ok'); $('zdnSt').textContent = '✅ مسدّدة'; $('zdnNote').textContent = 'تم إخراج الزكاة بالكامل.'; }
+      else if(now < d){ $('zdnSt').textContent = '⏳ باقي ' + yFmt(days) + ' يوم'; $('zdnNote').textContent = left > 0.5 ? 'جهّز ' + fmt(left) + ' ج.م قبل الموعد.' : ''; }
+      else { due.classList.add('late'); $('zdnSt').textContent = '🔔 مستحقة'; $('zdnNote').textContent = 'عدّى على الاستحقاق ' + yFmt(Math.max(1, Math.floor((now - d) / DAY))) + ' يوم' + (left > 0.5 ? ' — المتبقي ' + fmt(left) + ' ج.م' : ''); }
+    }
+    var pb = $('zdnPayBtn'); pb.disabled = done; pb.textContent = done ? '✅ الزكاة مسدّدة بالكامل' : '💸 سداد الزكاة الآن' + (left > 0.5 ? ' (' + fmt(left) + ')' : '');
+    /* التبرعات */
+    var dy = zdnDonYear(y), curM = String(now.getMonth() + 1).padStart(2, '0'), dm = dy.filter(function(x){ return String(x.date).slice(5, 7) === curM && y === now.getFullYear(); });
+    $('zdnDonYL').textContent = 'تبرعات ' + toArabicDigits(y); $('zdnDonY').textContent = fmt(sumA(dy));
+    $('zdnDonML').textContent = 'تبرعات ' + MONTHS[now.getMonth()]; $('zdnDonM').textContent = y === now.getFullYear() ? fmt(sumA(dm)) : '—';
+    $('zdnGive').textContent = fmt(paid + sumA(dy));
+    var names = {}; zdnDons().forEach(function(x){ if(x.name) names[x.name] = 1; });
+    var ch = $('zdnChips'); ch.innerHTML = '';
+    Object.keys(names).slice(0, 4).concat(['صدقة', 'مسجد', 'جمعية خيرية', 'علاج']).filter(function(v, i, a){ return a.indexOf(v) === i; }).slice(0, 7).forEach(function(n){ var b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = function(){ $('zdnDDest').value = n; }; ch.appendChild(b); });
+    var lst = $('zdnDonList'); lst.innerHTML = ''; $('zdnDonCnt').textContent = dy.length ? toArabicDigits(dy.length) + ' عملية' : '';
+    if(!dy.length){ var e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه ما سجّلتش تبرعات في ' + toArabicDigits(y) + '.'; lst.appendChild(e); }
+    sortDescByDate(dy).forEach(function(x){
+      var ts = x.date ? new Date(x.date + 'T12:00:00').getTime() : Date.now();
+      lst.appendChild(gpRow({cls: 'out', ic: '🎁', name: x.name || 'صدقة', sub: lblDate(ts), amt: x.amount, acts: [
+        {t: '✏️', fn: function(){ openGenEdit('✏️ تعديل تبرع', 'الجهة', x.name, x.amount, function(n, a, dt){ x.name = n || x.name || 'صدقة'; x.amount = a; if(dt) x.date = dateToInputValue(dt); save(); zdnRender(); }, ts); }},
+        {t: '🗑', fn: function(){ openConfirm('حذف التبرع', 'هل تريد حذف التبرع ده؟', function(){ data.donations = zdnDons().filter(function(q){ return q.id !== x.id; }); save(); zdnRender(); }); }}]}));
+    });
+    var pl = $('zdnPayList'); pl.innerHTML = ''; var pays = zpYearPays(y); $('zdnPayCnt').textContent = pays.length ? toArabicDigits(pays.length) + ' عملية' : '';
+    if(!pays.length){ var e2 = document.createElement('div'); e2.className = 'gp-empty'; e2.textContent = 'لسه ما صرفتش زكاة في ' + toArabicDigits(y) + '.'; pl.appendChild(e2); }
+    pays.slice(0, 6).forEach(function(x){ var p = x.p; pl.appendChild(gpRow({cls: 'out', ic: '🤲', name: p.note || 'دفعة زكاة', sub: p.date ? lblDate(new Date(p.date + 'T12:00:00').getTime()) : MONTHS[x.m], amt: p.amount})); });
+  };
+  window.zdnDonAdd = function(){
+    var dest = $('zdnDDest').value.trim(), amt = Number($('zdnDAmt').value) || 0, date = $('zdnDDate').value || dateToInputValue(Date.now());
+    if(amt <= 0){ showToast('اكتب القيمة', false); return; }
+    zdnDons().push({id: uid(), name: dest || 'صدقة', amount: amt, date: date});
+    $('zdnDDest').value = ''; $('zdnDAmt').value = ''; $('zdnDDate').value = dateToInputValue(Date.now());
+    save(); zdnRender(); showToast('اتسجّل التبرع 🎁', true);
+  };
+  window.zdnPayOpen = function(){
+    var y = _zdY || currentYear, zm = zpZmOf(y), left = Math.max(0, Math.round((zm - zmPaidFor(y)) * 100) / 100);
+    $('zdnPayT').textContent = '💸 سداد زكاة ' + toArabicDigits(y);
+    $('zdnPayInfo').textContent = 'المتبقي ' + fmt(left) + ' ج.م · المتاح ' + fmt(Math.max(0, zmAvailFor(y))) + ' ج.م';
+    $('zdnPDest').value = ''; $('zdnPAmt').value = left > 0 ? left : ''; $('zdnPDate').value = dateToInputValue(Date.now());
+    var ch = $('zdnPChips'); ch.innerHTML = '';
+    ['أسرة محتاجة', 'أقارب', 'جمعية خيرية', 'علاج'].forEach(function(n){ var b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = function(){ $('zdnPDest').value = n; }; ch.appendChild(b); });
+    $('zdnPayOverlay').classList.add('open');
+  };
+  window.zdnPayClose = function(){ $('zdnPayOverlay').classList.remove('open'); };
+  window.zdnPaySave = function(){
+    var y = _zdY || currentYear, dest = $('zdnPDest').value.trim(), amt = Number($('zdnPAmt').value) || 0, date = $('zdnPDate').value || dateToInputValue(Date.now());
+    if(!dest){ showToast('اكتب جهة الصرف', false); return; }
+    if(amt <= 0){ showToast('اكتب القيمة', false); return; }
+    var dy = Number(date.slice(0, 4)), dm = Number(date.slice(5, 7)) - 1;
+    if(!(dy > 2000) || !(dm >= 0 && dm <= 11)){ showToast('التاريخ مش صح', false); return; }
+    var doAdd = function(){
+      var lf0 = zkLeftFor(y);
+      zkGetAt(y, zpMonthFor(date, y)).payments.push({id: uid(), amount: amt, note: dest, date: date});
+      zdnPayClose(); zpAfter(); zdnRender(); showToast('تم سداد الزكاة ✅', true); zkDoneCheck(y, lf0);
+    };
+    var av = zmAvailFor(y);
+    if(amt > av + 0.5){ openConfirm('الرصيد المتاح مش كفاية', 'المتاح ' + fmt(Math.max(av, 0)) + ' والمطلوب سداده ' + fmt(amt) + '. هيبقى الرصيد بالسالب. تكمل؟', doAdd, 'كمّل'); return; }
+    doAdd();
+  };
+
+  /* ---------- الشارات + ربط الأحداث ---------- */
+  window.bdBadges = function(){
+    try{
+      var vis = bpVisible(), t0 = new Date(); t0.setHours(0, 0, 0, 0);
+      var b = $('bpBadge'); if(b){ b.textContent = vis.length > 99 ? '99+' : toArabicDigits(vis.length); b.classList.toggle('on', vis.length > 0); }
+      var c = bdCfg(), lv = bdLevels(), a = $('bdBadge'); if(a){ var over = c.on && lv.length && bdDayTotal(Date.now()) > lv[0]; a.textContent = '!'; a.classList.toggle('on', !!over); }
+    }catch(e){}
+  };
+  function wrap(name, fn){ var o = window[name]; if(typeof o !== 'function') return; window[name] = function(){ return fn(o, this, arguments); }; }
+  wrap('renderDetail', function(o, t, a){ var r = o.apply(t, a); try{ bdBanner(); }catch(e){} return r; });
+  wrap('renderMonths', function(o, t, a){ var r = o.apply(t, a); try{ bdBadges(); }catch(e){} return r; });
+  wrap('addItem', function(o, t, a){
+    var gid = a[0], de = $('itDate-' + gid), ts = de ? inputValueToDate(de.value, Date.now()) : Date.now(), before = bdDayTotal(ts), r = o.apply(t, a);
+    try{ if(bdDayTotal(ts) > before) bdCheckAlert(ts); bdBadges(); }catch(e){} return r;
+  });
+  wrap('saveQuickAdd', function(o, t, a){
+    var de = $('qaDate'), ts = de ? inputValueToDate(de.value, Date.now()) : Date.now(), before = bdDayTotal(ts), r = o.apply(t, a);
+    try{ if(bdDayTotal(ts) > before) bdCheckAlert(ts); bdBadges(); }catch(e){} return r;
+  });
+  wrap('zpAfter', function(o, t, a){ var r = o.apply(t, a); try{ if($('zdnPage').classList.contains('open')) zdnRender(); }catch(e){} return r; });
+  setTimeout(function(){
+    try{
+      bdBadges(); bdCheckAlert(Date.now());
+      var t0 = new Date(), late; t0.setHours(0, 0, 0, 0); late = bpVisible().filter(function(x){ return x.n.due && Number(x.n.due) < t0.getTime(); });
+      if(late.length) showToast('⏳ عندك ' + toArabicDigits(late.length) + ' دفعة معلقة متأخرة', false);
+    }catch(e){}
+  }, 3500);
+})();
+</script>
 </body>
 </html>
