@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8365">
+<meta name="app-version" content="2026-11-09.8366">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16831,16 +16831,32 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     }finally{ w.stop(); }
   }
   /* بيجرّب الموديل ثم الاحتياطي؛ ولو البحث رفض (400/429) بيجرّب من غير بحث */
+  function searchWhy(e){
+    if(!e) return '';
+    var st = e.status, why = st === 429 ? 'حصة البحث المجانية على مفتاحك خلصت أو مش متاحة للموديل ده' : (st === 403 ? 'مفتاحك مش مسموح له بالبحث' : (st === 404 ? 'الموديل ده مش بيدعم البحث' : (st === 400 ? 'جوجل رفضت طلب البحث' : 'خطأ في البحث')));
+    var raw = String(e.msg || '').replace(/\s+/g, ' ').slice(0, 140);
+    return why + ' (' + st + ')' + (raw ? ' — ' + raw : '');
+  }
+  /* بيجرّب البحث على أكتر من موديل الأول (حصة البحث بتختلف من موديل لموديل)، ولو كلهم رفضوا بيجاوب من غير بحث ويقولك السبب الحقيقي */
   async function gModels(bodyMain, bodyAlt, hooks){
-    var first = lsGet(MODK, DEFMOD), models = [first].concat(FALLBACKS.filter(function(m){ return m !== first; })), lastErr = null;
+    var first = lsGet(MODK, DEFMOD), models = [first].concat(FALLBACKS.filter(function(m){ return m !== first; })), lastErr = null, sErr = null;
+    if(bodyAlt){
+      var sm = [first, 'gemini-2.5-flash'].concat(FALLBACKS).filter(function(m, k, arr){ return arr.indexOf(m) === k; }).slice(0, 3);
+      for(var j = 0; j < sm.length; j++){
+        try{ return await gOnce(sm[j], bodyMain, hooks); }
+        catch(e){
+          if(hooks.began()) throw e;
+          var q = e.status;
+          if(q === 400 || q === 429 || q === 404 || q === 403){ if(!sErr || q === 429) sErr = e; }
+          else if(!(q === 503 || q === 500 || e.message === 'TIMEOUT')) throw e;
+        }
+      }
+      bodyMain = bodyAlt;
+    }
     for(var i = 0; i < models.length; i++){
-      try{ return await gOnce(models[i], bodyMain, hooks); }
+      try{ var r = await gOnce(models[i], bodyMain, hooks); if(bodyAlt){ r.noSearch = true; r.searchWhy = searchWhy(sErr); } return r; }
       catch(e){
         lastErr = e; if(hooks.began()) throw e;
-        if(bodyAlt && (e.status === 400 || e.status === 429)){
-          try{ var r2 = await gOnce(models[i], bodyAlt, hooks); r2.noSearch = true; return r2; }
-          catch(e2){ lastErr = e2; if(hooks.began()) throw e2; }
-        }
         var s = lastErr.status;
         if(!(s === 503 || s === 500 || s === 429 || s === 404 || lastErr.message === 'TIMEOUT') || i === models.length - 1) throw lastErr;   // الموديل مشغول أو خلصت حصته: جرّب اللي بعده
       }
@@ -16990,7 +17006,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function addMeta(info){
     var m = document.createElement('div'), g = info.g; m.className = 'ai-meta';
     if(info.viaNote) m.appendChild(mNote('⚡ جاوب ' + info.viaNote + (info.why ? ' (' + info.why + ')' : '')));
-    if(info.noSearch) m.appendChild(mNote('⚠️ بحث جوجل مش متاح دلوقتي، الرد ده من غير بحث.'));
+    if(info.noSearch) m.appendChild(mNote('⚠️ بحث جوجل مش متاح دلوقتي، الرد ده من غير بحث.' + (info.swhy ? ' السبب: ' + info.swhy : '')));
     if(g && (g.q.length || g.chunks.length)){
       if(g.q.length) m.appendChild(mNote('🌐 دوّرت في جوجل: ' + g.q.slice(0, 3).join(' • ')));
       if(g.chunks.length){
@@ -17083,7 +17099,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
         pushed = true;
         calls.forEach(function(fc){ if(fc.name === 'add_expense') expenseCard(fc.args || {}); });
         if(calls.length && !out) bubble('a', 'راجع البطاقة وأكّد 👇');
-        addMeta({g: res.g, viaNote: res.viaNote, why: res.why, noSearch: res.noSearch, answer: out, idx: mIdx});
+        addMeta({g: res.g, viaNote: res.viaNote, why: res.why, noSearch: res.noSearch, swhy: res.searchWhy, answer: out, idx: mIdx});
       }
     }catch(e){
       if(ty.parentNode) ty.remove(); if(typer) typer.skip(); if(bub) bub.onclick = null;
