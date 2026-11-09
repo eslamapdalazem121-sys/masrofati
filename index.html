@@ -29,11 +29,127 @@
   }catch(e){ window.avCloud = window.avCloud || function(n){ return n; }; }
 })();
 </script>
+<script>
+/* 8364: حماية البيانات — تشفير على الجهاز (AES-GCM + PBKDF2) + بوابة كلمة المرور. بيشتغل قبل أي كود تاني */
+(function(){
+  try{
+    var raw = window.localStorage, P = Storage.prototype, g0 = P.getItem, s0 = P.setItem, r0 = P.removeItem;
+    var META_K = 'masrofati_enc_v1', FAILK = 'masrofati_enc_fail_v1';
+    var SENS = {'budget_data_v1':1, 'budget_backups_local_v1':1, 'budget_prev_snapshot_v1':1, 'masrofati_ai_gkey':1, 'masrofati_ai_p2key':1};
+    var ST = window.MSR_ENC = {on:false, locked:false, mem:{}, key:null, meta:null, pending:{}, timer:0, SENS:SENS, META_K:META_K};
+    var subtle = (window.crypto && crypto.subtle) || null, TE = new TextEncoder(), TD = new TextDecoder();
+    ST.ok = !!subtle;
+    function b64(u){ var s = '', i, C = 0x8000; for(i = 0; i < u.length; i += C) s += String.fromCharCode.apply(null, u.subarray(i, i + C)); return btoa(s); }
+    function unb64(t){ var s = atob(t), u = new Uint8Array(s.length), i; for(i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+    ST.b64 = b64; ST.unb64 = unb64;
+    ST.derive = async function(pw, saltB64, iter){
+      var km = await subtle.importKey('raw', TE.encode(String(pw)), 'PBKDF2', false, ['deriveKey']);
+      return subtle.deriveKey({name:'PBKDF2', salt:unb64(saltB64), iterations:iter, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, true, ['encrypt', 'decrypt']);
+    };
+    ST.encStr = async function(key, str){
+      var iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await subtle.encrypt({name:'AES-GCM', iv:iv}, key, TE.encode(str))), o = new Uint8Array(12 + ct.length);
+      o.set(iv); o.set(ct, 12); return 'ENC1:' + b64(o);
+    };
+    ST.decStr = async function(key, blob){ var u = unb64(String(blob).slice(5)); return TD.decode(await subtle.decrypt({name:'AES-GCM', iv:u.subarray(0, 12)}, key, u.subarray(12))); };
+    var meta = null; try{ meta = JSON.parse(g0.call(raw, META_K)); }catch(e){}
+    ST.meta = meta;
+
+    // ---- تحويل القراءة/الكتابة للمفاتيح الحساسة (الباقي زي ما هو) ----
+    P.getItem = function(k){ if(this === raw && SENS[k] && ST.on) return Object.prototype.hasOwnProperty.call(ST.mem, k) ? ST.mem[k] : null; return g0.apply(this, arguments); };
+    P.setItem = function(k, v){
+      if(this === raw && SENS[k] && (ST.on || ST.locked)){ if(ST.locked) return; ST.mem[k] = String(v); ST.queue(k); return; }
+      return s0.apply(this, arguments);
+    };
+    P.removeItem = function(k){ if(this === raw && SENS[k] && ST.on){ delete ST.mem[k]; delete ST.pending[k]; } return r0.apply(this, arguments); };
+    ST.queue = function(k){ ST.pending[k] = 1; clearTimeout(ST.timer); ST.timer = setTimeout(ST.flush, 250); };
+    ST.flush = async function(){
+      clearTimeout(ST.timer); if(!ST.on) return;
+      if(!ST.key){ ST.timer = setTimeout(ST.flush, 300); return; }
+      var ks = Object.keys(ST.pending), i, k; ST.pending = {};
+      for(i = 0; i < ks.length; i++){ k = ks[i]; if(!Object.prototype.hasOwnProperty.call(ST.mem, k)) continue; try{ s0.call(raw, k, await ST.encStr(ST.key, ST.mem[k])); }catch(e){ ST.pending[k] = 1; } }
+    };
+    function hooks(){
+      if(ST._h) return; ST._h = 1;
+      document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') ST.flush(); });
+      window.addEventListener('pagehide', function(){ ST.flush(); });
+    }
+    ST.check = async function(pw){
+      if(!ST.meta) return null; var key = await ST.derive(pw, ST.meta.salt, ST.meta.iter);
+      try{ return (await ST.decStr(key, ST.meta.canary)) === 'msr-ok' ? key : null; }catch(e){ return null; }
+    };
+    ST.enable = async function(pw){
+      var salt = b64(crypto.getRandomValues(new Uint8Array(16))), iter = 200000, key = await ST.derive(pw, salt, iter), canary = await ST.encStr(key, 'msr-ok'), mem = {}, out = {}, k;
+      Object.keys(SENS).forEach(function(q){ var v = g0.call(raw, q); if(v !== null) mem[q] = v; });
+      for(k in mem) out[k] = await ST.encStr(key, mem[k]);
+      for(k in out) s0.call(raw, k, out[k]);
+      var m = {v:1, salt:salt, iter:iter, canary:canary, at:Date.now()};
+      s0.call(raw, META_K, JSON.stringify(m));
+      ST.meta = m; ST.mem = mem; ST.key = key; ST.on = true; hooks();
+    };
+    ST.disable = async function(pw){
+      var key = await ST.check(pw); if(!key) return false;
+      Object.keys(ST.mem).forEach(function(k){ s0.call(raw, k, ST.mem[k]); });
+      r0.call(raw, META_K); ST.on = false; ST.mem = {}; ST.key = null; ST.meta = null; return true;
+    };
+
+    // ---- بوابة الفتح ----
+    function gate(why){
+      ST.locked = true; try{ window.stop(); }catch(e){}
+      setTimeout(function(){ draw(why); }, 30);
+    }
+    function draw(why){
+      var css = 'html,body{margin:0;height:100%}body{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%,#17425e,#0a1f2e 70%);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:#fff;padding:20px;box-sizing:border-box}.c{width:100%;max-width:340px;text-align:center}.ic{font-size:64px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4))}h1{font-size:21px;margin:6px 0 4px}p{opacity:.75;font-size:13.5px;line-height:1.7;margin:4px 0 14px}input{width:100%;box-sizing:border-box;padding:14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:17px;text-align:center;font-family:inherit;outline:0}button{width:100%;margin-top:10px;padding:14px;border:0;border-radius:14px;font-size:16px;font-weight:800;font-family:inherit;color:#06251f;background:linear-gradient(180deg,#6df0c2,#1fc58d);box-shadow:0 4px 0 #0e7a58;cursor:pointer}button:disabled{opacity:.5}#e{color:#ffb4a8;font-size:13.5px;min-height:20px;margin-top:8px}.lk{background:none;box-shadow:none;color:#9fd6ff;font-weight:600;font-size:13px;padding:8px;margin-top:6px}.w{display:none;margin-top:8px;text-align:right;background:rgba(255,80,60,.12);border:1px solid rgba(255,120,100,.4);border-radius:14px;padding:12px}.w button{background:linear-gradient(180deg,#ff8f7d,#e0472f);color:#fff;box-shadow:0 4px 0 #8f2314}';
+      var body;
+      if(why === 'nocrypto'){ body = '<div class="c"><div class="ic">⚠️</div><h1>مش قادر أفتح البيانات المشفّرة</h1><p>المتصفح ده مش بيدعم أدوات التشفير في الوضع الحالي. افتح التطبيق من رابطه الأصلي (https) أو من متصفح حديث.</p></div>'; }
+      else { body = '<div class="c"><div class="ic">🔐</div><h1>أموالي AtoZ — مقفول</h1><p>بياناتك مشفّرة على الجهاز. اكتب كلمة مرور التشفير.</p><input id="p" type="password" autocomplete="current-password" placeholder="كلمة المرور"><button id="b">فتح</button><div id="e"></div><button class="lk" id="f">نسيت كلمة المرور؟</button><div class="w" id="w"><p style="margin:0 0 8px;opacity:1">كلمة المرور مش بتتسترجع — ده معناه إن التشفير شغّال فعلًا. لو معاك نسخة احتياطية أو حسابك متزامن، تقدر تمسح البيانات المشفّرة من الجهاز وتبدأ من جديد وترجّعها.</p><input id="x" placeholder="اكتب: مسح" style="font-size:15px"><button id="d">مسح البيانات المشفّرة من الجهاز</button></div></div>'; }
+      document.documentElement.setAttribute('lang', 'ar'); document.documentElement.setAttribute('dir', 'rtl');
+      document.documentElement.innerHTML = '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a1f2e"><title>أموالي — مقفول</title><style>' + css + '</style></head><body>' + body + '</body>';
+      if(why === 'nocrypto') return;
+      var $ = function(i){ return document.getElementById(i); }, busy = false, fails = 0;
+      function err(t){ $('e').textContent = t; }
+      async function go(){
+        if(busy) return; var pw = $('p').value; if(!pw){ err('اكتب كلمة المرور'); return; }
+        busy = true; $('b').disabled = true; err('بتحقق…');
+        try{
+          var key = await ST.check(pw);
+          if(!key){ fails++; $('p').value = ''; var wait = Math.min(30, Math.pow(2, Math.min(fails, 5) - 1)); err('كلمة المرور غلط. استنى ' + wait + ' ثانية'); setTimeout(function(){ busy = false; $('b').disabled = false; err(''); $('p').focus(); }, wait * 1000); return; }
+          var pt = {}, k, v;
+          for(k in SENS){ v = g0.call(raw, k); if(v === null) continue; if(v.indexOf('ENC1:') === 0){ try{ pt[k] = await ST.decStr(key, v); }catch(e){ if(k === 'budget_data_v1') throw new Error('bad'); } } else pt[k] = v; }
+          var rk = b64(new Uint8Array(await subtle.exportKey('raw', key)));
+          sessionStorage.setItem('__msr_boot', JSON.stringify({pt:pt, k:rk}));
+          location.reload();
+        }catch(e){ err('حصلت مشكلة في قراءة البيانات'); busy = false; $('b').disabled = false; }
+      }
+      $('b').onclick = go; $('p').onkeydown = function(e){ if(e.key === 'Enter') go(); };
+      $('f').onclick = function(){ $('w').style.display = $('w').style.display === 'block' ? 'none' : 'block'; };
+      $('d').onclick = function(){
+        if($('x').value.trim() !== 'مسح'){ err('اكتب كلمة «مسح» للتأكيد'); return; }
+        Object.keys(SENS).forEach(function(k){ r0.call(raw, k); }); r0.call(raw, META_K); location.reload();
+      };
+      setTimeout(function(){ try{ $('p').focus(); }catch(e){} }, 100);
+    }
+
+    if(meta && meta.salt){
+      if(!subtle){ ST.locked = true; try{ window.stop(); }catch(e){} setTimeout(function(){ draw('nocrypto'); }, 30); }
+      else {
+        var stash = null; try{ stash = sessionStorage.getItem('__msr_boot'); sessionStorage.removeItem('__msr_boot'); }catch(e){}
+        if(stash){
+          try{
+            var o = JSON.parse(stash); ST.on = true; ST.mem = o.pt || {}; window.__MSR_ENC_UNLOCKED = true;
+            subtle.importKey('raw', unb64(o.k), 'AES-GCM', true, ['encrypt', 'decrypt']).then(function(k){ ST.key = k; });
+            hooks();
+          }catch(e){ gate(); }
+        } else gate();
+      }
+    }
+  }catch(e){ try{ console.error('enc init', e); }catch(_){} }
+})();
+</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8364">
+<meta name="app-version" content="2026-11-09.8365">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -4840,6 +4956,50 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
     </div>
 
 
+    <div class="settings-section" id="privSection" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
+      <h4>🛡️ الخصوصية والحماية</h4>
+
+      <div class="check-row"><input type="checkbox" id="pv_shield" data-pk="shield" onchange="privToggle(this)"><label for="pv_shield" style="margin:0;">ستار الخصوصية: يغطّي الشاشة لما التطبيق يروح الخلفية أو يتعرض في قائمة التطبيقات</label></div>
+      <div class="field" style="margin-top:12px;">
+        <label>قفل تلقائي بعد ما تخرج من التطبيق (بيشتغل لو قفل التطبيق مفعّل)</label>
+        <select id="pv_autoLock" class="lock-input" style="text-align:right;" onchange="privSelect(this)">
+          <option value="0">فورًا</option><option value="30">بعد ٣٠ ثانية</option><option value="120">بعد دقيقتين</option><option value="600">بعد ١٠ دقايق</option><option value="-1">أبدًا</option>
+        </select>
+        <div id="pv_lockHint" style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin-top:6px; display:none;">⚠️ قفل التطبيق مش مفعّل، فعّله من «🔒 قفل التطبيق» عشان القفل التلقائي يشتغل.</div>
+      </div>
+      <div class="check-row" style="margin-top:10px;"><input type="checkbox" id="pv_blur" data-pk="blur" onchange="privToggle(this)"><label for="pv_blur" style="margin:0;">تغبيش الشاشة (للأماكن العامة) — بتضغط مطوّلًا على زرار «👁» عشان تشوف</label></div>
+
+      <div style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
+        <b style="font-size:calc(13.5px * var(--fs,1));">🔐 تشفير البيانات على الجهاز</b>
+        <p id="pv_encState" style="font-size:calc(12px * var(--fs,1)); color:var(--muted); margin:6px 0 8px; line-height:1.7;"></p>
+        <div id="pv_encOff">
+          <input type="password" class="lock-input" id="pv_pw1" placeholder="كلمة مرور التشفير (٨ حروف على الأقل)" autocomplete="new-password">
+          <input type="password" class="lock-input" id="pv_pw2" placeholder="أعد كتابتها" autocomplete="new-password" style="margin-top:8px;">
+          <div class="check-row" style="margin-top:8px;"><input type="checkbox" id="pv_ack"><label for="pv_ack" style="margin:0;">فاهم إن كلمة المرور دي مش بتتسترجع، ولو نسيتها بياناتي على الجهاز مش هترجع إلا من نسخة احتياطية أو حسابي</label></div>
+          <button class="btn-save" style="width:100%; margin-top:8px; padding:13px; border-radius:12px; border:none; font-weight:700; cursor:pointer; font-family:inherit;" onclick="privEncEnable()">🔐 تفعيل التشفير</button>
+        </div>
+        <div id="pv_encOn" style="display:none;">
+          <input type="password" class="lock-input" id="pv_pw0" placeholder="كلمة المرور لإلغاء التشفير" autocomplete="current-password">
+          <button type="button" class="backup-btn" style="width:100%; margin-top:8px;" onclick="privEncDisable()">إلغاء التشفير</button>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
+        <b style="font-size:calc(13.5px * var(--fs,1));">🤖 اللي بيتبعت للمساعد الذكي (Gemini أو الذكاء التاني)</b>
+        <div class="check-row" style="margin-top:8px;"><input type="checkbox" id="pv_aiMask" data-pk="aiMask" onchange="privToggle(this)"><label for="pv_aiMask" style="margin:0;">إخفاء الأسماء (حسابات، بنوك، شهادات، قطع ذهب، مصادر دخل) وإرسال أرقام بس</label></div>
+        <div class="check-row"><input type="checkbox" id="pv_aiExp" data-pk="aiExp" onchange="privToggle(this)"><label for="pv_aiExp" style="margin:0;">تفاصيل المصروفات (اسم كل مصروف)</label></div>
+        <div class="check-row"><input type="checkbox" id="pv_aiRep" data-pk="aiRep" onchange="privToggle(this)"><label for="pv_aiRep" style="margin:0;">التقارير والدخل (يومي / شهري / سنوي)</label></div>
+        <div class="check-row"><input type="checkbox" id="pv_aiMoney" data-pk="aiMoney" onchange="privToggle(this)"><label for="pv_aiMoney" style="margin:0;">الأموال ورأس المال</label></div>
+        <div class="check-row"><input type="checkbox" id="pv_aiGold" data-pk="aiGold" onchange="privToggle(this)"><label for="pv_aiGold" style="margin:0;">الذهب</label></div>
+        <div class="check-row"><input type="checkbox" id="pv_aiZakat" data-pk="aiZakat" onchange="privToggle(this)"><label for="pv_aiZakat" style="margin:0;">الزكاة</label></div>
+        <button type="button" class="backup-btn" style="width:100%; margin-top:8px;" onclick="privPreviewAi()">👁 اعرض اللي هيتبعت للمساعد</button>
+        <textarea id="pv_preview" class="lock-input" readonly style="display:none; margin-top:8px; height:180px; font-size:12px; text-align:right; direction:rtl;"></textarea>
+        <p style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin:6px 0 0; line-height:1.7;">صور الفواتير اللي بتصوّرها للمساعد بتتبعت لـ Gemini زي ما هي.</p>
+      </div>
+
+      <div class="check-row" style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);"><input type="checkbox" id="pv_encBackup" data-pk="encBackup" onchange="privToggle(this)"><label for="pv_encBackup" style="margin:0;">🔏 تشفير النسخة الاحتياطية وكود نقل البيانات بكلمة مرور (بتتسأل عليها وقت التصدير والاسترجاع)</label></div>
+      <p style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin:8px 0 0; line-height:1.7;">التشفير بيحمي البيانات اللي على الجهاز والنسخ اللي بتطلعها. بيانات حسابك المتزامن على السحابة مش مشمولة بيه.</p>
+    </div>
 <!--SHARE_PUBLIC_START-->
     <div class="settings-section" id="publicShareSection" style="display:none; margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
       <h4>🔗 شارك التطبيق مع غيرك</h4>
@@ -12160,7 +12320,8 @@ function copyManualBackup(){
 }
 
 async function exportBackup(){
-  const payload = buildBackupPayload();
+  const payload = await privWrapExport(buildBackupPayload());
+  if(!payload){ return; }
   document.getElementById('manualBackupArea').value = payload;
   if(SYNC_ENABLED){
     try{
@@ -12650,10 +12811,11 @@ async function encodeTransferCode(){
     try{ body = await pipeBytes(new CompressionStream('gzip'), raw); mode = '1'; }catch(e){ body = raw; mode = '0'; }
   }
   const b64 = bytesToB64(body);
-  return TRANSFER_PREFIX + mode + '.' + simpleHash(b64) + '.' + b64;
+  return await privWrapExport(TRANSFER_PREFIX + mode + '.' + simpleHash(b64) + '.' + b64);
 }
 // بيقبل الكود حتى لو اتلصق جوه رسالة أو اتقسّم على سطور أو فيه كلام زيادة في الآخر
 async function decodeTransferCode(text){
+  text = await privUnwrap(text);
   const flat = String(text || '').replace(/\s+/g, '');
   const at = flat.indexOf(TRANSFER_PREFIX);
   if(at === -1) return {error:'ده مش كود نقل بيانات صحيح'};
@@ -13773,7 +13935,8 @@ function onBackupDriveChange(){
 }
 // ===== BACKUP SYSTEM END =====
 
-function restoreFromRawText(raw){
+async function restoreFromRawText(raw){
+  raw = await privUnwrap(raw);
   let parsed;
   try{ parsed = JSON.parse(raw); }
   catch(e){ showToast('النص/الملف غير صالح كنسخة احتياطية', false); return; }
@@ -13974,6 +14137,7 @@ function showLoginChecking(){
 // صفحة تسجيل الدخول لازم تكون أول حاجة تظهر على أي جهاز، قبل أي بيانات
 async function checkLockOnStartup(){
   loadLockConfig();
+  if(window.__MSR_ENC_UNLOCKED && lockConfig.enabled && lockConfig.method){ startApp(); return; } // اتفتح بكلمة التشفير: منطلبش القفل تاني
 
   // جهاز عليه قفل مفعّل: صفحة الدخول فورًا
   if(lockConfig.enabled && lockConfig.method){
@@ -14816,9 +14980,9 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
     'الخط': ['🔤', 'font'], 'حجم الخط والأيقونات': ['🔠', 'size'], 'شكل الأرقام': ['🔢', 'digits'], 'عمق البطاقات (3D)': ['🧊', 'depth'], 'أيقونات رأس المال والزكاة والمصروفات والدخل': ['💼', 'capico'],
     'الإشعارات': ['🔔', 'notify'], 'صوت النقر': ['🔊', 'click'], 'صوت الافتتاح': ['🎵', 'intro'], 'ترتيب وتحريك العناصر': ['↕️', 'move'],
     'الوضع': ['🌓', 'theme'], 'اللون الأساسي': ['🎨', 'accent'], 'تفتيح / تغميق الألوان': ['🔆', 'bright'], 'ألوان البطاقات (كل بطاقة على حدا)': ['🖌️', 'cardcolors'],
-    'النسخ الاحتياطي': ['💾', 'backup'], 'قفل التطبيق': ['🔒', 'lock'], 'شارك التطبيق مع غيرك': ['🔗', 'share'], 'الحساب والمزامنة بين الأجهزة': ['☁️', 'cloud'], 'تثبيت التطبيق واختصار الشاشة الرئيسية': ['📲', 'install']
+    'النسخ الاحتياطي': ['💾', 'backup'], 'قفل التطبيق': ['🔒', 'lock'], 'الخصوصية والحماية': ['🛡️', 'priv'], 'شارك التطبيق مع غيرك': ['🔗', 'share'], 'الحساب والمزامنة بين الأجهزة': ['☁️', 'cloud'], 'تثبيت التطبيق واختصار الشاشة الرئيسية': ['📲', 'install']
   };
-  var STATIC = {cardcolors: 'لون مخصّص لكل بطاقة وكل شهر', backup: 'حفظ واسترجاع بياناتك', share: 'رابط التطبيق للمشاركة', cloud: 'تسجيل الدخول والمزامنة', install: 'اختصار على الشاشة الرئيسية'};
+  var STATIC = {priv: 'ستار وقفل تلقائي وتشفير وحماية المساعد', cardcolors: 'لون مخصّص لكل بطاقة وكل شهر', backup: 'حفظ واسترجاع بياناتك', share: 'رابط التطبيق للمشاركة', cloud: 'تسجيل الدخول والمزامنة', install: 'اختصار على الشاشة الرئيسية'};
   var accs = [];
   function norm(t){ return t.replace(/[\u2190-\u27BF\u2B00-\u2BFF\uFE0F\u200D]|[\uD83C-\uD83E][\uDC00-\uDFFF]/g, '').replace(/\s+/g, ' ').trim(); }
   function digits(n){ try{ return typeof toArabicDigits === 'function' ? toArabicDigits(n) : String(n); }catch(e){ return String(n); } }
@@ -14874,7 +15038,7 @@ setInterval(function(){ if(document.visibilityState === 'visible') dueAlertScan(
       ['🎨 المظهر', [by['الخط'], by['حجم الخط والأيقونات'], by['شكل الأرقام'], by['عمق البطاقات (3D)'], by['أيقونات رأس المال والزكاة والمصروفات والدخل'], colorsCard, colorsBody]],
       ['🔔 الصوت والإشعارات', [by['الإشعارات'], by['صوت النقر'], by['صوت الافتتاح']]],
       ['🧩 السلوك', [by['ترتيب وتحريك العناصر']]],
-      ['🛡️ البيانات والأمان', [by['النسخ الاحتياطي'], by['قفل التطبيق'], by['شارك التطبيق مع غيرك'], by['الحساب والمزامنة بين الأجهزة'], by['تثبيت التطبيق واختصار الشاشة الرئيسية']]]
+      ['🛡️ البيانات والأمان', [by['النسخ الاحتياطي'], by['قفل التطبيق'], by['الخصوصية والحماية'], by['شارك التطبيق مع غيرك'], by['الحساب والمزامنة بين الأجهزة'], by['تثبيت التطبيق واختصار الشاشة الرئيسية']]]
     ];
     var rest = Array.prototype.slice.call(body.children), used = [];
     var tools = document.createElement('div'); tools.className = 'set-tools';
@@ -16029,6 +16193,131 @@ body.kb-open .fab{display:none !important;}
   try{ zigHubRender(true); }catch(e){}
 })();
 </script>
+<style>
+#privShield{position:fixed; inset:0; z-index:2147483000; display:none; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:radial-gradient(circle at 30% 20%,#17425e,#0a1f2e 70%); color:#fff; font-family:inherit;}
+#privShield b{font-size:20px} #privShield i{font-style:normal; font-size:60px}
+#privReveal{position:fixed; z-index:2147482000; bottom:calc(14px + env(safe-area-inset-bottom,0px)); right:14px; display:none; width:58px; height:58px; border-radius:50%; border:0; background:#0a1f2e; color:#fff; font-size:26px; box-shadow:0 4px 14px rgba(0,0,0,.4); touch-action:none; user-select:none; -webkit-user-select:none;}
+body.priv-blur #privReveal{display:block}
+body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-events:none;}
+</style>
+<div id="privShield"><i>🔒</i><b>أموالي AtoZ</b></div>
+<button id="privReveal" type="button" aria-label="إظهار">👁</button>
+<script>
+/* 8364: لوحة الحماية — ستار، قفل تلقائي، تغبيش، تشفير، تشفير النسخ */
+(function(){
+  var PK = 'masrofati_priv_v1', DEF = {shield:true, autoLock:30, blur:false, aiMask:true, aiExp:true, aiRep:true, aiMoney:true, aiGold:true, aiZakat:true, encBackup:false};
+  var P = Object.assign({}, DEF);
+  try{ Object.assign(P, JSON.parse(localStorage.getItem(PK) || '{}')); }catch(e){}
+  function save(){ try{ localStorage.setItem(PK, JSON.stringify(P)); }catch(e){} }
+  window.MSR_PRIV = {get:function(){ return P; }};
+  function $(i){ return document.getElementById(i); }
+  function toast(m, ok){ try{ showToast(m, ok !== false); }catch(e){ alert(m); } }
+
+  // ===== ستار الخصوصية + قفل تلقائي =====
+  var sh = $('privShield'), hiddenAt = 0;
+  function cover(){ if(P.shield && sh) sh.style.display = 'flex'; if(!hiddenAt) hiddenAt = Date.now(); }
+  function uncover(){
+    if(sh) sh.style.display = 'none';
+    try{
+      var el = hiddenAt ? (Date.now() - hiddenAt) / 1000 : 0; hiddenAt = 0;
+      if(P.autoLock >= 0 && el >= P.autoLock && lockConfig && lockConfig.enabled && lockConfig.method && _appStarted) showLockGate();
+    }catch(e){}
+  }
+  document.addEventListener('visibilitychange', function(){ document.visibilityState === 'hidden' ? cover() : uncover(); });
+  window.addEventListener('pagehide', cover);
+  window.addEventListener('pageshow', function(e){ if(e.persisted) uncover(); });
+
+  // ===== تغبيش الشاشة =====
+  var rv = $('privReveal');
+  function applyBlur(){ document.body.classList.toggle('priv-blur', !!P.blur); }
+  function hold(on){ if(P.blur) document.body.classList.toggle('priv-blur', !on); }
+  ['pointerdown'].forEach(function(t){ rv.addEventListener(t, function(e){ e.preventDefault(); hold(true); }); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(t){ rv.addEventListener(t, function(){ hold(false); }); });
+
+  // ===== واجهة الإعدادات =====
+  function refresh(){
+    document.querySelectorAll('[data-pk]').forEach(function(el){ el.checked = !!P[el.getAttribute('data-pk')]; });
+    var s = $('pv_autoLock'); if(s) s.value = String(P.autoLock);
+    var h = $('pv_lockHint'); if(h){ try{ h.style.display = (lockConfig && lockConfig.enabled && lockConfig.method) ? 'none' : 'block'; }catch(e){} }
+    var E = window.MSR_ENC, on = !!(E && E.on), st = $('pv_encState');
+    if(st){
+      if(!E || !E.ok){ st.textContent = '⚠️ التشفير مش متاح هنا: المتصفح ما بيدعمش أدوات التشفير. جرّب من رابط https.'; }
+      else st.textContent = on ? '✅ مفعّل: بياناتك ومفتاح المساعد والنسخ المحلية مخزّنة مشفّرة (AES-256)، وبتتفتح بكلمة المرور كل مرة تفتح التطبيق من جديد.' : 'غير مفعّل. لما تفعّله، أي حد يفتح ذاكرة المتصفح مش هيقدر يقرا بياناتك من غير الكلمة.';
+    }
+    if($('pv_encOff')) $('pv_encOff').style.display = (on || !E || !E.ok) ? 'none' : 'block';
+    if($('pv_encOn')) $('pv_encOn').style.display = on ? 'block' : 'none';
+    applyBlur();
+  }
+  window.privToggle = function(el){ P[el.getAttribute('data-pk')] = el.checked; save(); if(el.getAttribute('data-pk') === 'blur') applyBlur(); };
+  window.privSelect = function(el){ P.autoLock = Number(el.value); save(); };
+  window.privPreviewAi = function(){
+    var t = $('pv_preview'); try{ t.value = (window.aiCtxPreview ? window.aiCtxPreview() : '') || '(مفيش بيانات هتتبعت)'; }catch(e){ t.value = 'تعذّر العرض'; }
+    t.style.display = t.style.display === 'none' ? 'block' : 'none';
+  };
+  var busy = false;
+  window.privEncEnable = async function(){
+    var E = window.MSR_ENC; if(busy || !E || !E.ok) return;
+    var a = $('pv_pw1').value, b = $('pv_pw2').value;
+    if(a.length < 8){ toast('كلمة المرور لازم ٨ حروف على الأقل', false); return; }
+    if(a !== b){ toast('كلمتا المرور مش متطابقتين', false); return; }
+    if(!$('pv_ack').checked){ toast('لازم تأكد إنك فاهم إن الكلمة مش بتتسترجع', false); return; }
+    if(!confirm('قبل التشفير: اتأكد إن عندك نسخة احتياطية من بياناتك (صفحة 💾). نكمّل؟')) return;
+    busy = true; toast('بشفّر بياناتك…', true);
+    try{ await E.enable(a); $('pv_pw1').value = $('pv_pw2').value = ''; $('pv_ack').checked = false; toast('اتفعّل التشفير ✅', true); }
+    catch(e){ toast('معرفتش أفعّل التشفير', false); }
+    busy = false; refresh();
+  };
+  window.privEncDisable = async function(){
+    var E = window.MSR_ENC; if(busy || !E || !E.on) return;
+    var pw = $('pv_pw0').value; if(!pw){ toast('اكتب كلمة المرور', false); return; }
+    busy = true;
+    try{ var ok = await E.disable(pw); if(ok){ $('pv_pw0').value = ''; toast('اتلغى التشفير', true); } else toast('كلمة المرور غلط', false); }
+    catch(e){ toast('حصلت مشكلة', false); }
+    busy = false; refresh();
+  };
+
+  // ===== تشفير النسخ الاحتياطية وأكواد النقل (MSEN1) =====
+  var TE = new TextEncoder(), TD = new TextDecoder();
+  function u2b(u){ var s = '', i; for(i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+  function b2u(t){ var s = atob(t), u = new Uint8Array(s.length), i; for(i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+  async function kdf(pw, salt){ var km = await crypto.subtle.importKey('raw', TE.encode(pw), 'PBKDF2', false, ['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2', salt:salt, iterations:200000, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, false, ['encrypt', 'decrypt']); }
+  async function encPw(str, pw){
+    var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), k = await kdf(pw, salt);
+    var ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv:iv}, k, TE.encode(str))), o = new Uint8Array(28 + ct.length);
+    o.set(salt); o.set(iv, 16); o.set(ct, 28); return 'MSEN1.' + u2b(o);
+  }
+  async function decPw(text, pw){
+    var m = String(text).replace(/\s+/g, '').match(/MSEN1\.([A-Za-z0-9+\/=]+)/); if(!m) return null;
+    var u = b2u(m[1]), k = await kdf(pw, u.subarray(0, 16));
+    return TD.decode(await crypto.subtle.decrypt({name:'AES-GCM', iv:u.subarray(16, 28)}, k, u.subarray(28)));
+  }
+  window.privWrapExport = async function(str){
+    if(!P.encBackup || !(window.crypto && crypto.subtle)) return str;
+    for(var i = 0; i < 3; i++){
+      var pw = prompt('اكتب كلمة مرور لتشفير النسخة (٨ حروف على الأقل). هتحتاجها وقت الاسترجاع، ولو نسيتها النسخة مش هتتفتح.');
+      if(pw === null) break;
+      if(pw.length < 8){ alert('كلمة المرور لازم ٨ حروف على الأقل'); continue; }
+      if(prompt('أعد كتابة الكلمة للتأكيد') !== pw){ alert('الكلمتين مش متطابقتين'); continue; }
+      return await encPw(str, pw);
+    }
+    return confirm('مفيش كلمة مرور اتحطت. تطلّع النسخة من غير تشفير؟') ? str : '';
+  };
+  window.privUnwrap = async function(text){
+    if(String(text).indexOf('MSEN1') === -1) return text;
+    for(var i = 0; i < 3; i++){
+      var pw = prompt('النسخة دي مشفّرة. اكتب كلمة المرور:'); if(pw === null) return '';
+      try{ var r = await decPw(text, pw); if(r !== null) return r; }catch(e){}
+      alert('كلمة المرور غلط');
+    }
+    return '';
+  };
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh); else refresh();
+  document.addEventListener('click', function(e){ if(e.target && e.target.closest && e.target.closest('.set-h')) setTimeout(refresh, 50); });
+  window.privRefresh = refresh;
+})();
+</script>
+
 <!-- ===== 8352: مساعد مصروفاتي بالذكاء الاصطناعي START ===== -->
 <style>
 .ai-fab svg{display:block; filter:drop-shadow(0 5px 3px rgba(60,30,150,.35));}
@@ -16331,34 +16620,39 @@ body.kb-open .fab{display:none !important;}
   }
   /* ===== 8363: معلومات التطبيق كله للمساعد (أموال / رأس مال / ذهب / زكاة / تقارير) ===== */
   function aiExtraCtx(){
-    var L = [], now = new Date();
+    var L = [], now = new Date(), PV = (window.MSR_PRIV && MSR_PRIV.get()) || {}, MK = PV.aiMask !== false, cnt = {};
+    function nm(t, real){ if(!MK) return real; cnt[t] = (cnt[t] || 0) + 1; return t + ' ' + toArabicDigits(cnt[t]); }
     function S(fn){ try{ fn(); }catch(e){} }
     function D(v){ try{ var m = (typeof opsMs === 'function') ? opsMs(v) : new Date(v).getTime(); return m ? dateToInputValue(m) : ''; }catch(e){ return ''; } }
     S(function(){
+      if(PV.aiRep === false) return;
       var ys = Object.keys(data).filter(function(k){ return /^\d{4}$/.test(k); }).sort(), rows = [];
       ys.forEach(function(y){ var inc = 0, exp = 0; for(var i = 0; i < 12; i++){ var mon = (data[y] || {})[i]; if(!mon) continue; inc += totalIncome(mon); exp += (mon.groups || []).reduce(function(s, g){ return s + nodeTotal(g); }, 0); } if(inc || exp) rows.push('- ' + y + ': دخل ' + fmt(inc) + ' / مصروفات ' + fmt(exp) + ' / الصافي ' + fmt(inc - exp)); });
       if(rows.length){ L.push('التقرير السنوي (إجمالي كل سنة):'); L = L.concat(rows); }
     });
     S(function(){
+      if(PV.aiRep === false) return;
       var y = currentYear, mi = curMonthIdx(), mon = (data[y] || {})[mi]; if(!mon) return;
       var rows = collectExpensesWithGroup(mon.groups || []).filter(function(e){ return e && e.type === 'expense' && e.counted !== false; }), by = {}, tot = 0;
       rows.forEach(function(e){ var d = e.date ? dateToInputValue(e.date) : 'بدون تاريخ', a = Number(e.amount) || 0; by[d] = (by[d] || 0) + a; tot += a; });
       var ks = Object.keys(by).sort(), days = (y === now.getFullYear() && mi === now.getMonth()) ? now.getDate() : new Date(y, mi + 1, 0).getDate();
       L.push('التقرير اليومي لشهر ' + MONTHS[mi] + ': إجمالي ' + fmt(tot) + ' | متوسط الإنفاق اليومي ' + fmt(Math.round(tot / Math.max(1, days))) + (Number(mon.dailyLimit) > 0 ? ' | الحد اليومي ' + fmt(Number(mon.dailyLimit)) : ''));
       if(ks.length) L.push('إنفاق كل يوم: ' + ks.map(function(d){ return d + ' ' + fmt(by[d]); }).join('، '));
-      var inc = (mon.incomeSources || []).map(function(x){ return (x.name || 'دخل') + ' ' + fmt(Number(x.amount) || 0) + (x.counted === false ? ' (مش محسوب)' : ''); });
+      var inc = (mon.incomeSources || []).map(function(x){ return nm('مصدر دخل', x.name || 'دخل') + ' ' + fmt(Number(x.amount) || 0) + (x.counted === false ? ' (مش محسوب)' : ''); });
       if(inc.length) L.push('مصادر دخل شهر ' + MONTHS[mi] + ': ' + inc.join('، '));
     });
     S(function(){
+      if(PV.aiMoney === false) return;
       var t = capTotals();
       L.push('— رأس المال والأموال (بالجنيه): نقدي ' + fmt(t.cash) + ' | حسابات بنكية ' + fmt(t.bank) + ' | إجمالي الأموال (نقدي+بنوك) ' + fmt(t.money) + ' | ذهب بسعر البيع الحالي ' + fmt(t.gold) + ' (بسعر الشراء ' + fmt(t.goldBuy) + '، ' + fmt(Math.round((Number(t.grams) || 0) * 100) / 100) + ' جم) | إجمالي رأس المال ' + fmt(t.all) + ' | معاش متاح ' + fmt(t.pension) + ' (شهريًا ' + fmt(t.penMonthly) + ')');
     });
     S(function(){
+      if(PV.aiMoney === false) return;
       var mo = capRaw().filter(function(x){ return capCatOf(x) === 'money'; }), rows = [], mi = 0;
       mo.slice(0, 40).forEach(function(x){
-        var sub = capSubOf(x), nm = x.certName || x.name || x.title || 'بند', p = [(x.isCert ? 'شهادة' : (sub === 'bank' ? 'حساب بنكي' : (sub === 'pension' ? 'معاش' : 'نقدي'))) + ': ' + nm, 'المبلغ ' + fmt(Number(x.amount) || 0)];
+        var sub = capSubOf(x), kind = x.isCert ? 'شهادة' : (sub === 'bank' ? 'حساب' : (sub === 'pension' ? 'معاش' : 'نقدي')), nm0 = nm(kind, x.certName || x.name || x.title || 'بند'), p = [(x.isCert ? 'شهادة' : (sub === 'bank' ? 'حساب بنكي' : (sub === 'pension' ? 'معاش' : 'نقدي'))) + ': ' + nm0, 'المبلغ ' + fmt(Number(x.amount) || 0)];
         try{ p.push('متاح للصرف ' + fmt(cmoAvailE(sub, x))); }catch(e){}
-        if(x.bank) p.push('بنك ' + x.bank);
+        if(x.bank && !MK) p.push('بنك ' + x.bank);
         if(Number(x.rate) > 0) p.push('فايدة ' + x.rate + '٪');
         try{ var bm = bankMonthly(x); if(bm > 0){ p.push('فايدة شهرية ' + fmt(bm)); mi += bm; } }catch(e){}
         try{ if(x.isCert){ var c = certMatInfo(x); if(c) p.push('استحقاق ' + dateToInputValue(c.end.getTime()) + ' (' + (c.ended ? 'انتهت' : 'باقي ' + c.days + ' يوم') + (c.auto ? '، تجديد تلقائي' : '') + ')'); } }catch(e){}
@@ -16368,15 +16662,17 @@ body.kb-open .fab{display:none !important;}
       if(rows.length){ L.push('بنود الأموال (نقدي / حسابات / شهادات / معاش):'); L = L.concat(rows); if(mi > 0) L.push('إجمالي الفوائد الشهرية: ' + fmt(Math.round(mi))); }
     });
     S(function(){
+      if(PV.aiGold === false) return;
       var go = capRaw().filter(function(x){ return capCatOf(x) === 'gold'; }), pr = [];
       if(glBase24() > 0) pr.push('جرام ٢٤ (بيع) ' + fmt(glSellPpg(24)) + ' | عيار ٢١ ' + fmt(glSellPpg(21)) + ' | عيار ١٨ ' + fmt(glSellPpg(18)));
       try{ if(typeof _gl === 'object' && _gl){ if(_gl.usd > 0) pr.push('الأونصة عالميًا ' + fmt(Math.round(_gl.usd)) + ' دولار'); if(_gl.rate > 0) pr.push('الدولار في البنوك بيع ' + _gl.rate + (_gl.rateBuy > 0 ? ' / شراء ' + _gl.rateBuy : '')); } }catch(e){}
       if(pr.length) L.push('أسعار الذهب والدولار دلوقتي: ' + pr.join(' | '));
       var pl = goldPnl(); if(pl.ok) L.push('الذهب: اشتريته بـ ' + fmt(pl.buy) + ' وقيمته دلوقتي ' + fmt(pl.now) + ' → ' + (pl.pnl >= 0 ? 'ربح ' : 'خسارة ') + fmt(Math.abs(pl.pnl)) + ' (' + toArabicDigits(Math.round(pl.pct)) + '٪)');
-      var rows = go.slice(0, 40).map(function(x){ return '- ' + (x.name || x.title || 'قطعة ذهب') + ' | ' + (Number(x.grams) || 0) + ' جم عيار ' + (x.karat || '؟') + ' | شراء ' + fmt(Number(x.amount) || 0) + (D(x.date) ? ' | ' + D(x.date) : '') + (capZkIn(x) ? '' : ' | خارج الزكاة'); });
+      var rows = go.slice(0, 40).map(function(x){ return '- ' + nm('قطعة ذهب', x.name || x.title || 'قطعة ذهب') + ' | ' + (Number(x.grams) || 0) + ' جم عيار ' + (x.karat || '؟') + ' | شراء ' + fmt(Number(x.amount) || 0) + (D(x.date) ? ' | ' + D(x.date) : '') + (capZkIn(x) ? '' : ' | خارج الزكاة'); });
       if(rows.length){ L.push('قطع الذهب:'); L = L.concat(rows); }
     });
     S(function(){
+      if(PV.aiZakat === false) return;
       var z = zkcCompute(), i = zkDueInfo(), p = [];
       p.push('الزكاة: أموال خاضعة (نقدي+بنوك) ' + fmt(z.zkMoney) + ' + ذهب خاضع ' + fmt(z.goldIn) + ' = وعاء الزكاة ' + fmt(z.base) + ' × نسبة ' + zkRateTxt() + ' = ' + fmt(z.zk));
       if(z.exMoney > 0 || z.exGold > 0) p.push('مستبعد من الزكاة: أموال ' + fmt(z.exMoney) + ' / ذهب ' + fmt(z.exGold));
@@ -16388,15 +16684,16 @@ body.kb-open .fab{display:none !important;}
       try{ var pd = Object.keys(data.zakatPaidD || {}).filter(function(k){ return data.zakatPaidD[k]; }).sort(); if(pd.length) L.push('مواعيد زكاة اتسدّدت: ' + pd.join('، ')); }catch(e){}
     });
     S(function(){
+      if(PV.aiMoney === false) return;
       var arr = (data.moneyOut || []).slice().sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 15);
       if(!arr.length) return;
       L.push('آخر عمليات الصرف من الأموال:');
-      arr.forEach(function(r){ var lb = ''; try{ lb = cmoDestLbl(r); }catch(e){} L.push('- ' + r.date + ' | ' + fmt(Number(r.amount) || 0) + (lb ? ' | ' + lb : '') + (r.note ? ' | ' + r.note : '')); });
+      arr.forEach(function(r){ var lb = ''; if(!MK){ try{ lb = cmoDestLbl(r); }catch(e){} } L.push('- ' + r.date + ' | ' + fmt(Number(r.amount) || 0) + (lb ? ' | ' + lb : '') + (r.note && !MK ? ' | ' + r.note : '')); });
     });
     return L;
   }
   function buildCtx(){
-    var now = new Date(), y = currentYear, mi = curMonthIdx(), L = [];
+    var now = new Date(), y = currentYear, mi = curMonthIdx(), L = [], PV = (window.MSR_PRIV && MSR_PRIV.get()) || {}, mc = 0;
     L.push('تاريخ النهاردة: ' + dateToInputValue(now.getTime()) + ' | السنة المعروضة: ' + y);
     L.push('ملخص شهور السنة (دخل / مصروفات / أكبر مجموعات):');
     for(var i = 0; i < 12; i++){
@@ -16405,16 +16702,19 @@ body.kb-open .fab{display:none !important;}
       var gs = (mon.groups || []).map(function(g){ return {n: g.name, v: nodeTotal(g)}; }).filter(function(g){ return g.v > 0; }).sort(function(a, b){ return b.v - a.v; }).slice(0, 6).map(function(g){ return g.n + ' ' + fmt(g.v); }).join('، ');
       L.push('- ' + MONTHS[i] + ': دخل ' + fmt(inc) + ' / مصروفات ' + fmt(exp) + (gs ? ' / ' + gs : ''));
     }
-    L.push('مصروفات شهر ' + MONTHS[mi] + ' بالتفصيل (اسم | مبلغ | تاريخ | مجموعة):');
-    L = L.concat(monthLines(y, mi, 120));
-    if(mi > 0){ L.push('مصروفات شهر ' + MONTHS[mi - 1] + ' بالتفصيل:'); L = L.concat(monthLines(y, mi - 1, 80)); }
+    if(PV.aiExp !== false){
+      L.push('مصروفات شهر ' + MONTHS[mi] + ' بالتفصيل (اسم | مبلغ | تاريخ | مجموعة):');
+      L = L.concat(monthLines(y, mi, 120));
+      if(mi > 0){ L.push('مصروفات شهر ' + MONTHS[mi - 1] + ' بالتفصيل:'); L = L.concat(monthLines(y, mi - 1, 80)); }
+    }
     var gl = groupsOf((data[y] || {})[mi]).map(function(g){ return g.path; });
     L.push('المجموعات المتاحة لتسجيل مصروف في الشهر ده: ' + (gl.join(' ، ') || '(مفيش مجموعات)'));
-    try{ var m = []; ['cash', 'bank'].forEach(function(k){ cmoEntries(k).forEach(function(e){ m.push((e.x.name || e.x.title || 'بند') + ': ' + fmt(cmoAvailE(e.k, e.x))); }); }); if(m.length) L.push('الأموال المتاحة (نقدي/حسابات): ' + m.join('، ')); }catch(e){}
+    try{ if(PV.aiMoney === false) throw 0; var m = []; ['cash', 'bank'].forEach(function(k){ cmoEntries(k).forEach(function(e){ m.push((PV.aiMask !== false ? 'بند ' + toArabicDigits(++mc) : (e.x.name || e.x.title || 'بند')) + ': ' + fmt(cmoAvailE(e.k, e.x))); }); }); if(m.length) L.push('الأموال المتاحة (نقدي/حسابات): ' + m.join('، ')); }catch(e){}
     try{ L = L.concat(aiExtraCtx()); }catch(e){}
     var t = L.join('\n'); return t.length > 36000 ? t.slice(0, 36000) + '\n…' : t;
   }
-  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى.';
+  window.aiCtxPreview = function(){ return buildCtx(); };
+  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى. ممكن بعض البيانات تكون مخفية أو بأسماء عامة (حساب ١، قطعة ٢…) بسبب إعدادات الخصوصية؛ لو سُئلت عن اسم مخفي قول إنه مخفي بإعدادات الحماية، ومتحاولش تخمّنه.';
   var GTOOLS = [{functionDeclarations: [{name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم المصروف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}]}];
 
   /* ===== الاتصال بـ Gemini (مجاني) ===== */
