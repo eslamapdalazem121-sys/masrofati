@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8372">
+<meta name="app-version" content="2026-11-09.8373">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3641,6 +3641,7 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
   <div class="modal-box ch-page">
     <button type="button" class="fs-close" onclick="closeZakHero()" aria-label="رجوع">✕</button>
     <div class="ch-ptitle">🕌 زكاتي</div>
+    <div class="zk-tabs"><button type="button" class="zk-tab active" onclick="zkTabGo('zk')"><i>🕌</i><span>زكاتي</span></button><button type="button" class="zk-tab" onclick="zkTabGo('don')"><i>🎁</i><span>تبرعات وصدقات</span></button></div>
     <div id="zakHeroHost"></div>
   </div>
 </div>
@@ -4356,6 +4357,36 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <div class="field"><label>المبلغ (ج.م)</label><input type="number" id="zdnPAmt" inputmode="decimal" step="any"></div>
     <div class="field"><label>📅 التاريخ</label><input type="date" id="zdnPDate"></div>
     <div class="modal-actions"><button type="button" class="btn-cancel" onclick="zdnPayClose()">إلغاء</button><button type="button" class="btn-save" onclick="zdnPaySave()">💸 سداد</button></div>
+  </div>
+</div>
+<style id="dn-style">
+.zk-tabs{display:flex;gap:12px;justify-content:center;margin:2px 0 12px;}
+.zk-tab{flex:1;max-width:178px;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px 10px;border-radius:20px;font:800 calc(14px * var(--fs,1)) var(--app-font,'Tajawal'),'Tajawal','Cairo',sans-serif;color:var(--text);background:var(--card);box-shadow:0 1px 0 #fff inset,0 5px 0 rgba(0,0,0,.12),0 10px 16px rgba(30,41,59,.1);transition:transform .08s,box-shadow .08s;}
+.zk-tab i{font-style:normal;font-size:calc(30px * var(--fs,1));line-height:1.1;}
+.zk-tab:active{transform:translateY(3px);box-shadow:0 1px 0 #fff inset,0 2px 0 rgba(0,0,0,.12);}
+.zk-tab.active{background:linear-gradient(180deg,#ffd45e,#f2a900);color:#3b2a00;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 5px 0 #8a5a00,0 10px 14px rgba(185,120,0,.3);}
+.gp-hero.dn{background:linear-gradient(145deg,#b197fc 0%,#7950f2 50%,#5130b8 100%);box-shadow:0 2px 0 rgba(255,255,255,.4) inset,0 -8px 0 rgba(0,0,0,.16) inset,0 7px 0 #3e2490,0 24px 34px -10px rgba(121,80,242,.45);}
+</style>
+<!-- صفحة التبرعات والصدقات (8373) -->
+<div class="gp" id="dnPage" role="dialog" aria-label="تبرعات وصدقات">
+  <div class="gp-top"><button type="button" class="gp-back" onclick="dnClose()">› رجوع</button><div class="gp-ttl">🎁 تبرعات وصدقات<small id="dnSub"></small></div></div>
+  <div class="gp-body">
+    <div class="gp-hero dn">
+      <small id="dnLbl">🎁 إجمالي التبرعات والصدقات</small>
+      <span class="gp-big" id="dnTotal">0</span>
+      <div class="gp-mini"><div><small id="dnML">📆 الشهر</small><b id="dnMonth">0</b></div><div><small>🧾 عدد العمليات</small><b id="dnCntB">0</b></div></div>
+    </div>
+    <div class="zp-years" id="dnYears"></div>
+    <div class="zp-form zp-card">
+      <h4>🎁 تبرع / صدقة جديدة</h4>
+      <label for="dnDDest">الجهة</label>
+      <input type="text" id="dnDDest" placeholder="مثال: صدقة، مسجد، جمعية خيرية" autocomplete="off">
+      <div class="zp-chips" id="dnChips"></div>
+      <div class="zp-row2"><div><label for="dnDAmt">القيمة</label><input type="number" id="dnDAmt" placeholder="0" inputmode="decimal" step="any"></div><div><label for="dnDDate">📅 التاريخ</label><input type="date" id="dnDDate"></div></div>
+      <button type="button" class="gp-btn y" onclick="dnAdd()">🎁 تسجيل التبرع</button>
+    </div>
+    <div class="gp-h">🎁 سجل التبرعات والصدقات <span id="dnCnt"></span></div>
+    <div id="dnList"></div>
   </div>
 </div>
 <!-- ===== 8372 END ===== -->
@@ -17722,6 +17753,63 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var av = zmAvailFor(y);
     if(amt > av + 0.5){ openConfirm('الرصيد المتاح مش كفاية', 'المتاح ' + fmt(Math.max(av, 0)) + ' والمطلوب سداده ' + fmt(amt) + '. هيبقى الرصيد بالسالب. تكمل؟', doAdd, 'كمّل'); return; }
     doAdd();
+  };
+
+  /* ---------- 4) صفحة التبرعات والصدقات (8373) ---------- */
+  var _dnY = null;
+  window.zkTabGo = function(k){
+    if(k === 'don'){ dnOpen(); return; }
+    try{ var ov = $('zakHeroOverlay'); if(ov){ ov.scrollTop = 0; var bx = ov.querySelector('.modal-box'); if(bx) bx.scrollTop = 0; } }catch(e){}
+  };
+  function dnYears(){
+    var set = {}; set[currentYear] = 1;
+    zdnDons().forEach(function(d){ var y = String(d.date || '').slice(0, 4); if(/^\d{4}$/.test(y)) set[y] = 1; });
+    return Object.keys(set).map(Number).sort(function(a, b){ return b - a; });
+  }
+  window.dnOpen = function(){
+    _dnY = currentYear; $('dnDDate').value = dateToInputValue(Date.now());
+    try{ closeZakHero(); }catch(e){}
+    openPg('dnPage'); dnRender();
+  };
+  window.dnClose = function(){ closePg('dnPage'); try{ openZakHero(); }catch(e){} };
+  window.dnSetYear = function(y){ _dnY = y; dnRender(); };
+  window.dnRender = function(){
+    var y = _dnY || currentYear, now = new Date(), dy = zdnDonYear(y);
+    var curM = String(now.getMonth() + 1).padStart(2, '0');
+    var dm = dy.filter(function(x){ return String(x.date).slice(5, 7) === curM && y === now.getFullYear(); });
+    $('dnSub').textContent = 'سنة ' + toArabicDigits(y);
+    $('dnLbl').textContent = '🎁 تبرعات وصدقات ' + toArabicDigits(y);
+    $('dnTotal').textContent = fmt(sumA(dy));
+    $('dnML').textContent = '📆 ' + MONTHS[now.getMonth()];
+    $('dnMonth').textContent = y === now.getFullYear() ? fmt(sumA(dm)) : '—';
+    $('dnCntB').textContent = toArabicDigits(dy.length);
+    var yb = $('dnYears'); yb.innerHTML = '';
+    var ys = dnYears();
+    if(ys.length > 1) ys.forEach(function(yy){
+      var b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<span></span><small></small>';
+      b.children[0].textContent = toArabicDigits(yy); b.children[1].textContent = fmt(sumA(zdnDonYear(yy)));
+      if(yy === y) b.classList.add('active'); b.onclick = function(){ dnSetYear(yy); }; yb.appendChild(b);
+    });
+    var names = {}; zdnDons().forEach(function(x){ if(x.name) names[x.name] = 1; });
+    var ch = $('dnChips'); ch.innerHTML = '';
+    Object.keys(names).slice(0, 4).concat(['صدقة', 'مسجد', 'جمعية خيرية', 'علاج']).filter(function(v, i, a){ return a.indexOf(v) === i; }).slice(0, 7).forEach(function(n){
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = function(){ $('dnDDest').value = n; }; ch.appendChild(b);
+    });
+    var lst = $('dnList'); lst.innerHTML = ''; $('dnCnt').textContent = dy.length ? toArabicDigits(dy.length) + ' عملية' : '';
+    if(!dy.length){ var e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه ما سجّلتش تبرعات في ' + toArabicDigits(y) + '.'; lst.appendChild(e); }
+    sortDescByDate(dy).forEach(function(x){
+      var ts = x.date ? new Date(x.date + 'T12:00:00').getTime() : Date.now();
+      lst.appendChild(gpRow({cls: 'out', ic: '🎁', name: x.name || 'صدقة', sub: lblDate(ts), amt: x.amount, acts: [
+        {t: '✏️', fn: function(){ openGenEdit('✏️ تعديل تبرع', 'الجهة', x.name, x.amount, function(n, a, dt){ x.name = n || x.name || 'صدقة'; x.amount = a; if(dt) x.date = dateToInputValue(dt); save(); dnRender(); }, ts); }},
+        {t: '🗑', fn: function(){ openConfirm('حذف التبرع', 'هل تريد حذف التبرع ده؟', function(){ data.donations = zdnDons().filter(function(q){ return q.id !== x.id; }); save(); dnRender(); }); }}]}));
+    });
+  };
+  window.dnAdd = function(){
+    var dest = $('dnDDest').value.trim(), amt = Number($('dnDAmt').value) || 0, date = $('dnDDate').value || dateToInputValue(Date.now());
+    if(amt <= 0){ showToast('اكتب القيمة', false); return; }
+    zdnDons().push({id: uid(), name: dest || 'صدقة', amount: amt, date: date});
+    $('dnDDest').value = ''; $('dnDAmt').value = ''; $('dnDDate').value = dateToInputValue(Date.now());
+    save(); dnRender(); showToast('اتسجّل التبرع 🎁', true);
   };
 
   /* ---------- الشارات + ربط الأحداث ---------- */
