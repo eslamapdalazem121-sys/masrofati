@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8373">
+<meta name="app-version" content="2026-11-09.8375">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3641,8 +3641,9 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
   <div class="modal-box ch-page">
     <button type="button" class="fs-close" onclick="closeZakHero()" aria-label="رجوع">✕</button>
     <div class="ch-ptitle">🕌 زكاتي</div>
-    <div class="zk-tabs"><button type="button" class="zk-tab active" onclick="zkTabGo('zk')"><i>🕌</i><span>زكاتي</span></button><button type="button" class="zk-tab" onclick="zkTabGo('don')"><i>🎁</i><span>تبرعات وصدقات</span></button></div>
+    <div class="cap-hero-wrap zk-pg-wrap" id="zakPgWrap"><button type="button" class="cap-hero" id="zakPgBtn" onclick="zkTabGo('zk')" data-hold-ok aria-label="زكاتي"><span class="ch-stage"><span class="ch-ico" id="zakPgIco"></span></span></button></div>
     <div id="zakHeroHost"></div>
+    <div class="cap-hero-wrap zk-pg-wrap" id="donPgWrap"><button type="button" class="cap-hero" id="donPgBtn" onclick="dnOpen()" data-hold-ok aria-label="تبرعات وصدقات"><span class="ch-stage"><span class="ch-ico" id="donPgIco"></span></span><span class="ch-lbl">تبرعات وصدقات</span></button></div>
   </div>
 </div>
 
@@ -3808,7 +3809,7 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     </div>
     <div class="cmo-arrow" aria-hidden="true"><span class="cmo-arr-ico">⬇</span><span class="cmo-arr-lbl">الصرف إلى</span></div>
     <div class="cmo-sec" id="cmoToCard">
-    <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" data-id="income" data-hold-ok="1" class="active" onclick="cmoSetDest('income')"><i class="cmo-di">💰</i><span class="cmo-dl">المصروف المنزلي</span></button><button type="button" data-id="zakat" data-hold-ok="1" onclick="cmoSetDest('zakat')"><i class="cmo-di">🕌</i><span class="cmo-dl">زكاتي</span></button><button type="button" data-id="other" data-hold-ok="1" onclick="cmoSetDest('other')"><i class="cmo-di">📦</i><span class="cmo-dl">أخرى</span></button><button type="button" data-id="gen" data-hold-ok="1" onclick="cmoSetDest('gen')"><i class="cmo-di">💵</i><span class="cmo-dl">الدخل العام الشهري</span></button></div>
+    <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" data-id="income" data-hold-ok="1" class="active" onclick="cmoSetDest('income')"><i class="cmo-di">💰</i><span class="cmo-dl">المصروف المنزلي</span></button><button type="button" data-id="zakat" data-hold-ok="1" onclick="cmoSetDest('zakat')"><i class="cmo-di">🕌</i><span class="cmo-dl">زكاتي</span></button><button type="button" data-id="other" data-hold-ok="1" onclick="cmoSetDest('other')"><i class="cmo-di">📦</i><span class="cmo-dl">أخرى</span></button><button type="button" data-id="gen" data-hold-ok="1" onclick="cmoSetDest('gen')"><i class="cmo-di">💵</i><span class="cmo-dl">الدخل العام الشهري</span></button><button type="button" data-id="charity" data-hold-ok="1" onclick="cmoSetDest('charity')"><i class="cmo-di">🎁</i><span class="cmo-dl">صدقات</span></button></div>
     <div class="field" id="cmoGenRow" style="display:none;"><div class="cmo-sub cmo-flow" id="cmoSub"><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg1)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام</span></button><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg2)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المنزلي</span></button><div id="cmoStlRow" class="cmo-flow-in"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg3)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">المصروفات</span></button><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStgRow" class="cmo-flow-in" style="display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div></div><div class="hint" id="cmoGenHint"></div></div>
     <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
@@ -4360,6 +4361,9 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
   </div>
 </div>
 <style id="dn-style">
+.zk-pg-wrap{margin:6px auto 10px;--ch-sc:.62;}
+.zk-pg-wrap .cap-hero .ch-stage{width:calc(150px * var(--ch-sc));height:calc(150px * var(--ch-sc));}
+.zk-pg-wrap .cap-hero .ch-ico{width:calc(118px * var(--ch-sc));height:calc(118px * var(--ch-sc));}
 .zk-tabs{display:flex;gap:12px;justify-content:center;margin:2px 0 12px;}
 .zk-tab{flex:1;max-width:178px;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px 10px;border-radius:20px;font:800 calc(14px * var(--fs,1)) var(--app-font,'Tajawal'),'Tajawal','Cairo',sans-serif;color:var(--text);background:var(--card);box-shadow:0 1px 0 #fff inset,0 5px 0 rgba(0,0,0,.12),0 10px 16px rgba(30,41,59,.1);transition:transform .08s,box-shadow .08s;}
 .zk-tab i{font-style:normal;font-size:calc(30px * var(--fs,1));line-height:1.1;}
@@ -4796,6 +4800,17 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
       </div>
       <div class="vol-val" id="zakIcoSizeLabel">100%</div>
       <div class="ch-prev" id="zakIcoPrev"></div>
+      </div></details>
+<details class="ico-grp"><summary>🎁 التبرعات والصدقات — الشكل والحجم</summary><div class="ico-body">
+<div class="opt-row" id="optDonIcon" data-nosound></div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(التبرعات بس)</small></div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="donIcoSize" min="60" max="180" step="5" value="100" oninput="donIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="donIcoSizeLabel">100%</div>
+      <div class="ch-prev" id="donIcoPrev"></div>
       </div></details>
 <details class="ico-grp"><summary>🗓️ المصروفات الشهرية — الحجم</summary><div class="ico-body">
 <div class="opt-row" id="optMsIcon" data-nosound>
@@ -5660,6 +5675,7 @@ function applySettings(s){
   if(s === _draftSettings) autoSaveSettings();   // أي تغيير في الإعدادات بيتحفظ لوحده
   try{ capIcoApply(s); }catch(e){}
   try{ zakIcoApply(s); }catch(e){}
+  try{ donIcoApply(s); }catch(e){}
   try{ msIcoApply(s); }catch(e){}
   try{ yiIcoApply(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
@@ -5755,6 +5771,7 @@ function refreshSettingsUI(s){
   try{ nfRender(s); }catch(e){}
   try{ capIcoRender(s); }catch(e){}
   try{ zakIcoRender(s); }catch(e){}
+  try{ donIcoRender(s); }catch(e){}
   try{ msIcoRender(s); }catch(e){}
   try{ yiIcoRender(s); }catch(e){}
   try{ fabSettingsUI(s); }catch(e){}
@@ -9708,6 +9725,7 @@ function cmoApply(x, amt, note, dateStr, keepId, stlArg, stgArg){
     rec.zkY = zy; rec.zkM = t.m; rec.zy = zy; rec.zm = t.m;
   }
   else if(_cmoDest === 'zakat'){ const z = zkGetAt(t.y, t.m); z.adds.push({id: id, name: label, amount: amt, date: date}); rec.zy = t.y; rec.zm = t.m; }
+  else if(_cmoDest === 'charity'){ if(!Array.isArray(data.donations)) data.donations = []; data.donations.push({id: id, name: label, amount: amt, date: date}); }
   else if(effD === 'income' && stl > 0){ ensureYear(t.y); const mon = data[t.y][t.m]; if(!mon.incomeSources) mon.incomeSources = []; mon.incomeSources.push({id: id, name: label, amount: stl, counted: true, date: opsMs(date)}); }
   if(gen && _cmoSub === 'grp' && stg > 0){ ensureYear(t.y); const gn = cmoGrpNode(t.y, t.m, _cmoGrp); if(gn){ gn.children.push({id: id + 'g', type: 'expense', name: label, amount: stg, counted: true, date: opsMs(date), createdAt: Date.now(), icon: '🧾'}); } }
   if(!Array.isArray(data.moneyOut)) data.moneyOut = [];
@@ -9724,6 +9742,7 @@ function cmoUndo(rec){   // يرجّع أثر الصرف كله (الرصيد + 
     const z = rec.zy !== undefined ? zkGetAt(rec.zy, rec.zm) : (rec.zkY !== undefined ? zkGetAt(rec.zkY, rec.zkM) : zkGet());
     z.adds = z.adds.filter(a=> a.id !== id); z.payments = z.payments.filter(a=> a.id !== id + 'p');
   }
+  else if(rec.dest === 'charity'){ if(Array.isArray(data.donations)) data.donations = data.donations.filter(a=> a.id !== id); }
   else if(rec.dest === 'income' && ym.length === 2){ const mon = data[ym[0]] && data[ym[0]][ym[1]]; if(mon && Array.isArray(mon.incomeSources)) mon.incomeSources = mon.incomeSources.filter(z=> z.id !== id); }
   else if(rec.dest === 'gen' && ym.length === 2){ const mon = data[ym[0]] && data[ym[0]][ym[1]]; if(mon){ if(Array.isArray(mon.incomeSources)) mon.incomeSources = mon.incomeSources.filter(z=> z.id !== id); [id, id + 'g'].forEach(function(k){ const f = findNode(mon.groups || [], k); if(f && f.node.type === 'expense') f.arr.splice(f.index, 1); }); } }
 }
@@ -10780,7 +10799,7 @@ function addGISource(){
 }
 
 // الصرف من الدخل العام: إلى المصروف المنزلي أو زكاتي
-const GI_DEST = { income:{n:'المصروف المنزلي', ic:'💰'}, zakat:{n:'زكاتي', ic:'🕌'}, other:{n:'أخرى', ic:'📦'}, grp:{n:'مجموعة من المصروف المنزلي', ic:'📁'} };
+const GI_DEST = { income:{n:'المصروف المنزلي', ic:'💰'}, zakat:{n:'زكاتي', ic:'🕌'}, charity:{n:'صدقات وتبرعات', ic:'🎁'}, other:{n:'أخرى', ic:'📦'}, grp:{n:'مجموعة من المصروف المنزلي', ic:'📁'} };
 let _giDest = 'income', _giFilter = null;
 function setGIFilter(f){
   _giFilter = (f === _giFilter) ? null : f;
@@ -15736,6 +15755,7 @@ function zakIcoApply(s){
   var k = zakIcoKey(s), sc = Math.min(180, Math.max(60, Number(s && s.zakIconSize) || 100)) / 100;
   var el = document.getElementById('zakHeroIco'); if(el && el.getAttribute('data-k') !== k){ el.innerHTML = zakIcoSvg(k).replace(/__U__/g, 'zh'); el.setAttribute('data-k', k); }
   var w = document.getElementById('zakHeroWrap'); if(w) w.style.setProperty('--ch-sc', String(sc));
+  var pe = document.getElementById('zakPgIco'); if(pe && pe.getAttribute('data-k') !== k){ pe.innerHTML = zakIcoSvg(k).replace(/__U__/g, 'zq'); pe.setAttribute('data-k', k); }
 }
 function zakIcoRender(s){
   s = s || settings; zakIcoApply(s);
@@ -16166,6 +16186,7 @@ body.kb-open .fab{display:none !important;}
 #cmOutOverlay #cmoDest button:nth-child(2){--dA:#2f7bff;}
 #cmOutOverlay #cmoDest button:nth-child(3){--dA:#f5a800;}
 #cmOutOverlay #cmoDest button:nth-child(4){--dA:#8a5cf0;}
+#cmOutOverlay #cmoDest button[data-id="charity"]{--dA:#e8508f;}
 #cmOutOverlay #cmoDest .cmo-di{font-style:normal; display:block; font-size:calc(38px * var(--fs,1)); line-height:1.15; filter:saturate(.75) opacity(.75) drop-shadow(0 3px 2px rgba(0,0,0,.22)); transition:transform .18s, filter .18s;}
 #cmOutOverlay #cmoDest .cmo-dl{font-weight:800; font-size:calc(12px * var(--fs,1)); line-height:1.35; text-align:center; opacity:.8;}
 #cmOutOverlay #cmoDest button.active .cmo-di{filter:drop-shadow(0 0 9px var(--dA)) drop-shadow(0 3px 3px rgba(0,0,0,.28)); transform:scale(1.18);}
@@ -16278,6 +16299,7 @@ body.kb-open .fab{display:none !important;}
     {key:'goldIcon',  n:'الذهب',             d:'pound',  f:function(k){ return capSubGoldSvg(k); }},
     {key:'cmIcon',    n:'إجمالي الأموال',    d:'cash',   f:function(k){ return capSubMoneySvg(k); }},
     {key:'zakIcon',   n:'الزكاة',            d:'mosque', f:function(k){ return zakIcoSvg(k); }},
+    {key:'donIcon',   n:'التبرعات والصدقات', d:'heart',  f:function(k){ return zakIcoSvg(k); }},
     {key:'msIcon',    n:'المصروفات الشهرية', d:'cash',   f:function(k){ return msIcoSvg(k); }},
     {key:'yiIcon',    n:'التقارير',          d:'growth', f:function(k){ return yiIcoSvg(k); }}
   ];
@@ -17839,6 +17861,38 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       if(late.length) showToast('⏳ عندك ' + toArabicDigits(late.length) + ' دفعة معلقة متأخرة', false);
     }catch(e){}
   }, 3500);
+})();
+</script>
+<script>
+/* 8374: أيقونة التبرعات والصدقات — الشكل والحجم من الإعدادات */
+(function(){
+  function key(s){ var k = s && s.donIcon; return zakIcoSvg(k) ? k : 'heart'; }
+  window.donIcoApply = function(s){
+    s = s || settings; var k = key(s), sc = Math.min(180, Math.max(60, Number(s && s.donIconSize) || 100)) / 100;
+    var el = document.getElementById('donPgIco'); if(el && el.getAttribute('data-k') !== k){ el.innerHTML = zakIcoSvg(k).replace(/__U__/g, 'dq'); el.setAttribute('data-k', k); }
+    var w = document.getElementById('donPgWrap'); if(w) w.style.setProperty('--ch-sc', String(0.62 * sc));
+  };
+  function fillChips(){
+    var dst = document.getElementById('optDonIcon'), src = document.getElementById('optZakIcon'); if(!dst || !src) return;
+    dst.innerHTML = '';
+    Array.prototype.forEach.call(src.children, function(c){
+      var v = c.getAttribute('data-val'); if(!v) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'opt-chip'; b.setAttribute('data-val', v);
+      b.setAttribute('onclick', "nfSet('donIcon','" + v + "')"); b.textContent = c.textContent; dst.appendChild(b);
+    });
+  }
+  window.donIcoRender = function(s){
+    s = s || settings; donIcoApply(s);
+    var k = key(s), sz = Math.min(180, Math.max(60, Math.round(Number(s.donIconSize) || 100)));
+    var r = document.getElementById('optDonIcon'); if(r) Array.prototype.forEach.call(r.children, function(c){ c.classList.toggle('active', c.getAttribute('data-val') === k); });
+    var sl = document.getElementById('donIcoSize'); if(sl && Number(sl.value) !== sz) sl.value = sz;
+    var lb = document.getElementById('donIcoSizeLabel'); if(lb) lb.textContent = toArabicDigits(sz) + '٪';
+    var pv = document.getElementById('donIcoPrev'); if(pv && pv.getAttribute('data-k') !== k){ pv.innerHTML = zakIcoSvg(k).replace(/__U__/g, 'dp'); pv.setAttribute('data-k', k); }
+  };
+  window.donIcoSizeInput = function(){ previewSetting('donIconSize', Number(document.getElementById('donIcoSize').value) || 100); };
+  fillChips();
+  try{ zakIcoApply(settings); }catch(e){}
+  try{ donIcoRender(settings); }catch(e){}
 })();
 </script>
 </body>
