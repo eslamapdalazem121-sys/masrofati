@@ -35,7 +35,7 @@
   try{
     var raw = window.localStorage, P = Storage.prototype, g0 = P.getItem, s0 = P.setItem, r0 = P.removeItem;
     var META_K = 'masrofati_enc_v1', FAILK = 'masrofati_enc_fail_v1';
-    var SENS = {'budget_data_v1':1, 'budget_backups_local_v1':1, 'budget_prev_snapshot_v1':1, 'masrofati_ai_gkey':1, 'masrofati_ai_p2key':1};
+    var SENS = {'budget_data_v1':1, 'budget_backups_local_v1':1, 'budget_prev_snapshot_v1':1, 'masrofati_ai_gkey':1, 'masrofati_ai_p2key':1, 'masrofati_ai_p3key':1};
     var ST = window.MSR_ENC = {on:false, locked:false, mem:{}, key:null, meta:null, pending:{}, timer:0, SENS:SENS, META_K:META_K};
     var subtle = (window.crypto && crypto.subtle) || null, TE = new TextEncoder(), TD = new TextDecoder();
     ST.ok = !!subtle;
@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8366">
+<meta name="app-version" content="2026-11-09.8367">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16517,7 +16517,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     <div class="ai-chk"><input type="checkbox" id="aiSearch"><label for="aiSearch">🌐 البحث في جوجل (أسعار وأخبار ومعلومات حديثة)</label></div>
     <div class="ai-sep"></div>
     <label>🤝 ذكاء اصطناعي تاني (اختياري)</label>
-    <select id="aiP2" onchange="aiP2Change()"><option value="">بدون</option><option value="groq">Groq (مجاني)</option><option value="openrouter">OpenRouter (فيه موديلات مجانية)</option><option value="custom">مخصص (متوافق مع OpenAI)</option></select>
+    <select id="aiP2" onchange="aiP2Change()"><option value="">بدون</option><option value="groq">Groq (مجاني)</option><option value="openrouter">OpenRouter (فيه موديلات مجانية)</option><option value="mistral">Mistral (فيه خطة مجانية)</option><option value="cerebras">Cerebras (فيه خطة مجانية)</option><option value="deepseek">DeepSeek (رخيص)</option><option value="custom">مخصص (متوافق مع OpenAI)</option></select>
     <div id="aiP2Box" style="display:none;">
       <label>مفتاح الذكاء التاني</label>
       <input type="password" id="aiP2Key" placeholder="API key" autocomplete="off">
@@ -16525,6 +16525,17 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       <input type="text" id="aiP2Model" placeholder="اسم الموديل">
       <div id="aiP2UrlBox" style="display:none;"><label>عنوان الـAPI</label><input type="text" id="aiP2Url" placeholder="https://.../v1"></div>
       <div class="ai-note" id="aiP2Note"></div>
+    </div>
+    <div class="ai-sep"></div>
+    <label>🤝 ذكاء اصطناعي تالت (اختياري)</label>
+    <select id="aiP3" onchange="aiP3Change()"><option value="">بدون</option><option value="groq">Groq (مجاني)</option><option value="openrouter">OpenRouter (فيه موديلات مجانية)</option><option value="mistral">Mistral (فيه خطة مجانية)</option><option value="cerebras">Cerebras (فيه خطة مجانية)</option><option value="deepseek">DeepSeek (رخيص)</option><option value="custom">مخصص (متوافق مع OpenAI)</option></select>
+    <div id="aiP3Box" style="display:none;">
+      <label>مفتاح الذكاء التالت</label>
+      <input type="password" id="aiP3Key" placeholder="API key" autocomplete="off">
+      <label>الموديل</label>
+      <input type="text" id="aiP3Model" placeholder="اسم الموديل">
+      <div id="aiP3UrlBox" style="display:none;"><label>عنوان الـAPI</label><input type="text" id="aiP3Url" placeholder="https://.../v1"></div>
+      <div class="ai-note" id="aiP3Note"></div>
     </div>
     <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiTest()">اختبار الاتصال</button><button class="ai-btn" onclick="aiClear()">مسح المحادثة</button></div><div id="aiTestOut" class="ai-note" style="display:none; font-weight:800; opacity:1; direction:rtl; word-break:break-word;"></div>
   </div>
@@ -16541,15 +16552,21 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 (function(){
   var KEYK = 'masrofati_ai_gkey', MODK = 'masrofati_ai_gmodel', DEFMOD = 'gemini-flash-latest';
   /* 8364: بحث جوجل + ذكاء اصطناعي تاني (متوافق مع OpenAI) */
-  var SRCHK = 'masrofati_ai_search', P2K = 'masrofati_ai_p2', P2KEY = 'masrofati_ai_p2key', P2MOD = 'masrofati_ai_p2model', P2URL = 'masrofati_ai_p2url';
+  var SRCHK = 'masrofati_ai_search', P2K = 'masrofati_ai_p2', P2KEY = 'masrofati_ai_p2key', P2MOD = 'masrofati_ai_p2model', P2URL = 'masrofati_ai_p2url', P3K = 'masrofati_ai_p3', P3KEY = 'masrofati_ai_p3key', P3MOD = 'masrofati_ai_p3model', P3URL = 'masrofati_ai_p3url';
   var P2PRE = {
     groq: {name: 'Groq', base: 'https://api.groq.com/openai/v1', model: 'openai/gpt-oss-120b'},
     openrouter: {name: 'OpenRouter', base: 'https://openrouter.ai/api/v1', model: 'openrouter/free'},
-    custom: {name: 'الذكاء التاني', base: '', model: ''}
+    mistral: {name: 'Mistral', base: 'https://api.mistral.ai/v1', model: 'mistral-small-latest'},
+    cerebras: {name: 'Cerebras', base: 'https://api.cerebras.ai/v1', model: 'gpt-oss-120b'},
+    deepseek: {name: 'DeepSeek', base: 'https://api.deepseek.com/v1', model: 'deepseek-chat'},
+    custom: {name: 'ذكاء اصطناعي إضافي', base: '', model: ''}
   };
   var P2NOTE = {
     groq: 'مفتاح مجاني من console.groq.com/keys (بحساب Google). بيشتغل لوحده لو Gemini وقع أو حصته خلصت، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
     openrouter: 'مفتاح من openrouter.ai/keys. الموديل openrouter/free بيختار موديل مجاني متاح لوحده. بيشتغل لوحده لو Gemini وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
+    mistral: 'مفتاح من console.mistral.ai/api-keys (فيه خطة تجريبية مجانية بحدود). لو الموديل اترفض غيّر اسمه من الخانة. بيشتغل لوحده لو اللي قبله وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
+    cerebras: 'مفتاح من cloud.cerebras.ai (فيه خطة مجانية بحدود). لو الموديل اترفض غيّر اسمه من الخانة. بيشتغل لوحده لو اللي قبله وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
+    deepseek: 'مفتاح من platform.deepseek.com (مدفوع بس رخيص جدًا). بيشتغل لوحده لو اللي قبله وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
     custom: 'أي خدمة متوافقة مع OpenAI (عنوانها بيخلص بـ /v1 زي Mistral أو DeepSeek أو Together). بيشتغل لوحده لو Gemini وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.'
   };
   var hist = [], busy = false, pendImg = null, started = false;
@@ -16562,22 +16579,27 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function norm(t){ return String(t || '').replace(/[\u064B-\u0652]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\bال/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
 
   /* ===== إعدادات المساعد (Gemini + بحث جوجل + الذكاء التاني) ===== */
-  function p2cfg(){
-    var id = lsGet(P2K, ''), pre = P2PRE[id], key = lsGet(P2KEY, ''); if(!pre || !key) return null;
-    var base = String(id === 'custom' ? lsGet(P2URL, '') : pre.base).replace(/\/+$/, ''), model = lsGet(P2MOD, '') || pre.model;
+  function pcfg(k, kk, km, ku, slot){
+    var id = lsGet(k, ''), pre = P2PRE[id], key = lsGet(kk, ''); if(!pre || !key) return null;
+    var base = String(id === 'custom' ? lsGet(ku, '') : pre.base).replace(/\/+$/, ''), model = lsGet(km, '') || pre.model;
     if(!/^https?:\/\//i.test(base) || !model) return null;
-    return {id: id, name: pre.name, base: base, key: key, model: model};
+    return {id: id, name: pre.name, base: base, key: key, model: model, slot: slot};
   }
+  function p2cfg(){ return pcfg(P2K, P2KEY, P2MOD, P2URL, 2); }
+  function p3cfg(){ return pcfg(P3K, P3KEY, P3MOD, P3URL, 3); }
   function loadSet(){
     $('aiKey').value = lsGet(KEYK, ''); $('aiModel').value = lsGet(MODK, DEFMOD);
     $('aiSearch').checked = lsGet(SRCHK, '1') !== '0';
     $('aiP2').value = lsGet(P2K, ''); $('aiP2Key').value = lsGet(P2KEY, ''); $('aiP2Model').value = lsGet(P2MOD, ''); $('aiP2Url').value = lsGet(P2URL, '');
     window.aiP2Change(true);
+    $('aiP3').value = lsGet(P3K, ''); $('aiP3Key').value = lsGet(P3KEY, ''); $('aiP3Model').value = lsGet(P3MOD, ''); $('aiP3Url').value = lsGet(P3URL, '');
+    window.aiP3Change(true);
   }
   function saveSet(){
     lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
     lsSet(SRCHK, $('aiSearch').checked ? '1' : '0');
     lsSet(P2K, $('aiP2').value); lsSet(P2KEY, $('aiP2Key').value.trim()); lsSet(P2MOD, $('aiP2Model').value.trim()); lsSet(P2URL, $('aiP2Url').value.trim());
+    lsSet(P3K, $('aiP3').value); lsSet(P3KEY, $('aiP3Key').value.trim()); lsSet(P3MOD, $('aiP3Model').value.trim()); lsSet(P3URL, $('aiP3Url').value.trim());
   }
   window.aiP2Change = function(keep){
     var id = $('aiP2').value, pre = P2PRE[id];
@@ -16588,11 +16610,20 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     if(keep !== true){ var defs = Object.keys(P2PRE).map(function(k){ return P2PRE[k].model; }); if(!m.value || defs.indexOf(m.value) > -1) m.value = pre.model; }
     $('aiP2Note').innerHTML = P2NOTE[id];
   };
+  window.aiP3Change = function(keep){
+    var id = $('aiP3').value, pre = P2PRE[id];
+    $('aiP3Box').style.display = pre ? 'block' : 'none';
+    $('aiP3UrlBox').style.display = id === 'custom' ? 'block' : 'none';
+    if(!pre) return;
+    var m = $('aiP3Model'); m.placeholder = pre.model || 'اسم الموديل';
+    if(keep !== true){ var defs = Object.keys(P2PRE).map(function(k){ return P2PRE[k].model; }); if(!m.value || defs.indexOf(m.value) > -1) m.value = pre.model; }
+    $('aiP3Note').innerHTML = P2NOTE[id].replace('رأي تاني', 'رأي تالت');
+  };
   window.aiOpen = function(){
     $('aiOv').classList.add('open');
     if(!started){ started = true; welcome(); }
     loadSet();
-    if(!lsGet(KEYK, '') && !p2cfg()) $('aiSet').classList.add('open');
+    if(!lsGet(KEYK, '') && !p2cfg() && !p3cfg()) $('aiSet').classList.add('open');
     endScroll();
   };
   window.aiClose = function(){ $('aiOv').classList.remove('open'); };
@@ -16912,22 +16943,33 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       return agg;
     }finally{ w.stop(); }
   }
-  async function p2Run(msgs, withTools, hooks){
-    var cfg = p2cfg(); if(!cfg) throw new Error('NOP2');
+  async function p2Run(msgs, withTools, hooks, cfgArg){
+    var cfg = cfgArg || p2cfg(); if(!cfg) throw new Error('NOP2');
     var r;
     try{ r = await p2Once(cfg, msgs, withTools, hooks); }
-    catch(e){ if(withTools && !hooks.began() && (e.status === 400 || e.status === 404 || e.status === 422)) r = await p2Once(cfg, msgs, false, hooks); else throw e; }
+    catch(e){
+      try{ if(withTools && !hooks.began() && (e.status === 400 || e.status === 404 || e.status === 422)) r = await p2Once(cfg, msgs, false, hooks); else throw e; }
+      catch(e3){ e3.pname = cfg.name; throw e3; }
+    }
     r.viaNote = cfg.name; return r;
   }
 
   /* ===== التوزيع: Gemini أولًا، ولو وقع بيجاوب الذكاء التاني ===== */
   async function converse(mode, hooks, hasImg){
-    var cfg = p2cfg(), needTools = mode === 'tool' || lsGet(SRCHK, '1') === '0';
-    if(!lsGet(KEYK, '') && cfg && !hasImg) return p2Run(p2Msgs(trimHist(), p2Sys()), needTools, hooks);
+    var chain = [p2cfg(), p3cfg()].filter(Boolean), needTools = mode === 'tool' || lsGet(SRCHK, '1') === '0';
+    async function runChain(why){
+      var last = null;
+      for(var i = 0; i < chain.length; i++){
+        try{ var r = await p2Run(p2Msgs(trimHist(), p2Sys()), needTools, hooks, chain[i]); r.why = why; return r; }
+        catch(e){ last = e; if(hooks.began()) throw e; }
+      }
+      throw last;
+    }
+    if(!lsGet(KEYK, '') && chain.length && !hasImg) return runChain('');
     try{ return await geminiRun(mode, hooks); }
     catch(e){
-      if(!cfg || hasImg || hooks.began() || (e && e.message === 'NOKEY')) throw e;
-      try{ var r = await p2Run(p2Msgs(trimHist(), p2Sys()), needTools, hooks); r.why = errShort(e); return r; }
+      if(!chain.length || hasImg || hooks.began() || (e && e.message === 'NOKEY')) throw e;
+      try{ return await runChain(errShort(e)); }
       catch(e2){ e2.prev = e; throw e2; }
     }
   }
@@ -16951,15 +16993,18 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
           out.pop(); out.push(rs.g.q.length || rs.g.chunks.length ? '✅ بحث جوجل شغال (' + (rs.g.q[0] || 'تم') + ')' : 'ℹ️ بحث جوجل متاح، بس الموديل ماستخدموش في الاختبار'); show();
         }catch(e){ bad = true; out.pop(); out.push('⚠️ بحث جوجل: ' + errCore(e, 'Gemini') + (e && e.status ? '  [كود ' + e.status + ']' : '')); show(); }
       }
-    }else if(!p2cfg()){ bad = true; out.push('❌ حط مفتاح Gemini الأول.'); show(); }
-    var c2 = p2cfg();
-    if(c2){
-      out.push('… بجرّب ' + c2.name); show();
-      try{
-        var r2 = await p2Once(c2, [{role: 'user', content: 'رد بكلمة واحدة بس: تمام'}], false, NOHOOK);
-        out.pop(); out.push('✅ ' + c2.name + ' شغال (' + (r2.model || '') + ')' + (r2.text.trim() ? ' — الرد: ' + r2.text.trim().slice(0, 40) : '')); show();
-      }catch(e){ bad = true; out.pop(); out.push('❌ ' + c2.name + ': ' + errCore(e, c2.name) + (e && e.status ? '  [كود ' + e.status + ']' : '') + (e && e.raw ? '  [' + e.raw.slice(0, 80) + ']' : '')); show(); }
-    }else if($('aiP2').value){ out.push('ℹ️ كمّل بيانات الذكاء التاني (المفتاح والموديل).'); show(); }
+    }else if(!p2cfg() && !p3cfg()){ bad = true; out.push('❌ حط مفتاح Gemini الأول.'); show(); }
+    var cs = [p2cfg(), p3cfg()];
+    for(var ci = 0; ci < 2; ci++){
+      var c2 = cs[ci];
+      if(c2){
+        out.push('… بجرّب ' + c2.name); show();
+        try{
+          var r2 = await p2Once(c2, [{role: 'user', content: 'رد بكلمة واحدة بس: تمام'}], false, NOHOOK);
+          out.pop(); out.push('✅ ' + c2.name + ' شغال (' + (r2.model || '') + ')' + (r2.text.trim() ? ' — الرد: ' + r2.text.trim().slice(0, 40) : '')); show();
+        }catch(e){ bad = true; out.pop(); out.push('❌ ' + c2.name + ': ' + errCore(e, c2.name) + (e && e.status ? '  [كود ' + e.status + ']' : '') + (e && e.raw ? '  [' + e.raw.slice(0, 80) + ']' : '')); show(); }
+      }else if($(ci ? 'aiP3' : 'aiP2').value){ out.push('ℹ️ كمّل بيانات ' + (ci ? 'الذكاء التالت' : 'الذكاء التاني') + ' (المفتاح والموديل).'); show(); }
+    }
     if(!bad) setTimeout(function(){ $('aiSet').classList.remove('open'); }, 2400);
   };
   function errCore(e, who){
@@ -16973,7 +17018,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     return 'مفيش اتصال (النت أو الطلب اتمنع). اضغط «اختبار الاتصال» من ⚙️ عشان نعرف السبب.';
   }
   function errText(e){
-    var c2 = p2cfg(), who = e && e.p2 ? (c2 ? c2.name : 'الذكاء التاني') : 'Gemini';
+    var c2 = p2cfg(), who = e && e.p2 ? (e.pname || (c2 ? c2.name : 'الذكاء التاني')) : 'Gemini';
     return (e && e.p2 ? who + ': ' : '') + errCore(e, who) + (e && e.prev ? '\n(Gemini كمان: ' + errCore(e.prev, 'Gemini') + ')' : '');
   }
   function errShort(e){
@@ -17020,22 +17065,22 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
         m.appendChild(f);
       }
     }
-    var c = p2cfg();
-    if(c && info.answer){
-      var b = document.createElement('button'); b.className = 'ai-rev'; b.textContent = '🔁 رأي تاني (' + c.name + ')';
-      b.onclick = function(){ secondOpinion(b, info.answer, info.idx); };
+    [p2cfg(), p3cfg()].forEach(function(c, ci){
+      if(!c || !info.answer) return;
+      var lbl = ci ? 'رأي تالت' : 'رأي تاني', b = document.createElement('button'); b.className = 'ai-rev'; b.textContent = '🔁 ' + lbl + ' (' + c.name + ')';
+      b.onclick = function(){ secondOpinion(b, info.answer, info.idx, c, lbl); };
       m.appendChild(b);
-    }
+    });
     if(m.childNodes.length){ $('aiMsgs').appendChild(m); endScroll(); }
   }
-  async function secondOpinion(btn, answer, idx){
-    var cfg = p2cfg(); if(!cfg){ toast('فعّل الذكاء التاني من ⚙️ الأول', false); return; }
+  async function secondOpinion(btn, answer, idx, cfg, lbl){
+    lbl = lbl || 'رأي تاني'; cfg = cfg || p2cfg(); if(!cfg){ toast('فعّل الذكاء التاني من ⚙️ الأول', false); return; }
     if(busy) return; busy = true; btn.disabled = true;
     var ty = typingEl(), bub = null, typer = null;
     var hooks = {
       began: function(){ return !!bub; },
       onText: function(t){
-        if(!bub){ ty.remove(); bub = bubble('a alt', '<div class="ai-alt-h">🔁 رأي تاني · ' + esc(cfg.name) + '</div><div class="ai-alt-t"></div>'); typer = makeTyper(bub.querySelector('.ai-alt-t')); bub.onclick = function(){ typer.skip(); }; }
+        if(!bub){ ty.remove(); bub = bubble('a alt', '<div class="ai-alt-h">🔁 ' + lbl + ' · ' + esc(cfg.name) + '</div><div class="ai-alt-t"></div>'); typer = makeTyper(bub.querySelector('.ai-alt-t')); bub.onclick = function(){ typer.skip(); }; }
         typer.set(t);
       }
     };
@@ -17043,13 +17088,13 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       var msgs = p2Msgs(trimHist(hist.slice(0, idx)), p2Sys()), l = msgs[msgs.length - 1];
       var q = 'ده رد مساعد تاني على سؤالي:\n«' + String(answer).slice(0, 3000) + '»\n\nراجعه وادّيني رأيك باختصار: صحّح أي رقم أو حساب غلط بالاعتماد على بياناتي، وضيف أي حاجة مهمة ناقصة، وقول لو متفق معاه.';
       if(l && l.role === 'user') l.content += '\n\n' + q; else msgs.push({role: 'user', content: q});
-      var res = await p2Run(msgs, false, hooks), tx = String(res.text || '').trim();
+      var res = await p2Run(msgs, false, hooks, cfg), tx = String(res.text || '').trim();
       if(ty.parentNode) ty.remove();
       if(!tx){ bubble('a err', 'الذكاء التاني مردّش. جرّب تاني.'); btn.disabled = false; }
       else{
         if(!bub) hooks.onText(res.text);
         await typer.finish(); bub.onclick = null;
-        hist.push({role: 'user', parts: [{text: '[رأي تاني من ' + cfg.name + ' على الرد اللي فات: ' + tx.slice(0, 1200) + ']'}]});
+        hist.push({role: 'user', parts: [{text: '[' + lbl + ' من ' + cfg.name + ' على الرد اللي فات: ' + tx.slice(0, 1200) + ']'}]});
       }
     }catch(e){
       if(ty.parentNode) ty.remove(); if(typer) typer.skip(); if(bub) bub.onclick = null;
