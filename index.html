@@ -35,7 +35,7 @@
   try{
     var raw = window.localStorage, P = Storage.prototype, g0 = P.getItem, s0 = P.setItem, r0 = P.removeItem;
     var META_K = 'masrofati_enc_v1', FAILK = 'masrofati_enc_fail_v1';
-    var SENS = {'budget_data_v1':1, 'budget_backups_local_v1':1, 'budget_prev_snapshot_v1':1, 'masrofati_ai_gkey':1, 'masrofati_ai_p2key':1, 'masrofati_ai_p3key':1};
+    var SENS = {'budget_data_v1':1, 'budget_backups_local_v1':1, 'budget_prev_snapshot_v1':1, 'masrofati_ai_gkey':1, 'masrofati_ai_p2key':1, 'masrofati_ai_p3key':1, 'masrofati_ai_chat_v1':1, 'masrofati_ai_chats_v1':1};
     var ST = window.MSR_ENC = {on:false, locked:false, mem:{}, key:null, meta:null, pending:{}, timer:0, SENS:SENS, META_K:META_K};
     var subtle = (window.crypto && crypto.subtle) || null, TE = new TextEncoder(), TD = new TextDecoder();
     ST.ok = !!subtle;
@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8369">
+<meta name="app-version" content="2026-11-09.8371">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -16330,6 +16330,15 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 #aiOv .ai-top h3{flex:1; margin:0; font-size:18px; font-weight:900; text-align:center;}
 #aiOv .ai-btn{border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; padding:9px 13px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.12);}
 #aiOv .ai-btn:active{transform:translateY(3px); box-shadow:none;}
+#aiHist{display:none; padding:10px 12px; background:var(--card,#fff); border-bottom:1px solid var(--border,#e8eaf0);}
+#aiHist.open{display:block; max-height:60vh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+#aiHist .ai-hh{font-weight:900; font-size:14px; margin:2px 4px 8px;}
+#aiHist .ai-hr{display:flex; gap:6px; align-items:stretch; margin-bottom:6px;}
+#aiHist .ai-ht{flex:1; text-align:right; border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; padding:10px 12px; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; gap:2px; min-width:0;}
+#aiHist .ai-ht b{font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+#aiHist .ai-ht small{font-size:11.5px; opacity:.7;}
+#aiHist .ai-hr.cur .ai-ht{outline:2px solid #8b5cf6;}
+#aiHist .ai-hx{border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; width:42px; font-size:15px; cursor:pointer;}
 #aiSet{display:none; padding:12px; background:var(--card,#fff); border-bottom:1px solid var(--border,#e8eaf0);}
 #aiSet.open{display:block; max-height:55vh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
 #aiMsgs{min-height:120px;}
@@ -16506,8 +16515,10 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   <div class="ai-top">
     <button class="ai-btn" onclick="aiClose()">‹ رجوع</button>
     <h3><svg class="aiRobot" width="52" height="52" style="vertical-align:-16px;margin-inline:0 6px" aria-hidden="true"></svg>مساعد مصروفاتي</h3>
+    <button class="ai-btn" onclick="aiHistToggle()" aria-label="المحادثات القديمة">🕘</button>
     <button class="ai-btn" onclick="aiToggleSet()" aria-label="إعدادات">⚙️</button>
   </div>
+  <div id="aiHist"></div>
   <div id="aiSet">
     <label>مفتاح Gemini (مجاني)</label>
     <input type="password" id="aiKey" placeholder="AIza..." autocomplete="off">
@@ -16515,6 +16526,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     <input type="text" id="aiModel" placeholder="gemini-flash-latest">
     <div class="ai-note">مجاني من غير كارت: ادخل aistudio.google.com/apikey بحساب Google واضغط Create API key. المفتاح بيتحفظ على جهازك بس.<br>تنبيه: في الخطة المجانية جوجل ممكن تستخدم الأسئلة والردود لتحسين موديلاتها.</div>
     <div class="ai-chk"><input type="checkbox" id="aiSearch"><label for="aiSearch">🌐 البحث في جوجل (أسعار وأخبار ومعلومات حديثة)</label></div>
+    <div class="ai-chk"><input type="checkbox" id="aiSaveChat"><label for="aiSaveChat">💾 حفظ المحادثات على الجهاز (بترجع لما تفتح المساعد تاني)</label></div>
     <div class="ai-chk"><input type="checkbox" id="aiAuto"><label for="aiAuto">🔁 رأي الذكاءات التانية (التاني والتالت) يظهر تلقائيًا بعد كل رد</label></div>
     <div class="ai-sep"></div>
     <label>🤝 ذكاء اصطناعي تاني (اختياري)</label>
@@ -16538,7 +16550,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       <div id="aiP3UrlBox" style="display:none;"><label>عنوان الـAPI</label><input type="text" id="aiP3Url" placeholder="https://.../v1"></div>
       <div class="ai-note" id="aiP3Note"></div>
     </div>
-    <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiTest()">اختبار الاتصال</button><button class="ai-btn" onclick="aiClear()">مسح المحادثة</button></div><div id="aiTestOut" class="ai-note" style="display:none; font-weight:800; opacity:1; direction:rtl; word-break:break-word;"></div>
+    <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiTest()">اختبار الاتصال</button><button class="ai-btn" onclick="aiClear()">محادثة جديدة</button></div><div id="aiTestOut" class="ai-note" style="display:none; font-weight:800; opacity:1; direction:rtl; word-break:break-word;"></div>
   </div>
   <div id="aiMsgs"></div>
   <div id="aiPrev"><img id="aiPrevImg" alt=""><button class="ai-btn" onclick="aiDropImg()">✕</button></div>
@@ -16592,7 +16604,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function p3cfg(){ return pcfg(P3K, P3KEY, P3MOD, P3URL, 3); }
   function loadSet(){
     $('aiKey').value = lsGet(KEYK, ''); $('aiModel').value = lsGet(MODK, DEFMOD);
-    $('aiSearch').checked = lsGet(SRCHK, '0') === '1'; $('aiAuto').checked = lsGet(AUTOK, '0') === '1';
+    $('aiSearch').checked = lsGet(SRCHK, '0') === '1'; $('aiAuto').checked = lsGet(AUTOK, '0') === '1'; $('aiSaveChat').checked = lsGet('masrofati_ai_savechat', '1') !== '0';
     $('aiP2').value = lsGet(P2K, ''); $('aiP2Key').value = lsGet(P2KEY, ''); $('aiP2Model').value = lsGet(P2MOD, ''); $('aiP2Url').value = lsGet(P2URL, '');
     window.aiP2Change(true);
     $('aiP3').value = lsGet(P3K, ''); $('aiP3Key').value = lsGet(P3KEY, ''); $('aiP3Model').value = lsGet(P3MOD, ''); $('aiP3Url').value = lsGet(P3URL, '');
@@ -16600,7 +16612,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   function saveSet(){
     lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
-    lsSet(SRCHK, $('aiSearch').checked ? '1' : '0'); lsSet(AUTOK, $('aiAuto').checked ? '1' : '0');
+    lsSet(SRCHK, $('aiSearch').checked ? '1' : '0'); lsSet(AUTOK, $('aiAuto').checked ? '1' : '0'); lsSet('masrofati_ai_savechat', $('aiSaveChat').checked ? '1' : '0'); chatSave();
     lsSet(P2K, $('aiP2').value); lsSet(P2KEY, $('aiP2Key').value.trim()); lsSet(P2MOD, $('aiP2Model').value.trim()); lsSet(P2URL, $('aiP2Url').value.trim());
     lsSet(P3K, $('aiP3').value); lsSet(P3KEY, $('aiP3Key').value.trim()); lsSet(P3MOD, $('aiP3Model').value.trim()); lsSet(P3URL, $('aiP3Url').value.trim());
   }
@@ -16624,7 +16636,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   };
   window.aiOpen = function(){
     $('aiOv').classList.add('open');
-    if(!started){ started = true; welcome(); }
+    if(!started){ started = true; if(!chatRestore()) welcome(); }
     loadSet();
     if(!lsGet(KEYK, '') && !p2cfg() && !p3cfg()) $('aiSet').classList.add('open');
     endScroll();
@@ -16632,11 +16644,98 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   window.aiClose = function(){ $('aiOv').classList.remove('open'); };
   window.aiToggleSet = function(){ $('aiSet').classList.toggle('open'); loadSet(); };
   window.aiSaveSet = function(){ saveSet(); $('aiSet').classList.remove('open'); toast('اتحفظت إعدادات المساعد ✅', true); };
-  window.aiClear = function(){ hist = []; $('aiMsgs').innerHTML = ''; welcome(); $('aiSet').classList.remove('open'); };
+  window.aiClear = function(){ chatSave(); hist = []; logEls = []; curId = null; $('aiHist').classList.remove('open'); $('aiMsgs').innerHTML = ''; welcome(); $('aiSet').classList.remove('open'); };
 
-  function bubble(cls, html){ var d = document.createElement('div'); d.className = 'ai-b ' + cls; d.innerHTML = html; $('aiMsgs').appendChild(d); endScroll(); return d; }
+  /* ٨٣٧٠: حفظ المحادثات — بتتحفظ على الجهاز (ومشفّرة لو تشفير الجهاز شغّال) وبترجع لما تفتح المساعد */
+  var CHATK = 'masrofati_ai_chat_v1', CHATS = 'masrofati_ai_chats_v1', SAVEK = 'masrofati_ai_savechat', logEls = [], noLog = false, saveT = null, curId = null;
+  function saveOn(){ return lsGet(SAVEK, '1') !== '0'; }
+  function plain(h){ var d = document.createElement('div'); d.innerHTML = h; return (d.textContent || '').replace(/📷/g, '').replace(/\s+/g, ' ').trim(); }
+  function titleOf(log){ for(var i = 0; i < log.length; i++){ if(log[i].c === 'u'){ var x = plain(log[i].h); if(x) return x.slice(0, 40); } } return 'محادثة'; }
+  function chatsRead(){
+    try{ var o = JSON.parse(lsGet(CHATS, '') || 'null'); if(o && Array.isArray(o.chats)) return o; }catch(e){}
+    var o2 = {v: 2, chats: []};
+    try{ var old = JSON.parse(lsGet(CHATK, '') || 'null'); if(old && old.log && old.log.length) o2.chats.push({id: 'c' + (old.at || Date.now()), at: old.at || Date.now(), t: titleOf(old.log), log: old.log, hist: old.hist || []}); }catch(e){}
+    return o2;
+  }
+  function chatsWrite(o){
+    try{
+      o.chats.sort(function(a, b){ return b.at - a.at; }); o.chats = o.chats.slice(0, 30);
+      var s = JSON.stringify(o); while(s.length > 900000 && o.chats.length > 1){ o.chats.pop(); s = JSON.stringify(o); }
+      localStorage.setItem(CHATS, s); try{ localStorage.removeItem(CHATK); }catch(e){}
+    }catch(e){}
+  }
+  function chatSave(){
+    clearTimeout(saveT);
+    try{
+      if(!saveOn()) return;
+      var log = [];
+      logEls.forEach(function(o){ if(!o.el.isConnected) return; var h = o.el.innerHTML.replace(/<img[^>]*>/g, '📷 '); if(!h.replace(/<[^>]*>/g, '').trim()) return; log.push({c: o.c, h: h}); });
+      log = log.slice(-60);
+      var all = chatsRead();
+      if(!log.length){ if(curId){ all.chats = all.chats.filter(function(c){ return c.id !== curId; }); chatsWrite(all); } return; }
+      var h2 = hist.slice(-40).map(function(m){ return {role: m.role, parts: (m.parts || []).filter(function(p){ return !p.inlineData; })}; }).filter(function(m){ return m.parts.length; });
+      while(h2.length && (h2[0].role !== 'user' || h2[0].parts.some(function(p){ return p.functionResponse; }))) h2.shift();
+      if(!curId) curId = 'c' + Date.now();
+      var e = {id: curId, at: Date.now(), t: titleOf(log), log: log, hist: h2}, i = -1;
+      all.chats.forEach(function(c, k){ if(c.id === curId) i = k; });
+      if(i > -1) all.chats[i] = e; else all.chats.push(e);
+      chatsWrite(all);
+    }catch(e){}
+  }
+  function chatSaveSoon(){ clearTimeout(saveT); saveT = setTimeout(chatSave, 500); }
+  function renderChat(c){
+    hist = Array.isArray(c.hist) ? c.hist : []; curId = c.id;
+    $('aiMsgs').innerHTML = ''; logEls = [];
+    c.log.forEach(function(e){ bubble(e.c, e.h); });
+    var s = document.createElement('div'); s.className = 'ai-sug';
+    var b = document.createElement('button'); b.textContent = '🆕 محادثة جديدة'; b.onclick = function(){ window.aiClear(); }; s.appendChild(b);
+    $('aiMsgs').appendChild(s); endScroll();
+  }
+  function chatRestore(){
+    try{ if(!saveOn()) return false; var all = chatsRead(); all.chats.sort(function(a, b){ return b.at - a.at; }); var c = all.chats[0]; if(!c || !c.log || !c.log.length) return false; renderChat(c); return true; }catch(e){ return false; }
+  }
+  function histRender(){
+    var box = $('aiHist'), all = chatsRead(); all.chats.sort(function(a, b){ return b.at - a.at; });
+    box.innerHTML = '';
+    var h = document.createElement('div'); h.className = 'ai-hh'; h.textContent = '🕘 المحادثات القديمة'; box.appendChild(h);
+    if(!all.chats.length){ var n = document.createElement('div'); n.className = 'ai-note'; n.textContent = 'مفيش محادثات محفوظة لسه.'; box.appendChild(n); return; }
+    all.chats.forEach(function(c){
+      var r = document.createElement('div'); r.className = 'ai-hr' + (c.id === curId ? ' cur' : '');
+      var b = document.createElement('button'); b.className = 'ai-ht';
+      var t1 = document.createElement('b'); t1.textContent = c.t || 'محادثة';
+      var t2 = document.createElement('small'); var d = new Date(c.at); t2.textContent = d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'}) + ' · ' + toArabicDigits(c.log.length) + ' رسالة';
+      b.appendChild(t1); b.appendChild(t2); b.onclick = function(){ chatOpen(c.id); };
+      var x = document.createElement('button'); x.className = 'ai-hx'; x.textContent = '✕'; x.setAttribute('aria-label', 'مسح المحادثة'); x.onclick = function(){ chatDel(c.id); };
+      r.appendChild(b); r.appendChild(x); box.appendChild(r);
+    });
+    var ca = document.createElement('button'); ca.className = 'ai-btn'; ca.style.cssText = 'width:100%; margin-top:8px;'; ca.textContent = '🗑️ مسح كل المحادثات'; ca.onclick = function(){ chatDelAll(); }; box.appendChild(ca);
+  }
+  function chatOpen(id){
+    if(busy){ toast('استنى المساعد يخلّص رده الأول', false); return; }
+    chatSave(); var all = chatsRead(), c = all.chats.filter(function(x){ return x.id === id; })[0]; if(!c) return;
+    renderChat(c); $('aiHist').classList.remove('open'); $('aiSet').classList.remove('open');
+  }
+  function chatReset(){ curId = null; hist = []; logEls = []; $('aiMsgs').innerHTML = ''; welcome(); }
+  function chatDel(id){
+    if(!confirm('تمسح المحادثة دي؟')) return;
+    var all = chatsRead(); all.chats = all.chats.filter(function(c){ return c.id !== id; }); chatsWrite(all);
+    if(id === curId) chatReset();
+    histRender();
+  }
+  function chatDelAll(){
+    if(!confirm('تمسح كل المحادثات المحفوظة؟')) return;
+    try{ localStorage.removeItem(CHATS); localStorage.removeItem(CHATK); }catch(e){}
+    chatReset(); histRender();
+  }
+  window.aiHistToggle = function(){ var p = $('aiHist'); $('aiSet').classList.remove('open'); if(p.classList.contains('open')){ p.classList.remove('open'); return; } chatSave(); histRender(); p.classList.add('open'); };
+  try{ new MutationObserver(chatSaveSoon).observe($('aiMsgs'), {childList: true, subtree: true, characterData: true}); }catch(e){}
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') chatSave(); });
+  function bubble(cls, html){ var d = document.createElement('div'); d.className = 'ai-b ' + cls; d.innerHTML = html; $('aiMsgs').appendChild(d); if(!noLog && /^(u|a|a alt)$/.test(cls)) logEls.push({c: cls, el: d}); endScroll(); return d; }
   function fmtTxt(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
   function welcome(){
+    noLog = true; try{ welcome0(); }finally{ noLog = false; }
+  }
+  function welcome0(){
     bubble('a', 'أهلًا 👋 أنا مساعد مصروفاتك. اكتب صرفتك بجملة، أو صوّر الفاتورة، أو اسألني عن مصروفاتك والأموال والذهب والزكاة والتقارير وهجاوبك.' + (lsGet(SRCHK, '0') === '1' ? ' وأدوّر لك في جوجل لو محتاج معلومة حديثة.' : ''));
     var s = document.createElement('div'); s.className = 'ai-sug';
     ['حلّل مصروفات الشهر ده', 'كام زكاتي؟', 'وضع الذهب بتاعي', 'ملخص رأس المال', 'إزاي أوفّر؟'].forEach(function(t){ var b = document.createElement('button'); b.textContent = t; b.onclick = function(){ $('aiIn').value = t; aiSend(); }; s.appendChild(b); });
