@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-10.8381">
+<meta name="app-version" content="2026-11-10.8382">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3342,15 +3342,20 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 /* ===== SPEND PAGE: DEST ROW BACK TO BOXES END ===== */
 </style>
 <style>
-/* 8381: تنبيه «مصروف معلق» في الصفحة الرئيسية */
-.pend-note{display:none; align-items:center; justify-content:center; gap:6px; width:max-content; max-width:90%; margin:-2px auto 10px; padding:5px 12px; border-radius:999px; background:rgba(245,158,11,.16); border:1px solid rgba(245,158,11,.45); color:var(--text); cursor:pointer; font-family:inherit; -webkit-tap-highlight-color:transparent;}
-.pend-note.on{display:flex; animation:pnIn .35s ease both;}
-.pend-note small{font-size:calc(11px * var(--fs,1)); font-weight:800; line-height:1;}
-.pend-note .pn-ico{display:inline-block; font-size:calc(15px * var(--fs,1)); line-height:1; animation:pnFlip 2.4s ease-in-out infinite;}
-.pend-note:active{transform:scale(.96);}
-@keyframes pnFlip{0%,55%{transform:rotate(0)} 80%,100%{transform:rotate(180deg)}}
-@keyframes pnIn{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
-@media (prefers-reduced-motion:reduce){.pend-note .pn-ico{animation:none}}
+/* 8382: الروبوت بيعرض الإشعارات والتنبيهات جنب راسه */
+.ai-bubbles{position:fixed; left:104px; bottom:84px; z-index:49; display:none; flex-direction:column-reverse; align-items:flex-start; gap:6px; max-width:calc(100vw - 124px); pointer-events:none;}
+.ai-bubbles.on{display:flex;}
+.ai-bub{pointer-events:auto; position:relative; display:inline-flex; align-items:center; gap:5px; padding:6px 11px; border-radius:16px; background:var(--card); color:var(--text); border:1px solid rgba(245,158,11,.5); box-shadow:0 4px 12px rgba(0,0,0,.18); font-family:inherit; cursor:pointer; animation:abIn .35s ease both; -webkit-tap-highlight-color:transparent;}
+.ai-bub small{font-size:calc(11px * var(--fs,1)); font-weight:800; line-height:1.2;}
+.ai-bub .ab-i{font-size:calc(14px * var(--fs,1)); line-height:1; display:inline-block;}
+.ai-bub.flip .ab-i{animation:abFlip 2.4s ease-in-out infinite;}
+.ai-bub.warn{border-color:rgba(239,68,68,.55);}
+.ai-bub:first-child::before{content:""; position:absolute; left:-6px; bottom:9px; width:10px; height:10px; background:var(--card); border-left:1px solid rgba(245,158,11,.5); border-bottom:1px solid rgba(245,158,11,.5); transform:rotate(45deg);}
+.ai-bub.warn:first-child::before{border-color:rgba(239,68,68,.55);}
+.ai-bub:active{transform:scale(.96);}
+@keyframes abFlip{0%,55%{transform:rotate(0)} 80%,100%{transform:rotate(180deg)}}
+@keyframes abIn{from{opacity:0; transform:translateX(-8px) scale(.9)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){.ai-bub .ab-i{animation:none !important}}
 </style>
 </head>
 <body>
@@ -3497,7 +3502,6 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 <h1>💰 أموالي AtoZ</h1>
 <div id="syncStatus" style="text-align:center; font-size:calc(10.5px * var(--fs,1)); color:var(--muted); margin:-12px 0 10px;"></div>
 
-<div id="pendNote" class="pend-note" role="button" tabindex="0" onclick="bpOpen()" style="display:none;"><span class="pn-ico">⏳</span><small id="pendNoteTxt">مصروف معلق</small></div>
 
 <div id="homeExtras">
   <button type="button" class="backup-fab" onclick="openBackupPage()" title="النسخ الاحتياطي">💾<span class="dot" id="backupFabDot" style="display:none;"></span></button>
@@ -16729,6 +16733,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   <pattern id="aiBotDots" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#5ee9f7"/><circle cx="6" cy="6" r="5.2" fill="#b8fbff"/></pattern>
 </defs></svg>
 <button class="ai-fab" id="aiFab" onclick="aiOpen()" title="المساعد الذكي" aria-label="المساعد الذكي"><svg class="aiRobot" width="100" height="100" aria-hidden="true"></svg></button>
+<div id="aiBubbles" class="ai-bubbles" aria-live="polite"></div>
 <script>
 (function(){
   var TPL = `  <ellipse class="rb-shadow" cx="545" cy="838" rx="150" ry="14" fill="#06206b" opacity=".35"></ellipse>
@@ -17956,10 +17961,29 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   };
 
   /* ---------- الشارات + ربط الأحداث ---------- */
+  window.robotBubbles = function(vis, t0){
+    var box = $('aiBubbles'); if(!box) return;
+    var items = [], c = bdCfg(), lv = bdLevels(), fab = $('aiFab');
+    var late = vis.filter(function(x){ return x.n.due && Number(x.n.due) < t0.getTime(); }).length;
+    if(vis.length) items.push({i:'⏳', c:'flip', t:'مصروف معلق' + (vis.length > 1 ? ' (' + toArabicDigits(vis.length) + ')' : ''), f:bpOpen});
+    if(late) items.push({i:'⏰', c:'warn', t:'متأخر ' + toArabicDigits(late), f:bpOpen});
+    try{ if(c.on && lv.length && bdDayTotal(Date.now()) > lv[0]) items.push({i:'⚠️', c:'warn', t:'صرف النهارده عدّى الحد', f:bdOpen}); }catch(e){}
+    try{ if(cloud && cloud.user && cloud.lastError) items.push({i:'☁️', c:'warn', t:'مشكلة في المزامنة'}); }catch(e){}
+    items = items.slice(0, 4);
+    box.innerHTML = '';
+    items.forEach(function(it){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'ai-bub ' + (it.c || '');
+      b.innerHTML = '<span class="ab-i"></span><small></small>'; b.children[0].textContent = it.i; b.children[1].textContent = it.t;
+      if(it.f) b.onclick = function(e){ e.stopPropagation(); it.f(); };
+      box.appendChild(b);
+    });
+    var hidden = !fab || getComputedStyle(fab).display === 'none';
+    box.classList.toggle('on', items.length > 0 && !hidden);
+  };
   window.bdBadges = function(){
     try{
       var vis = bpVisible(), t0 = new Date(); t0.setHours(0, 0, 0, 0);
-      var pn = $('pendNote'); if(pn){ pn.classList.toggle('on', vis.length > 0); pn.style.display = vis.length > 0 ? '' : 'none'; var pt = $('pendNoteTxt'); if(pt) pt.textContent = vis.length > 1 ? 'مصروف معلق (' + toArabicDigits(vis.length) + ')' : 'مصروف معلق'; }
+      try{ robotBubbles(vis, t0); }catch(e){}
       var b = $('bpBadge'); if(b){ b.textContent = vis.length > 99 ? '99+' : toArabicDigits(vis.length); b.classList.toggle('on', vis.length > 0); }
       var c = bdCfg(), lv = bdLevels(), a = $('bdBadge'); if(a){ var over = c.on && lv.length && bdDayTotal(Date.now()) > lv[0]; a.textContent = '!'; a.classList.toggle('on', !!over); }
     }catch(e){}
@@ -17976,6 +18000,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     try{ if(bdDayTotal(ts) > before) bdCheckAlert(ts); bdBadges(); }catch(e){} return r;
   });
   wrap('zpAfter', function(o, t, a){ var r = o.apply(t, a); try{ if($('zdnPage').classList.contains('open')) zdnRender(); }catch(e){} return r; });
+  setInterval(function(){ try{ bdBadges(); }catch(e){} }, 30000);
   setTimeout(function(){
     try{
       bdBadges(); bdCheckAlert(Date.now());
