@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-10.8382">
+<meta name="app-version" content="2026-11-10.8385">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3353,9 +3353,20 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 .ai-bub:first-child::before{content:""; position:absolute; left:-6px; bottom:9px; width:10px; height:10px; background:var(--card); border-left:1px solid rgba(245,158,11,.5); border-bottom:1px solid rgba(245,158,11,.5); transform:rotate(45deg);}
 .ai-bub.warn:first-child::before{border-color:rgba(239,68,68,.55);}
 .ai-bub:active{transform:scale(.96);}
+.ai-bub.msg{align-items:flex-start; border-color:rgba(124,92,255,.55); padding:8px 12px; max-width:100%;}
+.ai-bub.msg small{white-space:pre-line; text-align:right;}
+.ai-bub.msg:first-child::before{border-color:rgba(124,92,255,.55);}
 @keyframes abFlip{0%,55%{transform:rotate(0)} 80%,100%{transform:rotate(180deg)}}
 @keyframes abIn{from{opacity:0; transform:translateX(-8px) scale(.9)} to{opacity:1; transform:none}}
 @media (prefers-reduced-motion:reduce){.ai-bub .ab-i{animation:none !important}}
+/* 8384: فقاعات صغيرة فوق الروبوت على الحافة الشمال (من غير ما تغطي الأيقونات) + علامة ✕ */
+.ai-bubbles{left:8px; bottom:124px; max-width:138px; align-items:flex-start;}
+.ai-bub{max-width:138px; padding:5px 6px 5px 8px; gap:4px; border-radius:14px; align-items:center;}
+.ai-bub small{white-space:normal; text-align:right; font-size:calc(10.5px * var(--fs,1));}
+.ai-bub.msg small{white-space:normal;}
+.ai-bub .ab-x{flex:none; width:18px; height:18px; border-radius:50%; border:0; background:rgba(127,127,127,.25); color:var(--text); font-size:10px; line-height:18px; text-align:center; cursor:pointer; padding:0; font-family:inherit;}
+.ai-bub:first-child::before{left:30px; bottom:-6px; top:auto; border:0; border-right:1px solid rgba(245,158,11,.5); border-bottom:1px solid rgba(245,158,11,.5); transform:rotate(45deg);}
+
 </style>
 </head>
 <body>
@@ -17961,20 +17972,51 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   };
 
   /* ---------- الشارات + ربط الأحداث ---------- */
+  window.robotTodayText = function(){
+    var now = Date.now(), k = dateToInputValue(now), y = new Date(now).getFullYear(), list = [];
+    if(data[y]) for(var m = 0; m < 12; m++){
+      var mo = data[y][m]; if(!mo || !Array.isArray(mo.groups)) continue;
+      collectAllExpenses(mo.groups).forEach(function(e){ if(e.counted === false) return; var t = e.date || e.createdAt; if(t && dateToInputValue(t) === k) list.push(e); });
+    }
+    if(!list.length) return 'لسه ما صرفتش حاجة النهارده';
+    var tot = list.reduce(function(a, e){ return a + (Number(e.amount) || 0); }, 0);
+    return 'صرفت اليوم حتى الآن ' + fmt(tot) + ' ج';
+  };
+  window.robotShowToday = function(){
+    try{
+      window._robotToday = robotTodayText();
+      bdBadges();
+      clearTimeout(window._robotTodayT);
+      window._robotTodayT = setTimeout(function(){ window._robotToday = null; try{ bdBadges(); }catch(e){} }, 10000);
+    }catch(e){}
+  };
+  function robotDisGet(){ try{ var o = JSON.parse(localStorage.getItem('robot_dis') || '{}'); return (o.d === dateToInputValue(Date.now()) && Array.isArray(o.k)) ? o.k : []; }catch(e){ return []; } }
+  window.robotDismiss = function(k){
+    if(k === 'today') window._robotToday = null;
+    else { var a = robotDisGet(); if(a.indexOf(k) < 0) a.push(k); try{ localStorage.setItem('robot_dis', JSON.stringify({d: dateToInputValue(Date.now()), k: a})); }catch(e){} }
+    try{ bdBadges(); }catch(e){}
+  };
   window.robotBubbles = function(vis, t0){
     var box = $('aiBubbles'); if(!box) return;
     var items = [], c = bdCfg(), lv = bdLevels(), fab = $('aiFab');
     var late = vis.filter(function(x){ return x.n.due && Number(x.n.due) < t0.getTime(); }).length;
+    if(window._robotToday) items.push({i:'🤖', c:'msg', t:window._robotToday, f:function(){ window._robotToday = null; bdOpen(); }});
     if(vis.length) items.push({i:'⏳', c:'flip', t:'مصروف معلق' + (vis.length > 1 ? ' (' + toArabicDigits(vis.length) + ')' : ''), f:bpOpen});
     if(late) items.push({i:'⏰', c:'warn', t:'متأخر ' + toArabicDigits(late), f:bpOpen});
-    try{ if(c.on && lv.length && bdDayTotal(Date.now()) > lv[0]) items.push({i:'⚠️', c:'warn', t:'صرف النهارده عدّى الحد', f:bdOpen}); }catch(e){}
+    try{ var _dt = bdDayTotal(Date.now()); if(c.on && lv.length && _dt > lv[0]){ items = items.filter(function(x){ return x.i !== '🤖'; }); items.push({i:'⚠️', c:'warn', t:'صرفت اليوم حتى الآن ' + fmt(_dt) + ' ج', f:bdOpen}); } }catch(e){}
     try{ if(cloud && cloud.user && cloud.lastError) items.push({i:'☁️', c:'warn', t:'مشكلة في المزامنة'}); }catch(e){}
-    items = items.slice(0, 4);
+    var KEYS = {'🤖':'today', '⏳':'pend', '⏰':'late', '⚠️':'limit', '☁️':'sync'}, dis = robotDisGet();
+    items.forEach(function(it){ it.k = KEYS[it.i]; });
+    items = items.filter(function(it){ return it.k === 'today' || dis.indexOf(it.k) < 0; });
+    items = items.slice(0, 5);
     box.innerHTML = '';
     items.forEach(function(it){
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'ai-bub ' + (it.c || '');
+      var b = document.createElement('div'); b.setAttribute('role', 'button'); b.className = 'ai-bub ' + (it.c || '');
       b.innerHTML = '<span class="ab-i"></span><small></small>'; b.children[0].textContent = it.i; b.children[1].textContent = it.t;
       if(it.f) b.onclick = function(e){ e.stopPropagation(); it.f(); };
+      var x = document.createElement('button'); x.type = 'button'; x.className = 'ab-x'; x.textContent = '✕'; x.setAttribute('aria-label', 'إغلاق');
+      x.onclick = function(e){ e.stopPropagation(); robotDismiss(it.k); };
+      b.appendChild(x);
       box.appendChild(b);
     });
     var hidden = !fab || getComputedStyle(fab).display === 'none';
@@ -18001,6 +18043,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   });
   wrap('zpAfter', function(o, t, a){ var r = o.apply(t, a); try{ if($('zdnPage').classList.contains('open')) zdnRender(); }catch(e){} return r; });
   setInterval(function(){ try{ bdBadges(); }catch(e){} }, 30000);
+  setTimeout(function(){ robotShowToday(); }, 4500);
   setTimeout(function(){
     try{
       bdBadges(); bdCheckAlert(Date.now());
