@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-09.8375">
+<meta name="app-version" content="2026-11-10.8381">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -2859,6 +2859,19 @@ html{ overscroll-behavior:none; }
 #quickAddOverlay .qa-hero{background:linear-gradient(145deg,#ff8a7a 0%,var(--expense) 48%,var(--expense-dark) 100%); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -5px 0 rgba(0,0,0,.2), 0 8px 0 rgba(0,0,0,.28), 0 18px 26px rgba(0,0,0,.25); padding:18px 14px;}
 #quickAddOverlay .qa-hero-ico{position:relative; font-size:calc(44px * var(--fs,1)); line-height:1; filter:drop-shadow(0 5px 3px rgba(0,0,0,.35));}
 #quickAddOverlay .qa-hero-t{position:relative; font-weight:900; font-size:calc(20px * var(--fs,1)); margin-top:6px; text-shadow:0 2px 0 rgba(0,0,0,.25);}
+#quickAddOverlay .qa-split{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:2px 2px 18px;}
+#quickAddOverlay .qa-split .qa-pick{margin:0; width:100%; border:0; background:none; box-shadow:none; border-radius:18px; color:var(--text); font-family:inherit; cursor:pointer; padding:10px 6px 8px; opacity:.55; transition:transform .12s, opacity .15s, background .15s;}
+#quickAddOverlay .qa-split .qa-pick::before{display:none;}
+#quickAddOverlay .qa-split .qa-pick .qa-hero-ico{font-size:calc(40px * var(--fs,1)); filter:grayscale(.6) drop-shadow(0 3px 2px rgba(0,0,0,.25));}
+#quickAddOverlay .qa-split .qa-pick .qa-hero-t{font-size:calc(15px * var(--fs,1)); margin-top:4px; text-shadow:none; font-weight:800;}
+#quickAddOverlay .qa-split .qa-pick.active{opacity:1; background:var(--card); box-shadow:inset 0 0 0 2px var(--expense), 0 6px 14px rgba(0,0,0,.14); transform:translateY(-2px);}
+#quickAddOverlay .qa-split .qa-pick.active .qa-hero-ico{filter:drop-shadow(0 4px 3px rgba(0,0,0,.3));}
+#quickAddOverlay .qa-split .qa-pick.active .qa-hero-t{color:var(--expense);}
+#quickAddOverlay .qa-split .qa-pick.active::after{content:"✔"; position:absolute; top:6px; left:8px; width:20px; height:20px; border-radius:50%; background:var(--expense); color:#fff; font-size:12px; line-height:20px; text-align:center;}
+#quickAddOverlay .qa-split .qa-pick:active{transform:scale(.96);}
+#quickAddOverlay.qa-pend-mode{--expense:#f59e0b; --expense-dark:#b45309;}
+#quickAddOverlay.qa-pend-mode .modal-box{background-color:var(--bg); background-image:linear-gradient(180deg, rgba(245,158,11,.30), rgba(245,158,11,.14));}
+#quickAddOverlay.qa-pend-mode .qa-card{box-shadow:inset 0 3px 0 #f59e0b, 0 6px 0 rgba(0,0,0,.14), 0 16px 22px rgba(0,0,0,.12);}
 #quickAddOverlay .qa-card{background:var(--card); border:1px solid var(--border); border-radius:22px; padding:16px 14px 14px; box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 6px 0 rgba(0,0,0,.14), 0 16px 22px rgba(0,0,0,.12);}
 #quickAddOverlay .field label{font-weight:800; color:var(--text); opacity:.75;}
 #quickAddOverlay .field select,#quickAddOverlay .field input[type=text],#quickAddOverlay .field input[type=number],#quickAddOverlay .field input[type=date]{width:100%; box-sizing:border-box; padding:13px; border-radius:14px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-size:calc(15px * var(--fs,1)); box-shadow:inset 0 3px 6px rgba(0,0,0,.14), inset 0 -1px 0 rgba(255,255,255,.3);}
@@ -3328,6 +3341,17 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 #cmOutOverlay #cmoDest{display:flex; gap:8px; margin:8px 2px 16px !important; justify-content:flex-start; align-items:stretch;}
 /* ===== SPEND PAGE: DEST ROW BACK TO BOXES END ===== */
 </style>
+<style>
+/* 8381: تنبيه «مصروف معلق» في الصفحة الرئيسية */
+.pend-note{display:none; align-items:center; justify-content:center; gap:6px; width:max-content; max-width:90%; margin:-2px auto 10px; padding:5px 12px; border-radius:999px; background:rgba(245,158,11,.16); border:1px solid rgba(245,158,11,.45); color:var(--text); cursor:pointer; font-family:inherit; -webkit-tap-highlight-color:transparent;}
+.pend-note.on{display:flex; animation:pnIn .35s ease both;}
+.pend-note small{font-size:calc(11px * var(--fs,1)); font-weight:800; line-height:1;}
+.pend-note .pn-ico{display:inline-block; font-size:calc(15px * var(--fs,1)); line-height:1; animation:pnFlip 2.4s ease-in-out infinite;}
+.pend-note:active{transform:scale(.96);}
+@keyframes pnFlip{0%,55%{transform:rotate(0)} 80%,100%{transform:rotate(180deg)}}
+@keyframes pnIn{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){.pend-note .pn-ico{animation:none}}
+</style>
 </head>
 <body>
 
@@ -3472,6 +3496,8 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 
 <h1>💰 أموالي AtoZ</h1>
 <div id="syncStatus" style="text-align:center; font-size:calc(10.5px * var(--fs,1)); color:var(--muted); margin:-12px 0 10px;"></div>
+
+<div id="pendNote" class="pend-note" role="button" tabindex="0" onclick="bpOpen()" style="display:none;"><span class="pn-ico">⏳</span><small id="pendNoteTxt">مصروف معلق</small></div>
 
 <div id="homeExtras">
   <button type="button" class="backup-fab" onclick="openBackupPage()" title="النسخ الاحتياطي">💾<span class="dot" id="backupFabDot" style="display:none;"></span></button>
@@ -4474,7 +4500,10 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
   <div class="modal-box">
     <div class="ys-top"><button type="button" class="ys-back" onclick="closeQuickAdd()">› رجوع</button><h3 class="ys-ttl">🧾 إضافة مصروف</h3></div>
     <div class="ys-wrap qa-page">
-    <div class="ys-hero qa-hero"><div class="qa-hero-ico">🧾</div><div class="qa-hero-t">مصروف جديد</div></div>
+    <div class="qa-split">
+      <button type="button" class="ys-hero qa-hero qa-pick active" id="qaPickNew" onclick="qaPickNew()"><div class="qa-hero-ico">🧾</div><div class="qa-hero-t">مصروف جديد</div></button>
+      <button type="button" class="ys-hero qa-hero qa-pick" id="qaPickPend" onclick="qaPickPend()"><div class="qa-hero-ico">⏳</div><div class="qa-hero-t">مصروف معلق</div></button>
+    </div>
     <div class="qa-card">
     <div class="field">
       <label>الشهر</label>
@@ -4522,9 +4551,20 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
     <div class="warn-icon">⚠️</div>
     <h3 id="confirmTitle">تأكيد الحذف</h3>
     <p id="confirmMsg">هل أنت متأكد؟</p>
+    <button class="btn-save" id="confirmReviewBtn" style="display:none; width:100%; margin-top:10px; padding:12px; border:none; border-radius:12px; font-weight:700; font-family:inherit; cursor:pointer;" onclick="cloudReviewDiff()">🔍 راجع المصروفات المختلفة</button>
     <div class="modal-actions">
       <button class="btn-cancel" id="confirmCancelBtn" onclick="cancelConfirm()">إلغاء</button>
       <button class="btn-danger" id="confirmOkBtn" onclick="runConfirmedAction()">حذف</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="syncReviewOverlay" style="z-index:650;">
+  <div class="modal-box" style="max-height:85vh; display:flex; flex-direction:column;">
+    <h3>🔍 المصروفات المختلفة</h3>
+    <div id="syncReviewBody" style="overflow-y:auto; flex:1; text-align:right; font-size:calc(14px * var(--fs,1)); line-height:1.7;"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('syncReviewOverlay').classList.remove('open')">↩️ رجوع للاختيار</button>
     </div>
   </div>
 </div>
@@ -12275,6 +12315,7 @@ document.addEventListener('pointercancel', ()=>{
 let _pendingConfirmAction = null;
 let _pendingCancelAction = null;
 function openConfirm(title, msg, onConfirm, okLabel, cancelLabel, onCancel){
+  const _rv = document.getElementById('confirmReviewBtn'); if(_rv) _rv.style.display = 'none';
   document.getElementById('confirmOkBtn').textContent = okLabel || 'حذف';
   document.getElementById('confirmCancelBtn').textContent = cancelLabel || 'إلغاء';
   _pendingCancelAction = onCancel || null;
@@ -12284,6 +12325,8 @@ function openConfirm(title, msg, onConfirm, okLabel, cancelLabel, onCancel){
   document.getElementById('confirmOverlay').classList.add('open');
 }
 function closeConfirm(){
+  const _rv2 = document.getElementById('confirmReviewBtn'); if(_rv2) _rv2.style.display = 'none';
+  const _sr = document.getElementById('syncReviewOverlay'); if(_sr) _sr.classList.remove('open');
   _pendingConfirmAction = null;
   _pendingCancelAction = null;
   document.getElementById('confirmOverlay').classList.remove('open');
@@ -13502,6 +13545,66 @@ function cloudAskFirstChoice(remote, conflict){
       updateCloudUI();
     }
   );
+  const _rb = document.getElementById('confirmReviewBtn'); if(_rb) _rb.style.display = remoteRes ? 'block' : 'none';
+}
+
+// 8376: مراجعة المصروفات المختلفة بين الجهاز والحساب قبل الاختيار
+function syncCollectExpenses(d){
+  const out = {};
+  Object.keys(d||{}).forEach(y=>{
+    const yr = d[y]; if(!yr || typeof yr !== 'object') return;
+    Object.keys(yr).forEach(m=>{
+      const mon = yr[m]; if(!mon || !mon.groups) return;
+      (function walk(nodes, path){
+        (nodes||[]).forEach(x=>{
+          if(!x) return;
+          if(x.type === 'group') walk(x.children, path.concat(x.name || ''));
+          else {
+            const key = x.id || (y + '|' + m + '|' + path.join('/') + '|' + x.name + '|' + x.amount);
+            out[key] = {name: x.name || '', amount: Number(x.amount) || 0, counted: x.counted !== false, date: x.date, y: Number(y), m: Number(m), grp: path.join(' › ')};
+          }
+        });
+      })(mon.groups, []);
+    });
+  });
+  return out;
+}
+function cloudReviewDiff(){
+  const remote = cloud.pendingChoice;
+  const rd = remote && remote.__decoded && remote.__decoded.data;
+  if(!rd){ showToast('مش قادر أقرأ بيانات الحساب', false); return; }
+  const L = syncCollectExpenses(data), R = syncCollectExpenses(rd);
+  const onlyL = [], onlyR = [], changed = [];
+  Object.keys(L).forEach(k=>{
+    if(!R[k]) onlyL.push(L[k]);
+    else if(L[k].name !== R[k].name || L[k].amount !== R[k].amount || L[k].counted !== R[k].counted) changed.push({l:L[k], r:R[k]});
+  });
+  Object.keys(R).forEach(k=>{ if(!L[k]) onlyR.push(R[k]); });
+  const byNew = (a,b)=> (b.y - a.y) || (b.m - a.m) || ((Number(b.date)||0) - (Number(a.date)||0));
+  onlyL.sort(byNew); onlyR.sort(byNew); changed.sort((a,b)=> byNew(a.l, b.l));
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const money = n => toArabicDigits(fmt(n)) + ' ج';
+  const row = x => '<div style="padding:8px 10px; margin:6px 0; border-radius:10px; background:var(--bg, rgba(127,127,127,.12));"><b>' + esc(x.name || 'بدون اسم') + '</b> — ' + money(x.amount) +
+    (x.counted ? '' : ' <small>(غير محسوب)</small>') +
+    '<br><small style="opacity:.75;">' + esc(MONTHS[x.m] || '') + ' ' + toArabicDigits(x.y) + (x.grp ? ' · ' + esc(x.grp) : '') + '</small></div>';
+  const LIMIT = 60;
+  const sec = (title, note, arr, fn) => {
+    if(!arr.length) return '';
+    return '<h4 style="margin:14px 0 2px;">' + title + ' (' + toArabicDigits(arr.length) + ')</h4><small style="opacity:.75;">' + note + '</small>' +
+      arr.slice(0, LIMIT).map(fn).join('') +
+      (arr.length > LIMIT ? '<div style="opacity:.75; padding:6px;">… و ' + toArabicDigits(arr.length - LIMIT) + ' كمان</div>' : '');
+  };
+  let html = '';
+  html += sec('📱 على جهازك بس', 'هتتحذف لو اخترت «استخدم اللي في الحساب»', onlyL, row);
+  html += sec('☁️ في الحساب بس', 'هتتحذف لو اخترت «ارفع اللي على جهازي»', onlyR, row);
+  html += sec('✏️ اتعدّلت', 'نفس المصروف بس مختلف', changed, c =>
+    '<div style="padding:8px 10px; margin:6px 0; border-radius:10px; background:var(--bg, rgba(127,127,127,.12));"><b>' + esc(c.l.name || 'بدون اسم') + '</b>' +
+    '<br>📱 جهازك: ' + esc(c.l.name) + ' — ' + money(c.l.amount) + (c.l.counted ? '' : ' (غير محسوب)') +
+    '<br>☁️ الحساب: ' + esc(c.r.name) + ' — ' + money(c.r.amount) + (c.r.counted ? '' : ' (غير محسوب)') +
+    '<br><small style="opacity:.75;">' + esc(MONTHS[c.l.m] || '') + ' ' + toArabicDigits(c.l.y) + '</small></div>');
+  if(!html) html = '<p style="text-align:center; padding:16px;">مفيش فرق في المصروفات ✅<br><small>الفرق في حاجات تانية (أموال/إعدادات…)</small></p>';
+  document.getElementById('syncReviewBody').innerHTML = html;
+  document.getElementById('syncReviewOverlay').classList.add('open');
 }
 
 // ---- قلب المزامنة: الأحدث بيكسب، وبنحفظ نسخة أمان قبل أي استبدال ----
@@ -14186,8 +14289,26 @@ function openQuickAdd(){
   document.getElementById('qaDate').value = dateToInputValue(Date.now());
   document.getElementById('qaIconGrid').innerHTML = buildIconGrid('qaIconInput','🧾');
   populateQaGroups();
+  qaMarkPick('new');
   document.getElementById('quickAddOverlay').classList.add('open');
   setTimeout(function(){ var e=document.getElementById('qaName'); if(e) e.focus(); }, 120);
+}
+function qaMarkPick(w){
+  var a = document.getElementById('qaPickNew'), b = document.getElementById('qaPickPend');
+  if(a) a.classList.toggle('active', w === 'new');
+  if(b) b.classList.toggle('active', w === 'pend');
+  var ov = document.getElementById('quickAddOverlay'); if(ov) ov.classList.toggle('qa-pend-mode', w === 'pend');
+  var t = document.querySelector('#quickAddOverlay .ys-ttl'); if(t) t.textContent = (w === 'pend') ? '⏳ إضافة مصروف معلق' : '🧾 إضافة مصروف';
+}
+function qaPickNew(){
+  qaMarkPick('new');
+  var c = document.getElementById('qaCounted'); if(c) c.checked = true;
+  var e = document.getElementById('qaName'); if(e) e.focus();
+}
+function qaPickPend(){
+  qaMarkPick('pend');
+  var c = document.getElementById('qaCounted'); if(c) c.checked = false;
+  var e = document.getElementById('qaName'); if(e) e.focus();
 }
 function closeQuickAdd(){
   document.getElementById('quickAddOverlay').classList.remove('open');
@@ -17648,7 +17769,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   window.bpClose = function(){ closePg('bpPage'); afterChange(); };
   window.bpToggleHidden = function(){ _bpHid = !_bpHid; bpRender(); };
   window.bpAddNew = function(){
-    try{ openQuickAdd(); var q = $('qaCounted'); if(q) q.checked = false; showToast('اتحدد «غير محسوب» — هيظهر هنا بعد الحفظ', true); }catch(e){}
+    try{ openQuickAdd(); var q = $('qaCounted'); if(q) q.checked = false; qaMarkPick('pend'); showToast('اتحدد «غير محسوب» — هيظهر هنا بعد الحفظ', true); }catch(e){}
   };
   window.bpRender = function(){
     var vis = bpVisible().sort(function(a, b){ return bpKey(a) - bpKey(b); }), today0 = new Date(); today0.setHours(0, 0, 0, 0);
@@ -17838,6 +17959,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   window.bdBadges = function(){
     try{
       var vis = bpVisible(), t0 = new Date(); t0.setHours(0, 0, 0, 0);
+      var pn = $('pendNote'); if(pn){ pn.classList.toggle('on', vis.length > 0); pn.style.display = vis.length > 0 ? '' : 'none'; var pt = $('pendNoteTxt'); if(pt) pt.textContent = vis.length > 1 ? 'مصروف معلق (' + toArabicDigits(vis.length) + ')' : 'مصروف معلق'; }
       var b = $('bpBadge'); if(b){ b.textContent = vis.length > 99 ? '99+' : toArabicDigits(vis.length); b.classList.toggle('on', vis.length > 0); }
       var c = bdCfg(), lv = bdLevels(), a = $('bdBadge'); if(a){ var over = c.on && lv.length && bdDayTotal(Date.now()) > lv[0]; a.textContent = '!'; a.classList.toggle('on', !!over); }
     }catch(e){}
