@@ -149,7 +149,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-10.8392">
+<meta name="app-version" content="2026-11-11.8398">
+<script>
+/* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
+function entryTs(x){
+  try{
+    if(!x || typeof x !== 'object') return 0;
+    var id = String(x.id || ''), n = parseInt(id.slice(0, 8), 36);
+    if(/^[0-9a-z]{8}/.test(id) && n > 1.4e12 && n < 4.1e12) return n;
+    var t = Number(x.createdAt || x.at || x.ts || x.t || 0);
+    return t > 1.4e12 ? t : 0;
+  }catch(e){ return 0; }
+}
+function clkSet(){ try{ return ((typeof _draftSettings !== 'undefined' && _draftSettings) || (typeof settings !== 'undefined' && settings) || {}); }catch(e){ return {}; } }
+function clkParts(ts, sec){
+  var s = clkSet(), h12 = s.clk24 !== true, loc = (typeof DIGITS_MODE !== 'undefined' && DIGITS_MODE === 'en') ? 'en-US' : 'ar-EG-u-nu-arab';
+  var o = {hour: h12 ? 'numeric' : '2-digit', minute: '2-digit', hour12: h12}; if(sec) o.second = '2-digit';
+  var p = {}; new Intl.DateTimeFormat(loc, o).formatToParts(new Date(ts)).forEach(function(x){ p[x.type] = x.value; }); return p;
+}
+function clkFmt(ts, sec){
+  try{ var p = clkParts(ts, sec); return p.hour + ':' + p.minute + (sec && p.second ? ':' + p.second : '') + (p.dayPeriod ? ' ' + p.dayPeriod : ''); }catch(e){ return ''; }
+}
+function entryTimeTxt(x){ var t = entryTs(x); return t ? clkFmt(t, false) : ''; }
+function dtx(ts, x){ var d = ''; try{ d = formatDate(ts); }catch(e){} var t = entryTimeTxt(x); return d + (t ? (d ? ' · ' : '') + '🕒 ' + t : ''); }
+</script>
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -1445,7 +1468,7 @@ body{overflow-x:hidden;}
 .gi-sumrow{font-size:calc(13px * var(--fs,1));}
 .gi-sumrow b{font-size:calc(17px * var(--fs,1)); font-weight:800;}
 .date-sep{font-size:calc(12.5px * var(--fs,1)); font-weight:800; color:var(--muted); margin:10px 4px 4px;}
-.item-row.sep-done .item-date{display:none;}
+.item-row.sep-done .item-date .idd{display:none;}
 .day-header{font-size:calc(13.5px * var(--fs,1)); font-weight:800;}
 .group-head .gname{font-size:calc(16px * var(--fs,1)); font-weight:800;}
 .group-head .gtotal{font-size:calc(19px * var(--fs,1)); font-weight:800;}
@@ -2964,6 +2987,22 @@ html{ overscroll-behavior:none; }
 .zk-wrap.yr-ms.ms-nobox .zk-main:active{box-shadow:none; transform:none;}
 .zk-wrap.yr-ms.ms-nobox .zk-main::before,.zk-wrap.yr-ms.ms-nobox .zk-main::after{display:none;}
 .zk-wrap.yr-ms.ms-nobox .zk-main .yr-amt{color:var(--text); text-shadow:none;}
+
+/* 8393: الساعة الرقمية */
+.home-clock{text-align:center; margin:-8px 0 8px; line-height:1.1;}
+.home-clock.off{display:none;}
+.home-clock .hc-date{font-size:calc(11.5px * var(--fs,1)); font-weight:800; color:var(--muted); margin-bottom:1px;}
+.home-clock .hc-time{font-size:calc(25px * var(--fs,1)); font-weight:900; direction:ltr; font-variant-numeric:tabular-nums; letter-spacing:.5px; color:var(--text); text-shadow:0 2px 0 rgba(0,0,0,.08);}
+.home-clock .hc-time small{display:inline-block; unicode-bidi:isolate; font-size:.42em; font-weight:800; opacity:.7; margin-inline-start:6px; letter-spacing:0;}
+.home-clock.sub{display:none;}
+.mini-clock{--mc:var(--accent,#12a56f); display:none; flex:none; align-items:center; gap:7px; padding:5px 15px; border-radius:999px; font-size:calc(13px * var(--fs,1)); font-weight:900; line-height:1.2; direction:ltr; pointer-events:none; white-space:nowrap; font-variant-numeric:tabular-nums; letter-spacing:.4px; color:color-mix(in srgb,var(--mc) 55%,var(--text)); background:linear-gradient(180deg,color-mix(in srgb,var(--mc) 20%,var(--card)),color-mix(in srgb,var(--mc) 9%,var(--card))); border:1px solid color-mix(in srgb,var(--mc) 40%,transparent); box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 3px 0 color-mix(in srgb,var(--mc) 34%,transparent),0 9px 14px color-mix(in srgb,var(--mc) 18%,transparent);}
+.mini-clock::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--mc); box-shadow:0 0 0 3px color-mix(in srgb,var(--mc) 22%,transparent); animation:mcPulse 2s ease-in-out infinite;}
+.mini-clock small{font-size:.78em; font-weight:800; opacity:.75; unicode-bidi:isolate;}
+.mini-clock.show{display:flex;}
+.mini-clock.below{width:max-content; margin:2px auto 12px;}
+.mini-clock.float{position:fixed; top:calc(env(safe-area-inset-top,0px) + 6px); left:50%; transform:translateX(-50%); z-index:99990; padding:2px 10px; font-size:calc(11px * var(--fs,1));}
+@keyframes mcPulse{0%,100%{opacity:1; transform:scale(1);}50%{opacity:.45; transform:scale(.8);}}
+.et{font-size:.78em; font-weight:700; color:var(--muted); white-space:nowrap;}
 /* 8392: العملة بجنب رقم المصروفات الشهرية */
 .zk-wrap.yr-ms .yr-amt .ms-cur{font-size:.42em; font-weight:800; opacity:.85; margin-inline-start:4px; white-space:nowrap;}
 /* 8391: من غير كلمة «المصروفات الشهرية» (موجودة في عنوان الصفحة) — المحفظة والرقم بس، متنسقين في سطر واحد */
@@ -3543,6 +3582,7 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 <button class="settings-fab" onclick="openSettings()" title="الإعدادات">⚙️</button>
 
 <h1>💰 أموالي AtoZ</h1>
+<div id="homeClock" class="home-clock"><div class="hc-date" id="hcDate"></div><div class="hc-time" id="hcTime"></div></div>
 <div id="syncStatus" style="text-align:center; font-size:calc(10.5px * var(--fs,1)); color:var(--muted); margin:-12px 0 10px;"></div>
 
 
@@ -4916,6 +4956,25 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
         <button type="button" class="opt-chip" data-val="off" onclick="nfSet('msCardBox', false)">🚫 من غير بطاقة</button><button type="button" class="opt-chip" data-val="on" onclick="nfSet('msCardBox', true)">🟦 بطاقة ظاهرة</button>
       </div>
       </div></details>
+<details class="ico-grp"><summary>🕒 الساعة والتوقيت</summary><div class="ico-body">
+<div class="nf-sub">⏱️ نظام الوقت</div>
+<div class="opt-row" id="optClk24" data-nosound>
+  <button type="button" class="opt-chip" data-val="off" onclick="nfSet('clk24', false)">🌗 ١٢ ساعة (ص / م)</button><button type="button" class="opt-chip" data-val="on" onclick="nfSet('clk24', true)">🕛 ٢٤ ساعة</button>
+</div>
+<div class="nf-sub" style="margin-top:14px;">⏲️ الثواني</div>
+<div class="opt-row" id="optClkSec" data-nosound>
+  <button type="button" class="opt-chip" data-val="on" onclick="nfSet('clkSec', true)">✅ تظهر</button><button type="button" class="opt-chip" data-val="off" onclick="nfSet('clkSec', false)">🚫 مخفية</button>
+</div>
+<div class="nf-sub" style="margin-top:14px;">🏠 ساعة الصفحة الرئيسية</div>
+<div class="opt-row" id="optClkHome" data-nosound>
+  <button type="button" class="opt-chip" data-val="on" onclick="nfSet('clkHome', true)">✅ تظهر</button><button type="button" class="opt-chip" data-val="off" onclick="nfSet('clkHome', false)">🚫 مخفية</button>
+</div>
+<div class="nf-sub" style="margin-top:14px;">📄 ساعة باقي الصفحات <small>(جوه هيدر كل صفحة، وبتتغير مع شكل الأرقام)</small></div>
+<div class="opt-row" id="optClkMini" data-nosound>
+  <button type="button" class="opt-chip" data-val="right" onclick="nfSet('clkMini', 'right')">✅ تظهر</button><button type="button" class="opt-chip" data-val="off" onclick="nfSet('clkMini', 'off')">🚫 مخفية</button>
+</div>
+<div class="nf-sub" style="margin-top:14px;">🧾 توقيت العمليات <small>(بيظهر لوحده جنب تاريخ كل مصروف ودخل وصرف وزكاة وفي الإشعارات والتقارير)</small></div>
+</div></details>
 <details class="ico-grp"><summary>📊 التقارير — الحجم</summary><div class="ico-body">
 <div class="opt-row" id="optYiIcon" data-nosound>
         <button type="button" class="opt-chip" data-val="growth" onclick="nfSet('yiIcon','growth')">📈 نمو الدخل</button><button type="button" class="opt-chip" data-val="envelope" onclick="nfSet('yiIcon','envelope')">✉️ ظرف الراتب</button><button type="button" class="opt-chip" data-val="tree" onclick="nfSet('yiIcon','tree')">🌳 شجرة الدخل</button><button type="button" class="opt-chip" data-val="briefcase" onclick="nfSet('yiIcon','briefcase')">💼 حقيبة عمل</button><button type="button" class="opt-chip" data-val="piggy" onclick="nfSet('yiIcon','piggy')">🐷 حصالة</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('yiIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('yiIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="coins" onclick="nfSet('yiIcon','coins')">🪙 مجموعة نقود</button><button type="button" class="opt-chip" data-val="btc" onclick="nfSet('yiIcon','btc')">₿ بيتكوين</button>
@@ -5706,7 +5765,7 @@ function ensureFont(name){
   add('https://fonts.googleapis.com/css2?family=' + fam + ':wght@400;700&display=swap', 'https://fonts.googleapis.com/css2?family=' + fam + '&display=swap');
 }
 let settings = {
-  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, msCardBox:false, yiIcon:'growth', yiIconSize:100, homeCols:1,
+  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, msCardBox:false, clk24:false, clkSec:true, clkMini:'right', clkHome:true, yiIcon:'growth', yiIconSize:100, homeCols:1,
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -5772,7 +5831,7 @@ function applySettings(s){
   try{ homeColsApply(s); }catch(e){}
   const root = document.documentElement;
   const newMode = s.digits === 'en' ? 'en' : 'ar';
-  if(newMode !== DIGITS_MODE){ DIGITS_MODE = newMode; setTimeout(refreshDigitsView, 0); }
+  if(newMode !== DIGITS_MODE){ DIGITS_MODE = newMode; setTimeout(refreshDigitsView, 0); try{ if(window.clkRender) clkRender(s); }catch(e){} }
   soundCfg = soundCfgFromSettings(s);
   const depth = DEPTH_LEVELS[s.depth] || DEPTH_LEVELS.strong;
   root.style.setProperty('--thick', depth.thick + 'px');
@@ -5864,6 +5923,7 @@ function refreshSettingsUI(s){
   try{ zakIcoRender(s); }catch(e){}
   try{ donIcoRender(s); }catch(e){}
   try{ msIcoRender(s); }catch(e){}
+  try{ clkRender(s); }catch(e){}
   try{ yiIcoRender(s); }catch(e){}
   try{ fabSettingsUI(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
@@ -6495,7 +6555,7 @@ function opsFill(t, box, sumEl, dayObj, yy, mm){
   if(sumEl) sumEl.textContent = toArabicDigits(list.length) + ' عملية — ➕ ' + toArabicDigits(cnt('add')) + '  ✏️ ' + toArabicDigits(cnt('edit')) + '  🗑 ' + toArabicDigits(cnt('del')) + (t === 'month' ? '  (' + MONTHS[vm] + ')' : t === 'year' ? '  (' + toArabicDigits(vy) + ')' : '');
   box.innerHTML = '';
   if(!list.length){ box.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:14px;">لا توجد عمليات</div>'; return; }
-  const tm = e => { const rt = new Date(e.t), ed = new Date(e.d || e.t), same = rt.getFullYear() === ed.getFullYear() && rt.getMonth() === ed.getMonth() && rt.getDate() === ed.getDate(); return same ? rt.toLocaleTimeString(dateLocale(), {hour:'2-digit', minute:'2-digit'}) : '📝 ' + rt.toLocaleDateString(dateLocale(), {day:'numeric', month:'numeric'}); };
+  const tm = e => { const rt = new Date(e.t), ed = new Date(e.d || e.t), same = rt.getFullYear() === ed.getFullYear() && rt.getMonth() === ed.getMonth() && rt.getDate() === ed.getDate(); return clkFmt(e.t) + (same ? '' : ' · 📝 ' + rt.toLocaleDateString(dateLocale(), {day:'numeric', month:'numeric'})); };
   const row = e=>{ const d = document.createElement('div'); d.className = 'gi-row'; d.innerHTML = '<span></span><b></b><span></span>'; d.children[0].textContent = tm(e); d.children[1].textContent = e.x; d.children[2].textContent = e.a ? fmt(e.a) : ''; return d; };
   if(t === 'day'){ list.forEach(e=> box.appendChild(row(e))); return; }
   const groups = new Map();
@@ -8647,7 +8707,7 @@ function aaRender(){
     if(mk !== cur){ cur = mk; const h = aaEl('div', 'aa-mh'); h.appendChild(aaEl('span', '', MONTHS[d.getMonth()] + ' ' + toArabicDigits(d.getFullYear()))); list.appendChild(h); }
     const r = aaEl('div', 'aa-r aa-' + e.k), ic = aaEl('div', 'aa-ic', ICON[e.k] || '•'), tx = aaEl('div', 'aa-tx');
     tx.appendChild(aaEl('b', '', e.title));
-    const when = e.t ? d.toLocaleDateString(dateLocale(), {weekday: 'long', day: 'numeric', month: 'long'}) + (e.k === 'edit' ? ' · ' + d.toLocaleTimeString(dateLocale(), {hour: '2-digit', minute: '2-digit'}) : '') : '';
+    const when = e.t ? d.toLocaleDateString(dateLocale(), {weekday: 'long', day: 'numeric', month: 'long'}) + (' · 🕒 ' + clkFmt(e.t)) : '';
     tx.appendChild(aaEl('em', '', when + (e.note && e.k !== 'edit' ? ' · ' + e.note : '')));
     if(e.k === 'edit'){
       if(e.note) tx.appendChild(aaEl('em', '', '🕒 ' + e.note));
@@ -8878,7 +8938,7 @@ function ovOpen(id){
 }
 function mcCard(x, o){
   o = o || {};
-  const sub = capSubOf(x), now = new Date(), y = now.getFullYear(), m = now.getMonth(), dt = x.date ? formatDate(x.date) : '';
+  const sub = capSubOf(x), now = new Date(), y = now.getFullYear(), m = now.getMonth(), dt = x.date ? dtx(x.date, x) : '';
   const d = document.createElement('div'); d.className = 'gi-row mc mc-' + sub + (x.isAcc ? ' mc-acc' : (x.isCert ? ' mc-cert' : (x.isSub ? ' mc-sub' : ''))); d.dataset.id = x.id; d.dataset.grp = x.grp || '';
   d.innerHTML = '<div class="mc-top"><span class="mc-ic"></span><div class="mc-nm"><b class="mc-name"></b><small class="mc-tags"></small></div>' + (o.acts ? '<div class="mc-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button><button type="button" aria-label="الزكاة"></button></div>' : '') + '</div><div class="mc-bal"><small></small><b></b></div><div class="mc-grid"></div>';
   d.querySelector('.mc-ic').textContent = sub === 'bank' ? (x.isCert ? '📜' : (x.isSub ? '🗂' : '🏦')) : (sub === 'pension' ? '💳' : '💵');
@@ -9559,7 +9619,7 @@ function renderCmAddLog(){
       const x = o.x, sb = SUB[capSubOf(x)] || SUB.cash, gr = x.grp ? groups.find(q=> q.id === x.grp) : null, d = document.createElement('div'); d.className = 'cmo-row';
       d.innerHTML = '<span class="cmo-ic"></span><div class="cmo-mid"><b></b><small></small></div><span class="cmo-amt"></span>' + (capIsPast() ? '' : '<div class="cmo-acts"><button type="button" aria-label="تعديل">✏️</button></div>');
       d.children[0].textContent = o.dep ? '➕' : sb[0]; d.children[1].children[0].textContent = (o.dep ? 'إيداع · ' : '') + x.name;
-      d.children[1].children[1].textContent = o.dep ? ('إيداع في حساب بنكي' + (o.dep.note ? ' · ' + o.dep.note : '')) : (sb[1] + (gr ? ' · 📁 ' + gr.name : '') + (capZkIn(x) ? '' : ' · 🚫 خارج الزكاة'));
+      d.children[1].children[1].textContent = o.dep ? ('إيداع في حساب بنكي' + (o.dep.note ? ' · ' + o.dep.note : '')) : (sb[1] + (gr ? ' · 📁 ' + gr.name : '') + (capZkIn(x) ? '' : ' · 🚫 خارج الزكاة')); { const tt = entryTimeTxt(o.dep || x); if(tt) d.children[1].children[1].textContent += ' · 🕒 ' + tt; }
       d.children[2].textContent = '+' + fmt(o.a);
       if(d.children[3]){ if(o.dep){ d.children[3].children[0].textContent = '🗑'; d.children[3].children[0].onclick = ()=> openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(o.a) + ' ويتخصم من رصيد الحساب؟', ()=> depDel(o.dep.id), 'إلغاء الإيداع'); } else d.children[3].children[0].onclick = ()=> cmEditItem(x); }
       body.appendChild(d);
@@ -9782,7 +9842,7 @@ function cmoLog(){
       d.innerHTML = '<span class="cmo-ic"></span><div class="cmo-mid"><b></b><small></small></div><span class="cmo-amt"></span><div class="cmo-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button></div>';
       d.children[0].textContent = ic[r.kind] || '💸';
       d.children[1].children[0].textContent = r.name;
-      d.children[1].children[1].textContent = cmoDestLbl(r) + (r.zkY ? ' (زكاة ' + toArabicDigits(r.zkY) + ')' : '') + (r.note ? ' · ' + r.note : '');
+      d.children[1].children[1].textContent = cmoDestLbl(r) + (r.zkY ? ' (زكاة ' + toArabicDigits(r.zkY) + ')' : '') + (r.note ? ' · ' + r.note : '') + (entryTimeTxt(r) ? ' · 🕒 ' + entryTimeTxt(r) : '');
       d.children[2].textContent = fmt(r.amount);
       d.children[3].children[0].onclick = ()=> cmOutEdit(r.id);
       d.children[3].children[1].onclick = ()=> openConfirm('حذف الصرف', 'هل تريد حذف الصرف ده؟ المبلغ هيرجع لمكانه.', ()=>{ cmOutDel(r.id); });
@@ -10642,7 +10702,7 @@ function renderCapGold(){
     d.innerHTML = '<div class="pc-top"><span class="pc-ic"></span><div class="pc-nm"><b class="pc-name"></b><small class="pc-tags"></small></div><b class="pc-val"></b><div class="pc-acts"><button type="button">✏️</button><button type="button">🗑</button></div></div><div class="pc-grid"></div>';
     d.querySelector('.pc-ic').textContent = cgUseOf(x) === 'jewel' ? '💍' : '🪙';
     d.querySelector('.pc-name').textContent = x.name;
-    d.querySelector('.pc-tags').textContent = 'عيار ' + toArabicDigits(x.karat || '') + ' · ' + fmt(x.grams) + ' جم · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + formatDate(x.date) : '');
+    d.querySelector('.pc-tags').textContent = 'عيار ' + toArabicDigits(x.karat || '') + ' · ' + fmt(x.grams) + ' جم · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + dtx(x.date, x) : '');
     const grid = d.querySelector('.pc-grid');
     const cell = (cls, lb, big, sm)=>{ const c = document.createElement('div'); c.className = 'pc-c ' + cls; const l = document.createElement('small'); l.textContent = lb; const bb = document.createElement('b'); bb.textContent = big; c.appendChild(l); c.appendChild(bb); if(sm){ const em = document.createElement('em'); em.textContent = sm; c.appendChild(em); } grid.appendChild(c); };
     const cp = glSellPpg(x.karat);
@@ -10791,7 +10851,7 @@ function renderGISources(){
   r.src.forEach(x=>{
     const d = document.createElement('div'); d.className = 'gi-row'; if(x.id && !x.auto) d.dataset.id = x.id;
     d.innerHTML = '<span>💵</span><b></b><span></span><button type="button">✏️</button><button type="button">🗑</button>';
-    d.children[1].textContent = x.name + (x.date ? ' · ' + formatDate(x.date) : ''); d.children[2].textContent = fmt(x.amount);
+    d.children[1].textContent = x.name + (x.date ? ' · ' + dtx(x.date, x) : ''); d.children[2].textContent = fmt(x.amount);
     if(x.auto){
       d.children[0].textContent = x.auto === 'pension' ? '💳' : '🏦';
       const tg = document.createElement('span'); tg.className = 'gi-tag'; tg.textContent = x.counted === false ? '⏳ جاية في موعدها' : '🔄 من أموال'; d.children[1].prepend(tg);
@@ -10858,7 +10918,7 @@ function renderGIPage(){
   document.getElementById('gpSrcCnt').textContent = r.src.length ? toArabicDigits(r.src.length) + ' بند' : '';
   if(!r.src.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه مفيش مصادر دخل. دوس «＋ إضافة دخل» أو سجّل فوائد ومعاشات في «أموال» وهتظهر هنا لوحدها.'; box.appendChild(e); }
   sortDescByDate(r.src).forEach(x=>{
-    const dt = x.date ? formatDate(x.date) : '';
+    const dt = x.date ? dtx(x.date, x) : '';
     if(x.auto){
       const pend = x.counted === false, day = x.date ? toArabicDigits(new Date(x.date).getDate()) : '';
       box.appendChild(gpRow({cls: x.auto + (pend ? ' pend' : ''), ic: x.auto === 'pension' ? '💳' : '🏦', name: x.name, sub: (x.auto === 'pension' ? 'معاش' : 'فايدة بنك') + ' \u200f·\u200f من «أموال» \u200f·\u200f ' + dt, amt: x.amount,
@@ -10874,7 +10934,7 @@ function renderGIPage(){
   if(!r.out.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'لسه ماصرفتش من الدخل العام في الشهر ده.'; ob.appendChild(e); }
   sortDescByDate(r.out).forEach(x=>{
     const dd = GI_DEST[x.dest] || GI_DEST.income;
-    ob.appendChild(gpRow({cls: 'out' + (x.counted === false ? ' unc' : ''), ic: dd.ic, name: 'إلى ' + dd.n, sub: (x.note ? x.note + ' \u200f·\u200f ' : '') + (x.date ? formatDate(x.date) : ''), amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب', c: 'n'}] : []}));
+    ob.appendChild(gpRow({cls: 'out' + (x.counted === false ? ' unc' : ''), ic: dd.ic, name: 'إلى ' + dd.n, sub: (x.note ? x.note + ' \u200f·\u200f ' : '') + (x.date ? dtx(x.date, x) : ''), amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب', c: 'n'}] : []}));
   });
 }
 function gpEditSrc(x){ openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a,dt,cn)=>{ x.name = n || x.name; x.amount = a; if(dt) x.date = dt; if(cn !== undefined) x.counted = cn; save(); renderGISources(); renderGI(); }, x.date || Date.now(), x.counted !== false); }
@@ -11141,7 +11201,7 @@ function renderZmPay(){
     const fa = zpYearAdds(y), fb = document.getElementById('zfList'); fb.innerHTML = '';
     document.getElementById('zfCnt').textContent = fa.length ? toArabicDigits(fa.length) + ' عملية' : '';
     if(!fa.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'مفيش رصيد داخل للزكاة في ' + toArabicDigits(y) + ' لسه.'; fb.appendChild(e); }
-    fa.forEach(function(x){ const q = x.p, dt = q.date ? formatDate(new Date(q.date + 'T12:00:00').getTime()) : MONTHS[x.m];
+    fa.forEach(function(x){ const q = x.p, dt = q.date ? dtx(new Date(q.date + 'T12:00:00').getTime(), q) : MONTHS[x.m];
       const mv = {t: '🗓', fn: function(){ zfPickYear(x); }}; fb.appendChild(gpRow({cls: '', ic: '💳', name: q.name || 'رصيد زكاة', sub: dt + (x.by !== y ? ' · اتسجّل في ' + toArabicDigits(x.by) : ''), amt: q.amount, acts: q.zf ? [mv, {t: '✏️', fn: function(){ zfEdit(x); }}, {t: '🗑', fn: function(){ zfDel(x); }}] : [mv]})); }); }
   document.getElementById('zpLeft').textContent = fmt(Math.abs(left));
   document.getElementById('zpLeftLbl').textContent = bad ? '⚠️ زيادة عن المطلوب' : '⏳ المتبقي';
@@ -11156,7 +11216,7 @@ function renderZmPay(){
   const chips = document.getElementById('zpChips'); chips.innerHTML = '';
   Object.keys(dests).slice(0, 4).concat(['أسرة محتاجة', 'أقارب', 'جمعية خيرية', 'علاج']).filter(function(v, i, a){ return a.indexOf(v) === i; }).slice(0, 7).forEach(function(n){ const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = function(){ zpPick(n); }; chips.appendChild(b); });
   arr.forEach(function(x){
-    const p = x.p, dt = p.date ? formatDate(new Date(p.date + 'T12:00:00').getTime()) : MONTHS[x.m];
+    const p = x.p, dt = p.date ? dtx(new Date(p.date + 'T12:00:00').getTime(), p) : MONTHS[x.m];
     box.appendChild(gpRow({cls: 'out', ic: '🤲', name: p.note || 'دفعة زكاة', sub: dt, amt: p.amount, acts: [{t: '✏️', fn: function(){ zpEdit(x); }}, {t: '🗑', fn: function(){ zpDel(x); }}]}));
   });
 }
@@ -11616,7 +11676,7 @@ function renderGroupEl(g, depth, indexInParent, siblingCount){
   head.onclick = ()=> toggleGroup(g.id);
   head.innerHTML = `
     ${dragHandleHtml(g.id, indexInParent, siblingCount, 'moveNode')}
-    <span class="gname"><span class="g-ico">${g.icon||'📁'}</span> <span class="txt">${g.name}</span>${g.date ? ' <small class="gdate">📅 ' + formatDate(g.date) + '</small>' : ''}</span>
+    <span class="gname"><span class="g-ico">${g.icon||'📁'}</span> <span class="txt">${g.name}</span>${g.date ? ' <small class="gdate">📅 ' + dtx(g.date, g) + '</small>' : ''}</span>
     <span style="display:flex;align-items:center;gap:6px;">
       <span class="gtotal">${fmt(gtotal)}</span>
       ${gExcluded>0 ? `<span class="gtotal-excluded">🚫 ${fmt(gExcluded)}</span>` : ''}
@@ -11704,7 +11764,7 @@ function renderItemEl(it, indexInParent, siblingCount){
     <span class="it-ico">${it.icon||'🧾'}</span>
     <span class="item-main">
       <span class="it-name">${it.counted===false?'<span class="tag">غير محسوب</span>':''}${isBackdated(it)?'<span class="tag backdated-tag">🕓 بأثر رجعي</span>':''}${it.name}</span>
-      ${it.date?`<span class="item-date">${formatDate(it.date)}</span>`:''}
+      ${it.date?(()=>{ let dd = ''; try{ dd = formatDate(it.date); }catch(e){} const tt = entryTimeTxt(it); return `<span class="item-date"><span class="idd">${dd}${tt && dd ? ' · ' : ''}</span>${tt ? '<span class="idt">🕒 ' + tt + '</span>' : ''}</span>`; })():''}
     </span>
     <span style="display:flex;align-items:center;gap:6px;">
       <span class="it-amt">${fmt(it.amount)}</span>
@@ -12083,7 +12143,7 @@ function openDayDetail(day){
         html += `
           <div class="day-detail-row">
             <span class="ic">${e.icon||'🧾'}</span>
-            <span class="nm">${e.counted===false?'<span class="tag">غير محسوب</span>':''}${isBackdated(e)?'<span class="backdated-tag">🕓 بأثر رجعي</span>':''}${e.name}</span>
+            <span class="nm">${e.counted===false?'<span class="tag">غير محسوب</span>':''}${isBackdated(e)?'<span class="backdated-tag">🕓 بأثر رجعي</span>':''}${e.name}${entryTimeTxt(e) ? ' <small class="et">🕒 ' + entryTimeTxt(e) + '</small>' : ''}</span>
             <span class="amt2">${fmt(e.amount)}</span>
           </div>`;
       });
@@ -12126,7 +12186,7 @@ function openReport(kind){
 
   document.getElementById('reportTitle').textContent = title;
   document.getElementById('reportTotal').textContent = fmt(total);
-  document.getElementById('reportSub').textContent = sub;
+  document.getElementById('reportSub').textContent = sub + ' · 🕒 ' + clkFmt(Date.now());
   document.getElementById('reportOverlay').classList.add('open');
 }
 function closeReport(){
@@ -12435,7 +12495,7 @@ function renderIncomeSourcesList(){
       d.innerHTML = '<span class="inc-ic">💵</span><div class="inc-mid"><b></b><small></small></div><span class="inc-amt"></span><div class="inc-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button></div>';
       d.children[1].children[0].textContent = src.name;
       d.children[1].children[1].textContent = (src.counted === false ? '🚫 غير محسوب' : '✅ محسوب') + (String(src.name).indexOf('من الدخل العام') === 0 ? ' · 🔁 محوّل من الدخل العام' : '');
-      d.children[2].textContent = fmt(src.amount);
+      d.children[1].children[1].textContent += (entryTimeTxt(src) ? ' · 🕒 ' + entryTimeTxt(src) : ''); d.children[2].textContent = fmt(src.amount);
       d.children[3].children[0].onclick = ()=> openEditIncomeSource(src.id);
       d.children[3].children[1].onclick = ()=> deleteIncomeSource(src.id);
       list.appendChild(d);
@@ -15183,6 +15243,7 @@ function nfBanner(text){
   }catch(e){}
 }
 function nfFire(cfg, title, body, tag, force){
+  try{ if(typeof body === 'string' && body.indexOf('🕒') < 0) body += ' · 🕒 ' + clkFmt(Date.now()); }catch(e){}
   try{
     if(!settings || (!settings.notify && !force)) return;
     var vis = document.visibilityState === 'visible', vib = settings.nfVibe !== false;
@@ -18142,6 +18203,86 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   fillChips();
   try{ zakIcoApply(settings); }catch(e){}
   try{ donIcoRender(settings); }catch(e){}
+})();
+</script>
+
+<div id="miniClock" class="mini-clock" aria-hidden="true"></div>
+<script>
+/* 8393: ساعة رقمية: كبيرة في الرئيسية + صغيرة فوق باقي الصفحات */
+(function(){
+  var lastH = '', lastM = '', lastD = '', lastT = '';
+  function S(){ return clkSet(); }
+  var HDR = '.gp-top, .ys-top, .zkp-top, .topbar, .settings-page-head, .ch-ptitle';
+  function layers(){
+    var a = Array.prototype.slice.call(document.querySelectorAll('.modal-overlay.open, .gp.open')), d = document.getElementById('detail');
+    if(d && getComputedStyle(d).display !== 'none') a.unshift(d);
+    var o = a.map(function(e, k){ var z = parseInt(getComputedStyle(e).zIndex, 10); return {e: e, z: isNaN(z) ? 0 : z, k: k}; });
+    o.sort(function(x, y){ return (y.z - x.z) || (y.k - x.k); });
+    return o.map(function(x){ return x.e; });
+  }
+  function anchorOf(L){
+    var H = L.querySelector(HDR); if(H) return H;
+    var box = L.querySelector('.modal-box') || L, f = box.firstElementChild;
+    if(f && f.tagName !== 'BUTTON' && f.querySelector && f.querySelector('button')) return f;
+    var t = box.querySelector('h3, h2');
+    if(t){ var pa = t.parentElement; return (pa && pa !== box && pa.children.length <= 4) ? pa : t; }
+    return null;
+  }
+  var _top = null;
+  function topLayer(){ var a = layers(); return a.length ? a[0] : null; }
+  function onHome(){
+    var r = document.getElementById('appRoot'); if(!r || r.style.display === 'none') return null;
+    return !topLayer();
+  }
+  function pageColor(L){
+    try{
+      var e = L && L.querySelector('.gp-hero, .ys-hero, [class*="hero"]'); if(!e) return '';
+      var cs = getComputedStyle(e), m = (cs.backgroundImage + ' ' + cs.backgroundColor).match(/rgba?\([^)]+\)/g) || [];
+      m = m.filter(function(c){ return !/,\s*0\)$/.test(c) && !/rgba\([^)]*,\s*0(\.0+)?\)/.test(c); });
+      return m.length ? (m[1] || m[0]) : '';
+    }catch(x){ return ''; }
+  }
+  function place(mc){
+    var ls = layers(), L = null, H = null;
+    for(var k = 0; k < ls.length; k++){ var a = anchorOf(ls[k]); if(a && a.parentNode && a.getClientRects().length){ L = ls[k]; H = a; break; } }
+    if(!H){ if(mc.parentNode !== document.body) document.body.appendChild(mc); mc.style.removeProperty('--mc'); return 'float'; }
+    if(H.nextElementSibling !== mc) H.parentNode.insertBefore(mc, H.nextSibling);
+    var c = pageColor(L); if(c) mc.style.setProperty('--mc', c); else mc.style.removeProperty('--mc');
+    return 'below';
+  }
+  function clkRender(s){
+    s = s || S();
+    var hc = document.getElementById('homeClock'); if(hc) hc.classList.toggle('off', s.clkHome === false);
+    [['optClk24', s.clk24 === true ? 'on' : 'off'], ['optClkSec', s.clkSec === false ? 'off' : 'on'], ['optClkHome', s.clkHome === false ? 'off' : 'on'], ['optClkMini', s.clkMini === 'off' ? 'off' : 'right']].forEach(function(p){
+      var r = document.getElementById(p[0]); if(r) Array.prototype.forEach.call(r.children, function(c){ c.classList.toggle('active', c.getAttribute('data-val') === p[1]); });
+    });
+    lastH = lastM = lastD = lastT = ''; tick();
+  }
+  function tick(){
+    try{
+      if(document.hidden) return;
+      var s = S(), now = Date.now(), sec = s.clkSec !== false, home = onHome();
+      var hc = document.getElementById('homeClock'), ht = document.getElementById('hcTime'), hd = document.getElementById('hcDate'); if(hc) hc.classList.toggle('sub', home === false);
+      if(hc && ht && s.clkHome !== false && home !== null){
+        var p = clkParts(now, sec), big = p.hour + ':' + p.minute + (sec && p.second ? ':' + p.second : '') + '|' + (p.dayPeriod || '');
+        if(big !== lastH){ lastH = big; ht.textContent = ''; ht.appendChild(document.createTextNode(p.hour + ':' + p.minute + (sec && p.second ? ':' + p.second : ''))); if(p.dayPeriod){ var sm = document.createElement('small'); sm.textContent = p.dayPeriod; ht.appendChild(sm); } }
+        var ds = ''; try{ ds = new Date(now).toLocaleDateString(dateLocale(), {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'}); }catch(e){}
+        if(hd && ds !== lastD){ lastD = ds; hd.textContent = ds; }
+      }
+      var mc = document.getElementById('miniClock');
+      if(mc){
+        var show = s.clkMini !== 'off' && home === false;
+        if(!show){ mc.classList.remove('show'); }
+        else{
+          var md = place(mc), q = clkParts(now, sec), key = q.hour + ':' + q.minute + (sec && q.second ? ':' + q.second : '') + '|' + (q.dayPeriod || '');
+          mc.className = 'mini-clock show ' + md;
+          if(key !== lastT || !mc.firstChild){ lastT = key; mc.textContent = ''; mc.appendChild(document.createTextNode(q.hour + ':' + q.minute + (sec && q.second ? ':' + q.second : ''))); if(q.dayPeriod){ var sm = document.createElement('small'); sm.textContent = q.dayPeriod; mc.appendChild(sm); } }
+        }
+      }
+    }catch(e){}
+  }
+  window.clkRender = clkRender;
+  setInterval(tick, 1000); document.addEventListener('visibilitychange', tick); setTimeout(function(){ try{ clkRender(); }catch(e){} }, 300);
 })();
 </script>
 </body>
