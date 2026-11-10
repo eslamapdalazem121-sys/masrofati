@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-10.8387">
+<meta name="app-version" content="2026-11-10.8389">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -17329,10 +17329,20 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     return why + ' (' + st + ')' + (raw ? ' — ' + raw : '');
   }
   /* بيجرّب البحث على أكتر من موديل الأول (حصة البحث بتختلف من موديل لموديل)، ولو كلهم رفضوا بيجاوب من غير بحث ويقولك السبب الحقيقي */
+  /* 8389: بحث جوجل — حصة البحث المجانية لجيميني ٣ شهرية ومشتركة (وبتخلص)، أما جيميني ٢.٥ فليه حصة بحث يومية منفصلة؛ فبنجرّب ٢.٥ الأول وبعدين الباقي */
+  function smList(first){ return ['gemini-2.5-flash', 'gemini-2.5-flash-lite', first, 'gemini-flash-latest', 'gemini-flash-lite-latest'].concat(FALLBACKS).filter(function(m, k, arr){ return arr.indexOf(m) === k; }); }
+  async function gSearchTry(body){
+    var sm = smList(lsGet(MODK, DEFMOD)), last = null, log = [];
+    for(var j = 0; j < sm.length; j++){
+      try{ var r = await gOnce(sm[j], body, NOHOOK); r.tried = log; return r; }
+      catch(e){ last = e; log.push(sm[j] + ' ← ' + (e.status || e.message) + (e.msg ? ' (' + String(e.msg).replace(/\s+/g, ' ').slice(0, 70) + ')' : '')); e.tried = log; if(!(e.status === 400 || e.status === 429 || e.status === 404 || e.status === 403 || e.status === 500 || e.status === 503 || e.message === 'TIMEOUT')) throw e; }
+    }
+    throw last;
+  }
   async function gModels(bodyMain, bodyAlt, hooks){
     var first = lsGet(MODK, DEFMOD), models = [first].concat(FALLBACKS.filter(function(m){ return m !== first; })), lastErr = null, sErr = null;
     if(bodyAlt){
-      var sm = [first, 'gemini-2.5-flash'].concat(FALLBACKS).filter(function(m, k, arr){ return arr.indexOf(m) === k; }).slice(0, 3);
+      var sm = smList(first);
       for(var j = 0; j < sm.length; j++){
         try{ return await gOnce(sm[j], bodyMain, hooks); }
         catch(e){
@@ -17449,9 +17459,9 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       if(!bad && lsGet(SRCHK, '0') === '1'){
         out.push('… بجرّب بحث جوجل'); show();
         try{
-          var rs = await gModels({tools: [{google_search: {}}], contents: [{role: 'user', parts: [{text: 'دوّر في جوجل وقولي سعر أونصة الذهب عالميًا النهاردة بالدولار، الرقم بس.'}]}], generationConfig: {maxOutputTokens: 400}}, null, NOHOOK);
-          out.pop(); out.push(rs.g.q.length || rs.g.chunks.length ? '✅ بحث جوجل شغال (' + (rs.g.q[0] || 'تم') + ')' : 'ℹ️ بحث جوجل متاح، بس الموديل ماستخدموش في الاختبار'); show();
-        }catch(e){ bad = true; out.pop(); out.push('⚠️ بحث جوجل: ' + errCore(e, 'Gemini') + (e && e.status ? '  [كود ' + e.status + ']' : '')); show(); }
+          var rs = await gSearchTry({tools: [{google_search: {}}], contents: [{role: 'user', parts: [{text: 'دوّر في جوجل وقولي سعر أونصة الذهب عالميًا النهاردة بالدولار، الرقم بس.'}]}], generationConfig: {maxOutputTokens: 400}});
+          out.pop(); out.push(rs.g.q.length || rs.g.chunks.length ? '✅ بحث جوجل شغال على ' + (rs.model || '') + ' (' + (rs.g.q[0] || 'تم') + ')' : 'ℹ️ بحث جوجل متاح، بس الموديل ماستخدموش في الاختبار'); show();
+        }catch(e){ bad = true; out.pop(); out.push('⚠️ بحث جوجل مش شغال. الموديلات اللي اتجرّبت:\n' + ((e && e.tried) || []).join('\n')); show(); }
       }
     }else if(!p2cfg() && !p3cfg()){ bad = true; out.push('❌ حط مفتاح Gemini الأول.'); show(); }
     var cs = [p2cfg(), p3cfg()];
