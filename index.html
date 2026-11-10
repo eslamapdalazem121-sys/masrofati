@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-10.8385">
+<meta name="app-version" content="2026-11-10.8387">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -3367,6 +3367,21 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 .ai-bub .ab-x{flex:none; width:18px; height:18px; border-radius:50%; border:0; background:rgba(127,127,127,.25); color:var(--text); font-size:10px; line-height:18px; text-align:center; cursor:pointer; padding:0; font-family:inherit;}
 .ai-bub:first-child::before{left:30px; bottom:-6px; top:auto; border:0; border-right:1px solid rgba(245,158,11,.5); border-bottom:1px solid rgba(245,158,11,.5); transform:rotate(45deg);}
 
+/* 8386: الإشعارات جنب وجه الروبوت (على يمينه) وبتنزل لتحت */
+.ai-bubbles{left:106px; right:auto; top:auto; bottom:auto; flex-direction:column; align-items:flex-start; max-width:164px; gap:5px;}
+.ai-bub{animation-name:abIn2;}
+@keyframes abIn2{from{opacity:0; transform:translateY(-6px) scale(.92)} to{opacity:1; transform:none}}
+.ai-bub:first-child::before{left:-6px; right:auto; bottom:auto; top:9px; border:0; border-left:1px solid rgba(245,158,11,.5); border-bottom:1px solid rgba(245,158,11,.5); transform:rotate(45deg);}
+.ai-bub.warn:first-child::before{border-left-color:rgba(239,68,68,.55); border-bottom-color:rgba(239,68,68,.55);}
+.ai-bub.msg:first-child::before{border-left-color:rgba(124,92,255,.55); border-bottom-color:rgba(124,92,255,.55);}
+/* 8387: أول إشعار فوق الروبوت، والباقي جنب وجهه لتحت */
+#aiBubbles{left:8px; right:auto; top:auto; bottom:124px; flex-direction:column-reverse; align-items:flex-start; max-width:164px;}
+#aiBubbles .ai-bub:first-child::before{left:30px; right:auto; top:auto; bottom:-6px; border:0; border-right:1px solid rgba(245,158,11,.5); border-bottom:1px solid rgba(245,158,11,.5); transform:rotate(45deg);}
+#aiBubbles .ai-bub.warn:first-child::before{border-right-color:rgba(239,68,68,.55); border-bottom-color:rgba(239,68,68,.55);}
+#aiBubbles .ai-bub.msg:first-child::before{border-right-color:rgba(124,92,255,.55); border-bottom-color:rgba(124,92,255,.55);}
+#aiBubbles2{position:fixed; z-index:49; display:none; flex-direction:column; align-items:flex-start; gap:5px; max-width:164px; pointer-events:none;}
+#aiBubbles2.on{display:flex;}
+#aiBubbles2 .ai-bub:first-child::before{content:none !important;}
 </style>
 </head>
 <body>
@@ -18010,17 +18025,28 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     items = items.filter(function(it){ return it.k === 'today' || dis.indexOf(it.k) < 0; });
     items = items.slice(0, 5);
     box.innerHTML = '';
-    items.forEach(function(it){
+    var box2 = $('aiBubbles2'); if(!box2){ box2 = document.createElement('div'); box2.id = 'aiBubbles2'; box2.className = 'ai-bubbles2'; box2.setAttribute('aria-live','polite'); document.body.appendChild(box2); }
+    box2.innerHTML = '';
+    items.forEach(function(it, idx){
       var b = document.createElement('div'); b.setAttribute('role', 'button'); b.className = 'ai-bub ' + (it.c || '');
       b.innerHTML = '<span class="ab-i"></span><small></small>'; b.children[0].textContent = it.i; b.children[1].textContent = it.t;
       if(it.f) b.onclick = function(e){ e.stopPropagation(); it.f(); };
       var x = document.createElement('button'); x.type = 'button'; x.className = 'ab-x'; x.textContent = '✕'; x.setAttribute('aria-label', 'إغلاق');
       x.onclick = function(e){ e.stopPropagation(); robotDismiss(it.k); };
       b.appendChild(x);
-      box.appendChild(b);
+      (idx === 0 ? box : box2).appendChild(b);
     });
     var hidden = !fab || getComputedStyle(fab).display === 'none';
     box.classList.toggle('on', items.length > 0 && !hidden);
+    box2.classList.toggle('on', items.length > 1 && !hidden);
+    try{
+      if(fab && !hidden && items.length > 1){
+        var r = fab.getBoundingClientRect(), vh = window.innerHeight, top = r.top + r.height * 0.14;
+        box2.style.left = Math.round(r.left + r.width - 4) + 'px';
+        box2.style.top = Math.round(top) + 'px'; box2.style.bottom = 'auto';
+        var bh = box2.offsetHeight; if(top + bh > vh - 8) box2.style.top = Math.max(8, Math.round(vh - 8 - bh)) + 'px';
+      }
+    }catch(e){}
   };
   window.bdBadges = function(){
     try{
