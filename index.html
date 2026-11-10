@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-10.8389">
+<meta name="app-version" content="2026-11-10.8392">
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
 <script>
 /* 8275: لقطة أمان تلقائية — أول ما تتفتح نسخة جديدة بنحفظ نسخة من بيانات وإعدادات النسخة اللي قبلها (واحدة بس، بتتبدّل مع كل تحديث) عشان أي تحديث ما يضيّعش حاجة قديمة. */
@@ -2956,6 +2956,23 @@ html{ overscroll-behavior:none; }
 .zk-wrap.yr-cap.cap-nobox .zk-main .yr-amt{color:var(--text); text-shadow:none;}
 @media (prefers-reduced-motion: reduce){ .zk-wrap.yr-cap .cap-ico svg{animation:none;} }
 
+/* 8390: المصروفات الشهرية = أيقونة محفظة + الاسم + الرقم (بدون بطاقة افتراضيًا) — بطاقة ظاهرة من الإعدادات */
+.zk-wrap.yr-ms .zk-main .zk-ico.ms-ico{flex:0 0 auto; width:48px; height:48px; font-size:0; display:grid; place-items:center; filter:none;}
+.zk-wrap.yr-ms .ms-ico svg{width:100%; height:100%; display:block; overflow:visible; filter:drop-shadow(0 3px 2px rgba(0,0,60,.3));}
+.zk-wrap.yr-ms .ms-ico::after{display:none;}
+.zk-wrap.yr-ms.ms-nobox .zk-main{background:none; box-shadow:none; border:0; border-radius:0; padding:6px 2px; color:var(--text); text-shadow:none; animation:none;}
+.zk-wrap.yr-ms.ms-nobox .zk-main:active{box-shadow:none; transform:none;}
+.zk-wrap.yr-ms.ms-nobox .zk-main::before,.zk-wrap.yr-ms.ms-nobox .zk-main::after{display:none;}
+.zk-wrap.yr-ms.ms-nobox .zk-main .yr-amt{color:var(--text); text-shadow:none;}
+/* 8392: العملة بجنب رقم المصروفات الشهرية */
+.zk-wrap.yr-ms .yr-amt .ms-cur{font-size:.42em; font-weight:800; opacity:.85; margin-inline-start:4px; white-space:nowrap;}
+/* 8391: من غير كلمة «المصروفات الشهرية» (موجودة في عنوان الصفحة) — المحفظة والرقم بس، متنسقين في سطر واحد */
+.zk-wrap.yr-ms .zk-main .gi-col > span:first-child{display:none;}
+.zk-wrap.yr-ms .zk-main{display:flex; align-items:center; justify-content:flex-start; gap:16px;}
+.zk-wrap.yr-ms .zk-main .gi-col{flex:1; min-width:0; align-items:flex-start; justify-content:center;}
+.zk-wrap.yr-ms .zk-main .yr-amt{font-size:calc(36px * var(--fs,1)); font-weight:900; line-height:1.1; text-align:start; font-variant-numeric:tabular-nums;}
+.zk-wrap.yr-ms .zk-main .zk-ico.ms-ico{width:64px; height:64px;}
+
 /* ===== أموال وذهب: أيقونتين تحت بعض مع التفاصيل (التحكم من الإعدادات) ===== */
 #yrCap .zk-row.cap-subs{grid-template-columns:1fr; gap:12px; margin-top:12px;}
 #yrCap .cap-sub{display:grid; grid-template-columns:calc(92px * var(--cs-sc,1)) minmax(0,1fr); align-items:center; gap:12px; min-height:0; padding:12px 12px 12px 46px; border-radius:26px; text-align:start; overflow:visible;}
@@ -3678,7 +3695,7 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 
   <div class="zk-wrap yr-ms off" id="yrMS">
     <div class="zk-main" onclick="toggleMonthsGrid()" role="button">
-      <span class="zk-ico">🗓️</span>
+      <span class="zk-ico ms-ico" id="msCardIco"></span>
       <span class="gi-col"><span>المصروفات الشهرية</span><span class="yr-amt" id="msAmt">0</span></span>
       <span class="plus-badge in-card ms-plus" onclick="event.stopPropagation(); openMsSummary()" role="button" aria-label="ملخص المصروفات">+</span>
     </div>
@@ -4894,6 +4911,10 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
       </div>
       <div class="vol-val" id="msIcoSizeLabel">100%</div>
       <div class="ch-prev" id="msIcoPrev"></div>
+      <div class="nf-sub" style="margin-top:14px;">👛 صف المصروفات الشهرية <small>(المحفظة + الاسم + الرقم في صفحة الشهور)</small></div>
+      <div class="opt-row" id="optMsBox" data-nosound>
+        <button type="button" class="opt-chip" data-val="off" onclick="nfSet('msCardBox', false)">🚫 من غير بطاقة</button><button type="button" class="opt-chip" data-val="on" onclick="nfSet('msCardBox', true)">🟦 بطاقة ظاهرة</button>
+      </div>
       </div></details>
 <details class="ico-grp"><summary>📊 التقارير — الحجم</summary><div class="ico-body">
 <div class="opt-row" id="optYiIcon" data-nosound>
@@ -5685,7 +5706,7 @@ function ensureFont(name){
   add('https://fonts.googleapis.com/css2?family=' + fam + ':wght@400;700&display=swap', 'https://fonts.googleapis.com/css2?family=' + fam + '&display=swap');
 }
 let settings = {
-  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, yiIcon:'growth', yiIconSize:100, homeCols:1,
+  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, msCardBox:false, yiIcon:'growth', yiIconSize:100, homeCols:1,
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -11439,7 +11460,7 @@ function renderMonths(){
   document.getElementById('yrRemLbl').textContent = yrBad ? '⚠️ العجز السنوي' : '✅ المتبقي السنوي';
   setNumAnimated(document.getElementById('grandDeficit'), Math.abs(yrRem));
   renderZM(); renderCap();
-  const ms = document.getElementById('msAmt'); if(ms) ms.textContent = fmt(expAll);
+  const ms = document.getElementById('msAmt'); if(ms){ ms.textContent = fmt(expAll) + ' '; const cu = document.createElement('small'); cu.className = 'ms-cur'; cu.textContent = 'ج م'; ms.appendChild(cu); }
   renderZakat();
 }
 
@@ -15941,12 +15962,14 @@ function msIcoApply(s){
   var k = msIcoKey(s), sc = Math.min(180, Math.max(60, Number(s && s.msIconSize) || 100)) / 100;
   var el = document.getElementById('msHeroIco'); if(el && el.getAttribute('data-k') !== k){ el.innerHTML = msIcoSvg(k).replace(/__U__/g, 'mh'); el.setAttribute('data-k', k); }
   var w = document.getElementById('msHeroWrap'); if(w) w.style.setProperty('--ch-sc', String(sc));
+  try{ var ym = document.getElementById('yrMS'); if(ym){ ym.classList.toggle('ms-nobox', !(s && s.msCardBox === true)); var mc = document.getElementById('msCardIco'); if(mc && mc.getAttribute('data-k') !== 'wallet'){ mc.innerHTML = msIcoSvg('wallet').replace(/__U__/g, 'mc'); mc.setAttribute('data-k', 'wallet'); } } }catch(e){}
 }
 function msIcoRender(s){
   s = s || settings; msIcoApply(s);
   var k = msIcoKey(s), sz = Math.min(180, Math.max(60, Math.round(Number(s.msIconSize) || 100)));
   var r = document.getElementById('optMsIcon'); if(r) Array.prototype.forEach.call(r.children, function(c){ c.classList.toggle('active', c.getAttribute('data-val') === k); });
   var sl = document.getElementById('msIcoSize'); if(sl && Number(sl.value) !== sz) sl.value = sz;
+  var mb = document.getElementById('optMsBox'); if(mb) Array.prototype.forEach.call(mb.children, function(c){ c.classList.toggle('active', c.getAttribute('data-val') === (s.msCardBox === true ? 'on' : 'off')); });
   var lb = document.getElementById('msIcoSizeLabel'); if(lb) lb.textContent = (typeof toArabicDigits === 'function' ? toArabicDigits(sz) : sz) + '٪';
   var pv = document.getElementById('msIcoPrev'); if(pv && pv.getAttribute('data-k') !== k){ pv.innerHTML = msIcoSvg(k).replace(/__U__/g, 'mp'); pv.setAttribute('data-k', k); }
 }
