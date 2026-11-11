@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-11.8399">
+<meta name="app-version" content="2026-11-11.8401">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -1288,7 +1288,7 @@ body{overflow-x:hidden;}
 
 /* ===== PLUS BADGE START (علامة + صغيرة مجسّمة) ===== */
 .plus-badge{
-  --pb-hi:#ffe08a; --pb-mid:#ff9d3d; --pb-lo:#ff5a1f; --pb-edge:#b8400f;
+  --pb-hi:#ffe08a; --pb-mid:#ff9d3d; --pb-lo:#ff5a1f; --pb-edge:#b8401f;
   --pb-glow:rgba(184,64,15,.65); --pb-ring:rgba(255,90,20,.60); --pb-txt:rgba(120,30,0,.55);
   position:absolute; top:7px; right:7px; z-index:3; pointer-events:none;
   width:calc(24px * var(--fs,1)); height:calc(24px * var(--fs,1)); border-radius:50%;
@@ -4350,6 +4350,9 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 .zdn-st{padding:3px 12px;border-radius:99px;background:#fff3d6;color:#a86400;font-size:calc(13px * var(--fs,1));}
 .zdn-due.ok .zdn-st{background:#e5f7ef;color:#0e8c5c;} .zdn-due.late .zdn-st{background:#ffe3e3;color:#c92a2a;}
 .gp-btn:disabled{opacity:.55;filter:grayscale(.4);}
+#qaDueField{display:none;}
+#quickAddOverlay.qa-pend-mode #qaDueField{display:block;}
+#quickAddOverlay.qa-edit-mode .qa-split{display:none;}
 </style>
 
 <!-- تنبيهات الصرف اليومي -->
@@ -4615,6 +4618,10 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
     <div class="field">
       <label>التاريخ</label>
       <input type="date" id="qaDate">
+    </div>
+    <div class="field" id="qaDueField">
+      <label>تاريخ الاستحقاق (اختياري)</label>
+      <input type="date" id="qaDue">
     </div>
     <div class="field">
       <label>الأيقونة</label>
@@ -14389,7 +14396,11 @@ function importFromText(){
   restoreFromRawText(raw);
 }
 
+function qaYear(){ return window._qaEdit ? window._qaEdit.y : currentYear; }
 function openQuickAdd(){
+  window._qaEdit = null;
+  const _qov = document.getElementById('quickAddOverlay'); if(_qov) _qov.classList.remove('qa-edit-mode');
+  const _qdu = document.getElementById('qaDue'); if(_qdu) _qdu.value='';
   const monthSel = document.getElementById('qaMonth');
   monthSel.innerHTML = MONTHS.map((n,i)=>`<option value="${i}" ${i===currentMonth?'selected':''}>${n}</option>`).join('');
   monthSel.value = currentMonth!==null ? currentMonth : new Date().getMonth();
@@ -14422,12 +14433,13 @@ function qaPickPend(){
   var e = document.getElementById('qaName'); if(e) e.focus();
 }
 function closeQuickAdd(){
-  document.getElementById('quickAddOverlay').classList.remove('open');
+  window._qaEdit = null;
+  document.getElementById('quickAddOverlay').classList.remove('open','qa-edit-mode');
 }
 function populateQaGroups(){
   const mi = Number(document.getElementById('qaMonth').value);
   const groupSel = document.getElementById('qaGroup');
-  const options = flattenGroupOptions(data[currentYear][mi].groups);
+  const options = flattenGroupOptions(data[qaYear()][mi].groups);
   groupSel.innerHTML = options.map(o=>`<option value="${o.id}">${o.label}</option>`).join('')
     + `<option value="new">＋ مجموعة جديدة</option>`;
   const qaNone = options.length===0;
@@ -14455,9 +14467,9 @@ function saveQuickAdd(){
     const newName = document.getElementById('qaNewGroupName').value.trim();
     if(!newName) return;
     targetGroup = {id:uid(), type:'group', name:newName, children:[]};
-    data[currentYear][mi].groups.push(targetGroup);
+    data[qaYear()][mi].groups.push(targetGroup);
   } else {
-    const found = findNode(data[currentYear][mi].groups, groupSel);
+    const found = findNode(data[qaYear()][mi].groups, groupSel);
     if(!found) return;
     targetGroup = found.node;
   }
@@ -14466,8 +14478,29 @@ function saveQuickAdd(){
   const qaNow = Date.now();
   const qaDateEl = document.getElementById('qaDate');
   const qaChosenDate = qaDateEl ? inputValueToDate(qaDateEl.value, qaNow) : qaNow;
+  const qaDueEl = document.getElementById('qaDue');
+  const qaDueVal = qaDueEl ? qaDueEl.value : '';
+  const qaEd = window._qaEdit;
+  if(qaEd){
+    const en = qaEd.n;
+    en.name = name; en.amount = amt; en.counted = counted; en.date = qaChosenDate; en.icon = qaIcon;
+    if(!en.createdAt) en.createdAt = qaChosenDate || qaNow;
+    if(!counted && qaDueVal) en.due = inputValueToDate(qaDueVal, en.due || qaNow); else delete en.due;
+    if(counted){ en.settledAt = qaNow; delete en.bpHide; }
+    const cur = findNode(data[qaEd.y][qaEd.m].groups, en.id);
+    if(cur && cur.arr !== targetGroup.children){ cur.arr.splice(cur.index, 1); targetGroup.children.push(en); }
+    save();
+    closeQuickAdd();
+    try{ if(window.bpRender) bpRender(); if(window.bdBadges) bdBadges(); }catch(e){}
+    if(currentMonth !== null && data[currentYear]) renderDetail();
+    renderMonths();
+    showToast('تم تعديل المصروف المعلق', true);
+    return;
+  }
   const qaNewId = uid();
-  targetGroup.children.push({id:qaNewId, type:'expense', name, amount:amt, counted, date: qaChosenDate, createdAt: qaNow, icon: qaIcon});
+  const qaNewNode = {id:qaNewId, type:'expense', name, amount:amt, counted, date: qaChosenDate, createdAt: qaNow, icon: qaIcon};
+  if(!counted && qaDueVal) qaNewNode.due = inputValueToDate(qaDueVal, qaNow);
+  targetGroup.children.push(qaNewNode);
   save();
   closeQuickAdd();
   if(currentMonth === mi){ renderDetail(); flashNew(qaNewId); }
@@ -17913,7 +17946,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       var due = Number(x.n.due) || 0, tags = [];
       if(due){ tags.push({t: 'استحقاق ' + lblDate(due), c: 'n'}); var dl = Math.floor((today0.getTime() - due) / DAY); if(dl > 0) tags.push({t: 'متأخر ' + toArabicDigits(dl) + ' يوم', c: 'w'}); }
       box.appendChild(gpRow({cls: 'pend', ic: '⏳', name: x.n.name || 'دفعة', sub: x.g + ' · ' + lblDate(x.n.date || x.n.createdAt) + ' ' + toArabicDigits(x.y), amt: x.n.amount, tags: tags,
-        acts: [{t: '✅', fn: function(){ bpSettleOpen(x); }}, {t: '📅', fn: function(){ bpDueOpen(x); }}, {t: '🙈', fn: function(){ openConfirm('إخفاء من المعلقة', 'هيفضل «غير محسوب» بس مش هيظهر هنا. تكمل؟', function(){ x.n.bpHide = true; save(); bpRender(); bdBadges(); }, 'إخفاء'); }}]}));
+        acts: [{t: '✅', fn: function(){ bpSettleOpen(x); }}, {t: '✏️', fn: function(){ bpEditOpen(x); }}, {t: '📅', fn: function(){ bpDueOpen(x); }}, {t: '🙈', fn: function(){ openConfirm('إخفاء من المعلقة', 'هيفضل «غير محسوب» بس مش هيظهر هنا. تكمل؟', function(){ x.n.bpHide = true; save(); bpRender(); bdBadges(); }, 'إخفاء'); }}]}));
     });
     var hid = bpAll().filter(function(x){ return x.n.bpHide; });
     $('bpHidBtn').style.display = hid.length ? '' : 'none';
@@ -17937,6 +17970,25 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     save(); bpSettleClose(); bpRender(); afterChange(); showToast('✅ اتسوّت واتحسبت في الحسابات', true);
     if(todayDate) bdCheckAlert(nowTs);
   };
+  function bpParentId(nodes, id, pid){
+    for(var i = 0; i < nodes.length; i++){
+      var n = nodes[i]; if(n.id === id) return pid || null;
+      if(n.type === 'group'){ var r = bpParentId(n.children || [], id, n.id); if(r) return r; }
+    }
+    return null;
+  }
+  function bpEditOpen(x){
+    openQuickAdd(); window._qaEdit = x;
+    var n = x.n; $('quickAddOverlay').classList.add('qa-edit-mode'); qaMarkPick('pend');
+    var tt = document.querySelector('#quickAddOverlay .ys-ttl'); if(tt) tt.textContent = '✏️ تعديل مصروف معلق';
+    $('qaMonth').value = String(x.m); populateQaGroups();
+    var pid = bpParentId(data[x.y][x.m].groups, n.id); if(pid) $('qaGroup').value = pid; qaToggleNewGroup();
+    $('qaName').value = n.name || ''; $('qaAmount').value = n.amount || '';
+    $('qaDate').value = dateToInputValue(n.date || n.createdAt || Date.now());
+    $('qaDue').value = n.due ? dateToInputValue(n.due) : '';
+    $('qaCounted').checked = false;
+    $('qaIconGrid').innerHTML = buildIconGrid('qaIconInput', n.icon || '🧾');
+  }
   function bpDueOpen(x){ _bpSel = x; $('bpDueIn').value = x.n.due ? dateToInputValue(x.n.due) : ''; $('bpDueOverlay').classList.add('open'); }
   window.bpDueClose = function(){ _bpSel = null; $('bpDueOverlay').classList.remove('open'); };
   window.bpDueSave = function(clear){
