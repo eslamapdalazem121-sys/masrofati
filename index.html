@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-11.8402">
+<meta name="app-version" content="2026-11-11.8406">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -205,6 +205,7 @@ function dtx(ts, x){ var d = ''; try{ d = formatDate(ts); }catch(e){} var t = en
   });
 })();
 </script>
+<style id="tap8404">html,body{touch-action:manipulation;}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
@@ -944,6 +945,7 @@ body.scroll-locked{overflow:hidden; position:fixed; width:100%;}
   max-width:90vw; text-align:center;
 }
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+.toast{pointer-events:none;}   /* 8404: الرسالة المخفية كانت بتبلع اللمس فوق أسفل الشاشة */
 /* ===== 3D THEME START ===== */
 :root{
   --gloss:linear-gradient(180deg, rgba(255,255,255,.60) 0%, rgba(255,255,255,.14) 40%, rgba(255,255,255,0) 62%);
@@ -11052,6 +11054,7 @@ function groupItemDates(){
   function anyOpen(){ return !!document.querySelector('.modal-overlay.open'); }
   function lock(){
     if(locked || document.body.classList.contains('scroll-locked')) return; locked = true;
+    document.addEventListener('touchstart', onTS, {passive:true}); document.addEventListener('touchend', onTE, {passive:true}); document.addEventListener('touchcancel', onTE, {passive:true});
     document.addEventListener('touchmove', onTM, {passive:false}); document.addEventListener('wheel', onWH, {passive:false});
     savedY = window.pageYOffset || document.documentElement.scrollTop || 0;
     document.body.style.top = (-savedY) + 'px';
@@ -11060,6 +11063,7 @@ function groupItemDates(){
   function unlock(){
     if(!locked) return; locked = false;
     document.removeEventListener('touchmove', onTM, {passive:false}); document.removeEventListener('wheel', onWH, {passive:false});
+    document.removeEventListener('touchstart', onTS, {passive:true}); document.removeEventListener('touchend', onTE, {passive:true}); document.removeEventListener('touchcancel', onTE, {passive:true}); _blk = null;
     document.body.classList.remove('modal-locked');
     document.body.style.top = '';
     window.scrollTo(0, savedY);
@@ -11076,10 +11080,18 @@ function groupItemDates(){
     }
     return false;
   }
+  // 8404: القرار بيتاخد مرة واحدة أول ما الصباع ينزل (بدل فحص الأنماط مع كل حركة لمس، وده كان بيبطّأ ويعلّق السحب)
+  var _blk = null;
+  function decide(t){
+    const overlay = t && t.closest ? t.closest('.modal-overlay.open, .gp.open') : null;
+    return !overlay || !scrollableUp(t, overlay);
+  }
+  function onTS(e){ _blk = locked ? decide(e.target) : null; }
+  function onTE(){ _blk = null; }
   function onTM(e){
     if(!locked) return;
-    const overlay = e.target.closest ? e.target.closest('.modal-overlay.open, .gp.open') : null;
-    if(!overlay || !scrollableUp(e.target, overlay)) e.preventDefault();
+    if(_blk === null) _blk = decide(e.target);
+    if(_blk && e.cancelable) e.preventDefault();
   }
   function onWH(e){
     if(!locked) return;
@@ -17305,6 +17317,172 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     });
     return L;
   }
+  /* ===== 8405: ذاكرة تاريخية للمساعد (لقطات شهرية + ملخص كل السنين + تفاصيل شهور قديمة حسب السؤال) ===== */
+  var _snapBusy = false, _snapT = null;
+  function aiSnapMonth(){
+    if(_snapBusy) return;
+    try{
+      if(typeof _appStarted !== 'undefined' && !_appStarted) return;
+      if(!capRaw().length) return;
+      var now = new Date(), key = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'), dkey = dateToInputValue(now.getTime());
+      var t = capTotalsCalc(capRaw()), z = null; try{ z = zkcCompute(); }catch(e){}
+      var r = function(v){ return Math.round(Number(v) || 0); };
+      var snap = {cash: r(t.cash), bank: r(t.bank), money: r(t.money), gold: r(t.gold), goldBuy: r(t.goldBuy), grams: Math.round((Number(t.grams) || 0) * 100) / 100, all: r(t.all), pension: r(t.pension), zakat: z ? r(z.zk) : 0, d: dkey};
+      var changed = false;
+      // --- لقطة الشهر (آخر قيمة في الشهر) ---
+      if(!data.aiMonthSnap || typeof data.aiMonthSnap !== 'object') data.aiMonthSnap = {};
+      var old = data.aiMonthSnap[key];
+      var same = function(o, n){ if(!o) return false; var a1 = Object.assign({}, o), b1 = Object.assign({}, n); ['d', 'c', 'p', 'usd', 'fx', 'it'].forEach(function(k){ delete a1[k]; delete b1[k]; }); return JSON.stringify(a1) === JSON.stringify(b1); };
+      if(!same(old, snap)){ data.aiMonthSnap[key] = Object.assign({}, snap); changed = true; }
+      // --- لقطة اليوم (كل يوم) + أسعار الذهب + أرصدة البنود ---
+      var day = Object.assign({}, snap);
+      try{ day.p = [r(glSellPpg(24)), r(glSellPpg(21)), r(glSellPpg(18))]; }catch(e){}
+      try{ if(typeof _gl === 'object' && _gl){ if(_gl.usd > 0) day.usd = r(_gl.usd); if(_gl.rate > 0) day.fx = Number(_gl.rate); } }catch(e){}
+      try{
+        day.it = capRaw().slice(0, 40).map(function(x){ var g = capCatOf(x) === 'gold'; var o = {k: g ? 'ذهب' : (x.isCert ? 'شهادة' : (capSubOf(x) === 'bank' ? 'حساب' : (capSubOf(x) === 'pension' ? 'معاش' : 'نقدي'))), n: String(x.certName || x.name || x.title || 'بند').slice(0, 30), a: r(x.amount)}; if(g){ o.g = Number(x.grams) || 0; o.r = x.karat || ''; } return o; });
+      }catch(e){}
+      if(!data.aiDaySnap || typeof data.aiDaySnap !== 'object') data.aiDaySnap = {};
+      var ds = data.aiDaySnap, od = ds[dkey];
+      if(!od || !same(od, day) || JSON.stringify(od.it || null) !== JSON.stringify(day.it || null) || JSON.stringify(od.p || null) !== JSON.stringify(day.p || null)){
+        // الأيام اللي التطبيق ما اتفتحش فيها: نكمّلها بآخر قيمة معروفة (مُعلَّمة «مرحَّلة») عشان يفضل في سجل لكل يوم
+        var ks = Object.keys(ds).filter(function(k){ return k < dkey; }).sort(), last = ks.length ? ks[ks.length - 1] : null;
+        if(last){
+          var lt = new Date(last + 'T12:00:00').getTime(), gap = Math.round((new Date(dkey + 'T12:00:00').getTime() - lt) / 86400000);
+          if(gap > 1 && gap <= 61){
+            for(var g = 1; g < gap; g++){ var dd = new Date(lt + g * 86400000), k2 = dateToInputValue(dd.getTime()); if(!ds[k2]){ var cp = Object.assign({}, ds[last]); delete cp.it; cp.c = 1; cp.d = k2; ds[k2] = cp; } }
+          }
+        }
+        ds[dkey] = day; changed = true;
+      }
+      // --- تنضيف: تفاصيل البنود لآخر ٩٠ يوم، واليومي لآخر ٤٠٠ يوم (وأقدم من كده بنسيب آخر يوم في كل شهر بس) ---
+      var all = Object.keys(ds).sort(), cut90 = dateToInputValue(now.getTime() - 90 * 86400000), cut400 = dateToInputValue(now.getTime() - 400 * 86400000);
+      all.forEach(function(k, i){
+        if(k < cut90 && ds[k].it){ delete ds[k].it; changed = true; }
+        if(k < cut400){ var nx = all[i + 1]; if(!nx || nx.slice(0, 7) !== k.slice(0, 7)) return; delete ds[k]; changed = true; }
+      });
+      if(!changed) return;
+      _snapBusy = true; try{ save(); }finally{ _snapBusy = false; }
+    }catch(e){ _snapBusy = false; }
+  }
+  function aiSnapSoon(){ clearTimeout(_snapT); _snapT = setTimeout(aiSnapMonth, 4000); }
+  setTimeout(aiSnapMonth, 6000);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') aiSnapMonth(); });
+  (function(){ var prev = window.__onDataSaved; window.__onDataSaved = function(){ try{ if(typeof prev === 'function') prev.apply(this, arguments); }catch(e){} if(!_snapBusy) aiSnapSoon(); }; })();
+  function aiNorm(t){
+    return String(t || '').replace(/[٠-٩]/g, function(d){ return String(d.charCodeAt(0) - 1632); }).replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
+  }
+  function aiRecentQ(){
+    var out = [];
+    try{ for(var i = hist.length - 1; i >= 0 && out.length < 2; i--){ var m = hist[i]; if(m && m.role === 'user'){ var tx = (m.parts || []).map(function(p){ return p.text || ''; }).join(' ').trim(); if(tx && tx.charAt(0) !== '[') out.push(tx); } } }catch(e){}
+    return out.join(' ');
+  }
+  var AI_MON_RX = ['يناير', 'فبراير', 'مارس', 'ابريل', 'مايو', 'يونيو|يونيه', 'يوليو|يوليه', 'اغسطس', 'سبتمبر', 'اكتوبر', 'نوفمبر', 'ديسمبر'];
+  function aiTargets(q){
+    var n = aiNorm(q), now = new Date(), ny = now.getFullYear(), nm = now.getMonth(), tg = [];
+    function add(y, i){ if(i < 0){ i += 12; y--; } if(!tg.some(function(t){ return t.y === y && t.i === i; })) tg.push({y: y, i: i}); }
+    var yrs = (n.match(/\b(?:19|20)\d\d\b/g) || []).map(Number), months = [];
+    AI_MON_RX.forEach(function(rx, i){ if(new RegExp('(^|[^\\u0600-\\u06FF])(?:ال)?(?:' + rx + ')').test(n)) months.push(i); });
+    if(months.length){ months.forEach(function(i){ if(yrs.length) yrs.forEach(function(y){ add(y, i); }); else add(i <= nm ? ny : ny - 1, i); }); }
+    if(/الشهر (اللي|الي|اللى) فات|الشهر الماضي|الشهر السابق/.test(n)) add(ny, nm - 1);
+    if(/(من )?شهرين/.test(n)) add(ny, nm - 2);
+    var yearOnly = [];
+    if(/السنه (اللي|الي|اللى) فاتت|العام الماضي|السنه الماضيه|العام (اللي|الي|اللى) فات/.test(n)) yearOnly.push(ny - 1);
+    yrs.forEach(function(y){ if(!months.length && yearOnly.indexOf(y) < 0) yearOnly.push(y); });
+    if(/قارن|مقارن|الفرق|اتغير|زاد|زادت|قل |قلت|اكتر|اقل|عن الشهر|بين/.test(n) && tg.length === 1) add(tg[0].y, tg[0].i - 1);
+    return {months: tg.slice(0, 4), years: yearOnly.slice(0, 2)};
+  }
+  function aiDayTargets(q){
+    var n = aiNorm(q), now = new Date(), ny = now.getFullYear(), nm = now.getMonth(), out = [];
+    function addD(d){ var k = dateToInputValue(d.getTime()); if(out.indexOf(k) < 0) out.push(k); }
+    function back(x){ return new Date(now.getFullYear(), now.getMonth(), now.getDate() - x, 12); }
+    if(/اول (من )?(امبارح|امس|الامس)/.test(n)) addD(back(2));
+    else if(/(امبارح|امس|الامس)/.test(n)) addD(back(1));
+    if(/من اسبوع/.test(n)) addD(back(7));
+    (n.match(/\b(?:19|20)\d\d-\d\d-\d\d\b/g) || []).forEach(function(k){ out.push(k); });
+    AI_MON_RX.forEach(function(rx, i){
+      var m = new RegExp('(?:^|[^0-9])(\\d{1,2})\\s*(?:ال)?(?:' + rx + ')(?:\\s*(\\d{4}))?').exec(n);
+      if(!m) return; var dn = Number(m[1]); if(dn < 1 || dn > 31) return;
+      var y = m[2] ? Number(m[2]) : (i <= nm ? ny : ny - 1);
+      addD(new Date(y, i, dn, 12));
+    });
+    return out.slice(0, 3);
+  }
+  function aiDaySpendMap(days){
+    var map = {}, seen = {};
+    days.forEach(function(k){ var y = Number(k.slice(0, 4)), i = Number(k.slice(5, 7)) - 1, id = y + '-' + i; if(seen[id]) return; seen[id] = 1;
+      var mon = (data[y] || {})[i]; if(!mon) return;
+      collectExpensesWithGroup(mon.groups || []).forEach(function(e){ if(!e || e.type !== 'expense' || e.counted === false || !e.date) return; var dk = dateToInputValue(e.date); map[dk] = (map[dk] || 0) + (Number(e.amount) || 0); });
+    });
+    return map;
+  }
+  function aiHistCtx(cy, cmi){
+    var PV = (window.MSR_PRIV && MSR_PRIV.get()) || {}, L = [], q = aiRecentQ(), tgt = aiTargets(q);
+    var MKQ = PV.aiMask !== false;
+    function inc(mon){ try{ return totalIncome(mon); }catch(e){ return 0; } }
+    function expT(mon){ return (mon.groups || []).reduce(function(s, g){ return s + nodeTotal(g); }, 0); }
+    if(PV.aiRep !== false){
+      var ys = Object.keys(data).filter(function(k){ return /^\d{4}$/.test(k); }).sort(), any = false;
+      ys.forEach(function(y){
+        var parts = [];
+        for(var i = 0; i < 12; i++){ var mon = (data[y] || {})[i]; if(!mon) continue; var a = inc(mon), b = expT(mon); if(a || b) parts.push(MONTHS[i] + ' ' + fmt(a) + '/' + fmt(b)); }
+        if(parts.length){ if(!any){ L.push('السجل التاريخي لكل السنين — كل شهر (دخل/مصروفات):'); any = true; } L.push('- ' + y + ': ' + parts.join(' | ')); }
+      });
+    }
+    if(PV.aiMoney !== false){
+      var sn = data.capSnap || {}, ky = Object.keys(sn).filter(function(k){ return sn[k] && sn[k].totals; }).sort();
+      if(ky.length){
+        L.push('رأس المال في آخر كل سنة (مخزّن؛ السنة الحالية لحظية، وكلمة تقديري = اتحسب من تواريخ البنود):');
+        ky.forEach(function(k){ var t = sn[k].totals; L.push('- ' + k + ': أموال ' + fmt(t.money) + ' | ذهب ' + fmt(t.gold) + ' | إجمالي ' + fmt(t.all) + (sn[k].est ? ' (تقديري)' : '')); });
+      }
+      var ms = data.aiMonthSnap || {}, mk = Object.keys(ms).sort().slice(-36);
+      if(mk.length){
+        L.push('لقطات رأس المال الشهرية (اتخزنت تلقائيًا؛ آخر قيمة في كل شهر):');
+        mk.forEach(function(k){ var t = ms[k]; L.push('- ' + k + ': نقدي ' + fmt(t.cash) + ' | بنوك ' + fmt(t.bank) + ' | ذهب ' + fmt(t.gold) + ' (' + fmt(t.grams) + ' جم) | إجمالي ' + fmt(t.all) + (t.zakat ? ' | الزكاة ' + fmt(t.zakat) : '')); });
+      } else L.push('لقطات رأس المال الشهرية بدأت تتخزن من النسخة دي، ومفيش قبلها غير لقطة آخر كل سنة.');
+    }
+    if(PV.aiMoney !== false || PV.aiExp !== false){
+      var now0 = new Date(), recent = [], i2;
+      for(i2 = 0; i2 < 45; i2++) recent.push(dateToInputValue(now0.getTime() - i2 * 86400000));
+      var spm = {}; try{ spm = aiDaySpendMap(recent); }catch(e){}
+      var dsn = data.aiDaySnap || {}, rows = [];
+      recent.forEach(function(k){
+        var sn0 = dsn[k], sp = spm[k] || 0; if(!sn0 && !sp) return;
+        var p = [k + ':'];
+        if(sn0 && PV.aiMoney !== false) p.push('أموال ' + fmt(sn0.money) + ' | ذهب ' + fmt(sn0.gold) + ' (' + fmt(sn0.grams) + ' جم)' + (sn0.p && sn0.p[1] ? ' عيار٢١ ' + fmt(sn0.p[1]) : '') + ' | إجمالي ' + fmt(sn0.all) + (sn0.c ? ' (مرحَّلة)' : ''));
+        if(PV.aiExp !== false) p.push('إنفاق اليوم ' + fmt(sp));
+        rows.push('- ' + p.join(' '));
+      });
+      if(rows.length){ L.push('السجل اليومي لآخر ٤٥ يوم (التخزين اليومي لأرقام رأس المال بدأ من النسخة دي، لكن إنفاق كل يوم محسوب من تواريخ المصروفات القديمة كمان):'); L = L.concat(rows); }
+      aiDayTargets(q).forEach(function(k){
+        var sn1 = (data.aiDaySnap || {})[k], mk1 = MKQ;
+        if(PV.aiMoney !== false){
+          if(sn1){ L.push('تفاصيل يوم ' + k + (sn1.c ? ' (مرحَّلة من آخر يوم اتفتح فيه التطبيق)' : '') + ': نقدي ' + fmt(sn1.cash) + ' | بنوك ' + fmt(sn1.bank) + ' | ذهب ' + fmt(sn1.gold) + ' (' + fmt(sn1.grams) + ' جم)' + (sn1.p ? ' | جرام٢٤ ' + fmt(sn1.p[0]) + ' / ٢١ ' + fmt(sn1.p[1]) + ' / ١٨ ' + fmt(sn1.p[2]) : '') + (sn1.usd ? ' | الأونصة ' + fmt(sn1.usd) + '$' : '') + (sn1.fx ? ' | الدولار ' + sn1.fx : '') + ' | إجمالي ' + fmt(sn1.all) + (sn1.zakat ? ' | الزكاة ' + fmt(sn1.zakat) : ''));
+            if(sn1.it && sn1.it.length){ var cc = {}; L.push('أرصدة البنود يوم ' + k + ': ' + sn1.it.map(function(x){ var nmx = mk1 ? (cc[x.k] = (cc[x.k] || 0) + 1, x.k + ' ' + toArabicDigits(cc[x.k])) : x.k + ' ' + x.n; return nmx + ' ' + fmt(x.a) + (x.g ? ' (' + x.g + ' جم ' + x.r + ')' : ''); }).join('، ')); }
+          } else L.push('يوم ' + k + ': مفيش لقطة لرأس المال (التخزين اليومي بدأ من النسخة دي ولو بعدها كان التطبيق مقفول بتتكمّل بآخر قيمة)');
+        }
+        if(PV.aiExp !== false){
+          var y1 = Number(k.slice(0, 4)), m1 = Number(k.slice(5, 7)) - 1, mon1 = (data[y1] || {})[m1];
+          if(mon1){ var ex = collectExpensesWithGroup(mon1.groups || []).filter(function(e){ return e && e.type === 'expense' && e.date && dateToInputValue(e.date) === k; }); L.push('مصروفات يوم ' + k + ' (' + ex.length + ' عملية، إجمالي ' + fmt(ex.reduce(function(s2, e){ return s2 + (e.counted === false ? 0 : (Number(e.amount) || 0)); }, 0)) + '):'); ex.slice(0, 40).forEach(function(e){ L.push('- ' + e.name + ' | ' + fmt(Number(e.amount) || 0) + ' | ' + e.groupName); }); }
+        }
+      });
+    }
+    if(PV.aiExp !== false){
+      tgt.months.forEach(function(t){
+        if(t.y === cy && (t.i === cmi || t.i === cmi - 1)) return;
+        var mon = (data[t.y] || {})[t.i]; if(!mon){ L.push('تفاصيل ' + MONTHS[t.i] + ' ' + t.y + ': مفيش بيانات مسجّلة'); return; }
+        var gs = (mon.groups || []).map(function(g){ return {n: g.name, v: nodeTotal(g)}; }).filter(function(g){ return g.v > 0; }).sort(function(a, b){ return b.v - a.v; }).slice(0, 10).map(function(g){ return g.n + ' ' + fmt(g.v); }).join('، ');
+        L.push('تفاصيل ' + MONTHS[t.i] + ' ' + t.y + ' (طلبها السؤال): دخل ' + fmt(inc(mon)) + ' / مصروفات ' + fmt(expT(mon)) + (gs ? ' / المجموعات: ' + gs : ''));
+        L = L.concat(monthLines(t.y, t.i, 60));
+      });
+      tgt.years.forEach(function(y){
+        var by = {}, tot = 0; for(var i = 0; i < 12; i++){ var mon = (data[y] || {})[i]; if(!mon) continue; (mon.groups || []).forEach(function(g){ var v = nodeTotal(g); if(v > 0){ by[g.name] = (by[g.name] || 0) + v; tot += v; } }); }
+        var top = Object.keys(by).sort(function(a, b){ return by[b] - by[a]; }).slice(0, 12).map(function(k){ return k + ' ' + fmt(by[k]); }).join('، ');
+        L.push('مجموعات سنة ' + y + ' (طلبها السؤال): إجمالي ' + fmt(tot) + (top ? ' / ' + top : ' (مفيش بيانات)'));
+      });
+    }
+    L.push('(للمساعد: ده تاريخ كل السنين. قارن منه الماضي بالحاضر وقول الفرق والنسبة. لو شهر قديم مش مفصّل هنا اطلب من المستخدم يكتب الشهر والسنة بالاسم عشان تتحمّل تفاصيله.)');
+    var t = L.join('\n'); return t.length > 16000 ? t.slice(0, 16000) + '\n…' : t;
+  }
   function buildCtx(){
     var now = new Date(), y = currentYear, mi = curMonthIdx(), L = [], PV = (window.MSR_PRIV && MSR_PRIV.get()) || {}, mc = 0;
     L.push('تاريخ النهاردة: ' + dateToInputValue(now.getTime()) + ' | السنة المعروضة: ' + y);
@@ -17315,6 +17493,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       var gs = (mon.groups || []).map(function(g){ return {n: g.name, v: nodeTotal(g)}; }).filter(function(g){ return g.v > 0; }).sort(function(a, b){ return b.v - a.v; }).slice(0, 6).map(function(g){ return g.n + ' ' + fmt(g.v); }).join('، ');
       L.push('- ' + MONTHS[i] + ': دخل ' + fmt(inc) + ' / مصروفات ' + fmt(exp) + (gs ? ' / ' + gs : ''));
     }
+    try{ aiSnapMonth(); L.push(aiHistCtx(y, mi)); }catch(e){}
     if(PV.aiExp !== false){
       L.push('مصروفات شهر ' + MONTHS[mi] + ' بالتفصيل (اسم | مبلغ | تاريخ | مجموعة):');
       L = L.concat(monthLines(y, mi, 120));
@@ -17324,10 +17503,10 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     L.push('المجموعات المتاحة لتسجيل مصروف في الشهر ده: ' + (gl.join(' ، ') || '(مفيش مجموعات)'));
     try{ if(PV.aiMoney === false) throw 0; var m = []; ['cash', 'bank'].forEach(function(k){ cmoEntries(k).forEach(function(e){ m.push((PV.aiMask !== false ? 'بند ' + toArabicDigits(++mc) : (e.x.name || e.x.title || 'بند')) + ': ' + fmt(cmoAvailE(e.k, e.x))); }); }); if(m.length) L.push('الأموال المتاحة (نقدي/حسابات): ' + m.join('، ')); }catch(e){}
     try{ L = L.concat(aiExtraCtx()); }catch(e){}
-    var t = L.join('\n'); return t.length > 36000 ? t.slice(0, 36000) + '\n…' : t;
+    var t = L.join('\n'); return t.length > 48000 ? t.slice(0, 48000) + '\n…' : t;
   }
   window.aiCtxPreview = function(){ return buildCtx(); };
-  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى. ممكن بعض البيانات تكون مخفية أو بأسماء عامة (حساب ١، قطعة ٢…) بسبب إعدادات الخصوصية؛ لو سُئلت عن اسم مخفي قول إنه مخفي بإعدادات الحماية، ومتحاولش تخمّنه.';
+  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى. ممكن بعض البيانات تكون مخفية أو بأسماء عامة (حساب ١، قطعة ٢…) بسبب إعدادات الخصوصية؛ لو سُئلت عن اسم مخفي قول إنه مخفي بإعدادات الحماية، ومتحاولش تخمّنه. عندك في البيانات المرفقة تاريخ كل السنين (سجل شهري لكل سنة، ولقطات رأس المال آخر كل سنة وكل شهر، وسجل يومي لرأس المال والإنفاق وأسعار الذهب)؛ لما حد يسألك عن رقم قديم أو يطلب مقارنة بين الماضي والحاضر، راجع الأقسام دي وجاوب بالأرقام والفرق والنسبة، ومتقولش إنك مش شايف بيانات قديمة قبل ما تراجعها.';
   var GTOOLS = [{functionDeclarations: [{name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم المصروف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}]}];
 
   /* ===== الاتصال بـ Gemini (مجاني) ===== */
