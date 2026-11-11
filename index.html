@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-11.8398">
+<meta name="app-version" content="2026-11-11.8399">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -5315,7 +5315,7 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
         </select>
         <div id="pv_lockHint" style="font-size:calc(11.5px * var(--fs,1)); color:var(--muted); margin-top:6px; display:none;">⚠️ قفل التطبيق مش مفعّل، فعّله من «🔒 قفل التطبيق» عشان القفل التلقائي يشتغل.</div>
       </div>
-      <div class="check-row" style="margin-top:10px;"><input type="checkbox" id="pv_blur" data-pk="blur" onchange="privToggle(this)"><label for="pv_blur" style="margin:0;">تغبيش الشاشة (للأماكن العامة) — بتضغط مطوّلًا على زرار «👁» عشان تشوف</label></div>
+      <div class="check-row" style="margin-top:10px;"><input type="checkbox" id="pv_blur" data-pk="blur" onchange="privToggle(this)"><label for="pv_blur" style="margin:0;">تغبيش الشاشة (للأماكن العامة) — اضغط على زرار «👁» مرة تشوف الشاشة، ومرة تانية ترجّع التغبيش</label></div>
 
       <div style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
         <b style="font-size:calc(13.5px * var(--fs,1));">🔐 تشفير البيانات على الجهاز</b>
@@ -16638,7 +16638,7 @@ body.kb-open .fab{display:none !important;}
 #privShield{position:fixed; inset:0; z-index:2147483000; display:none; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:radial-gradient(circle at 30% 20%,#17425e,#0a1f2e 70%); color:#fff; font-family:inherit;}
 #privShield b{font-size:20px} #privShield i{font-style:normal; font-size:60px}
 #privReveal{position:fixed; z-index:2147482000; bottom:calc(14px + env(safe-area-inset-bottom,0px)); right:14px; display:none; width:58px; height:58px; border-radius:50%; border:0; background:#0a1f2e; color:#fff; font-size:26px; box-shadow:0 4px 14px rgba(0,0,0,.4); touch-action:none; user-select:none; -webkit-user-select:none;}
-body.priv-blur #privReveal{display:block}
+body.priv-eye #privReveal{display:block}
 body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-events:none;}
 </style>
 <div id="privShield"><i>🔒</i><b>أموالي AtoZ</b></div>
@@ -16670,10 +16670,15 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 
   // ===== تغبيش الشاشة =====
   var rv = $('privReveal');
-  function applyBlur(){ document.body.classList.toggle('priv-blur', !!P.blur); }
-  function hold(on){ if(P.blur) document.body.classList.toggle('priv-blur', !on); }
-  ['pointerdown'].forEach(function(t){ rv.addEventListener(t, function(e){ e.preventDefault(); hold(true); }); });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(t){ rv.addEventListener(t, function(){ hold(false); }); });
+  var shown = false;
+  function applyBlur(){
+    var on = !!P.blur; if(!on) shown = false;
+    document.body.classList.toggle('priv-eye', on);
+    document.body.classList.toggle('priv-blur', on && !shown);
+    rv.textContent = shown ? '🙈' : '👁'; rv.style.opacity = shown ? '.75' : '1';
+    rv.setAttribute('aria-label', shown ? 'تغبيش الشاشة' : 'إظهار الشاشة');
+  }
+  rv.addEventListener('click', function(e){ e.preventDefault(); shown = !shown; applyBlur(); });
 
   // ===== واجهة الإعدادات =====
   function refresh(){
@@ -16689,7 +16694,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     if($('pv_encOn')) $('pv_encOn').style.display = on ? 'block' : 'none';
     applyBlur();
   }
-  window.privToggle = function(el){ P[el.getAttribute('data-pk')] = el.checked; save(); if(el.getAttribute('data-pk') === 'blur') applyBlur(); };
+  window.privToggle = function(el){ P[el.getAttribute('data-pk')] = el.checked; save(); if(el.getAttribute('data-pk') === 'blur'){ shown = false; applyBlur(); } };
   window.privSelect = function(el){ P.autoLock = Number(el.value); save(); };
   window.privPreviewAi = function(){
     var t = $('pv_preview'); try{ t.value = (window.aiCtxPreview ? window.aiCtxPreview() : '') || '(مفيش بيانات هتتبعت)'; }catch(e){ t.value = 'تعذّر العرض'; }
