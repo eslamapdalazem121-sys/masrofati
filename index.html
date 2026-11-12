@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-12.8416">
+<meta name="app-version" content="2026-11-12.8420">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -2855,14 +2855,14 @@ html{ overscroll-behavior:none; }
 /* الصفحة الأولى: الأيقونات بس. البطاقات القديمة (رأس المال / زكاتي / الدخل السنوي / المصروفات الشهرية) مخفية من هنا،
    وبتظهر كاملة جوه صفحة كل أيقونة (لأنها بتتنقل لهناك ومبقاش أبوها #homeExtras مباشرة) */
 #homeExtras > .yr-gi, #homeExtras > .yr-zm, #homeExtras > .yr-cap, #homeExtras > .yr-ms, #homeExtras > #capPastBar{display:none !important;}
-#homeExtras > .cap-hero-wrap{margin:14px auto 14px;}
+#homeExtras > .cap-hero-wrap{margin:0 auto 0;}
 /* ترتيب الأيقونات في الصفحة الأولى: ١ تحت بعض / ٢ جنب بعض / ٤ في صف (الاختيار من الإعدادات) */
 #homeExtras{display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center; max-width:640px; margin-inline:auto; --hc:1;}
 #homeExtras.hcols-2{--hc:2;}
 #homeExtras.hcols-4{--hc:4;}
 #homeExtras > *{flex:0 0 100%; min-width:0; box-sizing:border-box;}
-#homeExtras > .cap-hero-wrap{flex:0 0 calc(100% / var(--hc)); max-width:calc(100% / var(--hc)); margin:14px 0;}
-#homeExtras .cap-hero{width:100%; box-sizing:border-box; padding:6px 4px 2px;}
+#homeExtras > .cap-hero-wrap{flex:0 0 calc(100% / var(--hc)); max-width:calc(100% / var(--hc)); margin:0;}
+#homeExtras .cap-hero{width:100%; box-sizing:border-box; padding:0 4px 0;}
 #homeExtras .cap-hero .ch-stage{width:min(calc(150px * var(--ch-sc)), 100%); height:auto; aspect-ratio:1 / 1;}
 #homeExtras .cap-hero .ch-ico{width:78.7%; height:auto; aspect-ratio:1 / 1;}
 #homeExtras .cap-hero .ch-lbl{text-align:center; line-height:1.3; padding:0 2px;}
@@ -2870,7 +2870,7 @@ html{ overscroll-behavior:none; }
 #homeExtras.hcols-4 .cap-hero .ch-lbl{font-size:calc(11.5px * var(--fs,1));}
 
 /* ===== YEAR PLAIN START ===== */
-.year-switcher{max-width:none !important; width:100%; box-sizing:border-box; flex-wrap:nowrap; overflow:visible; background:none !important; box-shadow:none !important; border-radius:0 !important; padding:0 !important; margin:0 auto 14px !important; gap:18px !important;}
+.year-switcher{max-width:none !important; width:100%; box-sizing:border-box; flex-wrap:nowrap; overflow:visible; background:none !important; box-shadow:none !important; border-radius:0 !important; padding:0 !important; margin:0 auto 0 !important; gap:18px !important;}
 .year-switcher .icon,.year-switcher .fy-label{display:none !important;}
 .year-switcher select{color:var(--text) !important; font-family:Arial,Helvetica,sans-serif; font-size:min(11vw,44px) !important; font-weight:800; letter-spacing:2px; width:auto !important; min-width:0 !important; flex:0 1 auto; text-shadow:none !important; direction:ltr; line-height:1.1;}
 .year-switcher select option{color:#111;}
@@ -5287,6 +5287,19 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
     </div>
 
 
+    </div>
+
+    <div class="settings-section" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
+      <h4>⚡ اختصارات الصفحة الرئيسية</h4>
+      <div class="check-row">
+        <input type="checkbox" id="scToggle" checked onchange="scToggle(this.checked)">
+        <label for="scToggle" style="margin:0;">إظهار الاختصارات في الصفحة الرئيسية</label>
+      </div>
+      <div class="groups-toggle-card" style="margin:8px 0 0;" onclick="scOpen()">
+        <span class="icon">⚡</span>
+        <span class="txt">إضافة / تعديل الاختصارات <span class="sub" id="scCount">لسه مفيش اختصارات</span></span>
+        <span class="chevron" style="transform:none;">‹</span>
+      </div>
     </div>
 
     <div class="settings-section" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
@@ -18762,6 +18775,162 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function run(){ IDS.forEach(function(id){ add(document.getElementById(id)); }); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();
+</script>
+
+<style>
+.sc-tilewrap .ch-ico svg text{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.sc-sec{font-weight:800;color:var(--text);margin:14px 2px 2px;font-size:13.5px}
+.sc-sel{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;margin-top:8px;border-radius:14px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--text);box-sizing:border-box}
+.sc-sel .sc-ic{font-size:24px}
+.sc-sel .sc-rl{flex:1;font-weight:700}
+.sc-mvb{border:1px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;font-weight:800;border-radius:10px;width:36px;height:36px;cursor:pointer}
+.sc-mvb:disabled{opacity:.3}
+.sc-ov{position:fixed;inset:0;z-index:2147481000;background:var(--bg);display:none;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.sc-top{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--border)}
+.sc-back{border:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font-family:inherit;font-weight:700;color:var(--text);cursor:pointer}
+.sc-ttl{font-weight:800;color:var(--text)}
+.sc-note{font-size:12.5px;color:var(--muted);line-height:1.7;padding:10px 14px 0}
+.sc-list{flex:1;overflow-y:auto;padding:4px 12px calc(20px + env(safe-area-inset-bottom,0px))}
+.sc-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px;margin-top:8px;border-radius:14px;border:1px solid var(--border);background:var(--card);font-family:inherit;color:var(--text);cursor:pointer;text-align:right}
+.sc-row .sc-ic{font-size:24px}
+.sc-row .sc-rl{flex:1;font-weight:700}
+.sc-row .sc-chk{font-weight:800;color:var(--muted)}
+.sc-row.on{border-color:var(--accent);background:var(--accent-soft)}
+.sc-row.on .sc-chk{color:var(--accent-dark)}
+.sc-empty{padding:24px;text-align:center;color:var(--muted);line-height:1.7}
+</style>
+<script>
+(function(){
+  var KEY='masrofati_home_shortcuts_v1', ON='masrofati_home_shortcuts_on';
+  var BAD_TXT=/(حذف|مسح|إعادة ضبط|اعادة ضبط|تسجيل خروج|خروج|إلغاء|الغاء|رجوع|إغلاق|اغلاق|حفظ|تأكيد|استرجاع|استعادة)/;
+  var BAD_JS=/(delete|remove|reset|clear|wipe|signOut|logout|restore|import|close|hide|Del\b|\bdel[A-Z]|toggleHomeReorder|scOpen|scAdd|scRemove)/i;
+  var EMO=/\p{Extended_Pictographic}/u;
+  function load(){ try{ var a=JSON.parse(localStorage.getItem(KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function save(a){ try{ localStorage.setItem(KEY,JSON.stringify(a)); }catch(e){} }
+  function isOn(){ try{ return localStorage.getItem(ON)!=='0'; }catch(e){ return true; } }
+  function tst(m,ok){ try{ showToast(m,ok); }catch(e){} }
+  function clean(t){ return (t||'').replace(/\p{Extended_Pictographic}|\uFE0F|\u200d/gu,'').replace(/[+＋−—–\-‹›▾▸▴▼◀▶↕✕×]/g,' ').replace(/\s+/g,' ').trim(); }
+  function iconOf(el){
+    var t=(el.textContent||'')+' '+(el.getAttribute('title')||'')+' '+(el.getAttribute('aria-label')||'');
+    var m=t.match(EMO); return m?m[0]:'⚡';
+  }
+  function labelOf(el){
+    var l=clean(el.getAttribute('aria-label')||'')||clean(el.getAttribute('title')||'');
+    if(!l){ var q=el.querySelector('.cm-lb,.ch-lbl,.txt,.label'); l=clean(q?q.textContent:el.textContent); }
+    return l;
+  }
+  // الأزرار اللي بتفتح صفحة أو نافذة بس (مفيهاش حفظ/تعديل/اختيارات)
+  var OK_JS=/^(open[A-Z]\w*|\w+Open|show[A-Z]\w*)\(\s*(?:'[\w-]*'|"[\w-]*"|\d+)?\s*\)\s*;?$/;
+  function scan(){
+    var out=[], seen={};
+    var nodes=document.querySelectorAll('[onclick]');
+    for(var i=0;i<nodes.length;i++){
+      var el=nodes[i];
+      if(el.closest('#scOverlay,.sc-tilewrap,#lockScreen,#cloudGate,#toast')) continue;
+      if(/INPUT|SELECT|TEXTAREA/.test(el.tagName)) continue;
+      var code=(el.getAttribute('onclick')||'').trim();
+      if(!OK_JS.test(code) || BAD_JS.test(code)) continue;
+      if(seen[code]) continue;
+      var lb=labelOf(el).replace(/[\d\u0660-\u0669.,]+/g,' ').replace(/[⌄⌃]/g,' ').replace(/\s+/g,' ').trim();
+      if(!lb || lb.length>28 || lb.length<2 || BAD_TXT.test(lb)) continue;
+      seen[code]=1;
+      out.push({c:code,l:lb,i:iconOf(el)});
+    }
+    return out;
+  }
+  function find(sc){
+    var nodes=document.querySelectorAll('[onclick]'), fb=null;
+    for(var i=0;i<nodes.length;i++){
+      var el=nodes[i];
+      if(el.closest('#scOverlay,.sc-tilewrap')) continue;
+      if((el.getAttribute('onclick')||'').trim()!==sc.c) continue;
+      if(labelOf(el)===sc.l) return el;
+      if(!fb) fb=el;
+    }
+    return fb;
+  }
+  window.scRun=function(i){
+    var sc=load()[i]; if(!sc) return;
+    var el=find(sc);
+    if(!el){ tst('الاختصار ده مش لاقيه دلوقتي — افتح صفحته مرة من التطبيق وجرّب تاني',false); return; }
+    try{ el.click(); }catch(e){ tst('معرفتش أفتح الاختصار ده',false); }
+  };
+  function glyph(e){ return '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><text x="60" y="64" font-size="86" text-anchor="middle" dominant-baseline="central">'+esc(e)+'</text></svg>'; }
+  function render(){
+    var cnt=document.getElementById('scCount'); var list=load();
+    if(cnt) cnt.textContent=list.length?('عندك '+list.length+' اختصار'):'لسه مفيش اختصارات';
+    var tg=document.getElementById('scToggle'); if(tg) tg.checked=isOn();
+    var host=document.getElementById('homeExtras'); if(!host) return;
+    Array.prototype.slice.call(host.querySelectorAll(':scope > .sc-tilewrap')).forEach(function(n){ n.remove(); });
+    var old=document.getElementById('homeShortcuts'); if(old) old.remove();
+    if(!isOn()) return;
+    list.forEach(function(s,i){
+      var w=document.createElement('div'); w.className='cap-hero-wrap sc-tilewrap';
+      w.innerHTML='<button type="button" class="cap-hero" onclick="scRun('+i+')" aria-label="'+esc(s.l)+'"><span class="ch-stage"><span class="ch-ico">'+glyph(s.i)+'</span></span><span class="ch-lbl">'+esc(s.l)+'</span></button>';
+      host.appendChild(w);
+    });
+  }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  var cache=[];
+  function mv(i,d){ var a=load(), j=i+d; if(j<0||j>=a.length) return; var t=a[i]; a[i]=a[j]; a[j]=t; save(a); render(); drawList(); }
+  function drawList(){
+    var q=(document.getElementById('scSearch').value||'').trim();
+    var cur=load(), has={};
+    cur.forEach(function(s){ has[s.c+'|'+s.l]=1; });
+    var h='';
+    if(cur.length){
+      h+='<div class="sc-sec">ترتيب اختصاراتك في الصفحة الرئيسية</div>';
+      cur.forEach(function(s,i){
+        h+='<div class="sc-sel"><span class="sc-ic">'+esc(s.i)+'</span><span class="sc-rl">'+esc(s.l)+'</span>'
+          +'<button type="button" class="sc-mvb" data-mv="'+i+'|-1"'+(i===0?' disabled':'')+' aria-label="لأعلى">▲</button>'
+          +'<button type="button" class="sc-mvb" data-mv="'+i+'|1"'+(i===cur.length-1?' disabled':'')+' aria-label="لأسفل">▼</button>'
+          +'<button type="button" class="sc-mvb" data-rm="'+i+'" aria-label="حذف">✕</button></div>';
+      });
+      h+='<div class="sc-sec">إضافة اختصار</div>';
+    }
+    var items=cache.filter(function(s){ return (!q || s.l.indexOf(q)>-1) && !has[s.c+'|'+s.l]; });
+    items.forEach(function(s){
+      h+='<button type="button" class="sc-row" data-k="'+esc(s.c+'|'+s.l)+'"><span class="sc-ic">'+esc(s.i)+'</span><span class="sc-rl">'+esc(s.l)+'</span><span class="sc-chk">＋</span></button>';
+    });
+    if(!items.length) h+='<div class="sc-empty">'+(q?'مفيش نتايج. لو مش لاقي اللي عايزه افتح صفحته مرة من التطبيق وارجع هنا.':'كل الصفحات المتاحة مضافة.')+'</div>';
+    var L=document.getElementById('scList'); L.innerHTML=h;
+    Array.prototype.forEach.call(L.querySelectorAll('[data-mv]'),function(b){
+      b.onclick=function(){ var p=b.getAttribute('data-mv').split('|'); mv(+p[0],+p[1]); };
+    });
+    Array.prototype.forEach.call(L.querySelectorAll('[data-rm]'),function(b){
+      b.onclick=function(){ var a=load(); a.splice(+b.getAttribute('data-rm'),1); save(a); render(); drawList(); };
+    });
+    Array.prototype.forEach.call(L.querySelectorAll('.sc-row'),function(b){
+      b.onclick=function(){
+        var k=b.getAttribute('data-k'), a=load();
+        var f=cache.filter(function(s){ return s.c+'|'+s.l===k; })[0]; if(f) a.push(f);
+        save(a); render(); drawList();
+      };
+    });
+  }
+  window.scOpen=function(){
+    var ov=document.getElementById('scOverlay');
+    cache=scan();
+    if(!ov){
+      ov=document.createElement('div'); ov.id='scOverlay'; ov.className='sc-ov';
+      ov.innerHTML='<div class="sc-top"><button type="button" class="sc-back" onclick="scClose()">› رجوع</button><div class="sc-ttl">⚡ اختصارات الصفحة الرئيسية</div></div>'
+        +'<div class="sc-note">اختار أي أيقونة أو صفحة في التطبيق (إيداع، صرف، الذهب، التقارير…) وهتظهر في الصفحة الرئيسية بنفس حجم الأيقونات الرئيسية. رتّبها بالأسهم ▲▼ أو احذفها بـ ✕.</div>'
+        +'<input type="search" id="scSearch" class="lock-input" placeholder="ابحث عن أيقونة أو صفحة…" oninput="scFilter()" style="text-align:right;margin:8px 12px;width:calc(100% - 24px)">'
+        +'<div id="scList" class="sc-list"></div>';
+      document.body.appendChild(ov);
+    }
+    document.getElementById('scSearch').value='';
+    ov.style.display='flex'; drawList();
+  };
+  window.scFilter=function(){ drawList(); };
+  window.scClose=function(){ var ov=document.getElementById('scOverlay'); if(ov) ov.style.display='none'; };
+  window.scToggle=function(on){ try{ localStorage.setItem(ON,on?'1':'0'); }catch(e){} render(); };
+  window.scRender=render;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',render); else render();
+  window.addEventListener('load',function(){ setTimeout(render,300); });
+  window.__scScan=scan;
+})();
+
 </script>
 </body>
 </html>
