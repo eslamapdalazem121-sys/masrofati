@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-12.8420">
+<meta name="app-version" content="2026-11-12.8421">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -2056,6 +2056,15 @@ html.perf .plus-badge::after{opacity:0 !important;}
 .cmv-day.on{background:linear-gradient(145deg,#8b5cf0,#5b32c8); color:#fff;}
 
 
+
+/* 8421: ملخص اليوم — المصروف المنزلي / المنصرف / المتبقي */
+.day-home-box{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px;}
+.day-home-box .dh-c{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:9px 4px; text-align:center; min-width:0;}
+.day-home-box .dh-c small{display:block; font-size:calc(11px * var(--fs,1)); color:var(--muted); font-weight:700;}
+.day-home-box .dh-c b{display:block; font-size:calc(14.5px * var(--fs,1)); font-weight:800; margin-top:3px; color:var(--text); word-break:break-word;}
+.day-home-box .dh-c.neg b{color:#d6162b;}
+.day-home-box .dh-c.pos b{color:#16a870;}
+.day-home-note{grid-column:1 / -1; font-size:calc(11px * var(--fs,1)); color:var(--muted); text-align:center;}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -5665,6 +5674,7 @@ document.addEventListener('DOMContentLoaded', perfRefreshUI);
       <span>إجمالي مصروفات اليوم</span>
       <span class="amt" id="dayDetailTotal">0</span>
     </div>
+    <div id="dayDetailHome" class="day-home-box"></div>
     <div id="dayDetailInterest" class="bank-box" style="display:none; margin-top:12px;"></div>
     <div id="dayDetailList" style="margin-top:12px;"></div>
     <div class="ops-sec"><h4 class="ops-h">📜 سجل عمليات هذا اليوم</h4><div class="gi-sumrow"><span id="opsSumDayD"></span></div><div class="gi-rows" id="opsListDayD" style="max-height:none; overflow:visible;"></div></div>
@@ -12163,8 +12173,42 @@ function navigateDayDetail(delta){
   openDayDetail(next);
 }
 
+/* 8421: حساب المصروف المنزلي / المنصرف / المتبقي ليوم معيّن */
+function dayHomeStats(y, m, day){
+  const mon = data[y] && data[y][m]; if(!mon) return null;
+  const end = new Date(y, m, day, 23, 59, 59, 999).getTime();
+  let home = 0;
+  (mon.incomeSources||[]).forEach(x=>{
+    if(x.counted === false) return;
+    const ms = opsMs(x.date);
+    if(ms !== undefined && ms > end) return;
+    home += Number(x.amount)||0;
+  });
+  let spentDay = 0, spentCum = 0;
+  collectAllExpenses(mon.groups).forEach(e=>{
+    if(e.counted === false) return;
+    const a = Number(e.amount)||0;
+    const ms = e.date ? new Date(e.date).getTime() : undefined;
+    if(ms !== undefined && !isNaN(ms)){
+      if(ms > end) return;
+      const d = new Date(ms);
+      if(d.getFullYear()===y && d.getMonth()===m && d.getDate()===day) spentDay += a;
+    }
+    spentCum += a;
+  });
+  return {home, spentDay, spentCum, remain: home - spentCum};
+}
+function dayHomeHtml(st){
+  if(!st) return '';
+  const rc = st.remain < 0 ? ' neg' : (st.remain > 0 ? ' pos' : '');
+  return '<div class="dh-c"><small>💰 المصروف المنزلي</small><b>' + fmt(st.home) + '</b></div>'
+    + '<div class="dh-c"><small>💸 المنصرف اليوم</small><b>' + fmt(st.spentDay) + '</b></div>'
+    + '<div class="dh-c' + rc + '"><small>✅ المتبقي</small><b>' + fmt(st.remain) + '</b></div>'
+    + '<div class="day-home-note">المنزلي والمتبقي محسوبين لحد نهاية اليوم ده (منصرف الشهر لحد اليوم: ' + fmt(st.spentCum) + ')</div>';
+}
 function openDayDetail(day){
   _currentDayDetail = day;
+  { const hb = document.getElementById('dayDetailHome'); if(hb){ try{ hb.innerHTML = dayHomeHtml(dayHomeStats(currentYear, currentMonth, day)); }catch(e){ hb.innerHTML = ''; } } }
   { const bi = document.getElementById('dayDetailInterest'), due = bankInterestDue(currentYear, currentMonth, day), pdue = pensionDue(currentYear, currentMonth, day);
     if(bi){ const parts = []; if(due.length) parts.push('🏦 فوائد بنكية مستحقة: ' + due.map(e=> e.name + ' ' + fmt(e.amt)).join(' · ')); if(pdue.length) parts.push('💳 معاش مستحق: ' + pdue.map(e=> e.name + ' ' + fmt(e.amt)).join(' · ')); bi.style.display = parts.length ? 'block' : 'none'; bi.textContent = parts.join('  —  '); } }
   const mon = data[currentYear][currentMonth];
@@ -12231,6 +12275,7 @@ function openReport(kind){
     total = todayExpenses.reduce((s,e)=> e.counted===false ? s : s + Number(e.amount||0), 0);
     title = '📅 تقرير اليوم — ' + now.toLocaleDateString(dateLocale(), {weekday:'long', day:'numeric', month:'long'});
     sub = toArabicDigits(todayExpenses.length) + ' عملية اليوم';
+    try{ const hs = dayHomeStats(now.getFullYear(), now.getMonth(), now.getDate()); if(hs && now.getFullYear()===currentYear && now.getMonth()===currentMonth) sub += ' · 💰 المصروف المنزلي: ' + fmt(hs.home) + ' · 💸 المنصرف اليوم: ' + fmt(hs.spentDay) + ' · ✅ المتبقي: ' + fmt(hs.remain); }catch(e){}
   } else if(kind === 'monthly'){
     total = monthExpenses(currentMonth);
     title = '🗓️ تقرير ' + MONTHS[currentMonth] + ' ' + toArabicDigits(currentYear);
