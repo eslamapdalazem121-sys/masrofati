@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-12.8422">
+<meta name="app-version" content="2026-11-12.8423">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -12744,11 +12744,19 @@ function saveEditItem(){
 }
 
 // ===== 8422: علامة «تم تعديله» على أي عنصر اتعدّل =====
-function edHtml(o){ return (o && o.edAt) ? '<span class="ed-tag">✎ تم تعديله</span>' : ''; }
+function edHtml(o){ return (o && o.edAt) ? '<span class="ed-tag" data-t="' + Number(o.edAt) + '">✎ تم تعديله</span>' : ''; }
+function edWhen(ms){
+  try{ return new Date(Number(ms)).toLocaleString('ar-EG', {weekday:'long', day:'numeric', month:'long', year:'numeric', hour:'numeric', minute:'2-digit'}); }catch(e){ return new Date(Number(ms)).toLocaleString(); }
+}
+document.addEventListener('click', function(e){
+  const g = e.target && e.target.closest ? e.target.closest('.ed-tag') : null; if(!g || !g.dataset.t) return;
+  e.stopPropagation(); e.preventDefault();
+  showToast('✎ تم تعديله — ' + edWhen(g.dataset.t), true);
+  clearTimeout(window._toastTimer); window._toastTimer = setTimeout(function(){ const t = document.getElementById('toast'); if(t) t.classList.remove('show'); }, 4500);
+}, true);
 function edAdd(el, o){
   if(!el || !o || !o.edAt) return;
-  const s = document.createElement('span'); s.className = 'ed-tag'; s.textContent = '✎ تم تعديله';
-  try{ s.title = 'تم تعديله: ' + new Date(o.edAt).toLocaleString('ar-EG'); }catch(e){}
+  const s = document.createElement('span'); s.className = 'ed-tag'; s.textContent = '✎ تم تعديله'; s.dataset.t = String(Number(o.edAt));
   el.appendChild(s);
 }
 function edStampIds(ids){   // بيعلّم السجلات اللي ليها الـ id ده (أو المرتبطة بيه) إنها اتعدّلت
@@ -18869,7 +18877,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 .sc-empty{padding:24px;text-align:center;color:var(--muted);line-height:1.7}
 
 /* 8422: علامة «تم تعديله» */
-.ed-tag{display:inline-block; margin-inline:6px; padding:1px 7px; border-radius:8px; font-size:10px !important; font-weight:800 !important; line-height:1.55; vertical-align:middle; white-space:nowrap; letter-spacing:0; color:#6b4a00 !important; background:#ffe58a !important; border:1px solid #e8b923; box-shadow:0 1px 0 rgba(232,185,35,.55);}
+.ed-tag{display:inline-block; margin-inline:6px; padding:1px 7px; border-radius:8px; font-size:10px !important; font-weight:800 !important; line-height:1.55; vertical-align:middle; white-space:nowrap; letter-spacing:0; color:#6b4a00 !important; cursor:pointer; background:#ffe58a !important; border:1px solid #e8b923; box-shadow:0 1px 0 rgba(232,185,35,.55);}
 </style>
 <script>
 (function(){
