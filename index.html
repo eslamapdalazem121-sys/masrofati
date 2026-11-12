@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-12.8423">
+<meta name="app-version" content="2026-11-12.8424">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -18878,6 +18878,45 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 
 /* 8422: علامة «تم تعديله» */
 .ed-tag{display:inline-block; margin-inline:6px; padding:1px 7px; border-radius:8px; font-size:10px !important; font-weight:800 !important; line-height:1.55; vertical-align:middle; white-space:nowrap; letter-spacing:0; color:#6b4a00 !important; cursor:pointer; background:#ffe58a !important; border:1px solid #e8b923; box-shadow:0 1px 0 rgba(232,185,35,.55);}
+
+/* 8424: صفحة المحادثة — شكل رسائل عصري 3D بألوان حديثة */
+#aiOv{background:radial-gradient(120% 60% at 100% 0%, color-mix(in srgb,#8b5cf6 14%,transparent), transparent 60%), radial-gradient(100% 50% at 0% 100%, color-mix(in srgb,#22d3ee 13%,transparent), transparent 60%), var(--bg,#eef1f6);}
+#aiOv .ai-top{background:linear-gradient(135deg,#7c4dff 0%,#5b34d6 55%,#3b6cf0 100%); color:#fff; border-radius:0 0 26px 26px; padding-bottom:14px; box-shadow:0 8px 0 -2px rgba(59,26,153,.35), 0 14px 22px -10px rgba(91,52,214,.55), inset 0 1px 0 rgba(255,255,255,.35);}
+#aiOv .ai-top h3{color:#fff; text-shadow:0 2px 0 rgba(30,10,90,.35); letter-spacing:.2px;}
+#aiOv .ai-top .ai-btn{background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.14)); color:#fff; border:1px solid rgba(255,255,255,.35); backdrop-filter:blur(6px); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 3px 0 rgba(30,10,90,.35);}
+#aiOv .ai-top .ai-btn:active{transform:translateY(3px); box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
+#aiMsgs{padding:18px 12px 10px; gap:12px;}
+#aiOv #aiMsgs .ai-b{position:relative; max-width:84%; padding:12px 16px; font-size:15.5px; line-height:1.75; border-radius:22px; border:0;}
+#aiOv #aiMsgs .ai-b.u{align-self:flex-start; color:#fff; border-bottom-right-radius:7px; text-shadow:0 1px 0 rgba(30,10,90,.25);
+  background:linear-gradient(155deg,#9b6dff 0%,#6a3df0 55%,#4b2bd0 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.38), inset 0 -3px 0 rgba(30,10,110,.28), 0 4px 0 #3b1fa8, 0 10px 16px -6px rgba(91,52,214,.55);}
+#aiOv #aiMsgs .ai-b.a{align-self:flex-end; color:var(--text,#161a22); border-bottom-left-radius:7px;
+  background:linear-gradient(160deg,color-mix(in srgb,#ffffff 70%,var(--card,#fff)) 0%,color-mix(in srgb,#38bdf8 12%,var(--card,#fff)) 100%);
+  border:1px solid color-mix(in srgb,#38bdf8 28%,transparent);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.85), inset 0 -3px 0 rgba(56,130,200,.14), 0 4px 0 color-mix(in srgb,#5aa9e6 38%,transparent), 0 10px 16px -8px rgba(40,110,190,.35);}
+#aiOv #aiMsgs .ai-b.alt{background:linear-gradient(160deg,color-mix(in srgb,#fff7e0 80%,var(--card,#fff)),color-mix(in srgb,#fbbf24 22%,var(--card,#fff))); border:1px solid color-mix(in srgb,#f59e0b 40%,transparent);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.85), inset 0 -3px 0 rgba(217,119,6,.14), 0 4px 0 color-mix(in srgb,#f59e0b 40%,transparent), 0 10px 16px -8px rgba(217,119,6,.35);}
+#aiOv #aiMsgs .ai-b.alt .ai-alt-h{color:#b45309;}
+#aiOv #aiMsgs .ai-b.err{background:linear-gradient(160deg,#fff1f0,#ffd9d6); color:#b42318; border:1px solid rgba(229,72,77,.35);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.8), 0 4px 0 rgba(229,72,77,.3), 0 10px 16px -8px rgba(229,72,77,.4);}
+#aiOv #aiMsgs .ai-b img{border-radius:14px; box-shadow:0 4px 10px rgba(0,0,0,.22);}
+#aiOv #aiMsgs .ai-typing{border-radius:20px; border-bottom-left-radius:7px; padding:12px 17px; background:linear-gradient(160deg,#fff,color-mix(in srgb,#38bdf8 12%,var(--card,#fff))); box-shadow:inset 0 2px 0 rgba(255,255,255,.85), 0 4px 0 rgba(90,169,230,.35), 0 8px 14px -8px rgba(40,110,190,.35);}
+#aiOv #aiMsgs .ai-src{border-radius:14px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 10%,var(--card,#fff))); box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(139,92,246,.25);}
+#aiOv #aiMsgs .ai-rev{border-radius:16px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 12%,var(--card,#fff))); color:#5b34d6; box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(139,92,246,.3);}
+#aiOv #aiMsgs .ai-sug button{border-radius:18px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#22d3ee 14%,var(--card,#fff))); border:1px solid color-mix(in srgb,#22d3ee 35%,transparent); box-shadow:inset 0 1px 0 #fff, 0 4px 0 color-mix(in srgb,#06b6d4 30%,transparent);}
+#aiOv #aiMsgs .ai-sug button:active{transform:translateY(3px); box-shadow:none;}
+#aiOv #aiMsgs .ai-card{border-radius:24px; border:1px solid color-mix(in srgb,#8b5cf6 45%,transparent); background:linear-gradient(170deg,#fff,color-mix(in srgb,#8b5cf6 7%,var(--card,#fff))); box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(91,47,209,.3), 0 14px 20px -10px rgba(91,52,214,.4);}
+#aiOv #aiMsgs .ai-card.done{border-color:#12b27a; box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(18,178,122,.35), 0 14px 20px -10px rgba(18,178,122,.35);}
+#aiOv #aiPrev img{box-shadow:0 4px 10px rgba(0,0,0,.25);}
+#aiOv #aiBar{margin:0 10px calc(env(safe-area-inset-bottom,0px) + 10px); padding:8px; border-radius:30px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 7%,var(--card,#fff))); border:1px solid color-mix(in srgb,#8b5cf6 22%,transparent); box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(91,52,214,.18), 0 14px 24px -10px rgba(91,52,214,.45);}
+#aiOv #aiBar input[type=text]{background:color-mix(in srgb,var(--bg,#eef1f6) 80%,#fff); border:1px solid color-mix(in srgb,#8b5cf6 18%,transparent); border-radius:24px; box-shadow:inset 0 2px 5px rgba(60,40,140,.12);}
+#aiOv #aiBar input[type=text]:focus{outline:0; border-color:#8b5cf6; box-shadow:inset 0 2px 5px rgba(60,40,140,.12), 0 0 0 3px rgba(139,92,246,.22);}
+#aiOv #aiBar .ai-ic{background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 12%,var(--card,#fff))); box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(91,52,214,.25);}
+#aiOv #aiBar .ai-send{color:#fff; background:linear-gradient(155deg,#9b6dff,#5b34d6); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 3px 0 #3b1a99, 0 8px 14px -6px rgba(91,52,214,.6);}
+#aiOv #aiBar .ai-ic:active{transform:translateY(3px); box-shadow:none;}
+#aiOv #aiBar .ai-ic.rec{background:linear-gradient(155deg,#ff6b70,#e5484d); color:#fff;}
+@media (prefers-reduced-motion:no-preference){#aiOv #aiMsgs .ai-b,#aiOv #aiMsgs .ai-typing{animation:aiPop .28s ease both;}}
+@keyframes aiPop{from{opacity:0; transform:translateY(8px) scale(.97);} to{opacity:1; transform:none;}}
 </style>
 <script>
 (function(){
