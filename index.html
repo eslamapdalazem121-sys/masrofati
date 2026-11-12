@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-12.8421">
+<meta name="app-version" content="2026-11-12.8422">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -8102,7 +8102,7 @@ function saveCapAcc(backChoice){
     }
   }
   let savedX = null;
-  if(edit){ const x = capList().find(z=> z.id === _accEditId); if(x){ delete x.intKeep; delete x.noZk; Object.assign(x, rec); savedX = x; } }
+  if(edit){ const x = capList().find(z=> z.id === _accEditId); if(x){ delete x.intKeep; delete x.noZk; rec.edAt = Date.now(); Object.assign(x, rec); savedX = x; } }
   else { capList().push(Object.assign({id: uid()}, rec)); savedX = capList()[capList().length - 1]; }
   if(savedX && (savedX.isSub === true || savedX.isAcc === true) && rec.intKeep === true && savedX.intBack === undefined) savedX.intBack = (backChoice === 'all') ? 'all' : 'none';
   if(savedX && (savedX.isSub === true || savedX.isAcc === true) && rec.intKeep === true && backChoice !== undefined && !savedX.intDepDone) savedX.intBack = (backChoice === 'all') ? 'all' : 'none';
@@ -8199,7 +8199,7 @@ function saveCapCert(backChoice){
   if(edit){ const x = capList().find(z=> z.id === _certEditId); if(x){
     const pt = certTermM(x), pd = new Date(x.date || Date.now()).toDateString(); let ext0 = certExt(x);
     if(pt && x.autoRenew === true){ const i0 = certMatInfo(x); if(i0) ext0 = i0.cycle - 1; }   // كانت بتتجدد تلقائيًا: الدورات اللي عدّت بتتحسب كتجديدات
-    delete x.intKeep; delete x.noZk; delete x.accId; delete x.term; delete x.autoRenew; delete x.ext; Object.assign(x, rec);
+    delete x.intKeep; delete x.noZk; delete x.accId; delete x.term; delete x.autoRenew; delete x.ext; rec.edAt = Date.now(); Object.assign(x, rec);
     if(rec.term && !rec.autoRenew && rec.term === pt && new Date(rec.date).toDateString() === pd && ext0 > 0) x.ext = ext0;
   } }
   else capList().push(Object.assign({id: uid()}, rec));
@@ -8920,7 +8920,7 @@ function aaDepEdit(id, na, nd, nn){
     x.amount = cgInt((Number(x.amount) || 0) + diff);
     const c = aaChgOf(x, id + 'd'); if(c){ c.delta = na; c.t = t; }
   }
-  r.amount = na; r.date = nd; r.note = nn; r.ts = r.ts || Date.now();
+  r.amount = na; r.date = nd; r.note = nn; r.ts = r.ts || Date.now(); r.edAt = Date.now();
   return true;
 }
 function aaXfEdit(id, na, nd, nn){
@@ -8933,7 +8933,7 @@ function aaXfEdit(id, na, nd, nn){
   const isB = function(z){ return capSubOf(z) === 'bank'; };
   if(a){ a.amount = (isB(a) ? cgInt : cgRound)((Number(a.amount) || 0) - diff); const c = aaChgOf(a, id + 'o'); if(c){ c.delta = -na; c.t = t; } }
   if(b){ b.amount = (isB(b) ? cgInt : cgRound)((Number(b.amount) || 0) + diff); const c = aaChgOf(b, id + 'i'); if(c){ c.delta = na; c.t = t; } }
-  r.amount = na; r.date = nd; r.note = nn;
+  r.amount = na; r.date = nd; r.note = nn; r.edAt = Date.now();
   return true;
 }
 // ===== 8316: قيمة الفايدة / المعاش يدويًا لموعد معيّن (مبلغ البنك بيزيد أو بينقص) — للحسابات والشهادات والمعاش =====
@@ -8999,7 +8999,7 @@ function mcCard(x, o){
   const d = document.createElement('div'); d.className = 'gi-row mc mc-' + sub + (x.isAcc ? ' mc-acc' : (x.isCert ? ' mc-cert' : (x.isSub ? ' mc-sub' : ''))); d.dataset.id = x.id; d.dataset.grp = x.grp || '';
   d.innerHTML = '<div class="mc-top"><span class="mc-ic"></span><div class="mc-nm"><b class="mc-name"></b><small class="mc-tags"></small></div>' + (o.acts ? '<div class="mc-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button><button type="button" aria-label="الزكاة"></button></div>' : '') + '</div><div class="mc-bal"><small></small><b></b></div><div class="mc-grid"></div>';
   d.querySelector('.mc-ic').textContent = sub === 'bank' ? (x.isCert ? '📜' : (x.isSub ? '🗂' : '🏦')) : (sub === 'pension' ? '💳' : '💵');
-  d.querySelector('.mc-name').textContent = x.name;
+  d.querySelector('.mc-name').textContent = x.name; edAdd(d.querySelector('.mc-name'), x);
   d.querySelector('.mc-bal b').textContent = fmt(x.amount);
   const grid = d.querySelector('.mc-grid'), vl = d.querySelector('.mc-bal small'), tg = d.querySelector('.mc-tags');
   if(sub === 'bank'){
@@ -9675,7 +9675,7 @@ function renderCmAddLog(){
     g.rows.forEach(o=>{
       const x = o.x, sb = SUB[capSubOf(x)] || SUB.cash, gr = x.grp ? groups.find(q=> q.id === x.grp) : null, d = document.createElement('div'); d.className = 'cmo-row';
       d.innerHTML = '<span class="cmo-ic"></span><div class="cmo-mid"><b></b><small></small></div><span class="cmo-amt"></span>' + (capIsPast() ? '' : '<div class="cmo-acts"><button type="button" aria-label="تعديل">✏️</button></div>');
-      d.children[0].textContent = o.dep ? '➕' : sb[0]; d.children[1].children[0].textContent = (o.dep ? 'إيداع · ' : '') + x.name;
+      d.children[0].textContent = o.dep ? '➕' : sb[0]; d.children[1].children[0].textContent = (o.dep ? 'إيداع · ' : '') + x.name; edAdd(d.children[1].children[0], o.dep || x);
       d.children[1].children[1].textContent = o.dep ? ('إيداع في حساب بنكي' + (o.dep.note ? ' · ' + o.dep.note : '')) : (sb[1] + (gr ? ' · 📁 ' + gr.name : '') + (capZkIn(x) ? '' : ' · 🚫 خارج الزكاة')); { const tt = entryTimeTxt(o.dep || x); if(tt) d.children[1].children[1].textContent += ' · 🕒 ' + tt; }
       d.children[2].textContent = '+' + fmt(o.a);
       if(d.children[3]){ if(o.dep){ d.children[3].children[0].textContent = '🗑'; d.children[3].children[0].onclick = ()=> openConfirm('إلغاء الإيداع', 'تلغي إيداع ' + fmt(o.a) + ' ويتخصم من رصيد الحساب؟', ()=> depDel(o.dep.id), 'إلغاء الإيداع'); } else d.children[3].children[0].onclick = ()=> cmEditItem(x); }
@@ -9898,7 +9898,7 @@ function cmoLog(){
       const d = document.createElement('div'); d.className = 'cmo-row' + (_cmoEditId === r.id ? ' editing' : '');
       d.innerHTML = '<span class="cmo-ic"></span><div class="cmo-mid"><b></b><small></small></div><span class="cmo-amt"></span><div class="cmo-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button></div>';
       d.children[0].textContent = ic[r.kind] || '💸';
-      d.children[1].children[0].textContent = r.name;
+      d.children[1].children[0].textContent = r.name; edAdd(d.children[1].children[0], r);
       d.children[1].children[1].textContent = cmoDestLbl(r) + (r.zkY ? ' (زكاة ' + toArabicDigits(r.zkY) + ')' : '') + (r.note ? ' · ' + r.note : '') + (entryTimeTxt(r) ? ' · 🕒 ' + entryTimeTxt(r) : '');
       d.children[2].textContent = fmt(r.amount);
       d.children[3].children[0].onclick = ()=> cmOutEdit(r.id);
@@ -9990,6 +9990,7 @@ function cmOutSave(){
     if(!old || oi < 0){ _cmoEditId = null; cmoRender(); return; }
     cmoUndo(old); data.moneyOut.splice(oi, 1);
     { const k0 = _cmoKind; _cmoKind = list[0].k; try{ cmoApply(list[0].x, cgRound(amt), note, dstr, old.id, restS, restG); } finally { _cmoKind = k0; } }
+    edStampIds([old.id, old.id + 's', old.id + 'p', old.id + 'g']);
     _cmoEditId = null; _cmoZkYear = (_cmoDest === 'zakat') ? _cmoZkYear : '';
     document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; document.getElementById('cmoDate').value = cmoToday();
     cmoAfter(); showToast('اتعدّل الصرف ✅', true); return;
@@ -10201,7 +10202,7 @@ function addCapMoney(backChoice){
   const linkFrom = (backChoice === 'none') ? today0 : penStart({date: rec.date}).getTime();
   const nAdded = (newLink && backChoice !== 'none') ? back.length : 0;
   if(newLink){ rec.payFrom = linkFrom; rec.depBack = 1; }
-  if(wasEdit){ const x = oldX; if(x){ const oldPay = x.payAcc; delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; let penH0 = null, penOld = true, penF = penFutureFrom(); if(_cmSub === 'pension'){ penH0 = Array.isArray(x.penGenH) ? x.penGenH.slice() : []; if(!penH0.length && (x.penGen === true || x.penGen === false)) penH0.push({f: 0, v: x.penGen}); penOld = penGenAt(Object.assign({}, x, {penGenH: penH0}), penF, new Date(penF).getFullYear(), new Date(penF).getMonth()); } delete x.penGen; if(_cmSub === 'pension'){ delete x.payAcc; } Object.assign(x, rec); if(_cmSub === 'pension'){ if(wantGen !== penOld || penH0.length){ const last = penH0[penH0.length - 1]; if(wantGen !== penOld){ if(last && last.f === penF) last.v = wantGen; else penH0.push({f: penF, v: wantGen}); } x.penGenH = penH0; } } } }
+  if(wasEdit){ const x = oldX; if(x){ const oldPay = x.payAcc; delete x.grp; delete x.rate; delete x.remInt; delete x.monthlyInt; delete x.intKeep; delete x.noZk; let penH0 = null, penOld = true, penF = penFutureFrom(); if(_cmSub === 'pension'){ penH0 = Array.isArray(x.penGenH) ? x.penGenH.slice() : []; if(!penH0.length && (x.penGen === true || x.penGen === false)) penH0.push({f: 0, v: x.penGen}); penOld = penGenAt(Object.assign({}, x, {penGenH: penH0}), penF, new Date(penF).getFullYear(), new Date(penF).getMonth()); } delete x.penGen; if(_cmSub === 'pension'){ delete x.payAcc; } rec.edAt = Date.now(); Object.assign(x, rec); if(_cmSub === 'pension'){ if(wantGen !== penOld || penH0.length){ const last = penH0[penH0.length - 1]; if(wantGen !== penOld){ if(last && last.f === penF) last.v = wantGen; else penH0.push({f: penF, v: wantGen}); } x.penGenH = penH0; } } } }
   else { if(_cmSub === 'pension') rec.penGenH = [{f: 0, v: wantGen}]; capList().push(Object.assign({id: uid()}, rec)); }
   try{ if(_cmSub === 'bank' || _cmSub === 'pension'){ const it2 = wasEdit ? oldX : capList()[capList().length - 1]; ovFormApply('cmNextOv', it2, wasEdit); } }catch(e){}
   try{ if(penDepositSync()) save(); }catch(e){}
@@ -10758,7 +10759,7 @@ function renderCapGold(){
     const d = document.createElement('div'); d.className = 'gi-row gd-pc ' + (cgUseOf(x) === 'jewel' ? 'jw' : 'sv'); d.dataset.id = x.id; d.dataset.grp = x.grp || '';
     d.innerHTML = '<div class="pc-top"><span class="pc-ic"></span><div class="pc-nm"><b class="pc-name"></b><small class="pc-tags"></small></div><b class="pc-val"></b><div class="pc-acts"><button type="button">✏️</button><button type="button">🗑</button></div></div><div class="pc-grid"></div>';
     d.querySelector('.pc-ic').textContent = cgUseOf(x) === 'jewel' ? '💍' : '🪙';
-    d.querySelector('.pc-name').textContent = x.name;
+    d.querySelector('.pc-name').textContent = x.name; edAdd(d.querySelector('.pc-name'), x);
     d.querySelector('.pc-tags').textContent = 'عيار ' + toArabicDigits(x.karat || '') + ' · ' + fmt(x.grams) + ' جم · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + dtx(x.date, x) : '');
     const grid = d.querySelector('.pc-grid');
     const cell = (cls, lb, big, sm)=>{ const c = document.createElement('div'); c.className = 'pc-c ' + cls; const l = document.createElement('small'); l.textContent = lb; const bb = document.createElement('b'); bb.textContent = big; c.appendChild(l); c.appendChild(bb); if(sm){ const em = document.createElement('em'); em.textContent = sm; c.appendChild(em); } grid.appendChild(c); };
@@ -10794,7 +10795,7 @@ function saveCapGold(){
   if(!n || g <= 0 || pr <= 0){ showToast('اكتب اسم القطعة والوزن وثمن الجرام', false); return; }
   if(mvEd()){ const dv = document.getElementById('cgDate').value; if(dv && dv > mvInputDate()){ showToast('التاريخ لازم يكون في اليوم المعروض أو قبله', false); return; } }
   const rec = {name: n, cat: 'gold', karat: Number(document.getElementById('cgKarat').value), grams: g, ppg: pr, use: _cgUse, grp: document.getElementById('cgGrp').value || undefined, amount: cgInt(g * pr), date: inputValueToDate(document.getElementById('cgDate').value, Date.now())};
-  if(_cgEditId){ const x = capList().find(z=> z.id === _cgEditId); if(x){ delete x.grp; Object.assign(x, rec); } }
+  if(_cgEditId){ const x = capList().find(z=> z.id === _cgEditId); if(x){ delete x.grp; rec.edAt = Date.now(); Object.assign(x, rec); } }
   else capList().push(Object.assign({id: uid()}, rec));
   const wasEdit = !!_cgEditId;
   save(); cgReset(); renderCapGold(); renderCap(); showToast(wasEdit ? 'تم حفظ التعديل' : 'تمت إضافة القطعة', true);
@@ -10950,6 +10951,7 @@ function gpRow(o){
   d.children[0].textContent = o.ic; d.querySelector('.gp-name').textContent = o.name; d.querySelector('.gp-sub').textContent = o.sub || '';
   if(!o.sub) d.querySelector('.gp-sub').style.display = 'none';
   (o.tags || []).forEach(t=>{ const g = document.createElement('span'); g.className = 'gp-tag ' + (t.c || ''); g.textContent = t.t; d.querySelector('.gp-tags').appendChild(g); });
+  edAdd(d.querySelector('.gp-tags'), o.ed);
   d.querySelector('.gp-amt').textContent = fmt(o.amt);
   if(o.acts){ const a = document.createElement('div'); a.className = 'gp-acts'; o.acts.forEach(x=>{ const b = document.createElement('button'); b.type = 'button'; b.className = 'gp-mb'; b.textContent = x.t; b.onclick = x.fn; a.appendChild(b); }); d.appendChild(a); }
   return d;
@@ -10981,7 +10983,7 @@ function renderGIPage(){
       box.appendChild(gpRow({cls: x.auto + (pend ? ' pend' : ''), ic: x.auto === 'pension' ? '💳' : '🏦', name: x.name, sub: (x.auto === 'pension' ? 'معاش' : 'فايدة بنك') + ' \u200f·\u200f من «أموال» \u200f·\u200f ' + dt, amt: x.amount,
         tags: [pend ? {t: '⏳ هتتحوّل يوم ' + day, c: 'w'} : {t: '✅ تم التحويل والصرف'}]}));
     } else {
-      box.appendChild(gpRow({cls: x.counted === false ? 'unc' : '', ic: '💵', name: x.name, sub: dt, amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب في الإجمالي', c: 'n'}] : [],
+      box.appendChild(gpRow({ed: x, cls: x.counted === false ? 'unc' : '', ic: '💵', name: x.name, sub: dt, amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب في الإجمالي', c: 'n'}] : [],
         acts: [{t: '✏️', fn: ()=> gpEditSrc(x)}, {t: '🗑', fn: ()=> gpDelSrc(x)}]}));
     }
   });
@@ -10994,7 +10996,7 @@ function renderGIPage(){
     ob.appendChild(gpRow({cls: 'out' + (x.counted === false ? ' unc' : ''), ic: dd.ic, name: 'إلى ' + dd.n, sub: (x.note ? x.note + ' \u200f·\u200f ' : '') + (x.date ? dtx(x.date, x) : ''), amt: x.amount, tags: x.counted === false ? [{t: '🚫 غير محسوب', c: 'n'}] : []}));
   });
 }
-function gpEditSrc(x){ openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a,dt,cn)=>{ x.name = n || x.name; x.amount = a; if(dt) x.date = dt; if(cn !== undefined) x.counted = cn; save(); renderGISources(); renderGI(); }, x.date || Date.now(), x.counted !== false); }
+function gpEditSrc(x){ openGenEdit('✏️ تعديل مصدر الدخل', 'الاسم', x.name, x.amount, (n,a,dt,cn)=>{ x.name = n || x.name; x.amount = a; x.edAt = Date.now(); if(dt) x.date = dt; if(cn !== undefined) x.counted = cn; save(); renderGISources(); renderGI(); }, x.date || Date.now(), x.counted !== false); }
 function gpDelSrc(x){ openConfirm('حذف مصدر الدخل', 'هل تريد حذف "' + x.name + '"؟', ()=>{ { const mr = (data.moneyOut || []).find(z=> z.dest === 'gen' && !z.gi && (z.id + 's') === x.id); if(mr){ cmoUndo(mr); data.moneyOut = data.moneyOut.filter(z=> z.id !== mr.id); try{ cmoRender(); renderDetail(); }catch(e){} } } const rr = giRec(); rr.src = rr.src.filter(z=> z.id !== x.id); save(); renderGISources(); renderGI(); }); }
 function closeGI(){ document.getElementById('giOverlay').classList.remove('open'); }
 function addGISource(){
@@ -11047,6 +11049,7 @@ function renderGIOut(){
     d.children[1].textContent = x.note || (GI_DEST[x.dest] || GI_DEST.income).n;
     if(x.counted === false){ d.classList.add('unc'); const tg = document.createElement('span'); tg.className = 'gi-tag'; tg.textContent = '🚫 غير محسوب'; d.children[1].prepend(tg); }
     d.children[2].textContent = fmt(x.amount);
+    edAdd(d.children[1], x);
     d.children[3].onclick = ()=> openGenEdit('✏️ تعديل الصرف', 'ملاحظة', x.note, x.amount, (n,a)=> editGIOut(x.id, n, a));
     d.children[4].onclick = ()=> openConfirm('حذف عملية الصرف', (x.dest === 'other' ? 'هتتحذف عملية الصرف دي. متأكد؟' : 'سيتم التراجع عنها من ' + (GI_DEST[x.dest] || GI_DEST.income).n + '. متأكد؟'), ()=> deleteGIOut(x.id));
     box.appendChild(d);
@@ -11071,12 +11074,13 @@ function addGIOut(){
 }
 function editGIOut(id, note, amt){
   const rec = giRec().out.find(x=> x.id === id); if(!rec) return;
-  rec.note = note; rec.amount = amt;
+  rec.note = note; rec.amount = amt; rec.edAt = Date.now();
   const mon = data[currentYear][currentMonth];
   const inc = (mon.incomeSources || []).find(x=> x.id === id); if(inc){ inc.name = giLabel(note); inc.amount = amt; }
   { const f = findNode(mon.groups || [], id); if(f && f.node.type === 'expense'){ f.node.name = giLabel(note); f.node.amount = amt; } }
   const z = zkGet(), za = z.adds.find(x=> x.id === id); if(za){ za.name = giLabel(note); za.amount = amt; }
   const zp = z.payments.find(x=> x.id === id); if(zp){ zp.note = giLabel(note); zp.amount = amt; }
+  edStampIds([id]);
   giAfter();
 }
 function deleteGIOut(id){
@@ -11269,7 +11273,7 @@ function renderZmPay(){
     document.getElementById('zfCnt').textContent = fa.length ? toArabicDigits(fa.length) + ' عملية' : '';
     if(!fa.length){ const e = document.createElement('div'); e.className = 'gp-empty'; e.textContent = 'مفيش رصيد داخل للزكاة في ' + toArabicDigits(y) + ' لسه.'; fb.appendChild(e); }
     fa.forEach(function(x){ const q = x.p, dt = q.date ? dtx(new Date(q.date + 'T12:00:00').getTime(), q) : MONTHS[x.m];
-      const mv = {t: '🗓', fn: function(){ zfPickYear(x); }}; fb.appendChild(gpRow({cls: '', ic: '💳', name: q.name || 'رصيد زكاة', sub: dt + (x.by !== y ? ' · اتسجّل في ' + toArabicDigits(x.by) : ''), amt: q.amount, acts: q.zf ? [mv, {t: '✏️', fn: function(){ zfEdit(x); }}, {t: '🗑', fn: function(){ zfDel(x); }}] : [mv]})); }); }
+      const mv = {t: '🗓', fn: function(){ zfPickYear(x); }}; fb.appendChild(gpRow({ed: q, cls: '', ic: '💳', name: q.name || 'رصيد زكاة', sub: dt + (x.by !== y ? ' · اتسجّل في ' + toArabicDigits(x.by) : ''), amt: q.amount, acts: q.zf ? [mv, {t: '✏️', fn: function(){ zfEdit(x); }}, {t: '🗑', fn: function(){ zfDel(x); }}] : [mv]})); }); }
   document.getElementById('zpLeft').textContent = fmt(Math.abs(left));
   document.getElementById('zpLeftLbl').textContent = bad ? '⚠️ زيادة عن المطلوب' : '⏳ المتبقي';
   document.getElementById('zpHero').classList.toggle('bad', bad);
@@ -11284,7 +11288,7 @@ function renderZmPay(){
   Object.keys(dests).slice(0, 4).concat(['أسرة محتاجة', 'أقارب', 'جمعية خيرية', 'علاج']).filter(function(v, i, a){ return a.indexOf(v) === i; }).slice(0, 7).forEach(function(n){ const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = function(){ zpPick(n); }; chips.appendChild(b); });
   arr.forEach(function(x){
     const p = x.p, dt = p.date ? dtx(new Date(p.date + 'T12:00:00').getTime(), p) : MONTHS[x.m];
-    box.appendChild(gpRow({cls: 'out', ic: '🤲', name: p.note || 'دفعة زكاة', sub: dt, amt: p.amount, acts: [{t: '✏️', fn: function(){ zpEdit(x); }}, {t: '🗑', fn: function(){ zpDel(x); }}]}));
+    box.appendChild(gpRow({ed: p, cls: 'out', ic: '🤲', name: p.note || 'دفعة زكاة', sub: dt, amt: p.amount, acts: [{t: '✏️', fn: function(){ zpEdit(x); }}, {t: '🗑', fn: function(){ zpDel(x); }}]}));
   });
 }
 function zpYearAdds(y){
@@ -11323,7 +11327,7 @@ function zfAdd(){
   document.getElementById('zfSrc').value = ''; document.getElementById('zfAmt').value = '';
   zpAfter(); showToast('اتضاف للرصيد المتاح لزكاة ' + toArabicDigits(zy) + ' ✅', true);
 }
-function zfEdit(x){ const q = x.p; openGenEdit('✏️ تعديل رصيد الزكاة', 'المصدر', q.name, q.amount, function(n, a){ q.name = n || q.name || 'رصيد زكاة'; q.amount = a; zpAfter(); }); }
+function zfEdit(x){ const q = x.p; openGenEdit('✏️ تعديل رصيد الزكاة', 'المصدر', q.name, q.amount, function(n, a){ q.name = n || q.name || 'رصيد زكاة'; q.amount = a; q.edAt = Date.now(); zpAfter(); }); }
 function zfDel(x){ openConfirm('حذف رصيد الزكاة', 'هل تريد حذف الرصيد ده؟ هيتخصم من الرصيد المتاح.', function(){ x.bucket.adds = x.bucket.adds.filter(function(q){ return q.id !== x.p.id; }); zpAfter(); }); }
 /* 8321: لما المتبقي من زكاة السنة يوصل صفر نطلّع رسالة تهنئة */
 function zkLeftFor(y){ return zpZmOf(y) - zmPaidFor(y); }
@@ -11361,7 +11365,7 @@ function zpEdit(x){
   const p = x.p, ts = p.date ? new Date(p.date + 'T12:00:00').getTime() : Date.now();
   openGenEdit('✏️ تعديل صرف الزكاة', 'جهة الصرف', p.note, p.amount, function(n, a, dt){
     const lf0 = zkLeftFor(_zpYear || currentYear);
-    p.note = n || p.note || 'دفعة زكاة'; p.amount = a;
+    p.note = n || p.note || 'دفعة زكاة'; p.amount = a; p.edAt = Date.now();
     if(dt){
       const nd = dateToInputValue(dt), zy = _zpYear || currentYear, nm = zpMonthFor(nd, zy);
       p.date = nd;
@@ -11743,7 +11747,7 @@ function renderGroupEl(g, depth, indexInParent, siblingCount){
   head.onclick = ()=> toggleGroup(g.id);
   head.innerHTML = `
     ${dragHandleHtml(g.id, indexInParent, siblingCount, 'moveNode')}
-    <span class="gname"><span class="g-ico">${g.icon||'📁'}</span> <span class="txt">${g.name}</span>${g.date ? ' <small class="gdate">📅 ' + dtx(g.date, g) + '</small>' : ''}</span>
+    <span class="gname"><span class="g-ico">${g.icon||'📁'}</span> <span class="txt">${g.name}</span>${edHtml(g)}${g.date ? ' <small class="gdate">📅 ' + dtx(g.date, g) + '</small>' : ''}</span>
     <span style="display:flex;align-items:center;gap:6px;">
       <span class="gtotal">${fmt(gtotal)}</span>
       ${gExcluded>0 ? `<span class="gtotal-excluded">🚫 ${fmt(gExcluded)}</span>` : ''}
@@ -11830,7 +11834,7 @@ function renderItemEl(it, indexInParent, siblingCount){
     ${dragHandleHtml(it.id, indexInParent, siblingCount, 'moveNode')}
     <span class="it-ico">${it.icon||'🧾'}</span>
     <span class="item-main">
-      <span class="it-name">${it.counted===false?'<span class="tag">غير محسوب</span>':''}${isBackdated(it)?'<span class="tag backdated-tag">🕓 بأثر رجعي</span>':''}${it.name}</span>
+      <span class="it-name">${it.counted===false?'<span class="tag">غير محسوب</span>':''}${isBackdated(it)?'<span class="tag backdated-tag">🕓 بأثر رجعي</span>':''}${it.name}${edHtml(it)}</span>
       ${it.date?(()=>{ let dd = ''; try{ dd = formatDate(it.date); }catch(e){} const tt = entryTimeTxt(it); return `<span class="item-date"><span class="idd">${dd}${tt && dd ? ' · ' : ''}</span>${tt ? '<span class="idt">🕒 ' + tt + '</span>' : ''}</span>`; })():''}
     </span>
     <span style="display:flex;align-items:center;gap:6px;">
@@ -12595,7 +12599,7 @@ function renderIncomeSourcesList(){
     rows.forEach(src=>{
       const d = document.createElement('div'); d.className = 'inc-row' + (src.counted === false ? ' excluded' : ''); d.dataset.id = src.id;
       d.innerHTML = '<span class="inc-ic">💵</span><div class="inc-mid"><b></b><small></small></div><span class="inc-amt"></span><div class="inc-acts"><button type="button" aria-label="تعديل">✏️</button><button type="button" aria-label="حذف">🗑</button></div>';
-      d.children[1].children[0].textContent = src.name;
+      d.children[1].children[0].textContent = src.name; edAdd(d.children[1].children[0], src);
       d.children[1].children[1].textContent = (src.counted === false ? '🚫 غير محسوب' : '✅ محسوب') + (String(src.name).indexOf('من الدخل العام') === 0 ? ' · 🔁 محوّل من الدخل العام' : '');
       d.children[1].children[1].textContent += (entryTimeTxt(src) ? ' · 🕒 ' + entryTimeTxt(src) : ''); d.children[2].textContent = fmt(src.amount);
       d.children[3].children[0].onclick = ()=> openEditIncomeSource(src.id);
@@ -12663,7 +12667,7 @@ function saveEditIncomeSource(){
   const counted = document.getElementById('editIncomeSrcCounted').checked;
   const mon = data[currentYear][currentMonth];
   const src = (mon.incomeSources||[]).find(s=> s.id===_editIncomeSourceId);
-  if(src){ src.name = name; src.amount = amt; src.counted = counted; src.date = inputValueToDate(document.getElementById('editIncomeSrcDate').value, src.date); }
+  if(src){ src.name = name; src.amount = amt; src.counted = counted; src.edAt = Date.now(); src.date = inputValueToDate(document.getElementById('editIncomeSrcDate').value, src.date); }
   save();
   closeEditIncomeSource();
   renderIncomeSourcesList();
@@ -12690,7 +12694,7 @@ function saveRename(){
   if(!newName || !_renameId){ closeRename(); return; }
   const found = findNode(data[currentYear][currentMonth].groups, _renameId);
   if(!found){ closeRename(); return; }
-  found.node.name = newName;
+  found.node.name = newName; found.node.edAt = Date.now();
   found.node.date = inputValueToDate(document.getElementById('renameDate').value, found.node.date);
   save();
   closeRename();
@@ -12730,7 +12734,7 @@ function saveEditItem(){
   const iconEl = document.getElementById('editItemIconInput');
   const dateEl = document.getElementById('editItemDate');
   if(!found.node.createdAt){ found.node.createdAt = found.node.date || Date.now(); } // توافق مع مصروفات قديمة
-  found.node.name = name; found.node.amount = amt; found.node.counted = counted;
+  found.node.name = name; found.node.amount = amt; found.node.counted = counted; found.node.edAt = Date.now();
   found.node.icon = iconEl ? iconEl.value : found.node.icon;
   if(dateEl && dateEl.value){ found.node.date = inputValueToDate(dateEl.value, found.node.date); }
   save();
@@ -12739,6 +12743,26 @@ function saveEditItem(){
   showToast('تم تعديل المصروف', true);
 }
 
+// ===== 8422: علامة «تم تعديله» على أي عنصر اتعدّل =====
+function edHtml(o){ return (o && o.edAt) ? '<span class="ed-tag">✎ تم تعديله</span>' : ''; }
+function edAdd(el, o){
+  if(!el || !o || !o.edAt) return;
+  const s = document.createElement('span'); s.className = 'ed-tag'; s.textContent = '✎ تم تعديله';
+  try{ s.title = 'تم تعديله: ' + new Date(o.edAt).toLocaleString('ar-EG'); }catch(e){}
+  el.appendChild(s);
+}
+function edStampIds(ids){   // بيعلّم السجلات اللي ليها الـ id ده (أو المرتبطة بيه) إنها اتعدّلت
+  try{
+    const set = {}; ids.forEach(function(i){ set[i] = 1; });
+    const now = Date.now(), seen = new Set();
+    (function w(o){
+      if(!o || typeof o !== 'object' || seen.has(o)) return; seen.add(o);
+      if(Array.isArray(o)){ o.forEach(w); return; }
+      if(typeof o.id === 'string' && set[o.id] && !('delta' in o)) o.edAt = now;
+      Object.keys(o).forEach(function(k){ w(o[k]); });
+    })(data);
+  }catch(e){}
+}
 // ===== رسالة تنبيه بسيطة (Toast) =====
 function showToast(msg, ok){
   const t = document.getElementById('toast');
@@ -14616,7 +14640,7 @@ function saveQuickAdd(){
   const qaEd = window._qaEdit;
   if(qaEd){
     const en = qaEd.n;
-    en.name = name; en.amount = amt; en.counted = counted; en.date = qaChosenDate; en.icon = qaIcon;
+    en.name = name; en.amount = amt; en.counted = counted; en.date = qaChosenDate; en.icon = qaIcon; en.edAt = Date.now();
     if(!en.createdAt) en.createdAt = qaChosenDate || qaNow;
     if(!counted && qaDueVal) en.due = inputValueToDate(qaDueVal, en.due || qaNow); else delete en.due;
     if(counted){ en.settledAt = qaNow; delete en.bpHide; }
@@ -18394,7 +18418,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     vis.forEach(function(x){
       var due = Number(x.n.due) || 0, tags = [];
       if(due){ tags.push({t: 'استحقاق ' + lblDate(due), c: 'n'}); var dl = Math.floor((today0.getTime() - due) / DAY); if(dl > 0) tags.push({t: 'متأخر ' + toArabicDigits(dl) + ' يوم', c: 'w'}); }
-      box.appendChild(gpRow({cls: 'pend', ic: '⏳', name: x.n.name || 'دفعة', sub: x.g + ' · ' + lblDate(x.n.date || x.n.createdAt) + ' ' + toArabicDigits(x.y), amt: x.n.amount, tags: tags,
+      box.appendChild(gpRow({ed: x.n, cls: 'pend', ic: '⏳', name: x.n.name || 'دفعة', sub: x.g + ' · ' + lblDate(x.n.date || x.n.createdAt) + ' ' + toArabicDigits(x.y), amt: x.n.amount, tags: tags,
         acts: [{t: '✅', fn: function(){ bpSettleOpen(x); }}, {t: '✏️', fn: function(){ bpEditOpen(x); }}, {t: '📅', fn: function(){ bpDueOpen(x); }}, {t: '🙈', fn: function(){ openConfirm('إخفاء من المعلقة', 'هيفضل «غير محسوب» بس مش هيظهر هنا. تكمل؟', function(){ x.n.bpHide = true; save(); bpRender(); bdBadges(); }, 'إخفاء'); }}]}));
     });
     var hid = bpAll().filter(function(x){ return x.n.bpHide; });
@@ -18494,7 +18518,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     });
     var pl = $('zdnPayList'); pl.innerHTML = ''; var pays = zpYearPays(y); $('zdnPayCnt').textContent = pays.length ? toArabicDigits(pays.length) + ' عملية' : '';
     if(!pays.length){ var e2 = document.createElement('div'); e2.className = 'gp-empty'; e2.textContent = 'لسه ما صرفتش زكاة في ' + toArabicDigits(y) + '.'; pl.appendChild(e2); }
-    pays.slice(0, 6).forEach(function(x){ var p = x.p; pl.appendChild(gpRow({cls: 'out', ic: '🤲', name: p.note || 'دفعة زكاة', sub: p.date ? lblDate(new Date(p.date + 'T12:00:00').getTime()) : MONTHS[x.m], amt: p.amount})); });
+    pays.slice(0, 6).forEach(function(x){ var p = x.p; pl.appendChild(gpRow({ed: p, cls: 'out', ic: '🤲', name: p.note || 'دفعة زكاة', sub: p.date ? lblDate(new Date(p.date + 'T12:00:00').getTime()) : MONTHS[x.m], amt: p.amount})); });
   };
   window.zdnDonAdd = function(){
     var dest = $('zdnDDest').value.trim(), amt = Number($('zdnDAmt').value) || 0, date = $('zdnDDate').value || dateToInputValue(Date.now());
@@ -18843,6 +18867,9 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 .sc-row.on{border-color:var(--accent);background:var(--accent-soft)}
 .sc-row.on .sc-chk{color:var(--accent-dark)}
 .sc-empty{padding:24px;text-align:center;color:var(--muted);line-height:1.7}
+
+/* 8422: علامة «تم تعديله» */
+.ed-tag{display:inline-block; margin-inline:6px; padding:1px 7px; border-radius:8px; font-size:10px !important; font-weight:800 !important; line-height:1.55; vertical-align:middle; white-space:nowrap; letter-spacing:0; color:#6b4a00 !important; background:#ffe58a !important; border:1px solid #e8b923; box-shadow:0 1px 0 rgba(232,185,35,.55);}
 </style>
 <script>
 (function(){
