@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-11.8411">
+<meta name="app-version" content="2026-11-12.8415">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -3573,6 +3573,16 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <button type="button" id="lockForgotBtn" class="lock-link" style="display:none;" onclick="toggleLockForgot()">نسيت النقش / كلمة المرور؟</button>
     <div id="lockForgotPanel" class="lock-panel" style="display:none;">
       <button type="button" id="lockRestoreBtn" class="lock-panel-btn" onclick="lockRestoreFromAccount()">☁️ استرجاع القفل من حسابي</button>
+      <button type="button" id="lockEmailBtn" class="lock-panel-btn" onclick="toggleLockEmail()">📧 استرجاع بالإيميل (بياناتك بتفضل زي ما هي)</button>
+      <div id="lockEmailBox" style="display:none;">
+        <div class="lock-panel-note">اكتب إيميل وكلمة مرور حسابك في التطبيق — نفس الحساب اللي سجّلت بيه دخول على الجهاز ده. لو صح، القفل بيتفتح وبتعمل قفل جديد من الإعدادات.</div>
+        <input type="email" id="lockEmail" class="lock-input" dir="ltr" placeholder="الإيميل" autocomplete="email" autocapitalize="off" spellcheck="false" style="text-align:left; margin-top:8px;">
+        <input type="password" id="lockPassword" class="lock-input" dir="ltr" placeholder="كلمة مرور الحساب" autocomplete="current-password" style="text-align:left; margin-top:8px;" onkeydown="if(event.key==='Enter')lockEmailRecover()">
+        <button type="button" class="lock-panel-btn" style="margin-top:8px;" onclick="lockEmailRecover()">✅ تأكيد وفتح القفل</button>
+        <button type="button" class="lock-link" onclick="cloudAuthAction('lock','reset')">نسيت كلمة مرور الحساب؟ ابعتلي رسالة على الإيميل</button>
+        <p id="lockMsg" class="bk-note" style="text-align:center;"></p>
+        <div class="lock-panel-note">لو الجهاز ده عمره ما اتسجّل عليه دخول بحساب، الاسترجاع بالإيميل مش هينفع — استخدم «إعادة ضبط التطبيق».</div>
+      </div>
       <button type="button" id="lockResetBtn" class="lock-panel-btn danger" onclick="lockResetApp()">🧹 إعادة ضبط التطبيق على الجهاز ده</button>
       <div class="lock-panel-note">إعادة الضبط بتمسح بيانات التطبيق من الجهاز ده وتقفل القفل. اللي محفوظ في حسابك (لو بتستخدم نسخة Claude) أو في نسخة احتياطية ملفها معاك بيرجع تاني.</div>
     </div>
@@ -5385,7 +5395,7 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
           <button type="button" class="btn-save bk-main-btn" onclick="cloudAuthAction('cloud','signin')">دخول</button>
           <button type="button" class="drive-btn" style="margin:0;" onclick="cloudAuthAction('cloud','signup')">حساب جديد</button>
         </div>
-        <button type="button" class="lock-link" onclick="cloudAuthAction('cloud','reset')">نسيت كلمة المرور؟</button>
+        <button type="button" class="lock-link" onclick="cloudAuthAction('cloud','reset')">🔑 نسيت كلمة المرور؟ ابعتلي رابط على الإيميل</button>
         <p id="cloudMsg" class="bk-note"></p>
         <p id="cloudSdkHint" class="bk-note" style="display:none;">لو الأزرار مش بتشتغل: افتح التطبيق وإنت متصل بالنت مرة واحدة عشان يحمّل خدمة الحساب.</p>
       </div>
@@ -5511,7 +5521,7 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
     <input type="password" id="gatePassword" class="lock-input" dir="ltr" placeholder="كلمة المرور" autocomplete="current-password" style="text-align:left; margin-top:8px;">
     <button type="button" class="btn-save bk-main-btn" style="margin-top:12px;" onclick="cloudAuthAction('gate','signin')">دخول</button>
     <button type="button" class="drive-btn" style="margin:8px 0 0;" onclick="cloudAuthAction('gate','signup')">حساب جديد</button>
-    <button type="button" class="lock-link" onclick="cloudAuthAction('gate','reset')">نسيت كلمة المرور؟</button>
+    <button type="button" class="lock-link" onclick="cloudAuthAction('gate','reset')">🔑 نسيت كلمة المرور؟ ابعتلي رابط على الإيميل</button>
     <p id="gateMsg" class="bk-note" style="text-align:center;"></p>
     <button type="button" class="lock-link" onclick="cloudSkipLogin()">تخطي — استخدم التطبيق من غير حساب</button>
   </div>
@@ -13138,6 +13148,44 @@ async function lockRestoreFromAccount(){
   showToast('اتسترجع القفل من حسابك — استخدم النقش/الباسورد المسجّل في الحساب', true);
   showLockGate();
 }
+// استرجاع بالإيميل: الدخول بحساب السحابة (إيميل + كلمة مرور) = إثبات إنك صاحب الحساب، فبيتفتح القفل من غير ما يتمسح حاجة
+function toggleLockEmail(){
+  const b = document.getElementById('lockEmailBox'); if(!b) return;
+  b.style.display = b.style.display === 'none' ? 'block' : 'none';
+}
+async function lockEmailRecover(){
+  const prefix = 'lock', {email, password} = cloudCreds(prefix);
+  if(!email){ cloudSetMsg(prefix, 'اكتب الإيميل'); return; }
+  if(!password){ cloudSetMsg(prefix, 'اكتب كلمة مرور الحساب'); return; }
+  if(!navigator.onLine){ cloudSetMsg(prefix, 'محتاج إنترنت عشان نتأكد من الحساب'); return; }
+  cloudSetMsg(prefix, 'ثواني…', true);
+  let sdk;
+  try{ sdk = await cloudLoadSdk(); }
+  catch(e){ cloudSetMsg(prefix, 'مش قادر أحمّل خدمة الحساب. افتح التطبيق من رابطه الأصلي (GitHub) وإنت متصل بالنت وجرّب تاني.'); return; }
+  try{
+    // لازم الحساب يكون هو المربوط بالجهاز ده (اللي سجّلت بيه دخول قبل كده) — مش أي حساب تاني
+    let u = cloud.auth.currentUser || cloud.user;
+    if(!u){
+      u = await new Promise(function(res){
+        let done = false, un = null;
+        const fin = function(x){ if(done) return; done = true; try{ if(un) un(); }catch(e){} res(x || null); };
+        un = sdk.authM.onAuthStateChanged(cloud.auth, fin);
+        if(done){ try{ un(); }catch(e){} }
+        setTimeout(function(){ fin(null); }, 8000);
+      });
+    }
+    if(!u){ cloudSetMsg(prefix, 'الجهاز ده مش مربوط بحساب (ما سجّلتش دخول عليه قبل كده). استخدم «إعادة ضبط التطبيق» وبعدها سجّل دخول عشان بياناتك ترجع.'); return; }
+    if(String(u.email || '').toLowerCase() !== email.toLowerCase()){ cloudSetMsg(prefix, 'الإيميل ده مش هو الحساب المربوط بالجهاز ده'); return; }
+    await cloudTimeout(sdk.authM.reauthenticateWithCredential(u, sdk.authM.EmailAuthProvider.credential(email, password)), 20000);
+  }catch(e){ cloudSetMsg(prefix, cloudErrorMessage(e)); return; }
+  document.getElementById('lockPassword').value = '';
+  cloudSetMsg(prefix, '');
+  lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null};
+  try{ await saveLockConfig(); }catch(e){}
+  _lockFails = 0;
+  showToast('اتأكدنا من حسابك ✅ القفل اتفتح — اعمل قفل جديد من الإعدادات', true);
+  startApp();
+}
 // إعادة ضبط كاملة (ضغطتين للتأكيد): بتمسح بيانات الجهاز وتقفل القفل
 let _lockResetArmedAt = 0;
 async function lockResetApp(){
@@ -13877,7 +13925,7 @@ function cloudSetMsg(prefix, text, good){
 }
 async function cloudAuthAction(prefix, kind){
   const {email, password} = cloudCreds(prefix);
-  if(!email){ cloudSetMsg(prefix, 'اكتب الإيميل'); return; }
+  if(!email){ cloudSetMsg(prefix, kind === 'reset' ? 'اكتب إيميلك في الخانة اللي فوق وبعدين ادوس «نسيت كلمة المرور»' : 'اكتب الإيميل'); return; }
   if(kind !== 'reset' && !password){ cloudSetMsg(prefix, 'اكتب كلمة المرور'); return; }
   if(!navigator.onLine){ cloudSetMsg(prefix, 'محتاج إنترنت عشان تسجّل الدخول'); return; }
   cloudSetMsg(prefix, 'ثواني…', true);
@@ -16822,7 +16870,10 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 #aiOv .ai-btn{border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; padding:9px 13px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.12);}
 #aiOv .ai-btn:active{transform:translateY(3px); box-shadow:none;}
 #aiHist{display:none; padding:10px 12px; background:var(--card,#fff); border-bottom:1px solid var(--border,#e8eaf0);}
-#aiHist.open{display:block; max-height:60vh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+#aiHist.open{display:block; position:fixed; inset:0; z-index:5; max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0; background:var(--bg,#eef1f6); border:0;}
+#aiHist .ai-hhead{display:flex; align-items:center; gap:8px; position:sticky; top:0; z-index:2; padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px; background:var(--card,#fff); box-shadow:0 2px 10px rgba(0,0,0,.08);}
+#aiHist .ai-hhead h3{flex:1; margin:0; font-size:18px; font-weight:900; text-align:center;}
+#aiHist .ai-hbody{padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 40px);}
 #aiHist .ai-hh{font-weight:900; font-size:14px; margin:2px 4px 8px;}
 #aiHist .ai-hr{display:flex; gap:6px; align-items:stretch; margin-bottom:6px;}
 #aiHist .ai-ht{flex:1; text-align:right; border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; padding:10px 12px; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; gap:2px; min-width:0;}
@@ -17231,8 +17282,9 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function histRender(){
     var box = $('aiHist'), all = chatsRead(); all.chats.sort(function(a, b){ return b.at - a.at; });
     box.innerHTML = '';
-    var h = document.createElement('div'); h.className = 'ai-hh'; h.textContent = '🕘 المحادثات القديمة'; box.appendChild(h);
-    if(!all.chats.length){ var n = document.createElement('div'); n.className = 'ai-note'; n.textContent = 'مفيش محادثات محفوظة لسه.'; box.appendChild(n); return; }
+    var h = document.createElement('div'); h.className = 'ai-hhead'; var hb = document.createElement('button'); hb.className = 'ai-btn'; hb.textContent = '‹ رجوع'; hb.onclick = function(){ window.aiHistToggle(); }; var ht = document.createElement('h3'); ht.textContent = '🕘 المحادثات القديمة'; var hs = document.createElement('span'); hs.style.cssText = 'width:72px; flex:none;'; h.appendChild(hb); h.appendChild(ht); h.appendChild(hs); box.appendChild(h);
+    var wrap = document.createElement('div'); wrap.className = 'ai-hbody'; box.appendChild(wrap);
+    if(!all.chats.length){ var n = document.createElement('div'); n.className = 'ai-note'; n.textContent = 'مفيش محادثات محفوظة لسه.'; wrap.appendChild(n); return; }
     all.chats.forEach(function(c){
       var r = document.createElement('div'); r.className = 'ai-hr' + (c.id === curId ? ' cur' : '');
       var b = document.createElement('button'); b.className = 'ai-ht';
@@ -17240,9 +17292,9 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       var t2 = document.createElement('small'); var d = new Date(c.at); t2.textContent = d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'}) + ' · ' + toArabicDigits(c.log.length) + ' رسالة';
       b.appendChild(t1); b.appendChild(t2); b.onclick = function(){ chatOpen(c.id); };
       var x = document.createElement('button'); x.className = 'ai-hx'; x.textContent = '✕'; x.setAttribute('aria-label', 'مسح المحادثة'); x.onclick = function(){ chatDel(c.id); };
-      r.appendChild(b); r.appendChild(x); box.appendChild(r);
+      r.appendChild(b); r.appendChild(x); wrap.appendChild(r);
     });
-    var ca = document.createElement('button'); ca.className = 'ai-btn'; ca.style.cssText = 'width:100%; margin-top:8px;'; ca.textContent = '🗑️ مسح كل المحادثات'; ca.onclick = function(){ chatDelAll(); }; box.appendChild(ca);
+    var ca = document.createElement('button'); ca.className = 'ai-btn'; ca.style.cssText = 'width:100%; margin-top:8px;'; ca.textContent = '🗑️ مسح كل المحادثات'; ca.onclick = function(){ chatDelAll(); }; wrap.appendChild(ca);
   }
   function chatOpen(id){
     if(busy){ toast('استنى المساعد يخلّص رده الأول', false); return; }
@@ -18603,6 +18655,36 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   window.clkRender = clkRender;
   setInterval(tick, 1000); document.addEventListener('visibilitychange', tick); setTimeout(function(){ try{ clkRender(); }catch(e){} }, 300);
+})();
+</script>
+
+<style>
+.pw-eye-wrap{position:relative;display:block;width:100%}
+.pw-eye-wrap>input{padding-right:46px!important}
+.pw-eye-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:none;background:none;font-size:20px;line-height:1;cursor:pointer;padding:0;opacity:.75;-webkit-tap-highlight-color:transparent}
+.pw-eye-btn.on{opacity:1}
+</style>
+<script>
+(function(){
+  var IDS=['cloudPassword','gatePassword','lockPassword','lockPasswordInput','setupPasswordInput','setupPasswordConfirm','pv_pw0','pv_pw1','pv_pw2'];
+  function add(inp){
+    if(!inp || inp.dataset.pwEye) return;
+    inp.dataset.pwEye='1';
+    var w=document.createElement('span'); w.className='pw-eye-wrap';
+    inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
+    var b=document.createElement('button'); b.type='button'; b.className='pw-eye-btn';
+    b.setAttribute('aria-label','إظهار كلمة المرور'); b.textContent='👁';
+    b.addEventListener('click',function(e){
+      e.preventDefault(); e.stopPropagation();
+      var show = inp.type==='password';
+      inp.type = show ? 'text' : 'password';
+      b.classList.toggle('on',show);
+      b.textContent = show ? '🙈' : '👁';
+    });
+    w.appendChild(b);
+  }
+  function run(){ IDS.forEach(function(id){ add(document.getElementById(id)); }); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();
 </script>
 </body>
