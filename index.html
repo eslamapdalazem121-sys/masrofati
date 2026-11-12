@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-11.8408">
+<meta name="app-version" content="2026-11-11.8411">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -16831,7 +16831,11 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 #aiHist .ai-hr.cur .ai-ht{outline:2px solid #8b5cf6;}
 #aiHist .ai-hx{border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; width:42px; font-size:15px; cursor:pointer;}
 #aiSet{display:none; padding:12px; background:var(--card,#fff); border-bottom:1px solid var(--border,#e8eaf0);}
-#aiSet.open{display:block; max-height:55vh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+#aiSet.open{display:block; position:fixed; inset:0; z-index:5; max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0; background:var(--bg,#eef1f6); border:0;}
+#aiSet .ai-sethead{display:none;}
+#aiSet.open .ai-sethead{display:flex; align-items:center; gap:8px; position:sticky; top:0; z-index:2; padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px; background:var(--card,#fff); box-shadow:0 2px 10px rgba(0,0,0,.08);}
+#aiSet .ai-sethead h3{flex:1; margin:0; font-size:18px; font-weight:900; text-align:center;}
+#aiSet .ai-setbody{padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 40px);}
 #aiMsgs{min-height:120px;}
 #aiSet label{display:block; font-weight:800; font-size:13px; margin:8px 4px 5px; opacity:.8;}
 #aiSet input{width:100%; box-sizing:border-box; padding:12px; border-radius:14px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-size:15px; font-family:inherit; direction:ltr; text-align:left;}
@@ -16883,6 +16887,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 #aiBar .ai-ic{flex:none; width:46px; height:46px; border-radius:50%; border:0; font-size:21px; cursor:pointer; display:flex; align-items:center; justify-content:center; background:var(--bg,#eef1f6); color:inherit; box-shadow:0 3px 0 rgba(0,0,0,.12);}
 #aiBar .ai-send{background:linear-gradient(160deg,#8b5cf6,#6d3fe0); color:#fff; box-shadow:0 3px 0 #3b1a99;}
 #aiBar .ai-ic:active{transform:translateY(3px); box-shadow:none;}
+#aiBar .ai-ic.rec{background:#e5484d; color:#fff; animation:aiRec 1s infinite;}
+@keyframes aiRec{50%{transform:scale(1.12);}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="aiBotW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".65" stop-color="#eef3fb"/><stop offset="1" stop-color="#c9d7ee"/></linearGradient>
@@ -17012,6 +17018,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   </div>
   <div id="aiHist"></div>
   <div id="aiSet">
+    <div class="ai-sethead"><button class="ai-btn" onclick="aiToggleSet()">‹ رجوع</button><h3>⚙️ إعدادات المساعد</h3><button class="ai-btn" style="background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button></div>
+    <div class="ai-setbody">
     <label>مفتاح Gemini (مجاني)</label>
     <input type="password" id="aiKey" placeholder="AIza..." autocomplete="off">
     <label>الموديل</label>
@@ -17053,13 +17061,17 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       <div id="aiP4UrlBox" style="display:none;"><label>عنوان الـAPI</label><input type="text" id="aiP4Url" placeholder="https://.../v1"></div>
       <div class="ai-note" id="aiP4Note"></div>
     </div>
+    <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:14px;"><input type="checkbox" id="aiAutoMic"> 🎤 الميكروفون يشتغل لوحده أول ما أفتح الروبوت</label>
+    <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:14px;"><input type="checkbox" id="aiVoiceOut"> 🔊 الروبوت يقرأ كل الردود بصوت عالي (لو بتكلمه بالصوت بيرد بالصوت تلقائي)</label>
     <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiTest()">اختبار الاتصال</button><button class="ai-btn" onclick="aiClear()">محادثة جديدة</button></div><div id="aiTestOut" class="ai-note" style="display:none; font-weight:800; opacity:1; direction:rtl; word-break:break-word;"></div>
+    </div>
   </div>
   <div id="aiMsgs"></div>
   <div id="aiPrev"><img id="aiPrevImg" alt=""><button class="ai-btn" onclick="aiDropImg()">✕</button></div>
   <div id="aiBar">
     <button class="ai-ic" onclick="document.getElementById('aiFile').click()" aria-label="صورة فاتورة">📷</button>
     <input type="file" id="aiFile" accept="image/*" style="display:none" onchange="aiPickImg(this)">
+    <button class="ai-ic" id="aiMic" onclick="aiMic()" aria-label="تحدّث">🎤</button>
     <input type="text" id="aiIn" placeholder="اكتب: صرفت ٢٠٠ كهرباء…" onkeydown="if(event.key==='Enter'){aiSend();}">
     <button class="ai-ic ai-send" onclick="aiSend()" aria-label="إرسال">➤</button>
   </div>
@@ -17115,6 +17127,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     window.aiP3Change(true);
     $('aiP4').value = lsGet(P4K, ''); $('aiP4Key').value = lsGet(P4KEY, ''); $('aiP4Model').value = lsGet(P4MOD, ''); $('aiP4Url').value = lsGet(P4URL, '');
     window.aiP4Change(true);
+    $('aiVoiceOut').checked = lsGet('masrofati_ai_voiceout', '0') === '1';
+    $('aiAutoMic').checked = lsGet('masrofati_ai_automic', '1') === '1';
   }
   function saveSet(){
     lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
@@ -17154,10 +17168,14 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     $('aiOv').classList.add('open');
     if(!started){ started = true; if(!chatRestore()) welcome(); }
     loadSet();
-    if(!lsGet(KEYK, '') && !p2cfg() && !p3cfg() && !p4cfg()) $('aiSet').classList.add('open');
     endScroll();
+    if(!lsGet(KEYK, '') && !p2cfg() && !p3cfg() && !p4cfg()){
+      if(!noKeyHint){ noKeyHint = true; bubble('a', 'عشان أرد عليك محتاج مفتاح مجاني. دوس ⚙️ فوق وحط المفتاح.'); endScroll(); }
+    }else if(lsGet('masrofati_ai_automic', '1') === '1' && !busy && !recOn && typeof window.aiMic === 'function'){
+      window.aiMic();   // التحدث يفتح على طول (الضغطة على الروبوت هي اللي بتسمح للمتصفح)
+    }
   };
-  window.aiClose = function(){ $('aiOv').classList.remove('open'); };
+  window.aiClose = function(){ $('aiOv').classList.remove('open'); try{ window.speechSynthesis.cancel(); }catch(e){} try{ if(typeof rec !== 'undefined' && rec) rec.abort(); }catch(e){} };
   window.aiToggleSet = function(){ $('aiSet').classList.toggle('open'); loadSet(); };
   window.aiSaveSet = function(){ saveSet(); $('aiSet').classList.remove('open'); toast('اتحفظت إعدادات المساعد ✅', true); };
   window.aiClear = function(){ chatSave(); hist = []; logEls = []; curId = null; $('aiHist').classList.remove('open'); $('aiMsgs').innerHTML = ''; welcome(); $('aiSet').classList.remove('open'); };
@@ -17899,8 +17917,49 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
 
   /* ===== الإرسال ===== */
-  window.aiSend = async function(){
+  /* ===== صوت: تتكلم للروبوت (🎤) وهو يرد بصوته (🔊) ===== */
+  var voiceFlag = false, rec = null, recOn = false, noKeyHint = false;
+  function speakClean(t){ return String(t || '').replace(/<[^>]*>/g, ' ').replace(/https?:\/\/\S+/g, ' ').replace(/[*_#`>|~\[\]]/g, ' ').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, ' ').replace(/\s+/g, ' ').trim(); }
+  function aiStopSpeak(){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  function aiSpeak(t){
+    try{
+      var ss = window.speechSynthesis; if(!ss || typeof SpeechSynthesisUtterance === 'undefined') return;
+      ss.cancel();
+      var clean = speakClean(t).slice(0, 900); if(!clean) return;
+      var parts = [];
+      (clean.match(/[^.!؟?]+[.!؟?]*/g) || [clean]).forEach(function(x){
+        while(x.length > 200){ var k = x.lastIndexOf(' ', 200); if(k < 40) k = 200; parts.push(x.slice(0, k)); x = x.slice(k).trim(); }
+        if(x) parts.push(x);
+      });
+      var vs = []; try{ vs = ss.getVoices() || []; }catch(e){}
+      var v = vs.filter(function(z){ return /^ar/i.test(z.lang || ''); })[0];
+      parts.forEach(function(x){ var u = new SpeechSynthesisUtterance(x); u.lang = 'ar-EG'; u.rate = 1; if(v) u.voice = v; ss.speak(u); });
+    }catch(e){}
+  }
+  $('aiAutoMic').addEventListener('change', function(){ lsSet('masrofati_ai_automic', this.checked ? '1' : '0'); });
+  $('aiVoiceOut').addEventListener('change', function(){ lsSet('masrofati_ai_voiceout', this.checked ? '1' : '0'); });
+  window.aiMic = function(){
+    aiStopSpeak();
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ toast('المتصفح ده مش بيدعم التحدث. افتح التطبيق من Chrome.', false); return; }
+    if(recOn){ try{ rec.stop(); }catch(e){} return; }
     if(busy) return;
+    var btn = $('aiMic'), got = '', sent = false;
+    rec = new SR(); rec.lang = 'ar-EG'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    rec.onstart = function(){ recOn = true; btn.classList.add('rec'); };
+    rec.onresult = function(ev){ var x = ''; for(var i = 0; i < ev.results.length; i++) x += ev.results[i][0].transcript; got = x; $('aiIn').value = x; };
+    rec.onerror = function(ev){
+      var c = ev && ev.error;
+      if(c === 'not-allowed' || c === 'service-not-allowed') toast('اسمح للتطبيق باستخدام الميكروفون من إعدادات المتصفح.', false);
+      else if(c === 'no-speech') toast('مسمعتش حاجة، جرّب تاني.', false);
+      else if(c === 'network') toast('التحدث محتاج إنترنت.', false);
+    };
+    rec.onend = function(){ recOn = false; btn.classList.remove('rec'); if(got.trim() && !sent){ sent = true; voiceFlag = true; window.aiSend(); } };
+    try{ rec.start(); }catch(e){ recOn = false; btn.classList.remove('rec'); }
+  };
+  window.aiSend = async function(){
+    if(busy){ voiceFlag = false; return; }
+    var fromVoice = voiceFlag; voiceFlag = false; aiStopSpeak();
     var txt = $('aiIn').value.trim(), img = pendImg; if(!txt && !img) return;
     $('aiIn').value = ''; pendImg = null; $('aiPrev').classList.remove('open');
     $('aiSet').classList.remove('open');
@@ -17929,6 +17988,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       }else{
         if(out && !bub) hooks.onText(res.text);   // لو الرد وصل مرة واحدة برضه يتكتب قدامك
         if(typer){ await typer.finish(); bub.onclick = null; }
+        if(out && (fromVoice || lsGet('masrofati_ai_voiceout', '0') === '1')) aiSpeak(out);
         var mIdx;
         if(res.parts){
           hist.push({role: 'model', parts: res.parts}); mIdx = hist.length - 1;
