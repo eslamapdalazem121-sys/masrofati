@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-12.8415">
+<meta name="app-version" content="2026-11-12.8416">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -3567,6 +3567,11 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <div id="lockPatternArea" style="display:none;">
       <div class="pattern-grid" id="lockPatternGrid"></div>
       <div id="lockPatternHint" style="text-align:center; font-size:calc(12px * var(--fs,1)); color:var(--muted); margin-top:8px;">ارسم النقش</div>
+      <button type="button" id="lockBackupLink" class="lock-link" style="display:none;" onclick="toggleLockBackup()">🔑 استخدم كلمة المرور الاحتياطية</button>
+    </div>
+    <div id="lockBackupBox" style="display:none;">
+      <input type="password" id="lockBackupInput" class="lock-input" placeholder="كلمة المرور الاحتياطية" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')attemptUnlockBackup()">
+      <button type="button" class="btn-save" style="width:100%; margin-top:10px; padding:13px; border-radius:12px; border:none; font-weight:700; font-size:calc(15px * var(--fs,1)); cursor:pointer; font-family:inherit;" onclick="attemptUnlockBackup()">دخول بالاحتياطية</button>
     </div>
     <div id="lockError" style="color:var(--expense); font-size:calc(12.5px * var(--fs,1)); text-align:center; margin-top:10px; display:none;"></div>
     <div id="lockOfflineHint" class="lock-hint" style="display:none;">📴 مفيش إنترنت — القفل شغال من الجهاز نفسه</div>
@@ -5319,6 +5324,16 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
           <div id="setupPatternHint" style="text-align:center; font-size:calc(12px * var(--fs,1)); color:var(--muted); margin-top:8px;">ارسم النقش (4 نقط على الأقل)</div>
         </div>
         <div id="lockStatusMsg" style="font-size:calc(12px * var(--fs,1)); color:var(--accent-dark); text-align:center; margin-top:10px; display:none;"></div>
+
+        <div id="backupPwSection" style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
+          <div style="font-weight:800; margin-bottom:4px;">🔑 كلمة مرور احتياطية</div>
+          <div style="font-size:calc(12px * var(--fs,1)); color:var(--muted); line-height:1.6;">بتفتح بيها التطبيق لو نسيت النقش أو كلمة المرور الأساسية، سواء اخترت نقش أو كلمة مرور.</div>
+          <div id="backupPwStatus" style="font-size:calc(12.5px * var(--fs,1)); font-weight:700; margin:8px 0;"></div>
+          <input type="password" class="lock-input" id="backupPwInput" placeholder="اكتب كلمة المرور الاحتياطية" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <input type="password" class="lock-input" id="backupPwConfirm" placeholder="أعد كتابتها للتأكيد" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-top:8px;">
+          <button class="btn-save" style="width:100%; margin-top:8px; padding:13px; border-radius:12px; border:none; font-weight:700; cursor:pointer; font-family:inherit;" onclick="setupBackupPassword()">حفظ كلمة المرور الاحتياطية</button>
+          <button type="button" id="backupPwRemoveBtn" class="lock-link" style="display:none;" onclick="removeBackupPassword()">حذف كلمة المرور الاحتياطية</button>
+        </div>
       </div>
     </div>
 
@@ -13180,7 +13195,7 @@ async function lockEmailRecover(){
   }catch(e){ cloudSetMsg(prefix, cloudErrorMessage(e)); return; }
   document.getElementById('lockPassword').value = '';
   cloudSetMsg(prefix, '');
-  lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null};
+  lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null, backupHash:null};
   try{ await saveLockConfig(); }catch(e){}
   _lockFails = 0;
   showToast('اتأكدنا من حسابك ✅ القفل اتفتح — اعمل قفل جديد من الإعدادات', true);
@@ -13199,7 +13214,7 @@ async function lockResetApp(){
   ['budget_data_v1','budget_settings_v1','budget_current_year','budget_backup_cfg_v1','budget_backups_local_v1','budget_short_links_v1','fonts_warm_v1','budget_data_updated_at','budget_cloud_synced_at','budget_cloud_cfg_v1','budget_cloud_skip_login']
     .forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
   try{ indexedDB.deleteDatabase('firebaseLocalStorageDb'); }catch(e){} // يطلّع حساب السحابة كمان
-  lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null};
+  lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null, backupHash:null};
   try{ await saveLockConfig(); }catch(e){} // بيرفع "القفل مقفول" لحسابك كمان عشان ما يرجعش لوحده
   location.reload();
 }
@@ -14573,7 +14588,7 @@ function simpleHash(str){
   for(let i=0;i<str.length;i++){ h = ((h*33) ^ str.charCodeAt(i)) >>> 0; }
   return h.toString(36);
 }
-let lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null};
+let lockConfig = {enabled:false, method:null, passwordHash:null, patternHash:null, backupHash:null};
 // إعدادات قديمة كانت بتستخدم البصمة: نرجّعها لكلمة المرور الاحتياطية لو موجودة، وإلا نقفل القفل
 function normalizeLockConfig(){
   delete lockConfig.credentialId;
@@ -14632,7 +14647,7 @@ async function fetchRemoteLock(){
 }
 
 function lockSnapshot(c){
-  return JSON.stringify([!!c.enabled, c.method || null, c.passwordHash || null, c.patternHash || null]);
+  return JSON.stringify([!!c.enabled, c.method || null, c.passwordHash || null, c.patternHash || null, c.backupHash || null]);
 }
 function applyRemoteLock(remote){
   lockConfig = Object.assign({}, lockConfig, remote);
@@ -14712,6 +14727,8 @@ function showLockGate(){
   document.getElementById('lockScreen').style.display = 'flex';
   document.getElementById('appRoot').style.display = 'none';
   ['lockPasswordArea','lockPatternArea'].forEach(id=> document.getElementById(id).style.display='none');
+  const _bb = document.getElementById('lockBackupBox'); if(_bb) _bb.style.display = 'none';
+  const _bl = document.getElementById('lockBackupLink'); if(_bl) _bl.style.display = lockConfig.backupHash ? 'inline-block' : 'none';
   if(lockConfig.method === 'password'){
     document.getElementById('lockPasswordArea').style.display = 'block';
     setTimeout(()=>{ const i=document.getElementById('lockPasswordInput'); if(i) i.focus(); }, 80);
@@ -14739,7 +14756,8 @@ function attemptUnlockPassword(){
   const input = document.getElementById('lockPasswordInput');
   const val = input.value;
   if(!val){ showLockError('اكتب كلمة المرور'); return; }
-  const ok = simpleHash(val) === lockConfig.passwordHash || simpleHash(val.trim()) === lockConfig.passwordHash;
+  const ok = simpleHash(val) === lockConfig.passwordHash || simpleHash(val.trim()) === lockConfig.passwordHash
+    || (!!lockConfig.backupHash && (simpleHash(val) === lockConfig.backupHash || simpleHash(val.trim()) === lockConfig.backupHash));
   if(ok){
     input.value = '';
     noteLockSuccess();
@@ -14748,6 +14766,30 @@ function attemptUnlockPassword(){
     input.value = '';
     input.focus();
     showLockError('كلمة المرور غير صحيحة، حاول تاني');
+    noteLockFail();
+  }
+}
+// ===== كلمة المرور الاحتياطية (تفتح التطبيق لو نسيت النقش أو كلمة المرور الأساسية) =====
+function toggleLockBackup(){
+  const b = document.getElementById('lockBackupBox'); if(!b) return;
+  const open = b.style.display === 'none';
+  b.style.display = open ? 'block' : 'none';
+  document.getElementById('lockError').style.display = 'none';
+  if(open) setTimeout(()=>{ const i = document.getElementById('lockBackupInput'); if(i) i.focus(); }, 60);
+}
+function attemptUnlockBackup(){
+  const input = document.getElementById('lockBackupInput');
+  const val = input.value;
+  if(!val){ showLockError('اكتب كلمة المرور الاحتياطية'); return; }
+  if(lockConfig.backupHash && (simpleHash(val) === lockConfig.backupHash || simpleHash(val.trim()) === lockConfig.backupHash)){
+    input.value = '';
+    noteLockSuccess();
+    startApp();
+    showToast('اتفتح بكلمة المرور الاحتياطية — لو نسيت النقش/كلمة المرور غيّرهم من الإعدادات', true);
+  } else {
+    input.value = '';
+    input.focus();
+    showLockError('كلمة المرور الاحتياطية غير صحيحة');
     noteLockFail();
   }
 }
@@ -14868,6 +14910,34 @@ function refreshLockSettingsUI(){
   Array.from(document.getElementById('optLockMethod').children).forEach(el=>{
     el.classList.toggle('active', el.dataset.val === lockConfig.method);
   });
+  refreshBackupPwUI();
+}
+function refreshBackupPwUI(){
+  const st = document.getElementById('backupPwStatus'); if(!st) return;
+  const has = !!lockConfig.backupHash;
+  st.textContent = has ? '✅ كلمة المرور الاحتياطية متسجّلة (اكتب واحدة جديدة تحت لو عايز تغيّرها)' : '⚠️ لسه مفيش كلمة مرور احتياطية — سجّل واحدة عشان لو نسيت النقش/كلمة المرور';
+  st.style.color = has ? 'var(--accent-dark)' : 'var(--expense)';
+  const rm = document.getElementById('backupPwRemoveBtn'); if(rm) rm.style.display = has ? 'inline-block' : 'none';
+}
+function setupBackupPassword(){
+  const val = document.getElementById('backupPwInput').value.trim();
+  const conf = document.getElementById('backupPwConfirm').value.trim();
+  if(!lockConfig.method){ showToast('اختار كلمة مرور أو نقش الأول وبعدها سجّل الاحتياطية', false); return; }
+  if(!val || val.length < 4){ showToast('اكتب كلمة مرور احتياطية 4 حروف/أرقام على الأقل', false); return; }
+  if(val !== conf){ showToast('كلمتا المرور غير متطابقتين، أعد الكتابة', false); return; }
+  if(lockConfig.method === 'password' && simpleHash(val) === lockConfig.passwordHash){ showToast('الاحتياطية لازم تختلف عن كلمة المرور الأساسية', false); return; }
+  lockConfig.backupHash = simpleHash(val);
+  saveLockConfig();
+  document.getElementById('backupPwInput').value = '';
+  document.getElementById('backupPwConfirm').value = '';
+  refreshBackupPwUI();
+  showToast('تم حفظ كلمة المرور الاحتياطية ✅', true);
+}
+function removeBackupPassword(){
+  lockConfig.backupHash = null;
+  saveLockConfig();
+  refreshBackupPwUI();
+  showToast('اتحذفت كلمة المرور الاحتياطية', true);
 }
 function onLockEnabledToggle(){
   const checked = document.getElementById('lockEnabledToggle').checked;
@@ -14912,7 +14982,8 @@ function chooseLockMethod(method){
       saveLockConfig();
       _patternSetupFirst = null;
       hint.textContent = '✅ تم حفظ النقش';
-      showToast('تم تفعيل قفل النقش', true);
+      refreshBackupPwUI();
+      showToast(lockConfig.backupHash ? 'تم تفعيل قفل النقش' : 'تم تفعيل قفل النقش — سجّل كمان كلمة مرور احتياطية من تحت', true);
     });
   }
 }
@@ -14933,13 +15004,18 @@ function setupPasswordLock(){
     showToast('كلمتا المرور غير متطابقتين، أعد الكتابة', false);
     return;
   }
+  if(lockConfig.backupHash && simpleHash(val) === lockConfig.backupHash){
+    showToast('كلمة المرور الأساسية لازم تختلف عن الاحتياطية', false);
+    return;
+  }
   lockConfig.enabled = true;
   lockConfig.method = 'password';
   lockConfig.passwordHash = simpleHash(val);
   saveLockConfig();
   document.getElementById('setupPasswordInput').value = '';
   document.getElementById('setupPasswordConfirm').value = '';
-  showToast('تم تفعيل قفل كلمة المرور — هيظهر عند فتح التطبيق المرة الجاية', true);
+  refreshBackupPwUI();
+  showToast(lockConfig.backupHash ? 'تم تفعيل قفل كلمة المرور — هيظهر عند فتح التطبيق المرة الجاية' : 'تم تفعيل قفل كلمة المرور — سجّل كمان كلمة مرور احتياطية من تحت', true);
 }
 
 
@@ -18666,7 +18742,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 </style>
 <script>
 (function(){
-  var IDS=['cloudPassword','gatePassword','lockPassword','lockPasswordInput','setupPasswordInput','setupPasswordConfirm','pv_pw0','pv_pw1','pv_pw2'];
+  var IDS=['cloudPassword','gatePassword','lockPassword','lockPasswordInput','lockBackupInput','backupPwInput','backupPwConfirm','setupPasswordInput','setupPasswordConfirm','pv_pw0','pv_pw1','pv_pw2'];
   function add(inp){
     if(!inp || inp.dataset.pwEye) return;
     inp.dataset.pwEye='1';
