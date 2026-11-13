@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-13.8436">
+<meta name="app-version" content="2026-11-13.8437">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -6593,6 +6593,7 @@ function opsEntry(kind, n, o){
   if(kind === 'edit' && o && o.a !== n.a) txt += ' (' + fmt(o.a) + ' ← ' + fmt(n.a) + ')';
   if(kind === 'edit' && o && n.d && o.d !== n.d) txt += ' (نقلتها ليوم ' + new Date(n.d).toLocaleDateString(dateLocale(), {day:'numeric', month:'long'}) + ')';
   const ent = {id: uid(), t: Date.now(), y: n.y, m: n.m, k: kind, x: txt, a: n.a, c: n.t};
+  if(n.t === 'e'){ ent.nm = n.n; }
   if(n.d) ent.d = n.d;
   return ent;
 }
@@ -6626,7 +6627,17 @@ function opsNotify(list){
       nfFire(cf, 'أموالي AtoZ', '📝 تمت ' + toArabicDigits(list.length) + ' عمليات', 'multi' + Date.now());
       return;
     }
-    list.forEach(e=> nfFire(nfCfg(e.c), 'أموالي AtoZ', e.x + (e.a ? ' — ' + fmt(e.a) : ''), e.id));
+    list.forEach(e=>{
+      var body = e.x + (e.a ? ' — ' + fmt(e.a) : '');
+      try{
+        if(e.c === 'e' && e.k === 'add'){
+          body = '✅ تم تسجيل «' + (e.nm || 'مصروف') + '» — ' + fmt(e.a) + ' ج';
+          var now = Date.now(), sameDay = !e.d || dateToInputValue(e.d) === dateToInputValue(now);
+          if(sameDay && typeof bdDayTotal === 'function') body += ' · صرفت اليوم حتى الآن ' + fmt(bdDayTotal(now)) + ' ج';
+        }
+      }catch(_e){}
+      nfFire(nfCfg(e.c), 'أموالي AtoZ', body, e.id);
+    });
   }catch(err){}
 }
 function showOpNotification(title, body, tag, extra){
@@ -15569,7 +15580,7 @@ var NF_CATS = [
   ['cap','💼','رأس المال (أموال / ذهب)'], ['cgp','🗂️','مجموعات رأس المال'],
   ['bank','🏦','استحقاق فايدة بنك'], ['pension','💳','استحقاق معاش'],
   ['bankup','⏰','قبل استحقاق شهادة / فايدة'], ['certend','📜','قرب انتهاء الشهادة / تجديدها'], ['penup','⏰','قبل استحقاق معاش'],
-  ['zdue','🔔','موعد الزكاة'], ['backup','🗄️','نسخة احتياطية']
+  ['zdue','🔔','موعد الزكاة'], ['pct','📊','نسبة مصروفات الشهر من الدخل'], ['backup','🗄️','نسخة احتياطية']
 ];
 var NF_DEF_OFF = {backup: {s:false, l:false}};
 function nfCfg(cat){
@@ -18765,18 +18776,38 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 
   /* ---------- الشارات + ربط الأحداث ---------- */
   window.robotTodayText = function(){
-    var now = Date.now(), k = dateToInputValue(now), y = new Date(now).getFullYear(), list = [];
-    if(data[y]) for(var m = 0; m < 12; m++){
+    /* 8437: بيتحسب من البيانات الحية لحظة العرض، وبيتأكد من جدول المصروفات اليومية قبل ما يقول «ما صرفتش» */
+    var now = Date.now(), k = dateToInputValue(now), y = new Date(now).getFullYear(), n = 0, tot = 0;
+    try{ tot = bdDayTotal(now) || 0; }catch(e){}
+    if(data && data[y]) for(var m = 0; m < 12; m++){
       var mo = data[y][m]; if(!mo || !Array.isArray(mo.groups)) continue;
-      collectAllExpenses(mo.groups).forEach(function(e){ if(e.counted === false) return; var t = e.date || e.createdAt; if(t && dateToInputValue(t) === k) list.push(e); });
+      collectAllExpenses(mo.groups).forEach(function(e){ var t = e.date || e.createdAt; if(t && dateToInputValue(t) === k) n++; });
     }
-    if(!list.length) return 'لسه ما صرفتش حاجة النهارده';
-    var tot = list.reduce(function(a, e){ return a + (Number(e.amount) || 0); }, 0);
-    return 'صرفت اليوم حتى الآن ' + fmt(tot) + ' ج';
+    if(tot > 0) return 'صرفت اليوم حتى الآن ' + fmt(tot) + ' ج';
+    if(n > 0) return null;   // فيه مصروفات مسجلة النهارده (غير محسوبة): ماينفعش نقول إنه ما صرفش
+    return 'لسه ما صرفتش حاجة النهارده';
+  };
+  /* 8437: نسبة مصروفات الشهر الحالي من إجمالي دخله، وتنبيه استباقي مرة واحدة في الشهر لو وصلت ٧٠٪ */
+  var PCT_LIMIT = 70, _pctBusy = false;
+  window.monthPctInfo = function(){
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth(), mon = data && data[y] && data[y][m];
+    if(!mon) return null;
+    var income = totalIncome(mon), exp = (mon.groups || []).reduce(function(a, g){ return a + nodeTotal(g); }, 0);
+    return {y: y, m: m, income: income, exp: exp, pct: income > 0 ? exp / income * 100 : 0};
+  };
+  window.pctCheck = function(){
+    try{
+      if(_pctBusy) return; var r = monthPctInfo(); if(!r || !(r.income > 0) || r.pct < PCT_LIMIT) return;
+      var c = bdCfg(), key = 'pct:' + r.y + '-' + (r.m + 1); if(c.fired[key]) return;
+      _pctBusy = true; c.fired[key] = 1;
+      var ks = Object.keys(c.fired); if(ks.length > 120){ ks.sort(); ks.slice(0, ks.length - 120).forEach(function(k){ delete c.fired[k]; }); }
+      try{ save(); }finally{ _pctBusy = false; }
+      nfFire(nfCfg('pct'), 'أموالي AtoZ', '📊 مصروفات ' + MONTHS[r.m] + ' وصلت ' + toArabicDigits(Math.round(r.pct)) + '٪ من دخل الشهر (' + fmt(r.exp) + ' من ' + fmt(r.income) + ' ج)', key);
+    }catch(e){ _pctBusy = false; console.error(e); }
   };
   window.robotShowToday = function(){
     try{
-      window._robotToday = robotTodayText();
+      window._robotToday = robotTodayText() ? true : null;
       bdBadges();
       clearTimeout(window._robotTodayT);
       window._robotTodayT = setTimeout(function(){ window._robotToday = null; try{ bdBadges(); }catch(e){} }, 10000);
@@ -18792,7 +18823,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var box = $('aiBubbles'); if(!box) return;
     var items = [], c = bdCfg(), lv = bdLevels(), fab = $('aiFab');
     var late = vis.filter(function(x){ return x.n.due && Number(x.n.due) < t0.getTime(); }).length;
-    if(window._robotToday) items.push({i:'🤖', c:'msg', t:window._robotToday, f:function(){ window._robotToday = null; bdOpen(); }});
+    if(window._robotToday){ var _rt = robotTodayText(); if(_rt) items.push({i:'🤖', c:'msg', t:_rt, f:function(){ window._robotToday = null; bdOpen(); }}); }
     if(vis.length) items.push({i:'⏳', c:'flip', t:'مصروف معلق' + (vis.length > 1 ? ' (' + toArabicDigits(vis.length) + ')' : ''), f:bpOpen});
     if(late) items.push({i:'⏰', c:'warn', t:'متأخر ' + toArabicDigits(late), f:bpOpen});
     try{ var _dt = bdDayTotal(Date.now()); if(c.on && lv.length && _dt > lv[0]){ items = items.filter(function(x){ return x.i !== '🤖'; }); items.push({i:'⚠️', c:'warn', t:'صرفت اليوم حتى الآن ' + fmt(_dt) + ' ج', f:bdOpen}); } }catch(e){}
@@ -18845,11 +18876,12 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     try{ if(bdDayTotal(ts) > before) bdCheckAlert(ts); bdBadges(); }catch(e){} return r;
   });
   wrap('zpAfter', function(o, t, a){ var r = o.apply(t, a); try{ if($('zdnPage').classList.contains('open')) zdnRender(); }catch(e){} return r; });
+  (function(){ var prev = window.__onDataSaved; window.__onDataSaved = function(){ try{ if(typeof prev === 'function') prev.apply(this, arguments); }catch(e){} if(!_pctBusy) setTimeout(function(){ try{ pctCheck(); }catch(e){} }, 400); }; })();
   setInterval(function(){ try{ bdBadges(); }catch(e){} }, 30000);
   setTimeout(function(){ robotShowToday(); }, 4500);
   setTimeout(function(){
     try{
-      bdBadges(); bdCheckAlert(Date.now());
+      bdBadges(); bdCheckAlert(Date.now()); pctCheck();
       var t0 = new Date(), late; t0.setHours(0, 0, 0, 0); late = bpVisible().filter(function(x){ return x.n.due && Number(x.n.due) < t0.getTime(); });
       if(late.length) showToast('⏳ عندك ' + toArabicDigits(late.length) + ' دفعة معلقة متأخرة', false);
     }catch(e){}
