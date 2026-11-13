@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-13.8435">
+<meta name="app-version" content="2026-11-13.8436">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -2145,6 +2145,49 @@ html.perf .plus-badge::after{opacity:0 !important;}
 #zkcOverlay .modal-actions .btn-save{color:#3b2a00;background:linear-gradient(180deg,#ffe793,#f7bf16);box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 6px 0 #a87400,0 12px 18px rgba(168,116,0,.35);}
 #zkcOverlay .modal-actions button:active{transform:translateY(5px);}
 </style>
+<style id="zxCss">
+#zkcBody{scroll-behavior:smooth;}
+.zx-nav{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 12px;margin:0 -2px;scrollbar-width:none;position:sticky;top:-4px;z-index:5;background:linear-gradient(180deg,var(--bg) 72%,transparent);}
+.zx-nav::-webkit-scrollbar{display:none;}
+.zx-nav button{flex:none;border:0;cursor:pointer;font:800 calc(13px * var(--fs,1)) var(--app-font,'Tajawal'),'Tajawal','Cairo',sans-serif;color:var(--text);background:var(--card);padding:9px 14px;border-radius:999px;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 4px 0 rgba(0,0,0,.13),0 8px 12px rgba(30,41,59,.10);transition:transform .08s;}
+.zx-nav button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.13);}
+.zx-hero{position:relative;border-radius:28px;padding:18px 14px 16px;text-align:center;color:#3b2a00;background:radial-gradient(120% 90% at 18% 0%,rgba(255,255,255,.6),transparent 55%),linear-gradient(150deg,#ffe793,#f7bf16 55%,#e6a100);box-shadow:0 9px 0 #a87400,0 22px 34px rgba(168,116,0,.42),inset 0 2px 0 rgba(255,255,255,.7);margin:4px 2px 22px;transform:perspective(900px) rotateX(3deg);transform-origin:50% 100%;}
+.zx-hero .t{font-size:calc(16px * var(--fs,1));font-weight:900;}
+.zx-hero .big{font-size:calc(44px * var(--fs,1));font-weight:900;line-height:1.2;text-shadow:0 3px 0 rgba(255,255,255,.55),0 6px 10px rgba(120,80,0,.25);}
+.zx-hero .s{font-size:calc(13.5px * var(--fs,1));font-weight:800;opacity:.85;}
+.zx-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.zx-st{border-radius:16px;padding:9px 4px 8px;background:rgba(255,255,255,.62);box-shadow:0 4px 0 rgba(120,80,0,.35),inset 0 1px 0 #fff;}
+.zx-st .i{font-size:calc(18px * var(--fs,1));} .zx-st .l{font-size:calc(12px * var(--fs,1));font-weight:800;opacity:.8;} .zx-st .v{font-size:calc(16px * var(--fs,1));font-weight:900;white-space:nowrap;}
+.zx-st.ok .v{color:#0b6e48;} .zx-st.bad .v{color:#b3261e;}
+.zx-bar{height:14px;border-radius:99px;background:rgba(60,40,0,.2);box-shadow:inset 0 3px 5px rgba(0,0,0,.25);overflow:hidden;margin-top:12px;}
+.zx-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(180deg,#6be8b2,#12a06a);box-shadow:inset 0 2px 0 rgba(255,255,255,.55);transition:width .6s ease;}
+.zx-pct{margin-top:6px;font-size:calc(12.5px * var(--fs,1));font-weight:800;opacity:.85;}
+.zx-act{display:flex;gap:8px;margin-top:12px;}
+.zx-act button{flex:1;border:0;cursor:pointer;padding:11px 6px;border-radius:16px;font:800 calc(13.5px * var(--fs,1)) var(--app-font,'Tajawal'),'Tajawal','Cairo',sans-serif;color:#fff;background:linear-gradient(180deg,#34c58b,#12a06a);box-shadow:0 5px 0 #0b6e48,0 10px 14px rgba(11,110,72,.3),inset 0 1px 0 rgba(255,255,255,.4);transition:transform .08s;}
+.zx-act button.on{background:linear-gradient(180deg,#fff,#f4e6b4);color:#3b2a00;box-shadow:0 5px 0 #b88a00,inset 0 1px 0 #fff;}
+.zx-act button:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.3);}
+.zx-card{background:var(--card);color:var(--text);border-radius:24px;padding:14px 12px 16px;margin:0 2px 20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 7px 0 rgba(0,0,0,.10),0 16px 24px rgba(30,41,59,.12);scroll-margin-top:62px;}
+.zx-h{display:flex;align-items:center;gap:11px;margin-bottom:14px;}
+.zx-n{flex:none;width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-weight:900;font-size:calc(19px * var(--fs,1));color:#3b2a00;background:linear-gradient(160deg,#ffe793,#f7bf16);box-shadow:0 4px 0 #a87400,inset 0 1px 0 rgba(255,255,255,.7);}
+.zx-ht .b{font-size:calc(18px * var(--fs,1));font-weight:900;line-height:1.3;} .zx-ht .s{font-size:calc(12.5px * var(--fs,1));font-weight:700;color:var(--muted);}
+.zx-card .zkd-due,.zx-card .zkd-date,.zx-card .zkd-dateinfo,.zx-card .zkd-seg,.zx-card .zkd-conv,.zx-card .zkd-note{margin-left:0;margin-right:0;}
+.zx-card .zkd-grid{margin:0;}
+.zx-sub{margin:16px 2px 8px;font-size:calc(14.5px * var(--fs,1));font-weight:900;color:var(--text);} .zx-sub:first-child{margin-top:0;}
+.zx-sub small{display:block;font-size:calc(12px * var(--fs,1));font-weight:700;color:var(--muted);line-height:1.5;}
+.zx-eq{display:flex;align-items:stretch;justify-content:center;gap:5px;flex-wrap:wrap;}
+.zx-eq .p{flex:1 1 64px;text-align:center;border-radius:14px;padding:8px 3px;background:var(--bg2);box-shadow:inset 0 2px 4px rgba(0,0,0,.09),0 3px 0 rgba(0,0,0,.08);}
+.zx-eq .p .l{font-size:calc(11.5px * var(--fs,1));font-weight:800;color:var(--muted);} .zx-eq .p .v{font-size:calc(14.5px * var(--fs,1));font-weight:900;white-space:nowrap;}
+.zx-eq .p.m{background:rgba(124,77,219,.16);} .zx-eq .p.r{flex-basis:100%;background:linear-gradient(160deg,#ffe793,#f7bf16);color:#3b2a00;box-shadow:0 4px 0 #a87400;} .zx-eq .p.r .l{color:#6a4a00;} .zx-eq .p.r .v{font-size:calc(22px * var(--fs,1));}
+.zx-eq .op{align-self:center;font-weight:900;font-size:calc(18px * var(--fs,1));color:var(--muted);}
+.zx-nis{border-radius:20px;padding:13px 12px;color:#fff;text-align:center;font-weight:800;line-height:1.7;}
+.zx-nis.ok{background:linear-gradient(150deg,#66d9a0,#12a06a);box-shadow:0 5px 0 #0b6e48,0 12px 18px rgba(11,110,72,.28),inset 0 2px 0 rgba(255,255,255,.35);}
+.zx-nis.no{background:linear-gradient(150deg,#ffb74d,#f57c00);box-shadow:0 5px 0 #a65200,0 12px 18px rgba(166,82,0,.28),inset 0 2px 0 rgba(255,255,255,.35);}
+.zx-nis .h{font-size:calc(19px * var(--fs,1));font-weight:900;} .zx-nis .d{font-size:calc(13px * var(--fs,1));opacity:.96;}
+.zx-law{display:flex;gap:9px;align-items:flex-start;padding:10px 11px;margin:8px 0 0;border-radius:15px;background:var(--bg2);font-size:calc(13.5px * var(--fs,1));line-height:1.75;font-weight:700;color:var(--text);box-shadow:inset 0 1px 3px rgba(0,0,0,.06);}
+.zx-law .i{flex:none;font-size:calc(17px * var(--fs,1));}
+@media (prefers-reduced-motion:reduce){.zx-hero{transform:none;}#zkcBody{scroll-behavior:auto;}.zx-bar i{transition:none;}}
+</style>
+
 <style id="zpCss">
 .gp-hero.zk{background:linear-gradient(145deg,#ffd45e 0%,#f2a900 48%,#b97800 100%);color:#3b2a00;box-shadow:0 2px 0 rgba(255,255,255,.55) inset,0 -8px 0 rgba(0,0,0,.14) inset,0 7px 0 #8a5a00,0 24px 34px -10px rgba(185,120,0,.55);}
 .gp-hero.zk .gp-big{text-shadow:0 3px 0 rgba(255,255,255,.35);}
@@ -7284,77 +7327,100 @@ function renderZkCalc(){
     const d = el('zkd-tile ' + cls, undefined, parent); if(fn) d.onclick = fn;
     el('ic', ic, d); el('l', label, d); el(cls.indexOf('g3') > -1 ? 'gr' : 'n', big, d); (subs || []).forEach(sx=> el('v', sx, d)); return d;
   };
+  const sec = (id, n, ttl, sub)=>{ const w = el('zx-card'); w.id = id; const h = el('zx-h', undefined, w); el('zx-n', yFmt(n), h); const tx = el('zx-ht', undefined, h); el('b', ttl, tx); if(sub) el('s', sub, tx); return el('zx-b', undefined, w); };
+  const sub = (txt, small, parent)=>{ const d = el('zx-sub', txt, parent); if(small){ const sm = document.createElement('small'); sm.textContent = small; d.appendChild(sm); } return d; };
   _zkcResult = c.zk;
+  const paid = zmPaidTotal(), left = Math.max(0, c.zk - paid), pct = c.zk > 0 ? Math.min(100, Math.round(paid / c.zk * 100)) : 0;
+  const auto = zmAuto(), canAuto = currentYear === new Date().getFullYear() && !frozen;
+  // شريط التنقل السريع
+  { const nv = el('zx-nav'); [['zxS1', '١ · الاستحقاق'], ['zxS2', '٢ · وعاء الزكاة'], ['zxS3', '٣ · النصاب'], ['zxS4', '٤ · الحكم الشرعي']].forEach(([id, lb])=>{ const b = document.createElement('button'); b.type = 'button'; b.textContent = lb; b.onclick = ()=>{ const x = document.getElementById(id); if(x) x.scrollIntoView({behavior: 'smooth', block: 'start'}); }; nv.appendChild(b); }); }
+  // البطل: قيمة الزكاة + المطلوب/المُخرَج/المتبقي
+  const hero = el('zx-hero');
+  el('t', '🕌 زكاة المال ' + toArabicDigits(currentYear), hero); el('big', fmt(c.zk), hero); el('s', 'الوعاء ' + fmt(c.base) + ' × ' + zkRateTxt(), hero);
+  const st = el('zx-stats', undefined, hero);
+  [['📌', 'المطلوب', fmt(c.zk), ''], ['🤲', 'المُخرَج', fmt(paid), 'ok'], ['⏳', 'المتبقي', fmt(left), left > 0 ? 'bad' : 'ok']].forEach(([ic, lb, v, k])=>{ const d = el('zx-st ' + k, undefined, st); el('i', ic, d); el('l', lb, d); el('v', v, d); });
+  const bar = el('zx-bar', undefined, hero); const bi = document.createElement('i'); bi.style.width = pct + '%'; bar.appendChild(bi);
+  el('zx-pct', (c.zk > 0 ? 'تم سداد ' + yFmt(pct) + '٪ من الزكاة' : 'لسه مفيش زكاة مطلوبة') + (paid > c.zk && c.zk > 0 ? ' (زيادة ' + fmt(paid - c.zk) + ')' : ''), hero);
+  { const ac = el('zx-act', undefined, hero);
+    const b1 = document.createElement('button'); b1.type = 'button'; b1.textContent = '🤲 صرف / سداد الزكاة'; b1.onclick = ()=>{ closeZkCalc(); openZmPay(); }; ac.appendChild(b1);
+    if(canAuto){ const b2 = document.createElement('button'); b2.type = 'button'; b2.className = auto ? 'on' : ''; b2.textContent = auto ? '🔄 تلقائي: شغال' : '⏸ مثبّتة يدويًا'; b2.onclick = zkcAutoToggle; ac.appendChild(b2); } }
   if(frozen){
     const sn = data.zakatSnap[currentYear], fb = el('zkd-note');
-    fb.style.cssText = 'background:rgba(14,138,90,.12);border:1px solid rgba(14,138,90,.4);border-radius:12px;padding:10px;font-weight:800;line-height:1.7;';
-    fb.textContent = '🔒 زكاة ' + toArabicDigits(currentYear) + ' مثبّتة' + (sn && sn.est ? ' (تقدير من تواريخ الإضافة — اللي اتباع أو اتحذف قبل كده مش ظاهر، راجع الرقم)' : (sn && sn.ts ? ' بتاريخ ' + gFmt(new Date(sn.ts)) : '')) + ' — أي بيع أو خصم أو إضافة أو تعديل في الذهب بعد كده ما بيغيّرهاش.\n💰 القيمة: ' + fmt(c.zk) + ' · المصروف: ' + fmt(zmPaidTotal()) + ' · المتبقي: ' + fmt(Math.max(0, c.zk - zmPaidTotal())) + (zmPaidTotal() > c.zk ? ' (زيادة ' + fmt(zmPaidTotal() - c.zk) + ')' : '');
+    fb.style.cssText = 'background:rgba(14,138,90,.12);border:1px solid rgba(14,138,90,.4);border-radius:14px;padding:10px;font-weight:800;line-height:1.7;margin:0 2px 16px;color:var(--text);';
+    fb.textContent = '🔒 زكاة ' + toArabicDigits(currentYear) + ' مثبّتة' + (sn && sn.est ? ' (تقدير من تواريخ الإضافة — اللي اتباع أو اتحذف قبل كده مش ظاهر، راجع الرقم)' : (sn && sn.ts ? ' بتاريخ ' + gFmt(new Date(sn.ts)) : '')) + ' — أي بيع أو خصم أو إضافة أو تعديل في الذهب بعد كده ما بيغيّرهاش.';
     fb.style.whiteSpace = 'pre-line';
-    const ub = document.createElement('button'); ub.type = 'button'; ub.style.cssText = 'display:block;margin-top:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border,#cdd);background:#fff;font-weight:800;font-family:inherit;'; ub.textContent = currentYear < new Date().getFullYear() ? '🔄 إعادة التقدير من تواريخ الإضافة' : '🔓 إلغاء التثبيت وإعادة الحساب'; ub.onclick = zkUnfreeze; fb.appendChild(ub);
+    const ub = document.createElement('button'); ub.type = 'button'; ub.style.cssText = 'display:block;margin-top:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border,#cdd);background:#fff;color:#1c2430;font-weight:800;font-family:inherit;'; ub.textContent = currentYear < new Date().getFullYear() ? '🔄 إعادة التقدير من تواريخ الإضافة' : '🔓 إلغاء التثبيت وإعادة الحساب'; ub.onclick = zkUnfreeze; fb.appendChild(ub);
   }
-  // موعد وجوب الزكاة
-  { const di = zkDueInfo(), dt = zkDueText(di).filter(Boolean), b = el('zkd-due ' + di.state);
-    dt.forEach((ln, ix)=> el(ix === 0 ? 'h' : 'd', ln, b));
-    if(di.state === 'due'){ const bt = document.createElement('button'); bt.textContent = '✅ تم إخراج زكاة هذا الموعد'; bt.onclick = ()=> zkMarkPaid(true); b.appendChild(bt); }
-    if(di.state === 'paid'){ const bt = document.createElement('button'); bt.textContent = '↩️ تراجع'; bt.onclick = ()=> zkMarkPaid(false); b.appendChild(bt); }
-    const dr = el('zkd-date'); const lb = document.createElement('span'); lb.textContent = '📅 تاريخ استحقاق الزكاة (يتكرر كل سنة)'; dr.appendChild(lb);
-    const inp = document.createElement('input'); inp.type = 'date'; inp.value = data.zakatStart || ''; inp.onchange = ()=> zkSetStart(inp.value); dr.appendChild(inp);
-    if(data.zakatStart){
-      const st = new Date(data.zakatStart + 'T12:00:00');
-      if(!isNaN(st)){ const nx = zkDueAt(st, 1), dd = Math.round((nx - st) / 86400000);
-        el('zkd-dateinfo', '📌 فهمت التاريخ: ' + zkBoth(st) + ' — الاستحقاق اللي بعده: ' + zkBoth(nx) + ' (بعد ' + yFmt(dd) + ' يوم)'); } }
-    const sg = el('zkd-seg');
-    [['greg', '📅 ميلادي — ٢٫٥٧٧٪'], ['hij', '🌙 هجري — ٢٫٥٪']].forEach(([m, lbl])=>{ const bt = document.createElement('button'); bt.type = 'button'; bt.className = zkMode() === m ? 'on' : ''; bt.textContent = lbl; bt.onclick = ()=> zkSetMode(m); sg.appendChild(bt); });
-  }
-  // البطل: قيمة الزكاة
-  const hero = el('zkd-hero');
-  el('t', '🕌 زكاة المال ' + zkRateTxt(), hero); el('big', fmt(c.zk), hero); el('s', fmt(c.base) + ' × ' + zkRateTxt(), hero);
   if(currentYear < new Date().getFullYear()){
-    const pb = el('zkd-note'), left = cmoZkLeft(currentYear), ry = new Date().getFullYear();
-    pb.style.cssText = 'background:rgba(124,77,219,.10);border:1px solid rgba(124,77,219,.35);border-radius:12px;padding:10px;font-weight:800;line-height:1.7;';
-    pb.textContent = '💸 سدّدت أو هتسدّد زكاة ' + toArabicDigits(currentYear) + ' دلوقتي؟ المبلغ بيتخصم من رأس مال ' + toArabicDigits(ry) + ' (الحالي) لأن رأس مال ' + toArabicDigits(currentYear) + ' عدّى، وبيتسجّل كسداد لزكاة ' + toArabicDigits(currentYear) + (c.zk > 0 ? ' — المتبقي: ' + fmt(left) : '') + '.';
+    const pb = el('zkd-note'), lf = cmoZkLeft(currentYear), ry = new Date().getFullYear();
+    pb.style.cssText = 'background:rgba(124,77,219,.10);border:1px solid rgba(124,77,219,.35);border-radius:14px;padding:10px;font-weight:800;line-height:1.7;margin:0 2px 16px;color:var(--text);';
+    pb.textContent = '💸 سدّدت أو هتسدّد زكاة ' + toArabicDigits(currentYear) + ' دلوقتي؟ المبلغ بيتخصم من رأس مال ' + toArabicDigits(ry) + ' (الحالي) لأن رأس مال ' + toArabicDigits(currentYear) + ' عدّى، وبيتسجّل كسداد لزكاة ' + toArabicDigits(currentYear) + (c.zk > 0 ? ' — المتبقي: ' + fmt(lf) : '') + '.';
     const bt = document.createElement('button'); bt.type = 'button'; bt.style.cssText = 'display:block;margin-top:8px;padding:9px 14px;border-radius:10px;border:0;background:#7c4ddb;color:#fff;font-weight:900;font-family:inherit;cursor:pointer;';
     bt.textContent = '💸 سدّد زكاة ' + toArabicDigits(currentYear) + ' من رأس مال ' + toArabicDigits(ry); const yy = currentYear; bt.onclick = ()=> openCmOutZk(yy); pb.appendChild(bt);
   }
-  const auto = zmAuto(), canAuto = currentYear === new Date().getFullYear() && !frozen;
-  if(canAuto){ const pill = el('zkd-pill' + (auto ? ' on' : ''), auto ? '🔄 تحديث تلقائي مع رأس المال: شغال' : '⏸ القيمة مثبّتة يدويًا — دوس للتلقائي', hero); pill.onclick = zkcAutoToggle; }
-  // الأموال
-  el('zkd-sec', '💰 أموالي (من رأس المال)');
-  const g1 = el('zkd-grid');
-  const zkM = (c.zkMoney !== undefined) ? c.zkMoney : t.money, zkC = (t.zkCash !== undefined) ? t.zkCash : t.cash, zkB = (t.zkBank !== undefined) ? t.zkBank : t.bank;
-  tile(g1, 'x', '💵', 'نقدي', fmt(zkC)); tile(g1, 'x', '🏦', 'بنوك وشهادات', fmt(zkB));
-  tile(g1, 'violet zkd-wide', '💼', 'إجمالي أموالي (الداخل في الزكاة)', fmt(zkM), (c.exMoney > 0) ? ['🚫 مستبعد: ' + fmt(c.exMoney)] : []);
-  if(c.exMoney > 0 || c.exGold > 0) el('zkd-note', '🚫 مستبعد من حساب الزكاة (حسب اختيارك للمجموعات والبنود): أموال ' + fmt(c.exMoney || 0) + ' · ذهب ' + fmt(c.exGold || 0) + '. تقدر ترجّعه من زرار 🕌 جنب المجموعة أو البند في صفحة أموال/ذهب.');
-  // تحويل الذهب لعيار ٢٤
-  el('zkd-sec', '⚖️ تحويل الذهب إلى عيار ٢٤ (الجرام × العيار ÷ ٢٤)');
-  const cv = el('zkd-conv');
-  const karats = Object.keys(c.kr).map(Number).filter(k=> c.kr[k] > 0).sort((a, b)=> b - a);
-  [24, 21, 18].forEach(k=>{ if(karats.indexOf(k) < 0) karats.push(k); });
-  karats.sort((a, b)=> b - a).forEach(k=>{
-    const g = c.kr[k] || 0, eq = g * k / 24, r = el('zkd-cr' + (g ? '' : ' z'), undefined, cv);
-    el('a', 'عيار ' + toArabicDigits(k || '؟'), r); el('m', k === 24 ? f2(g) + ' جم' : f2(g) + ' جم × ' + toArabicDigits(k) + '/٢٤', r); el('b', f2(eq) + ' جم', r);
-  });
-  const tr = el('zkd-cr tot', undefined, cv); el('a', 'إجمالي عيار ٢٤ المكافئ', tr); el('m', '', tr); el('b', f2(c.eqAll) + ' جم', tr);
-  // الذهب مصنف
-  el('zkd-sec', '🪙 الذهب مصنفًا — ' + (c.live ? 'بسعر بيع جرام ٢٤: ' + fmt(c.p24) : 'بسعر الشراء (السعر الحالي غير متاح)') + ' (دوس على النوع لتضمينه أو استبعاده)');
-  const g2 = el('zkd-grid g3');
-  [['jewel', '💍', 'زينة'], ['save', '💰', 'ادخار'], ['other', '📦', 'خلافه']].forEach(([k, ic, lb])=>{
-    const b = c.bk[k];
-    tile(g2, 'gold g3 tap ' + (_zkc[k] ? 'on' : 'off'), ic, lb, f2(b.e) + ' جم', ['عيار ٢٤ (فعلي ' + f2(b.g) + ')', fmt(b.v) + (_zkc[k] ? ' ✓' : ' ✗')], ()=> zkcToggle(k));
-  });
-  const g3 = el('zkd-grid'); g3.style.marginTop = '10px';
-  tile(g3, 'gold zkd-wide', '🪙', 'الذهب الداخل في حساب الزكاة', fmt(c.goldIn), [f2(c.eqIn) + ' جم عيار ٢٤' + (c.live ? ' × ' + fmt(c.p24) : ''), 'من إجمالي ذهب ' + fmt(c.goldAll)]);
-  // النصاب
-  if(c.live){
-    const nis = cgInt(85 * c.p24);
-    el('zkd-note', (c.base >= nis ? '✅ بلغ النصاب' : '⚠️ أقل من النصاب') + ' — نصاب الذهب ٨٥ جم عيار ٢٤ ≈ ' + fmt(nis) + ' ج. والزكاة تجب بعد مرور سنة هجرية كاملة على المال.');
-  } else el('zkd-note', 'الزكاة تجب لو بلغ المال النصاب (٨٥ جم ذهب عيار ٢٤) ومرّت عليه سنة كاملة.');
-  const sh = el('zkd-note sh');
-  ['⚖️ الحكم الشرعي (حسب فتاوى دار الإفتاء المصرية):',
-   '• الأصل الحول الهجري بنسبة ٢٫٥٪، ويجوز الحول الميلادي بنسبة ٢٫٥٧٧٪ تعويضًا عن فرق ١١ يوم (فتوى ٨١٢٤).',
-   '• تعجيل الزكاة قبل موعدها جائز (حتى على أقساط) إذا بلغ المال النصاب، وتراجع المبلغ عند الموعد وتزيد الفرق لو زاد مالك.',
-   '• لا يجوز تأخير الزكاة بعد حلول موعدها ولا تقسيطها بعده إلا لعذر قاهر، وتُخرج كاملة فورًا.',
-   '• هذا حساب تقريبي للمساعدة، ولو عندك حالة خاصة اسأل جهة فتوى.'].forEach(t=>{ const d = document.createElement('div'); d.textContent = t; sh.appendChild(d); });
+  // ١) الاستحقاق
+  { const s1 = sec('zxS1', 1, 'موعد الاستحقاق', 'متى تجب الزكاة وحالتها');
+    const di = zkDueInfo(), dt = zkDueText(di).filter(Boolean), b = el('zkd-due ' + di.state, undefined, s1);
+    dt.forEach((ln, ix)=> el(ix === 0 ? 'h' : 'd', ln, b));
+    if(di.state === 'due'){ const bt = document.createElement('button'); bt.textContent = '✅ تم إخراج زكاة هذا الموعد'; bt.onclick = ()=> zkMarkPaid(true); b.appendChild(bt); }
+    if(di.state === 'paid'){ const bt = document.createElement('button'); bt.textContent = '↩️ تراجع'; bt.onclick = ()=> zkMarkPaid(false); b.appendChild(bt); }
+    const dr = el('zkd-date', undefined, s1); const lb = document.createElement('span'); lb.textContent = '📅 تاريخ استحقاق الزكاة (يتكرر كل سنة)'; dr.appendChild(lb);
+    const inp = document.createElement('input'); inp.type = 'date'; inp.value = data.zakatStart || ''; inp.onchange = ()=> zkSetStart(inp.value); dr.appendChild(inp);
+    if(data.zakatStart){
+      const sdt = new Date(data.zakatStart + 'T12:00:00');
+      if(!isNaN(sdt)){ const nx = zkDueAt(sdt, 1), dd = Math.round((nx - sdt) / 86400000);
+        el('zkd-dateinfo', '📌 فهمت التاريخ: ' + zkBoth(sdt) + ' — الاستحقاق اللي بعده: ' + zkBoth(nx) + ' (بعد ' + yFmt(dd) + ' يوم)', s1); } }
+    const sg = el('zkd-seg', undefined, s1);
+    [['greg', '📅 ميلادي — ٢٫٥٧٧٪'], ['hij', '🌙 هجري — ٢٫٥٪']].forEach(([m, lbl])=>{ const bt = document.createElement('button'); bt.type = 'button'; bt.className = zkMode() === m ? 'on' : ''; bt.textContent = lbl; bt.onclick = ()=> zkSetMode(m); sg.appendChild(bt); });
+  }
+  // ٢) وعاء الزكاة
+  { const s2 = sec('zxS2', 2, 'وعاء الزكاة', 'الأموال + الذهب اللي بتتحسب عليه الزكاة');
+    sub('💰 أموالي', 'من رأس المال', s2);
+    const g1 = el('zkd-grid', undefined, s2);
+    const zkM = (c.zkMoney !== undefined) ? c.zkMoney : t.money, zkC = (t.zkCash !== undefined) ? t.zkCash : t.cash, zkB = (t.zkBank !== undefined) ? t.zkBank : t.bank;
+    tile(g1, 'x', '💵', 'نقدي', fmt(zkC)); tile(g1, 'x', '🏦', 'بنوك وشهادات', fmt(zkB));
+    tile(g1, 'violet zkd-wide', '💼', 'إجمالي أموالي (الداخل في الزكاة)', fmt(zkM), (c.exMoney > 0) ? ['🚫 مستبعد: ' + fmt(c.exMoney)] : []);
+    if(c.exMoney > 0 || c.exGold > 0) el('zkd-note', '🚫 مستبعد من حساب الزكاة (حسب اختيارك للمجموعات والبنود): أموال ' + fmt(c.exMoney || 0) + ' · ذهب ' + fmt(c.exGold || 0) + '. تقدر ترجّعه من زرار 🕌 جنب المجموعة أو البند في صفحة أموال/ذهب.', s2);
+    sub('⚖️ تحويل الذهب لعيار ٢٤', 'الجرام × العيار ÷ ٢٤', s2);
+    const cv = el('zkd-conv', undefined, s2);
+    const karats = Object.keys(c.kr).map(Number).filter(k=> c.kr[k] > 0).sort((a, b)=> b - a);
+    [24, 21, 18].forEach(k=>{ if(karats.indexOf(k) < 0) karats.push(k); });
+    karats.sort((a, b)=> b - a).forEach(k=>{
+      const g = c.kr[k] || 0, eq = g * k / 24, r = el('zkd-cr' + (g ? '' : ' z'), undefined, cv);
+      el('a', 'عيار ' + toArabicDigits(k || '؟'), r); el('m', k === 24 ? f2(g) + ' جم' : f2(g) + ' جم × ' + toArabicDigits(k) + '/٢٤', r); el('b', f2(eq) + ' جم', r);
+    });
+    const tr = el('zkd-cr tot', undefined, cv); el('a', 'إجمالي عيار ٢٤ المكافئ', tr); el('m', '', tr); el('b', f2(c.eqAll) + ' جم', tr);
+    sub('🪙 الذهب حسب النوع', (c.live ? 'بسعر بيع جرام ٢٤: ' + fmt(c.p24) : 'بسعر الشراء (السعر الحالي غير متاح)') + ' — دوس على النوع لتضمينه أو استبعاده', s2);
+    const g2 = el('zkd-grid g3', undefined, s2);
+    [['jewel', '💍', 'زينة'], ['save', '💰', 'ادخار'], ['other', '📦', 'خلافه']].forEach(([k, ic, lb])=>{
+      const b = c.bk[k];
+      tile(g2, 'gold g3 tap ' + (_zkc[k] ? 'on' : 'off'), ic, lb, f2(b.e) + ' جم', ['عيار ٢٤ (فعلي ' + f2(b.g) + ')', fmt(b.v) + (_zkc[k] ? ' ✓' : ' ✗')], ()=> zkcToggle(k));
+    });
+    const g3 = el('zkd-grid', undefined, s2); g3.style.marginTop = '10px';
+    tile(g3, 'gold zkd-wide', '🪙', 'الذهب الداخل في حساب الزكاة', fmt(c.goldIn), [f2(c.eqIn) + ' جم عيار ٢٤' + (c.live ? ' × ' + fmt(c.p24) : ''), 'من إجمالي ذهب ' + fmt(c.goldAll)]);
+    sub('🧮 المعادلة النهائية', undefined, s2);
+    const eq = el('zx-eq', undefined, s2);
+    [['أموال', fmt(zkM), ''], ['+', '', 'op'], ['ذهب', fmt(c.goldIn), ''], ['=', '', 'op'], ['الوعاء', fmt(c.base), 'm'], ['×', '', 'op'], ['النسبة', zkRateTxt(), ''], ['الزكاة = الوعاء × النسبة', fmt(c.zk), 'r']].forEach(([lb, v, k])=>{ const d = el(k === 'op' ? 'op' : 'p ' + k, undefined, eq); if(k === 'op') d.textContent = lb; else { el('l', lb, d); el('v', v, d); } });
+  }
+  // ٣) النصاب
+  { const s3 = sec('zxS3', 3, 'النصاب والحول', 'هل مالك بلغ النصاب؟');
+    if(c.live){
+      const nis = cgInt(85 * c.p24), ok = c.base >= nis, r = nis > 0 ? Math.min(100, Math.round(c.base / nis * 100)) : 0;
+      const nb = el('zx-nis ' + (ok ? 'ok' : 'no'), undefined, s3);
+      el('h', ok ? '✅ بلغ النصاب' : '⚠️ أقل من النصاب', nb);
+      el('d', 'وعاء الزكاة ' + fmt(c.base) + ' · النصاب ≈ ' + fmt(nis) + ' ج (٨٥ جم عيار ٢٤)', nb);
+      const bb = el('zx-bar', undefined, nb); const bj = document.createElement('i'); bj.style.width = r + '%'; bb.appendChild(bj);
+      el('d', ok ? 'مالك أعلى من النصاب بـ ' + fmt(c.base - nis) : 'ناقص ' + fmt(nis - c.base) + ' عشان تبلغ النصاب', nb);
+    } else el('zkd-note', 'الزكاة تجب لو بلغ المال النصاب (٨٥ جم ذهب عيار ٢٤) ومرّت عليه سنة كاملة. (سعر الذهب الحالي غير متاح لحساب النصاب بالجنيه)', s3);
+    if(c.live) el('zx-law', '⏳ الزكاة تجب بعد مرور سنة (حول) كاملة على المال وهو بالغ النصاب.', s3);
+  }
+  // ٤) الحكم الشرعي
+  { const s4 = sec('zxS4', 4, 'الحكم الشرعي', 'حسب فتاوى دار الإفتاء المصرية');
+    [['📅', 'الأصل الحول الهجري بنسبة ٢٫٥٪، ويجوز الحول الميلادي بنسبة ٢٫٥٧٧٪ تعويضًا عن فرق ١١ يوم (فتوى ٨١٢٤).'],
+     ['🟢', 'تعجيل الزكاة قبل موعدها جائز (حتى على أقساط) إذا بلغ المال النصاب، وتراجع المبلغ عند الموعد وتزيد الفرق لو زاد مالك.'],
+     ['🔴', 'لا يجوز تأخير الزكاة بعد حلول موعدها ولا تقسيطها بعده إلا لعذر قاهر، وتُخرج كاملة فورًا.'],
+     ['ℹ️', 'هذا حساب تقريبي للمساعدة، ولو عندك حالة خاصة اسأل جهة فتوى.']].forEach(([ic, tx])=>{ const d = el('zx-law', undefined, s4); el('i', ic, d); el('t', tx, d); });
+  }
 }
 function openMsSummary(){
   const box = document.getElementById('msList'); box.innerHTML = '';
