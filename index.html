@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-14.8440">
+<meta name="app-version" content="2026-11-14.8443">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -17662,11 +17662,11 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     try{
       if(!saveOn()) return;
       var log = [];
-      logEls.forEach(function(o){ if(!o.el.isConnected) return; var h = o.el.innerHTML.replace(/<img[^>]*>/g, '📷 '); if(!h.replace(/<[^>]*>/g, '').trim()) return; log.push({c: o.c, h: h}); });
+      logEls.forEach(function(o){ if(!o.el.isConnected) return; var h = o.el.innerHTML.replace(/<img[^>]*>/g, '📷 '); if(!h.replace(/<[^>]*>/g, '').trim()) return; log.push({c: o.c, h: h, i: o.el.dataset.mid || ''}); });
       log = log.slice(-60);
       var all = chatsRead();
       if(!log.length){ if(curId){ all.chats = all.chats.filter(function(c){ return c.id !== curId; }); chatsWrite(all); } return; }
-      var h2 = hist.slice(-40).map(function(m){ return {role: m.role, parts: (m.parts || []).filter(function(p){ return !p.inlineData; })}; }).filter(function(m){ return m.parts.length; });
+      var h2 = hist.slice(-40).map(function(m){ return {role: m.role, parts: (m.parts || []).filter(function(p){ return !p.inlineData; }), b: m.b}; }).filter(function(m){ return m.parts.length; });
       while(h2.length && (h2[0].role !== 'user' || h2[0].parts.some(function(p){ return p.functionResponse; }))) h2.shift();
       if(!curId) curId = 'c' + Date.now();
       var e = {id: curId, at: Date.now(), t: titleOf(log), log: log, hist: h2}, i = -1;
@@ -17679,7 +17679,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function renderChat(c){
     hist = Array.isArray(c.hist) ? c.hist : []; curId = c.id;
     $('aiMsgs').innerHTML = ''; logEls = [];
-    c.log.forEach(function(e){ bubble(e.c, e.h); });
+    c.log.forEach(function(e){ var bb = bubble(e.c, e.h); if(e.i && bb.dataset.mid) bb.dataset.mid = e.i; });
     var s = document.createElement('div'); s.className = 'ai-sug';
     var b = document.createElement('button'); b.textContent = '🆕 محادثة جديدة'; b.onclick = function(){ window.aiClear(); }; s.appendChild(b);
     $('aiMsgs').appendChild(s); endScroll();
@@ -17724,7 +17724,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   window.aiHistToggle = function(){ var p = $('aiHist'); $('aiSet').classList.remove('open'); if(p.classList.contains('open')){ p.classList.remove('open'); return; } chatSave(); histRender(); p.classList.add('open'); };
   try{ new MutationObserver(chatSaveSoon).observe($('aiMsgs'), {childList: true, subtree: true, characterData: true}); }catch(e){}
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') chatSave(); });
-  function bubble(cls, html){ var d = document.createElement('div'); d.className = 'ai-b ' + cls; d.innerHTML = html; $('aiMsgs').appendChild(d); if(!noLog && /^(u|a|a alt)$/.test(cls)) logEls.push({c: cls, el: d}); endScroll(); return d; }
+  var midN = 0;   /* 8442: لكل رسالة معرّف بيربطها بالمحادثة المخزّنة عشان التعديل والمسح */
+  function bubble(cls, html){ var d = document.createElement('div'); d.className = 'ai-b ' + cls; d.innerHTML = html; $('aiMsgs').appendChild(d); if(!noLog && /^(u|a|a alt)$/.test(cls)){ d.dataset.mid = 'm' + Date.now().toString(36) + (++midN); logEls.push({c: cls, el: d}); } endScroll(); return d; }
   function fmtTxt(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
   function welcome(){
     noLog = true; try{ welcome0(); }finally{ noLog = false; }
@@ -18147,12 +18148,16 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   /* بيجرّب البحث على أكتر من موديل الأول (حصة البحث بتختلف من موديل لموديل)، ولو كلهم رفضوا بيجاوب من غير بحث ويقولك السبب الحقيقي */
   /* 8389: بحث جوجل — حصة البحث المجانية لجيميني ٣ شهرية ومشتركة (وبتخلص)، أما جيميني ٢.٥ فليه حصة بحث يومية منفصلة؛ فبنجرّب ٢.٥ الأول وبعدين الباقي */
-  function smList(first){ return ['gemini-2.5-flash', 'gemini-2.5-flash-lite', first, 'gemini-flash-latest', 'gemini-flash-lite-latest'].concat(FALLBACKS).filter(function(m, k, arr){ return arr.indexOf(m) === k; }); }
+  /* 8441: الموديل اللي جوجل ردّت عليه 404 (مقفول على المفتاح ده) بنفتكره ٧ أيام وما نجرّبوش تاني — يرجع تلقائي لو اتجدّد */
+  var SDEADK = 'masrofati_ai_sdead', SDEAD_MS = 7 * 864e5;
+  function sDead(){ try{ var o = JSON.parse(lsGet(SDEADK, '{}')) || {}, n = Date.now(), c = {}; Object.keys(o).forEach(function(k){ if(n - o[k] < SDEAD_MS) c[k] = o[k]; }); return c; }catch(e){ return {}; } }
+  function sMarkDead(m){ var o = sDead(); o[m] = Date.now(); lsSet(SDEADK, JSON.stringify(o)); }
+  function smList(first){ var all = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', first, 'gemini-flash-latest', 'gemini-flash-lite-latest'].concat(FALLBACKS).filter(function(m, k, arr){ return arr.indexOf(m) === k; }), d = sDead(), ok = all.filter(function(m){ return !d[m]; }); return ok.length ? ok : all; }
   async function gSearchTry(body){
     var sm = smList(lsGet(MODK, DEFMOD)), last = null, log = [];
     for(var j = 0; j < sm.length; j++){
       try{ var r = await gOnce(sm[j], body, NOHOOK); r.tried = log; return r; }
-      catch(e){ last = e; log.push(sm[j] + ' ← ' + (e.status || e.message) + (e.msg ? ' (' + String(e.msg).replace(/\s+/g, ' ').slice(0, 70) + ')' : '')); e.tried = log; if(!(e.status === 400 || e.status === 429 || e.status === 404 || e.status === 403 || e.status === 500 || e.status === 503 || e.message === 'TIMEOUT')) throw e; }
+      catch(e){ last = e; if(e.status === 404) sMarkDead(sm[j]); log.push(sm[j] + ' ← ' + (e.status || e.message) + (e.msg ? ' (' + String(e.msg).replace(/\s+/g, ' ').slice(0, 70) + ')' : '')); e.tried = log; if(!(e.status === 400 || e.status === 429 || e.status === 404 || e.status === 403 || e.status === 500 || e.status === 503 || e.message === 'TIMEOUT')) throw e; }
     }
     throw last;
   }
@@ -18401,7 +18406,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       else{
         if(!bub) hooks.onText(res.text);
         await typer.finish(); bub.onclick = null;
-        hist.push({role: 'user', parts: [{text: '[' + lbl + ' من ' + cfg.name + ' على الرد اللي فات: ' + tx.slice(0, 1200) + ']'}]});
+        hist.push({role: 'user', parts: [{text: '[' + lbl + ' من ' + cfg.name + ' على الرد اللي فات: ' + tx.slice(0, 1200) + ']'}], b: bub ? bub.dataset.mid : undefined});
       }
     }catch(e){
       if(ty.parentNode) ty.remove(); if(typer) typer.skip(); if(bub) bub.onclick = null;
@@ -18459,9 +18464,9 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     $('aiSet').classList.remove('open');
     var sg = document.querySelector('#aiMsgs .ai-sug'); if(sg) sg.remove();
     var shown = (img ? '<img src="data:image/jpeg;base64,' + img + '" alt="">' : '') + fmtTxt(txt || 'اقرأ الفاتورة دي وسجّلها');
-    bubble('u', shown);
+    var ub = bubble('u', shown); aeCloseBar();
     var uparts = img ? [{inlineData: {mimeType: 'image/jpeg', data: img}}, {text: txt || 'اقرأ الفاتورة دي وسجّلها'}] : [{text: txt}];
-    hist.push({role: 'user', parts: uparts});
+    hist.push({role: 'user', parts: uparts, b: ub.dataset.mid});
     busy = true;
     var ty = typingEl(), bub = null, typer = null, pushed = false, mode = isExpenseIntent(txt, img) ? 'tool' : 'chat', autoGo = false;
     var hooks = {
@@ -18474,7 +18479,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     try{
       var res = await converse(mode, hooks, !!img);
       if(ty.parentNode) ty.remove();
-      if(img){ hist[hist.length - 1] = {role: 'user', parts: [{text: (txt || 'اقرأ الفاتورة دي وسجّلها') + ' [صورة فاتورة اتبعتت]'}]}; }
+      if(img){ hist[hist.length - 1] = {role: 'user', parts: [{text: (txt || 'اقرأ الفاتورة دي وسجّلها') + ' [صورة فاتورة اتبعتت]'}], b: ub.dataset.mid}; }
       var calls = res.calls || [], out = String(res.text || '').trim();
       if(!out && !calls.length){
         hist.pop(); pushed = true;
@@ -18492,7 +18497,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
         }
         pushed = true;
         calls.forEach(function(fc){ if(fc.name === 'add_expense') expenseCard(fc.args || {}); });
-        if(calls.length && !out) bubble('a', 'راجع البطاقة وأكّد 👇');
+        if(calls.length && !out){ var cb = bubble('a', 'راجع البطاقة وأكّد 👇'); if(!bub) bub = cb; }
+        if(bub && bub.dataset.mid){ if(hist[mIdx]) hist[mIdx].b = bub.dataset.mid; if(res.parts && calls.length && hist[mIdx + 1]) hist[mIdx + 1].b = bub.dataset.mid; }
         addMeta({g: res.g, viaNote: res.viaNote, why: res.why, noSearch: res.noSearch, swhy: res.searchWhy, answer: out, idx: mIdx});
         autoGo = mode === 'chat' && !calls.length && !res.viaNote && out.length > 25 && lsGet(AUTOK, '0') === '1';
       }
@@ -18546,8 +18552,132 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     };
     $('aiMsgs').appendChild(card); endScroll();
   }
+
+  /* ===== 8442: تعديل ومسح رسايل المحادثة — اضغط على أي رسالة يظهر ✏️ تعديل / 🗑️ مسح / 📋 نسخ ===== */
+  var aeBar = null;
+  function aeCloseBar(){ if(aeBar){ if(aeBar._b) aeBar._b.classList.remove('ae-sel'); aeBar.remove(); aeBar = null; } }
+  function aePlain(t){ return String(t || '').replace(/\*\*/g, '').replace(/\s+/g, ' ').trim(); }
+  function aeUTxt(m){ return (m.parts || []).map(function(p){ return p.text || ''; }).join(' ').trim(); }
+  function aeMTxt(m){ return (m.parts || []).filter(function(p){ return p.text; }).map(function(p){ return p.text; }).join('\n'); }
+  function aeHasFR(m){ return (m.parts || []).some(function(p){ return p.functionResponse; }); }
+  function aeHasFC(m){ return (m.parts || []).some(function(p){ return p.functionCall; }); }
+  /* مكان الرسالة في سجل المحادثة اللي بيتبعت للذكاء (بالمعرّف، ولو محادثة قديمة بالنص) */
+  function aeFind(b){
+    var mid = b.dataset.mid, i, m;
+    if(mid){ for(i = 0; i < hist.length; i++) if(hist[i].b === mid && !aeHasFR(hist[i])) return i; }
+    var t = aePlain(b.textContent);
+    if(b.classList.contains('u')){ for(i = hist.length - 1; i >= 0; i--){ m = hist[i]; if(m.role === 'user' && !m.b && !aeHasFR(m) && aePlain(aeUTxt(m).replace(/\s*\[صورة فاتورة اتبعتت\]$/, '')) === t) return i; } }
+    else if(!b.classList.contains('alt')){ for(i = hist.length - 1; i >= 0; i--){ m = hist[i]; if(m.role === 'model' && !m.b && aePlain(aeMTxt(m)) === t) return i; } }
+    return -1;
+  }
+  function aeRaw(b){
+    var i = aeFind(b);
+    if(b.classList.contains('alt')){ var el = b.querySelector('.ai-alt-t'); return (el ? el.textContent : b.textContent).trim(); }
+    if(i > -1){ var t = b.classList.contains('u') ? aeUTxt(hist[i]).replace(/\s*\[صورة فاتورة اتبعتت\]$/, '') : aeMTxt(hist[i]); if(t) return t; }
+    return b.textContent.trim();
+  }
+  function aeCopy(b){
+    var el = b.classList.contains('alt') ? (b.querySelector('.ai-alt-t') || b) : b, t = el.textContent.trim();
+    function ok(){ toast('اتنسخت ✅', true); }
+    function old(){ try{ var ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); ok(); }catch(e){ toast('ماقدرتش أنسخ', false); } }
+    try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok, old); } else old(); }catch(e){ old(); }
+  }
+  /* 8443: تأكيد المسح جوه التطبيق (نافذة confirm بتتمنع في بعض المتصفحات فكان المسح مش بيشتغل) */
+  function aeAsk(b, q){ if(!aeBar) return; aeBar.innerHTML = ''; var s = document.createElement('span'); s.className = 'ae-q'; s.textContent = q; aeBar.appendChild(s); [['✅ أيوه، امسح', 'del', function(){ aeDelete(b, true); }], ['لأ', '', function(){ aeOpenBar(b); }]].forEach(function(a){ var x = document.createElement('button'); x.type = 'button'; x.textContent = a[0]; if(a[1]) x.className = a[1]; x.onclick = function(ev){ ev.stopPropagation(); a[2](); }; aeBar.appendChild(x); }); }
+  function aeDelete(b, sure){
+    if(busy){ toast('استنى المساعد يخلّص رده الأول', false); return; }
+    var isU = b.classList.contains('u'), list = [b], n = b.nextElementSibling;
+    if(isU){ while(n && !(n.classList.contains('ai-b') && n.classList.contains('u'))){ list.push(n); n = n.nextElementSibling; } }
+    else { while(n && n.classList.contains('ai-meta')){ list.push(n); n = n.nextElementSibling; } }
+    if(!sure){ aeAsk(b, isU && list.length > 1 ? 'تمسح رسالتك ورد المساعد عليها؟' : 'تمسح الرسالة دي؟'); return; }
+    var mids = {}, del = {};
+    list.forEach(function(el){ if(el.dataset && el.dataset.mid) mids[el.dataset.mid] = 1; });
+    hist.forEach(function(m, k){ if(m.b && mids[m.b]) del[k] = 1; });
+    list.forEach(function(el){ if(el.classList.contains('ai-b') && el.dataset.mid){ var k = aeFind(el); if(k > -1) del[k] = 1; } });
+    Object.keys(del).forEach(function(k){ k = +k; if(hist[k] && hist[k].role === 'model' && aeHasFC(hist[k]) && hist[k + 1] && aeHasFR(hist[k + 1])) del[k + 1] = 1; });
+    hist = hist.filter(function(m, k){ return !del[k]; });
+    aeCloseBar();
+    list.forEach(function(el){ el.remove(); });
+    if(!$('aiMsgs').children.length) welcome();
+    toast('اتمسحت ✅', true);
+  }
+  function aeApply(b, nt, resend){
+    var i = aeFind(b), isU = b.classList.contains('u'), isAlt = b.classList.contains('alt');
+    if(resend){
+      if(busy){ toast('استنى المساعد يخلّص رده الأول', false); return; }
+      if(i > -1) hist.length = i;
+      var n = b.nextElementSibling; while(n){ var nx = n.nextElementSibling; n.remove(); n = nx; }
+      aeCloseBar(); b.remove();
+      $('aiIn').value = nt; window.aiSend(); return;
+    }
+    if(isU){ b.innerHTML = fmtTxt(nt); if(i > -1) hist[i].parts = [{text: nt}]; }
+    else if(isAlt){
+      var el = b.querySelector('.ai-alt-t'); if(el) el.innerHTML = fmtLive(nt, false);
+      if(i > -1 && hist[i].parts && hist[i].parts[0] && typeof hist[i].parts[0].text === 'string') hist[i].parts[0].text = hist[i].parts[0].text.replace(/(على الرد اللي فات:)[\s\S]*\]$/, function(m, a){ return a + ' ' + nt.slice(0, 1200) + ']'; });
+    } else {
+      b.innerHTML = fmtLive(nt, false);
+      if(i > -1){ var done = false, np = []; (hist[i].parts || []).forEach(function(p){ if(typeof p.text === 'string' && !p.functionCall){ if(!done){ p.text = nt; np.push(p); done = true; } } else np.push(p); }); if(!done) np.unshift({text: nt}); hist[i].parts = np; }
+    }
+    aeCloseBar(); chatSaveSoon(); toast('اتعدّلت ✅', true);
+  }
+  function aeEdit(b){
+    if(busy){ toast('استنى المساعد يخلّص رده الأول', false); return; }
+    if(b.querySelector('img') || /^\s*📷/.test(b.textContent)){ toast('الرسالة اللي فيها صورة ما ينفعش تتعدّل — تقدر تمسحها', false); return; }
+    var isU = b.classList.contains('u'), old = document.getElementById('aiEd'); if(old) old.remove();
+    var ov = document.createElement('div'); ov.id = 'aiEd';
+    ov.innerHTML = '<div class="ae-box"><h4>' + (isU ? '✏️ تعديل رسالتك' : '✏️ تعديل رد المساعد') + '</h4><textarea dir="auto"></textarea>' + (isU ? '<div class="ae-note">«حفظ وإرسال تاني» بيمسح اللي بعد الرسالة دي ويبعتها للمساعد من جديد. «حفظ بس» بيغيّر النص من غير ما يبعت.</div>' : '<div class="ae-note">التعديل بيغيّر الكلام عندك وفي سياق المحادثة اللي المساعد بيشوفه.</div>') + '<div class="ae-row">' + (isU ? '<button type="button" class="pri" data-a="send">📤 حفظ وإرسال تاني</button><button type="button" data-a="save">💾 حفظ بس</button>' : '<button type="button" class="pri" data-a="save">💾 حفظ</button>') + '<button type="button" data-a="x">إلغاء</button></div></div>';
+    var ta = ov.querySelector('textarea'), orig = aeRaw(b); ta.value = orig;
+    ov.onclick = function(e){
+      if(e.target === ov){ ov.remove(); return; }
+      var a = e.target.getAttribute && e.target.getAttribute('data-a'); if(!a) return;
+      if(a === 'x'){ ov.remove(); return; }
+      var nt = ta.value.trim(); if(!nt){ toast('اكتب نص الرسالة', false); return; }
+      if(a === 'save' && nt === orig.trim()){ ov.remove(); aeCloseBar(); return; }
+      ov.remove(); aeApply(b, nt, a === 'send');
+    };
+    $('aiOv').appendChild(ov); setTimeout(function(){ try{ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }catch(e){} }, 60);
+  }
+  function aeOpenBar(b){
+    aeCloseBar();
+    var isErr = b.classList.contains('err'), isU = b.classList.contains('u'), bar = document.createElement('div');
+    bar.className = 'ai-act ' + (isU ? 'u' : 'a'); bar._b = b;
+    function mk(txt, cls, fn){ var x = document.createElement('button'); x.type = 'button'; x.textContent = txt; if(cls) x.className = cls; x.onclick = function(ev){ ev.stopPropagation(); fn(b); }; bar.appendChild(x); }
+    if(!isErr){ mk('✏️ تعديل', '', aeEdit); mk('📋 نسخ', '', aeCopy); }
+    mk('🗑️ مسح', 'del', aeDelete);
+    var at = b; while(at.nextElementSibling && at.nextElementSibling.classList.contains('ai-meta')) at = at.nextElementSibling;
+    at.parentNode.insertBefore(bar, at.nextSibling); b.classList.add('ae-sel'); aeBar = bar;
+    try{ bar.scrollIntoView({block: 'nearest', behavior: 'smooth'}); }catch(e){}
+  }
+  $('aiMsgs').addEventListener('click', function(e){
+    var t = e.target; if(!t || !t.closest) return;
+    if(t.closest('.ai-act') || t.closest('a,button,input,textarea,select,iframe,label')) return;
+    var b = t.closest('.ai-b');
+    if(!b || !(b.dataset.mid || b.classList.contains('err'))){ aeCloseBar(); return; }
+    if(busy) return;
+    try{ if(window.getSelection && String(window.getSelection()).length) return; }catch(er){}
+    if(aeBar && aeBar._b === b){ aeCloseBar(); return; }
+    aeOpenBar(b);
+  });
 })();
 </script>
+<style id="aiEditCss">
+/* 8442: تعديل ومسح رسايل المحادثة */
+#aiMsgs .ai-act{display:flex; gap:6px; flex-wrap:wrap; margin-top:-4px; animation:aiPop .2s ease both;}
+#aiMsgs .ai-act.u{align-self:flex-start;} #aiMsgs .ai-act.a{align-self:flex-end;}
+#aiMsgs .ai-act button{border:0; border-radius:14px; padding:7px 13px; font-family:inherit; font-weight:800; font-size:13.5px; cursor:pointer; background:linear-gradient(180deg,#fff,color-mix(in srgb,#10b981 12%,var(--card,#fff))); color:var(--text,#161a22); box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(16,185,129,.32);}
+#aiMsgs .ai-act button.del{color:#b42318; box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(229,72,77,.35);}
+#aiMsgs .ai-act button:active{transform:translateY(3px); box-shadow:none;}
+#aiMsgs .ai-b.ae-sel{outline:3px solid rgba(16,185,129,.55); outline-offset:2px;}
+#aiMsgs .ai-act .ae-q{font-weight:800; font-size:13.5px; align-self:center;}
+#aiEd{position:fixed; inset:0; z-index:8; display:flex; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.45);}
+#aiEd .ae-box{width:100%; max-width:640px; box-sizing:border-box; background:var(--card,#fff); color:var(--text,#161a22); border-radius:22px 22px 0 0; padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 14px); box-shadow:0 -8px 30px rgba(0,0,0,.25);}
+#aiEd h4{margin:0 0 8px; font-size:16px; font-weight:900;}
+#aiEd textarea{width:100%; box-sizing:border-box; min-height:120px; max-height:45vh; padding:12px; border-radius:14px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-family:inherit; font-size:15.5px; line-height:1.7; resize:vertical;}
+#aiEd .ae-note{font-size:12.5px; opacity:.75; margin:6px 2px 0; line-height:1.6;}
+#aiEd .ae-row{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+#aiEd .ae-row button{flex:1; min-width:30%; border:0; padding:11px 8px; border-radius:14px; font-family:inherit; font-weight:900; font-size:14px; cursor:pointer; background:var(--bg,#eef1f6); color:inherit; box-shadow:0 3px 0 rgba(0,0,0,.12);}
+#aiEd .ae-row button.pri{background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;}
+</style>
 <!-- ===== 8352 END ===== -->
 <script>
 /* ===== 8372: تنبيهات الصرف اليومي + المدفوعات المعلقة + الزكاة والتبرعات ===== */
