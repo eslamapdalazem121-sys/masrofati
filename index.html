@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-13.8434">
+<meta name="app-version" content="2026-11-13.8435">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -4639,6 +4639,7 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
     <div class="field">
       <label>اسم المصروف</label>
       <input type="text" id="qaName" placeholder="مثال: فاتورة الكهرباء">
+      <button type="button" class="btn-cancel" id="qaAiBtn" onclick="qaAutoCat()" style="margin-top:6px;width:100%;">🤖 اقترح المجموعة تلقائيًا</button>
     </div>
     <div class="field">
       <label>المبلغ</label>
@@ -14623,6 +14624,24 @@ function qaToggleNewGroup(){
 }
 document.getElementById('qaMonth').addEventListener('change', populateQaGroups);
 
+async function qaAutoCat(){
+  const btn = document.getElementById('qaAiBtn'), sel = document.getElementById('qaGroup');
+  const nm = document.getElementById('qaName').value.trim();
+  const orig = '🤖 اقترح المجموعة تلقائيًا';
+  const say = (t, ms)=>{ btn.textContent = t; if(ms) setTimeout(()=>{ btn.textContent = orig; btn.disabled = false; }, ms); };
+  if(!nm){ say('اكتب اسم المصروف الأول', 1500); return; }
+  const opts = Array.from(sel.options).filter(o=>o.value !== 'new');
+  if(!opts.length || !window.aiOneShot){ say('مفيش مجموعات أو المساعد مش متفعّل', 2000); return; }
+  btn.disabled = true; say('⏳ بفكّر...');
+  try{
+    const list = opts.map((o,i)=>(i+1) + '. ' + o.textContent.replace(/^[— ]+/, '')).join('\n');
+    let t = await window.aiOneShot('صنّف المصروف «' + nm + '» في أنسب مجموعة من القايمة دي. رُد برقم المجموعة فقط من غير أي كلام تاني.\n' + list);
+    t = String(t).replace(/[٠-٩]/g, d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    const m = t.match(/\d+/), o = m && opts[Number(m[0]) - 1];
+    if(o){ sel.value = o.value; qaToggleNewGroup(); say('✅ ' + o.textContent.replace(/^[— ]+/, ''), 2500); }
+    else say('معرفتش أصنّفه، اختار بنفسك', 2500);
+  }catch(e){ say('حصلت مشكلة، جرّب تاني', 2500); }
+}
 function saveQuickAdd(){
   const mi = Number(document.getElementById('qaMonth').value);
   const name = document.getElementById('qaName').value.trim();
@@ -17273,6 +17292,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     <div class="ai-sep"></div>
     <label>🤝 ذكاء اصطناعي تاني (اختياري)</label>
     <select id="aiP2" onchange="aiP2Change()"><option value="">بدون</option><option value="groq">Groq (مجاني)</option><option value="openrouter">OpenRouter (فيه موديلات مجانية)</option><option value="mistral">Mistral (فيه خطة مجانية)</option><option value="cerebras">Cerebras (فيه خطة مجانية)</option><option value="deepseek">DeepSeek (رخيص)</option><option value="custom">مخصص (متوافق مع OpenAI)</option></select>
+    <datalist id="orModels"><option value="openrouter/free"><option value="~google/gemini-flash-latest"><option value="~anthropic/claude-opus-latest"><option value="~openai/gpt-sol-latest"></datalist>
     <div id="aiP2Box" style="display:none;">
       <label>مفتاح الذكاء التاني</label>
       <input type="password" id="aiP2Key" placeholder="API key" autocomplete="off">
@@ -17333,7 +17353,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   };
   var P2NOTE = {
     groq: 'مفتاح مجاني من console.groq.com/keys (بحساب Google). بيشتغل لوحده لو Gemini وقع أو حصته خلصت، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
-    openrouter: 'مفتاح من openrouter.ai/keys. الموديل openrouter/free بيختار موديل مجاني متاح لوحده. بيشتغل لوحده لو Gemini وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
+    openrouter: 'مفتاح من openrouter.ai/keys. الموديل openrouter/free بيختار موديل مجاني متاح لوحده. اضغط على خانة الموديل تظهرلك قايمة جاهزة (Gemini وClaude بيقروا صور الفواتير). بيشتغل لوحده لو Gemini وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
     mistral: 'مفتاح من console.mistral.ai/api-keys (فيه خطة تجريبية مجانية بحدود). لو الموديل اترفض غيّر اسمه من الخانة. بيشتغل لوحده لو اللي قبله وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
     cerebras: 'مفتاح من cloud.cerebras.ai (فيه خطة مجانية بحدود). لو الموديل اترفض غيّر اسمه من الخانة. بيشتغل لوحده لو اللي قبله وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
     deepseek: 'مفتاح من platform.deepseek.com (مدفوع بس رخيص جدًا). بيشتغل لوحده لو اللي قبله وقع، وبيظهر زر «🔁 رأي تاني» تحت كل رد.<br>تنبيه: بيانات مصروفاتك بتتبعت للخدمة دي كمان لما تستخدمها.',
@@ -17384,7 +17404,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     $('aiP2Box').style.display = pre ? 'block' : 'none';
     $('aiP2UrlBox').style.display = id === 'custom' ? 'block' : 'none';
     if(!pre) return;
-    var m = $('aiP2Model'); m.placeholder = pre.model || 'اسم الموديل';
+    var m = $('aiP2Model'); m.placeholder = pre.model || 'اسم الموديل'; if(id === 'openrouter') m.setAttribute('list', 'orModels'); else m.removeAttribute('list');
     if(keep !== true){ var defs = Object.keys(P2PRE).map(function(k){ return P2PRE[k].model; }); if(!m.value || defs.indexOf(m.value) > -1) m.value = pre.model; }
     $('aiP2Note').innerHTML = P2NOTE[id];
   };
@@ -17393,7 +17413,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     $('aiP3Box').style.display = pre ? 'block' : 'none';
     $('aiP3UrlBox').style.display = id === 'custom' ? 'block' : 'none';
     if(!pre) return;
-    var m = $('aiP3Model'); m.placeholder = pre.model || 'اسم الموديل';
+    var m = $('aiP3Model'); m.placeholder = pre.model || 'اسم الموديل'; if(id === 'openrouter') m.setAttribute('list', 'orModels'); else m.removeAttribute('list');
     if(keep !== true){ var defs = Object.keys(P2PRE).map(function(k){ return P2PRE[k].model; }); if(!m.value || defs.indexOf(m.value) > -1) m.value = pre.model; }
     $('aiP3Note').innerHTML = P2NOTE[id].replace('رأي تاني', 'رأي تالت');
   };
@@ -17402,7 +17422,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     $('aiP4Box').style.display = pre ? 'block' : 'none';
     $('aiP4UrlBox').style.display = id === 'custom' ? 'block' : 'none';
     if(!pre) return;
-    var m = $('aiP4Model'); m.placeholder = pre.model || 'اسم الموديل';
+    var m = $('aiP4Model'); m.placeholder = pre.model || 'اسم الموديل'; if(id === 'openrouter') m.setAttribute('list', 'orModels'); else m.removeAttribute('list');
     if(keep !== true){ var defs = Object.keys(P2PRE).map(function(k){ return P2PRE[k].model; }); if(!m.value || defs.indexOf(m.value) > -1) m.value = pre.model; }
     $('aiP4Note').innerHTML = P2NOTE[id].replace('رأي تاني', 'رأي رابع');
   };
@@ -17981,9 +18001,11 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     arr.forEach(function(m){
       var tx = m.parts.map(function(p){ return p.text || ''; }).join('').trim();
       if(!tx && m.parts.some(function(p){ return p.functionCall; })) tx = '[اتعرضت على المستخدم بطاقة تسجيل مصروف]';
-      if(!tx) return;
+      var im = m.parts.filter(function(p){ return p.inlineData; })[0];
+      if(!tx && !im) return;
+      if(im && m.role !== 'model'){ out.push({role: 'user', content: [{type: 'text', text: tx || 'اقرأ الفاتورة دي وسجّلها'}, {type: 'image_url', image_url: {url: 'data:' + (im.inlineData.mimeType || 'image/jpeg') + ';base64,' + im.inlineData.data}}]}); return; }
       var role = m.role === 'model' ? 'assistant' : 'user', l = out[out.length - 1];
-      if(l && l.role === role) l.content += '\n' + tx; else out.push({role: role, content: tx});
+      if(l && l.role === role && typeof l.content === 'string') l.content += '\n' + tx; else out.push({role: role, content: tx});
     });
     return out;
   }
@@ -18024,6 +18046,24 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     r.viaNote = cfg.name; return r;
   }
 
+  window.aiOneShot = async function(prompt){
+    var gk = lsGet(KEYK, '');
+    if(gk){
+      try{
+        var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(lsGet(MODK, DEFMOD)) + ':generateContent', {method: 'POST', headers: {'content-type': 'application/json', 'x-goog-api-key': gk}, body: JSON.stringify({contents: [{role: 'user', parts: [{text: prompt}]}], generationConfig: {temperature: 0, maxOutputTokens: 400}})});
+        if(r.ok){ var j = await r.json(), t = (((j.candidates || [])[0] || {}).content || {}).parts || []; t = t.map(function(p){ return p.text || ''; }).join('').trim(); if(t) return t; }
+      }catch(e){}
+    }
+    var chain = [p2cfg(), p3cfg(), p4cfg()].filter(Boolean);
+    for(var i = 0; i < chain.length; i++){
+      try{
+        var r2 = await fetch(chain[i].base + '/chat/completions', {method: 'POST', headers: {'content-type': 'application/json', 'authorization': 'Bearer ' + chain[i].key}, body: JSON.stringify({model: chain[i].model, messages: [{role: 'user', content: prompt}], max_tokens: 400, temperature: 0})});
+        if(r2.ok){ var j2 = await r2.json(), m2 = ((j2.choices || [])[0] || {}).message || {}, t2 = stripThink(String(m2.content || '')).trim(); if(t2) return t2; }
+      }catch(e){}
+    }
+    return '';
+  };
+
   /* ===== التوزيع: Gemini أولًا، ولو وقع بيجاوب الذكاء التاني ===== */
   async function converse(mode, hooks, hasImg){
     var chain = [p2cfg(), p3cfg(), p4cfg()].filter(Boolean), needTools = mode === 'tool' || lsGet(SRCHK, '0') !== '1';
@@ -18035,10 +18075,10 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       }
       throw last;
     }
-    if(!lsGet(KEYK, '') && chain.length && !hasImg) return runChain('');
+    if(!lsGet(KEYK, '') && chain.length) return runChain('');
     try{ return await geminiRun(mode, hooks); }
     catch(e){
-      if(!chain.length || hasImg || hooks.began() || (e && e.message === 'NOKEY')) throw e;
+      if(!chain.length || hooks.began() || (e && e.message === 'NOKEY')) throw e;
       try{ return await runChain(errShort(e)); }
       catch(e2){ e2.prev = e; throw e2; }
     }
@@ -18157,7 +18197,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     try{
       var msgs = p2Msgs(trimHist(hist.slice(0, idx)), p2Sys()), l = msgs[msgs.length - 1];
       var q = 'ده رد مساعد تاني على سؤالي:\n«' + String(answer).slice(0, 3000) + '»\n\nراجعه وادّيني رأيك باختصار: صحّح أي رقم أو حساب غلط بالاعتماد على بياناتي، وضيف أي حاجة مهمة ناقصة، وقول لو متفق معاه.';
-      if(l && l.role === 'user') l.content += '\n\n' + q; else msgs.push({role: 'user', content: q});
+      if(l && l.role === 'user' && Array.isArray(l.content)) l.content.push({type: 'text', text: q}); else if(l && l.role === 'user') l.content += '\n\n' + q; else msgs.push({role: 'user', content: q});
       var res = await p2Run(msgs, false, hooks, cfg), tx = String(res.text || '').trim();
       if(ty.parentNode) ty.remove();
       if(!tx){ bubble('a err', 'الذكاء التاني مردّش. جرّب تاني.'); btn.disabled = false; }
