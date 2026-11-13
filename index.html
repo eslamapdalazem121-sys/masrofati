@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-12.8424">
+<meta name="app-version" content="2026-11-13.8434">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -3696,15 +3696,15 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
       <span class="zk-ico">🕌</span>
       <span class="zm-ttl" id="zmTitle">زكاة المال</span>
       <span class="plus-badge in-card zk-plus" onclick="event.stopPropagation(); openZkCalc()" role="button" aria-label="حساب زكاة المال">+</span>
-      <span class="zm-duo">
-        <span class="zm-tile zm-due"><small>⚖️ المستحق</small><span class="yr-amt" id="zmAmt">0</span></span>
-        <span class="zm-tile zm-av" id="zmAvailBox" onclick="event.stopPropagation(); openZmPay()" role="button" aria-label="الرصيد المتاح للزكاة"><span class="zm-go">‹</span><small id="zmAvailLbl">💳 الرصيد المتاح</small><span class="yr-amt" id="zmAvail">0</span></span>
+      <span class="zm-duo" id="zmDuoBox">
+        <span class="zm-tile zm-due" data-id="due"><small>⚖️ المستحق</small><span class="yr-amt" id="zmAmt">0</span></span>
+        <span class="zm-tile zm-av" data-id="avail" id="zmAvailBox" onclick="event.stopPropagation(); openZmPay()" role="button" aria-label="الرصيد المتاح للزكاة"><span class="zm-go">‹</span><small id="zmAvailLbl">💳 الرصيد المتاح</small><span class="yr-amt" id="zmAvail">0</span></span>
       </span>
       <span class="gi-col zm-note"><span class="zk-sub" id="zmStatus"></span><span class="zk-bell" id="zmBell"></span></span>
     </div>
-    <div class="zk-row">
-      <div class="zk-sq" onclick="openZmPay()" role="button"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🤲</span><span class="zk-l">إجمالي منصرف الزكاة</span><span class="zk-v" id="zmPaid">0</span></div>
-      <div class="zk-sq" id="zmLeftSq"><span class="zk-i" id="zmLeftIco">⏳</span><span class="zk-l" id="zmLeftLbl">المتبقي</span><span class="zk-v" id="zmLeft">0</span></div>
+    <div class="zk-row" id="zmRowBox">
+      <div class="zk-sq" data-id="paid" onclick="openZmPay()" role="button"><span class="plus-badge" aria-hidden="true">+</span><span class="zk-i">🤲</span><span class="zk-l">إجمالي منصرف الزكاة</span><span class="zk-v" id="zmPaid">0</span></div>
+      <div class="zk-sq" id="zmLeftSq" data-id="left"><span class="zk-i" id="zmLeftIco">⏳</span><span class="zk-l" id="zmLeftLbl">المتبقي</span><span class="zk-v" id="zmLeft">0</span></div>
     </div>
     <div class="zk-due-line" id="zmDue" onclick="openZkCalc()"></div>
     <div class="zk-due-line zm-prev" id="zmPrev" onclick="openZkCalc()"></div>
@@ -3777,12 +3777,15 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 </div>
 
 <div class="modal-overlay" id="zakHeroOverlay">
-  <div class="modal-box ch-page">
+  <div class="modal-box ch-page" id="zakPgBox">
     <button type="button" class="fs-close" onclick="closeZakHero()" aria-label="رجوع">✕</button>
     <div class="ch-ptitle">🕌 زكاتي</div>
-    <div class="cap-hero-wrap zk-pg-wrap" id="zakPgWrap"><button type="button" class="cap-hero" id="zakPgBtn" onclick="zkTabGo('zk')" data-hold-ok aria-label="زكاتي"><span class="ch-stage"><span class="ch-ico" id="zakPgIco"></span></span></button></div>
-    <div id="zakHeroHost"></div>
-    <div class="cap-hero-wrap zk-pg-wrap" id="donPgWrap"><button type="button" class="cap-hero" id="donPgBtn" onclick="dnOpen()" data-hold-ok aria-label="تبرعات وصدقات"><span class="ch-stage"><span class="ch-ico" id="donPgIco"></span></span><span class="ch-lbl">تبرعات وصدقات</span></button></div>
+    <div id="zkGrid" class="zk-grid">
+    <div class="cap-hero-wrap zk-pg-wrap" id="zakPgWrap" data-gk="zk"><button type="button" class="cap-hero" id="zakPgBtn" onclick="zkTabGo('zk')" data-hold-ok aria-label="زكاتي"><span class="ch-stage"><span class="ch-ico" id="zakPgIco"></span></span></button></div>
+    <div class="cap-hero-wrap zk-pg-wrap" id="zkcPgWrap" data-gk="zkc"><button type="button" class="cap-hero" id="zkcPgBtn" onclick="openZkCalc()" data-hold-ok aria-label="زكاة المال — حساب الزكاة وموعد الاستحقاق"><span class="ch-stage"><span class="ch-ico" id="zkcPgIco"></span></span><span class="ch-lbl" id="zkcPgLbl">حساب زكاة</span></button></div>
+    <div class="cap-hero-wrap zk-pg-wrap" id="donPgWrap" data-gk="don"><button type="button" class="cap-hero" id="donPgBtn" onclick="dnOpen()" data-hold-ok aria-label="تبرعات وصدقات"><span class="ch-stage"><span class="ch-ico" id="donPgIco"></span></span><span class="ch-lbl">تبرعات وصدقات</span></button></div>
+    <div id="zakHeroHost" data-gk="card"></div>
+    </div>
   </div>
 </div>
 
@@ -15223,6 +15226,9 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 (function(){
   var KEYM = 'masrofati_move_v1', HINT = 'masrofati_home_hint_v1', HOLD = 380, TOL = 9;
   var IDS = ['yiHeroWrap', 'yrGI', 'zakHeroWrap', 'yrZM', 'capHeroWrap', 'yrCap', 'msHeroWrap', 'yrMS'];
+  /* 8428: ترتيب أيقونات وبطاقات صفحة الزكاة */
+  var ZK_BOX = {zmRowBox: 'zmrow', zmDuoBox: 'zmduo'}, ZK_KEY = {zmrow: 'zmRowOrder', zmduo: 'zmDuoOrder'};
+  function gridKind(k){ return k === 'cmokind' || k === 'cmodest' || k === 'zmrow' || k === 'zmduo'; }
   var st = null, suppressUntil = 0, lastTouchEnd = 0;
   function allowed(){ try{ return localStorage.getItem(KEYM) !== 'off'; }catch(e){ return true; } }
   function vib(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
@@ -15233,6 +15239,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(!el || el.nodeType !== 1 || !p || p.nodeType !== 1) return null;
     if(p.id === 'homeExtras') return IDS.indexOf(el.id) > -1 ? 'home' : null;
     if(!el.dataset || !el.dataset.id) return null;
+    if(ZK_BOX[p.id]) return ZK_BOX[p.id];
     if(p.id === 'cmBox') return 'cmblk';
     if(p.classList && p.classList.contains('cmo-wrap')) return 'cmoblk';
     if(p.id === 'cmoKinds') return 'cmokind';
@@ -15284,7 +15291,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   }
   function reorder(y){
     if(!st) return;
-    if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind' || st.kind === 'cmodest'){ reorderGrid(y); return; }
+    if((st.kind === 'home' && homeGrid()) || gridKind(st.kind)){ reorderGrid(y); return; }
     for(var i = 0; i < 14; i++){
       var nx = neighbor(1), pv = neighbor(-1), moved = false, r;
       if(nx){ r = nx.getBoundingClientRect(); if(y > r.top + r.height * 0.5){ st.parent.insertBefore(st.el, nx.nextSibling); moved = true; } }
@@ -15331,6 +15338,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
       else if(k === 'cmoblk'){ data.cmoBlkOrder = ids; save(); }
       else if(k === 'cmokind'){ data.cmoKindOrder = ids; save(); }
       else if(k === 'cmodest'){ data.cmoDestOrder = ids; save(); }
+      else if(ZK_KEY[k]){ data[ZK_KEY[k]] = ids; save(); }
       else if(k === 'capgrp'){ ok = reorderSubset(capGroups(), ids); if(ok){ save(); if(p.id === 'cgList') renderCapGold(); else renderCapMoney(); } }
       else if(k === 'zk'){ ok = reorderSubset(zkGet()[_zkMode], ids); if(ok){ save(); renderZakatList(); } }
       else if(k === 'gisrc'){ ok = reorderSubset(giRec().src, ids); if(ok){ save(); renderGISources(); } }
@@ -15369,7 +15377,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     for(var j = 0; j < kids.length; j++){ var rr = kids[j].getBoundingClientRect(); if(y < rr.top + rr.height * 0.5){ before = kids[j]; break; } }
     body.insertBefore(st.el, before); st.parent = body; st.cross = true; st.crossAt = Date.now();
   }
-  function move(y, x){ if(!st || !st.active) return; st.lastY = y; if(typeof x === 'number') st.lastX = x; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; if((st.kind === 'home' && homeGrid()) || st.kind === 'cmokind' || st.kind === 'cmodest') st.ghost.style.left = (st.lastX - st.offX + st.cx) + 'px'; if(st.kind === 'cap') crossGroup(y); reorder(y); }
+  function move(y, x){ if(!st || !st.active) return; st.lastY = y; if(typeof x === 'number') st.lastX = x; st.ghost.style.top = (y - st.offY + st.cy) + 'px'; if((st.kind === 'home' && homeGrid()) || gridKind(st.kind)) st.ghost.style.left = (st.lastX - st.offX + st.cx) + 'px'; if(st.kind === 'cap') crossGroup(y); reorder(y); }
   function finish(dropped){
     if(!st) return; var s0 = st; st = null; document.removeEventListener('touchmove', tmoveActive, {passive: false});
     if(s0.timer) clearTimeout(s0.timer);
@@ -15377,7 +15385,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     if(!s0.active) return;
     document.body.classList.remove('hc-dragging');
     suppressUntil = Date.now() + 500;
-    var el = s0.el, g = s0.ghost, animate = ((s0.kind === 'home' || s0.kind === 'cmokind' || s0.kind === 'cmodest') && dropped);
+    var el = s0.el, g = s0.ghost, animate = ((s0.kind === 'home' || gridKind(s0.kind)) && dropped);
     if(animate && el.isConnected){
       var r = el.getBoundingClientRect();
       g.style.transition = 'top .16s ease, left .16s ease, transform .16s ease, box-shadow .16s ease';
@@ -15437,6 +15445,23 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
     applyMode();
     toast(v === 'off' ? '🔒 التحريك مقفول — مفيش حاجة هتتحرك في التطبيق' : '✋ التحريك مسموح — دوس مطوّلًا على أي بطاقة أو صف وحرّكه', true);
   };
+  /* تطبيق الترتيب المحفوظ على أيقونات وبطاقات صفحة الزكاة */
+  window.zakOrderApply = function(){
+    try{
+      if(data && data.zakPgPos){ delete data.zakPgPos; try{ save(); }catch(e){} }
+      Object.keys(ZK_BOX).forEach(function(bid){
+        var box = document.getElementById(bid), ord = box && data && data[ZK_KEY[ZK_BOX[bid]]];
+        if(!box || !Array.isArray(ord) || !ord.length) return;
+        var kids = Array.prototype.filter.call(box.children, function(c){ return c.dataset && c.dataset.id; }), by = {};
+        if(!kids.length) return; kids.forEach(function(c){ by[c.dataset.id] = c; });
+        var seq = ord.filter(function(i){ return by[i]; }); kids.forEach(function(c){ if(seq.indexOf(c.dataset.id) < 0) seq.push(c.dataset.id); });
+        if(seq.join('|') === kids.map(function(c){ return c.dataset.id; }).join('|')) return;
+        var anchor = kids[kids.length - 1].nextSibling;
+        seq.forEach(function(i){ box.insertBefore(by[i], anchor); });
+      });
+    }catch(e){}
+  };
+  window.zakOrderApply();
   applyMode();
   try{ var so = document.getElementById('settingsOverlay'); if(so && window.MutationObserver) new MutationObserver(refreshChips).observe(so, {attributes: true, attributeFilter: ['class']}); }catch(e){}
   /* تلميح مرة واحدة */
@@ -17045,7 +17070,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 #aiHist .ai-ht{flex:1; text-align:right; border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; padding:10px 12px; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; gap:2px; min-width:0;}
 #aiHist .ai-ht b{font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 #aiHist .ai-ht small{font-size:11.5px; opacity:.7;}
-#aiHist .ai-hr.cur .ai-ht{outline:2px solid #8b5cf6;}
+#aiHist .ai-hr.cur .ai-ht{outline:2px solid #10b981;}
 #aiHist .ai-hx{border:0; background:var(--bg,#eef1f6); color:inherit; border-radius:14px; width:42px; font-size:15px; cursor:pointer;}
 #aiSet{display:none; padding:12px; background:var(--card,#fff); border-bottom:1px solid var(--border,#e8eaf0);}
 #aiSet.open{display:block; position:fixed; inset:0; z-index:5; max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0; background:var(--bg,#eef1f6); border:0;}
@@ -17059,36 +17084,36 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 #aiSet .ai-note{font-size:12.5px; opacity:.75; line-height:1.6; margin:8px 4px 2px;}
 #aiMsgs{flex:1; overflow-y:auto; padding:14px 12px 8px; display:flex; flex-direction:column; gap:10px; -webkit-overflow-scrolling:touch;}
 #aiMsgs .ai-b{max-width:86%; padding:11px 14px; border-radius:18px; font-size:15.5px; line-height:1.7; white-space:pre-wrap; word-break:break-word; box-shadow:0 3px 0 rgba(0,0,0,.08);}
-#aiMsgs .ai-b.u{align-self:flex-start; background:linear-gradient(160deg,#8b5cf6,#6d3fe0); color:#fff; border-bottom-right-radius:6px;}
+#aiMsgs .ai-b.u{align-self:flex-start; background:linear-gradient(160deg,#10b981,#059669); color:#fff; border-bottom-right-radius:6px;}
 #aiMsgs .ai-b.a{align-self:flex-end; background:var(--card,#fff); border-bottom-left-radius:6px;}
 #aiMsgs .ai-b img{display:block; max-width:100%; max-height:160px; border-radius:12px; margin-bottom:6px;}
 #aiMsgs .ai-b.err{background:#fff1f0; color:#b42318;}
 /* 8364: النقط التلاتة أصغر وبشكل حديث (نقط صغيرة بتدرّج بنفسجي→سماوي وموجة هادية) */
-#aiMsgs .ai-typing{align-self:flex-end; display:flex; align-items:center; gap:5px; padding:10px 15px; border-radius:16px; border-bottom-left-radius:5px; background:var(--card,#fff); box-shadow:0 1px 8px rgba(91,47,209,.14);}
-#aiMsgs .ai-typing i{display:block; width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,#8b5cf6,#38bdf8); opacity:.35; animation:aiDot 1.2s ease-in-out infinite;}
+#aiMsgs .ai-typing{align-self:flex-end; display:flex; align-items:center; gap:5px; padding:10px 15px; border-radius:16px; border-bottom-left-radius:5px; background:var(--card,#fff); box-shadow:0 1px 8px rgba(16,150,110,.14);}
+#aiMsgs .ai-typing i{display:block; width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,#10b981,#38bdf8); opacity:.35; animation:aiDot 1.2s ease-in-out infinite;}
 #aiMsgs .ai-typing i:nth-child(2){animation-delay:.15s;}
 #aiMsgs .ai-typing i:nth-child(3){animation-delay:.3s;}
 @keyframes aiDot{0%,70%,100%{transform:translateY(0) scale(.85); opacity:.35;} 35%{transform:translateY(-4px) scale(1.15); opacity:1;}}
 /* 8364: الكتابة الحيّة: مؤشر الكتابة + المصادر + اقتراحات بحث جوجل + زر رأي تاني */
-.ai-caret{display:inline-block; width:2px; height:1.05em; margin-inline-start:2px; vertical-align:-.18em; border-radius:1px; background:#8b5cf6; animation:aiBlink .9s steps(1) infinite;}
+.ai-caret{display:inline-block; width:2px; height:1.05em; margin-inline-start:2px; vertical-align:-.18em; border-radius:1px; background:#10b981; animation:aiBlink .9s steps(1) infinite;}
 @keyframes aiBlink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
 #aiMsgs .ai-meta{align-self:flex-end; max-width:92%; display:flex; flex-direction:column; gap:6px; margin-top:-3px;}
 #aiMsgs .ai-m-note{font-size:12.5px; opacity:.78; line-height:1.6; word-break:break-word;}
 #aiMsgs .ai-srcs{display:flex; flex-wrap:wrap; gap:6px;}
-#aiMsgs .ai-src{display:block; max-width:100%; box-sizing:border-box; font-size:12px; font-weight:800; padding:5px 10px; border-radius:12px; background:var(--card,#fff); color:#8b5cf6; text-decoration:none; box-shadow:0 2px 0 rgba(0,0,0,.08); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#aiMsgs .ai-src{display:block; max-width:100%; box-sizing:border-box; font-size:12px; font-weight:800; padding:5px 10px; border-radius:12px; background:var(--card,#fff); color:#10b981; text-decoration:none; box-shadow:0 2px 0 rgba(0,0,0,.08); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 #aiMsgs .ai-sug-frame{display:block; width:100%; height:44px; border:0; border-radius:10px; background:transparent;}
 #aiMsgs .ai-rev{align-self:flex-start; border:0; font-family:inherit; font-size:13px; font-weight:800; padding:7px 12px; border-radius:14px; background:var(--card,#fff); color:inherit; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.1);}
 #aiMsgs .ai-rev:active{transform:translateY(2px); box-shadow:none;}
 #aiMsgs .ai-rev:disabled{opacity:.5;}
-#aiMsgs .ai-b.alt .ai-alt-h{font-size:12.5px; font-weight:900; color:#8b5cf6; margin-bottom:4px;}
+#aiMsgs .ai-b.alt .ai-alt-h{font-size:12.5px; font-weight:900; color:#10b981; margin-bottom:4px;}
 #aiSet .ai-chk{display:flex; align-items:center; gap:10px; margin:12px 4px 4px;}
-#aiSet .ai-chk input{width:22px; height:22px; padding:0; margin:0; flex:none; accent-color:#8b5cf6;}
+#aiSet .ai-chk input{width:22px; height:22px; padding:0; margin:0; flex:none; accent-color:#10b981;}
 #aiSet .ai-chk label{margin:0; flex:1; font-size:14px; opacity:1; cursor:pointer;}
 #aiSet .ai-sep{height:1px; background:var(--border,#e8eaf0); margin:14px 0 4px;}
 #aiSet select{width:100%; box-sizing:border-box; padding:12px; border-radius:14px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-size:15px; font-family:inherit;}
 #aiMsgs .ai-sug{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;}
 #aiMsgs .ai-sug button{border:0; background:var(--card,#fff); color:inherit; border-radius:16px; padding:10px 14px; font-size:14px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.12);}
-#aiMsgs .ai-card{align-self:stretch; background:var(--card,#fff); border:2px solid #8b5cf6; border-radius:20px; padding:12px; box-shadow:0 5px 0 rgba(91,47,209,.35);}
+#aiMsgs .ai-card{align-self:stretch; background:var(--card,#fff); border:2px solid #10b981; border-radius:20px; padding:12px; box-shadow:0 5px 0 rgba(16,150,110,.35);}
 #aiMsgs .ai-card h4{margin:0 0 8px; font-size:15px; font-weight:900;}
 #aiMsgs .ai-card label{display:block; font-size:12.5px; font-weight:800; opacity:.75; margin:8px 4px 4px;}
 #aiMsgs .ai-card input,#aiMsgs .ai-card select{width:100%; box-sizing:border-box; padding:11px; border-radius:12px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-size:15px; font-family:inherit;}
@@ -17102,7 +17127,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 #aiBar{display:flex; align-items:center; gap:8px; padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px); background:var(--card,#fff); box-shadow:0 -2px 10px rgba(0,0,0,.06);}
 #aiBar input[type=text]{flex:1; min-width:0; padding:13px 14px; border-radius:20px; border:1px solid var(--border,#e8eaf0); background:var(--bg,#eef1f6); color:inherit; font-size:16px; font-family:inherit;}
 #aiBar .ai-ic{flex:none; width:46px; height:46px; border-radius:50%; border:0; font-size:21px; cursor:pointer; display:flex; align-items:center; justify-content:center; background:var(--bg,#eef1f6); color:inherit; box-shadow:0 3px 0 rgba(0,0,0,.12);}
-#aiBar .ai-send{background:linear-gradient(160deg,#8b5cf6,#6d3fe0); color:#fff; box-shadow:0 3px 0 #3b1a99;}
+#aiBar .ai-send{background:linear-gradient(160deg,#10b981,#059669); color:#fff; box-shadow:0 3px 0 #065f46;}
 #aiBar .ai-ic:active{transform:translateY(3px); box-shadow:none;}
 #aiBar .ai-ic.rec{background:#e5484d; color:#fff; animation:aiRec 1s infinite;}
 @keyframes aiRec{50%{transform:scale(1.12);}}
@@ -17671,7 +17696,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var map = {}, seen = {};
     days.forEach(function(k){ var y = Number(k.slice(0, 4)), i = Number(k.slice(5, 7)) - 1, id = y + '-' + i; if(seen[id]) return; seen[id] = 1;
       var mon = (data[y] || {})[i]; if(!mon) return;
-      collectExpensesWithGroup(mon.groups || []).forEach(function(e){ if(!e || e.type !== 'expense' || e.counted === false || !e.date) return; var dk = dateToInputValue(e.date); map[dk] = (map[dk] || 0) + (Number(e.amount) || 0); });
+      collectExpensesWithGroup(mon.groups || []).forEach(function(e){ if(!e || e.type !== 'expense' || e.counted === false || !(e.date || e.createdAt)) return; var dk = dateToInputValue(e.date || e.createdAt); map[dk] = (map[dk] || 0) + (Number(e.amount) || 0); });
     });
     return map;
   }
@@ -17746,6 +17771,19 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function buildCtx(){
     var now = new Date(), y = currentYear, mi = curMonthIdx(), L = [], PV = (window.MSR_PRIV && MSR_PRIV.get()) || {}, mc = 0;
     L.push('تاريخ النهاردة: ' + dateToInputValue(now.getTime()) + ' | السنة المعروضة: ' + y);
+    try{
+      var rn = new Date(), tkN = dateToInputValue(rn.getTime()), ykN = dateToInputValue(rn.getTime() - 86400000);
+      var dayOfE = function(e){ return e.date ? dateToInputValue(e.date) : (e.createdAt ? dateToInputValue(e.createdAt) : ''); };
+      [[tkN, 'النهارده'], [ykN, 'امبارح']].forEach(function(pr){
+        var k = pr[0], yy = Number(k.slice(0, 4)), mm = Number(k.slice(5, 7)) - 1, monD = (data[yy] || {})[mm];
+        if(PV.aiExp === false){ L.push('مصروفات ' + pr[1] + ' (' + k + '): مخفية بإعدادات الخصوصية — دي مش معناها إن مفيش مصروفات.'); return; }
+        var ex = monD ? collectExpensesWithGroup(monD.groups || []).filter(function(e){ return e && e.type === 'expense' && dayOfE(e) === k; }) : [];
+        if(!ex.length){ L.push('مصروفات ' + pr[1] + ' (' + k + '): مفيش أي مصروف مسجّل بالتاريخ ده في التطبيق.'); return; }
+        var tt = ex.reduce(function(s2, e){ return s2 + (e.counted === false ? 0 : (Number(e.amount) || 0)); }, 0);
+        L.push('مصروفات ' + pr[1] + ' (' + k + ') — ' + ex.length + ' عملية، إجمالي المحسوب ' + fmt(tt) + ' (اعتمد عليها في أي سؤال عن ' + pr[1] + '):');
+        ex.slice(0, 60).forEach(function(e){ L.push('- ' + e.name + ' | ' + fmt(Number(e.amount) || 0) + ' | ' + e.groupName + (e.counted === false ? ' | (مش محسوب)' : '')); });
+      });
+    }catch(e){}
     L.push('ملخص شهور السنة (دخل / مصروفات / أكبر مجموعات):');
     for(var i = 0; i < 12; i++){
       var mon = (data[y] || {})[i]; if(!mon) continue;
@@ -17758,6 +17796,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       L.push('مصروفات شهر ' + MONTHS[mi] + ' بالتفصيل (اسم | مبلغ | تاريخ | مجموعة):');
       L = L.concat(monthLines(y, mi, 120));
       if(mi > 0){ L.push('مصروفات شهر ' + MONTHS[mi - 1] + ' بالتفصيل:'); L = L.concat(monthLines(y, mi - 1, 80)); }
+      try{ var rn2 = new Date(); if(y !== rn2.getFullYear() || mi !== rn2.getMonth()){ L.push('مصروفات الشهر الحالي الفعلي (' + MONTHS[rn2.getMonth()] + ' ' + rn2.getFullYear() + ') بالتفصيل:'); L = L.concat(monthLines(rn2.getFullYear(), rn2.getMonth(), 120)); } }catch(e){}
     }
     var gl = groupsOf((data[y] || {})[mi]).map(function(g){ return g.path; });
     L.push('المجموعات المتاحة لتسجيل مصروف في الشهر ده: ' + (gl.join(' ، ') || '(مفيش مجموعات)'));
@@ -17766,7 +17805,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var t = L.join('\n'); return t.length > 48000 ? t.slice(0, 48000) + '\n…' : t;
   }
   window.aiCtxPreview = function(){ return buildCtx(); };
-  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى. ممكن بعض البيانات تكون مخفية أو بأسماء عامة (حساب ١، قطعة ٢…) بسبب إعدادات الخصوصية؛ لو سُئلت عن اسم مخفي قول إنه مخفي بإعدادات الحماية، ومتحاولش تخمّنه. عندك في البيانات المرفقة تاريخ كل السنين (سجل شهري لكل سنة، ولقطات رأس المال آخر كل سنة وكل شهر، وسجل يومي لرأس المال والإنفاق وأسعار الذهب)؛ لما حد يسألك عن رقم قديم أو يطلب مقارنة بين الماضي والحاضر، راجع الأقسام دي وجاوب بالأرقام والفرق والنسبة، ومتقولش إنك مش شايف بيانات قديمة قبل ما تراجعها.';
+  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى. ممكن بعض البيانات تكون مخفية أو بأسماء عامة (حساب ١، قطعة ٢…) بسبب إعدادات الخصوصية؛ لو سُئلت عن اسم مخفي قول إنه مخفي بإعدادات الحماية، ومتحاولش تخمّنه. عندك في البيانات المرفقة تاريخ كل السنين (سجل شهري لكل سنة، ولقطات رأس المال آخر كل سنة وكل شهر، وسجل يومي لرأس المال والإنفاق وأسعار الذهب)؛ لما حد يسألك عن رقم قديم أو يطلب مقارنة بين الماضي والحاضر، راجع الأقسام دي وجاوب بالأرقام والفرق والنسبة، ومتقولش إنك مش شايف بيانات قديمة قبل ما تراجعها. قسم «مصروفات النهارده» و«مصروفات امبارح» في البيانات هو المرجع لأي سؤال عنهم؛ لو فيه عمليات مكتوبة هناك متقولش إن مفيش مصروفات.';
   var GTOOLS = [{functionDeclarations: [{name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم المصروف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}]}];
 
   /* ===== الاتصال بـ Gemini (مجاني) ===== */
@@ -18880,16 +18919,16 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 .ed-tag{display:inline-block; margin-inline:6px; padding:1px 7px; border-radius:8px; font-size:10px !important; font-weight:800 !important; line-height:1.55; vertical-align:middle; white-space:nowrap; letter-spacing:0; color:#6b4a00 !important; cursor:pointer; background:#ffe58a !important; border:1px solid #e8b923; box-shadow:0 1px 0 rgba(232,185,35,.55);}
 
 /* 8424: صفحة المحادثة — شكل رسائل عصري 3D بألوان حديثة */
-#aiOv{background:radial-gradient(120% 60% at 100% 0%, color-mix(in srgb,#8b5cf6 14%,transparent), transparent 60%), radial-gradient(100% 50% at 0% 100%, color-mix(in srgb,#22d3ee 13%,transparent), transparent 60%), var(--bg,#eef1f6);}
-#aiOv .ai-top{background:linear-gradient(135deg,#7c4dff 0%,#5b34d6 55%,#3b6cf0 100%); color:#fff; border-radius:0 0 26px 26px; padding-bottom:14px; box-shadow:0 8px 0 -2px rgba(59,26,153,.35), 0 14px 22px -10px rgba(91,52,214,.55), inset 0 1px 0 rgba(255,255,255,.35);}
-#aiOv .ai-top h3{color:#fff; text-shadow:0 2px 0 rgba(30,10,90,.35); letter-spacing:.2px;}
-#aiOv .ai-top .ai-btn{background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.14)); color:#fff; border:1px solid rgba(255,255,255,.35); backdrop-filter:blur(6px); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 3px 0 rgba(30,10,90,.35);}
+#aiOv{background:radial-gradient(120% 60% at 100% 0%, color-mix(in srgb,#10b981 14%,transparent), transparent 60%), radial-gradient(100% 50% at 0% 100%, color-mix(in srgb,#22d3ee 13%,transparent), transparent 60%), var(--bg,#eef1f6);}
+#aiOv .ai-top{background:linear-gradient(135deg,#14b8a6 0%,#0d9488 55%,#0ea5e9 100%); color:#fff; border-radius:0 0 26px 26px; padding-bottom:14px; box-shadow:0 8px 0 -2px rgba(6,78,59,.35), 0 14px 22px -10px rgba(16,150,110,.55), inset 0 1px 0 rgba(255,255,255,.35);}
+#aiOv .ai-top h3{color:#fff; text-shadow:0 2px 0 rgba(5,60,50,.35); letter-spacing:.2px;}
+#aiOv .ai-top .ai-btn{background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.14)); color:#fff; border:1px solid rgba(255,255,255,.35); backdrop-filter:blur(6px); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 3px 0 rgba(5,60,50,.35);}
 #aiOv .ai-top .ai-btn:active{transform:translateY(3px); box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
 #aiMsgs{padding:18px 12px 10px; gap:12px;}
 #aiOv #aiMsgs .ai-b{position:relative; max-width:84%; padding:12px 16px; font-size:15.5px; line-height:1.75; border-radius:22px; border:0;}
-#aiOv #aiMsgs .ai-b.u{align-self:flex-start; color:#fff; border-bottom-right-radius:7px; text-shadow:0 1px 0 rgba(30,10,90,.25);
-  background:linear-gradient(155deg,#9b6dff 0%,#6a3df0 55%,#4b2bd0 100%);
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.38), inset 0 -3px 0 rgba(30,10,110,.28), 0 4px 0 #3b1fa8, 0 10px 16px -6px rgba(91,52,214,.55);}
+#aiOv #aiMsgs .ai-b.u{align-self:flex-start; color:#fff; border-bottom-right-radius:7px; text-shadow:0 1px 0 rgba(5,60,50,.25);
+  background:linear-gradient(155deg,#34d399 0%,#10b981 55%,#047857 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.38), inset 0 -3px 0 rgba(5,70,55,.28), 0 4px 0 #065f46, 0 10px 16px -6px rgba(16,150,110,.55);}
 #aiOv #aiMsgs .ai-b.a{align-self:flex-end; color:var(--text,#161a22); border-bottom-left-radius:7px;
   background:linear-gradient(160deg,color-mix(in srgb,#ffffff 70%,var(--card,#fff)) 0%,color-mix(in srgb,#38bdf8 12%,var(--card,#fff)) 100%);
   border:1px solid color-mix(in srgb,#38bdf8 28%,transparent);
@@ -18901,22 +18940,32 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   box-shadow:inset 0 2px 0 rgba(255,255,255,.8), 0 4px 0 rgba(229,72,77,.3), 0 10px 16px -8px rgba(229,72,77,.4);}
 #aiOv #aiMsgs .ai-b img{border-radius:14px; box-shadow:0 4px 10px rgba(0,0,0,.22);}
 #aiOv #aiMsgs .ai-typing{border-radius:20px; border-bottom-left-radius:7px; padding:12px 17px; background:linear-gradient(160deg,#fff,color-mix(in srgb,#38bdf8 12%,var(--card,#fff))); box-shadow:inset 0 2px 0 rgba(255,255,255,.85), 0 4px 0 rgba(90,169,230,.35), 0 8px 14px -8px rgba(40,110,190,.35);}
-#aiOv #aiMsgs .ai-src{border-radius:14px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 10%,var(--card,#fff))); box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(139,92,246,.25);}
-#aiOv #aiMsgs .ai-rev{border-radius:16px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 12%,var(--card,#fff))); color:#5b34d6; box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(139,92,246,.3);}
+#aiOv #aiMsgs .ai-src{border-radius:14px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#10b981 10%,var(--card,#fff))); box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(16,185,129,.25);}
+#aiOv #aiMsgs .ai-rev{border-radius:16px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#10b981 12%,var(--card,#fff))); color:#0d9488; box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(16,185,129,.3);}
 #aiOv #aiMsgs .ai-sug button{border-radius:18px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#22d3ee 14%,var(--card,#fff))); border:1px solid color-mix(in srgb,#22d3ee 35%,transparent); box-shadow:inset 0 1px 0 #fff, 0 4px 0 color-mix(in srgb,#06b6d4 30%,transparent);}
 #aiOv #aiMsgs .ai-sug button:active{transform:translateY(3px); box-shadow:none;}
-#aiOv #aiMsgs .ai-card{border-radius:24px; border:1px solid color-mix(in srgb,#8b5cf6 45%,transparent); background:linear-gradient(170deg,#fff,color-mix(in srgb,#8b5cf6 7%,var(--card,#fff))); box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(91,47,209,.3), 0 14px 20px -10px rgba(91,52,214,.4);}
+#aiOv #aiMsgs .ai-card{border-radius:24px; border:1px solid color-mix(in srgb,#10b981 45%,transparent); background:linear-gradient(170deg,#fff,color-mix(in srgb,#10b981 7%,var(--card,#fff))); box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(16,150,110,.3), 0 14px 20px -10px rgba(16,150,110,.4);}
 #aiOv #aiMsgs .ai-card.done{border-color:#12b27a; box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(18,178,122,.35), 0 14px 20px -10px rgba(18,178,122,.35);}
 #aiOv #aiPrev img{box-shadow:0 4px 10px rgba(0,0,0,.25);}
-#aiOv #aiBar{margin:0 10px calc(env(safe-area-inset-bottom,0px) + 10px); padding:8px; border-radius:30px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 7%,var(--card,#fff))); border:1px solid color-mix(in srgb,#8b5cf6 22%,transparent); box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(91,52,214,.18), 0 14px 24px -10px rgba(91,52,214,.45);}
-#aiOv #aiBar input[type=text]{background:color-mix(in srgb,var(--bg,#eef1f6) 80%,#fff); border:1px solid color-mix(in srgb,#8b5cf6 18%,transparent); border-radius:24px; box-shadow:inset 0 2px 5px rgba(60,40,140,.12);}
-#aiOv #aiBar input[type=text]:focus{outline:0; border-color:#8b5cf6; box-shadow:inset 0 2px 5px rgba(60,40,140,.12), 0 0 0 3px rgba(139,92,246,.22);}
-#aiOv #aiBar .ai-ic{background:linear-gradient(180deg,#fff,color-mix(in srgb,#8b5cf6 12%,var(--card,#fff))); box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(91,52,214,.25);}
-#aiOv #aiBar .ai-send{color:#fff; background:linear-gradient(155deg,#9b6dff,#5b34d6); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 3px 0 #3b1a99, 0 8px 14px -6px rgba(91,52,214,.6);}
+#aiOv #aiBar{margin:0 10px calc(env(safe-area-inset-bottom,0px) + 10px); padding:8px; border-radius:30px; background:linear-gradient(180deg,#fff,color-mix(in srgb,#10b981 7%,var(--card,#fff))); border:1px solid color-mix(in srgb,#10b981 22%,transparent); box-shadow:inset 0 2px 0 #fff, 0 5px 0 rgba(16,150,110,.18), 0 14px 24px -10px rgba(16,150,110,.45);}
+#aiOv #aiBar input[type=text]{background:color-mix(in srgb,var(--bg,#eef1f6) 80%,#fff); border:1px solid color-mix(in srgb,#10b981 18%,transparent); border-radius:24px; box-shadow:inset 0 2px 5px rgba(20,80,70,.12);}
+#aiOv #aiBar input[type=text]:focus{outline:0; border-color:#10b981; box-shadow:inset 0 2px 5px rgba(20,80,70,.12), 0 0 0 3px rgba(16,185,129,.22);}
+#aiOv #aiBar .ai-ic{background:linear-gradient(180deg,#fff,color-mix(in srgb,#10b981 12%,var(--card,#fff))); box-shadow:inset 0 1px 0 #fff, 0 3px 0 rgba(16,150,110,.25);}
+#aiOv #aiBar .ai-send{color:#fff; background:linear-gradient(155deg,#34d399,#0d9488); box-shadow:inset 0 2px 0 rgba(255,255,255,.4), 0 3px 0 #065f46, 0 8px 14px -6px rgba(16,150,110,.6);}
 #aiOv #aiBar .ai-ic:active{transform:translateY(3px); box-shadow:none;}
 #aiOv #aiBar .ai-ic.rec{background:linear-gradient(155deg,#ff6b70,#e5484d); color:#fff;}
 @media (prefers-reduced-motion:no-preference){#aiOv #aiMsgs .ai-b,#aiOv #aiMsgs .ai-typing{animation:aiPop .28s ease both;}}
 @keyframes aiPop{from{opacity:0; transform:translateY(8px) scale(.97);} to{opacity:1; transform:none;}}
+
+/* 8428: ترتيب أيقونات وبطاقات الزكاة بالضغط المطوّل والسحب */
+#zakPgBox > [data-id], #zmRowBox > [data-id], #zmDuoBox > [data-id]{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
+
+.mini-clock{padding:3px 11px; gap:6px;}
+.mini-clock.below{display:flex; flex:0 0 auto; width:max-content; max-width:100%; margin:2px auto 10px; align-self:center;}
+
+/* 8431: صفحة الزكاة — إلغاء شريط الترتيب، والساعة في النص والمستطيل بمقاس الساعة بالظبط */
+#zakPgBox > .mini-clock.below{display:flex; justify-content:center; align-items:center; width:fit-content; margin:0 auto 8px; padding:1px 7px; gap:3px; border-radius:8px; line-height:1.2; box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 2px 0 color-mix(in srgb,var(--mc) 30%,transparent);}
+#zakPgBox > .mini-clock.below::before{display:none;}
 </style>
 <script>
 (function(){
@@ -19050,6 +19099,217 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   window.__scScan=scan;
 })();
 
+</script>
+<script>
+/* 8427: أيقونة «زكاة المال» في صفحة الزكاة — بتفتح صفحة حساب الزكاة وموعد الاستحقاق */
+(function(){
+  function paint(){
+    try{
+      var ic = document.getElementById('zkcPgIco'); if(ic && !ic.getAttribute('data-k')){ ic.innerHTML = zakIcoSvg('coins').replace(/__U__/g, 'zc'); ic.setAttribute('data-k', 'coins'); }
+      var w = document.getElementById('zkcPgWrap'); if(w) w.style.setProperty('--ch-sc', '0.62');
+      var lb = document.getElementById('zkcPgLbl'); if(lb) lb.textContent = 'حساب زكاة ' + toArabicDigits(currentYear);
+    }catch(e){}
+  }
+  try{
+    var _oz = window.openZakHero;
+    if(typeof _oz === 'function') window.openZakHero = function(){ var r = _oz.apply(this, arguments); paint(); try{ window.zakOrderApply(); }catch(e){} return r; };
+  }catch(e){}
+  try{ var _rz = window.renderZM; if(typeof _rz === 'function') window.renderZM = function(){ var r = _rz.apply(this, arguments); try{ window.zakOrderApply(); }catch(e){} return r; }; }catch(e){}
+  paint();
+})();
+</script>
+
+
+<style id="zkGridCss">
+/* 8433: صفحة الزكاة — شبكة ٣ أعمدة: أي أيقونة في أي مكان (يمين/وسط/شمال، فوق/تحت) و١ أو ٢ أو ٣ جنب بعض */
+#zkGrid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:4px; row-gap:2px; direction:ltr; align-items:start; position:relative; width:100%; max-width:640px; margin:0 auto;}
+#zkGrid > [data-gk]{direction:rtl; position:relative; z-index:1; min-width:0; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; touch-action:pan-y;}
+#zkGrid > .zk-pg-wrap{margin:6px 0 8px; max-width:none; width:100%;}
+#zkGrid > .zk-pg-wrap .cap-hero{width:100%; box-sizing:border-box; padding:0 2px;}
+#zkGrid > .zk-pg-wrap .ch-lbl{text-align:center; line-height:1.3; font-size:calc(13.5px * var(--fs,1));}
+#zkGrid > [data-gk].zg-drag{z-index:60; transition:none; filter:drop-shadow(0 14px 16px rgba(0,0,0,.35)); opacity:.96;}
+#zkGrid > [data-gk="card"].zg-ins-u{box-shadow:0 -5px 0 0 var(--accent,#12a56f); border-radius:6px;}
+#zkGrid > [data-gk="card"].zg-ins-d{box-shadow:0 5px 0 0 var(--accent,#12a56f); border-radius:6px;}
+.zg-cell{display:none; z-index:0; align-self:stretch; min-height:104px; box-sizing:border-box; border:2px dashed color-mix(in srgb,var(--accent,#12a56f) 40%,transparent); border-radius:18px; margin:4px 0; pointer-events:none;}
+#zkGrid.zg-on .zg-cell{display:block;}
+.zg-cell.zg-occ{border-color:transparent;}
+.zg-cell.zg-hot{border-color:var(--accent,#12a56f); background:color-mix(in srgb,var(--accent,#12a56f) 14%,transparent);}
+</style>
+
+<script>
+/* 8433: ترتيب أيقونات وكارت صفحة الزكاة — ضغط مطوّل ثم سحب لأي خانة في شبكة ٣ أعمدة */
+(function(){
+  var KEY = 'zakPgGrid', HOLD = 380, TOL = 9, COLS = 3;
+  var DEF = {zk: {r: 0, c: 1}, zkc: {r: 1, c: 1}, don: {r: 2, c: 1}, card: {r: 3, c: 0}};
+  var st = null, supUntil = 0, lastTE = 0;
+  function grid(){ return document.getElementById('zkGrid'); }
+  function allowed(){ try{ return localStorage.getItem('masrofati_move_v1') !== 'off'; }catch(e){ return true; } }
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function valid(P){
+    var keys = Object.keys(DEF), seen = {}, cardRow = P.card.r, i;
+    for(i = 0; i < keys.length; i++){
+      var k = keys[i], p = P[k];
+      if(!p || typeof p.r !== 'number' || p.r < 0 || p.r > 12 || p.r % 1) return false;
+      if(k === 'card') continue;
+      if(typeof p.c !== 'number' || p.c < 0 || p.c >= COLS || p.c % 1) return false;
+      if(p.r === cardRow) return false;
+      var id = p.r + ',' + p.c; if(seen[id]) return false; seen[id] = 1;
+    }
+    return true;
+  }
+  function load(){
+    var S = null; try{ S = data && data[KEY]; }catch(e){}
+    var P = clone(DEF);
+    if(S && typeof S === 'object'){ var T = {}; Object.keys(DEF).forEach(function(k){ var s = S[k]; T[k] = s ? {r: s.r, c: k === 'card' ? 0 : s.c} : null; }); if(valid(T)) P = T; }
+    return P;
+  }
+  function compact(P){
+    var rows = []; Object.keys(P).forEach(function(k){ if(rows.indexOf(P[k].r) < 0) rows.push(P[k].r); });
+    rows.sort(function(a, b){ return a - b; });
+    Object.keys(P).forEach(function(k){ P[k].r = rows.indexOf(P[k].r); });
+  }
+  function shiftDown(P, from, except){ Object.keys(P).forEach(function(k){ if(k !== except && P[k].r >= from) P[k].r++; }); }
+  function setPos(P, key, r, c, half){
+    var occ = Object.keys(P).filter(function(k){ return k !== key && P[k].r === r; }), rr;
+    if(key === 'card'){
+      if(occ.length){ rr = half === 'd' ? r + 1 : r; shiftDown(P, rr, key); P[key] = {r: rr, c: 0}; }
+      else P[key] = {r: r, c: 0};
+    }else if(occ.indexOf('card') > -1){
+      rr = half === 'd' ? r + 1 : r; shiftDown(P, rr, key); P[key] = {r: rr, c: c};
+    }else{
+      var same = occ.filter(function(k){ return P[k].c === c; })[0];
+      if(same){ var old = P[key]; P[same] = {r: old.r, c: old.c}; }
+      P[key] = {r: r, c: c};
+    }
+    compact(P);
+  }
+  function items(){ var g = grid(); return g ? Array.prototype.slice.call(g.querySelectorAll(':scope > [data-gk]')) : []; }
+  function apply(){
+    var P = load();
+    items().forEach(function(el){
+      var k = el.getAttribute('data-gk'), p = P[k]; if(!p) return;
+      el.style.gridRow = String(p.r + 1); el.style.gridColumn = k === 'card' ? '1 / -1' : String(p.c + 1);
+      el.style.transform = '';
+    });
+  }
+  function showCells(P, dragKey){
+    var g = grid(); if(!g) return; hideCells();
+    var R = 0; Object.keys(P).forEach(function(k){ R = Math.max(R, P[k].r); });
+    for(var r = 0; r <= R + 1; r++) for(var c = 0; c < COLS; c++){
+      var d = document.createElement('div'), occ = false;
+      Object.keys(P).forEach(function(k){ if(k === dragKey) return; if(P[k].r === r && (k === 'card' || P[k].c === c)) occ = true; });
+      d.className = 'zg-cell' + (occ ? ' zg-occ' : ''); d.setAttribute('data-r', r); d.setAttribute('data-c', c);
+      d.style.gridRow = String(r + 1); d.style.gridColumn = String(c + 1); g.appendChild(d);
+    }
+    g.classList.add('zg-on');
+  }
+  function hideCells(){
+    var g = grid(); if(!g) return; g.classList.remove('zg-on');
+    Array.prototype.forEach.call(g.querySelectorAll(':scope > .zg-cell'), function(n){ n.remove(); });
+    items().forEach(function(el){ el.classList.remove('zg-ins-u', 'zg-ins-d'); });
+  }
+  function target(x, y){
+    var g = grid(), best = null, bd = 1e18; if(!g) return null;
+    Array.prototype.forEach.call(g.querySelectorAll(':scope > .zg-cell'), function(c){
+      var b = c.getBoundingClientRect(); if(b.height < 1) return;
+      var dx = x < b.left ? b.left - x : (x > b.right ? x - b.right : 0), dy = y < b.top ? b.top - y : (y > b.bottom ? y - b.bottom : 0);
+      var cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2, sc = (dx * dx + dy * dy) * 1000 + (x - cx) * (x - cx) + (y - cy) * (y - cy);
+      if(sc < bd){ bd = sc; best = {el: c, r: +c.getAttribute('data-r'), c: +c.getAttribute('data-c'), half: y < cy ? 'u' : 'd'}; }
+    });
+    return best;
+  }
+  function freeOf(t){
+    var g = grid(); if(!g || !t || !t.closest) return null;
+    var el = t.closest('[data-gk]'); if(!el || el.parentNode !== g) return null;
+    var bt = t.closest('button, input, select, textarea, a, label'); if(bt && !bt.hasAttribute('data-hold-ok') && el.contains(bt)) return null;
+    var di = t.closest('[data-id]'); if(di && el.contains(di) && di !== el) return null;   // بطاقات جوه الكارت ليها ترتيبها الخاص
+    return el;
+  }
+  function scrollerOf(el){
+    var n = el.parentNode;
+    while(n && n.nodeType === 1 && n !== document.body){ var cs = getComputedStyle(n); if(/(auto|scroll)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight + 2) return n; n = n.parentNode; }
+    return null;
+  }
+  function begin(t, x, y, id){
+    if(st || !allowed()) return;
+    var el = freeOf(t); if(!el) return;
+    st = {el: el, key: el.getAttribute('data-gk'), sx: x, sy: y, lastX: x, lastY: y, id: id, active: false, timer: null, P: load()};
+    st.timer = setTimeout(lift, HOLD);
+  }
+  function lift(){
+    if(!st || st.active) return;
+    st.active = true; st.timer = null; st.el.classList.add('zg-drag'); document.body.classList.add('hc-dragging');
+    st.scr = scrollerOf(st.el); st.s0 = st.scr ? st.scr.scrollTop : 0;
+    showCells(st.P, st.key);
+    document.addEventListener('touchmove', tmove, {passive: false});
+    try{ if(navigator.vibrate) navigator.vibrate(18); }catch(e){}
+    supUntil = Date.now() + 600; st.raf = requestAnimationFrame(loop);
+  }
+  function hot(){
+    var tg = target(st.lastX, st.lastY), g = grid();
+    Array.prototype.forEach.call(g.querySelectorAll(':scope > .zg-cell.zg-hot'), function(n){ n.classList.remove('zg-hot'); });
+    items().forEach(function(el){ el.classList.remove('zg-ins-u', 'zg-ins-d'); });
+    if(!tg) return;
+    var cardHere = Object.keys(st.P).some(function(k){ return k !== st.key && k === 'card' && st.P[k].r === tg.r; });
+    var rowBusy = Object.keys(st.P).some(function(k){ return k !== st.key && st.P[k].r === tg.r; });
+    if(cardHere){ var ce = g.querySelector(':scope > [data-gk="card"]'); if(ce) ce.classList.add(tg.half === 'd' ? 'zg-ins-d' : 'zg-ins-u'); }
+    else if(st.key === 'card' && rowBusy){ var ic = items().filter(function(e){ return e !== st.el && st.P[e.getAttribute('data-gk')] && st.P[e.getAttribute('data-gk')].r === tg.r; }); ic.forEach(function(e){ e.classList.add('zg-ins-' + tg.half); }); }
+    else tg.el.classList.add('zg-hot');
+  }
+  function put(){
+    if(!st || !st.active) return;
+    var ds = st.scr ? st.scr.scrollTop - st.s0 : 0;
+    st.el.style.transform = 'translate(' + Math.round(st.lastX - st.sx) + 'px,' + Math.round(st.lastY - st.sy + ds) + 'px) scale(1.05)';
+  }
+  function loop(){
+    if(!st || !st.active) return;
+    var sc = st.scr, top = 0, bottom = window.innerHeight;
+    if(sc){ var r = sc.getBoundingClientRect(); top = Math.max(r.top, 0); bottom = Math.min(r.bottom, window.innerHeight); }
+    var zone = Math.min(80, (bottom - top) / 4), dy = 0, y = st.lastY;
+    if(y < top + zone) dy = -Math.ceil((top + zone - Math.max(y, top)) / zone * 16); else if(y > bottom - zone) dy = Math.ceil((Math.min(y, bottom) - (bottom - zone)) / zone * 16);
+    if(dy && sc) sc.scrollTop += dy;
+    put(); hot(); st.raf = requestAnimationFrame(loop);
+  }
+  function tmove(e){
+    if(!st || !st.active) return;
+    var t = null; for(var i = 0; i < e.touches.length; i++) if(e.touches[i].identifier === st.id) t = e.touches[i];
+    if(!t) return; if(e.cancelable) e.preventDefault(); st.lastX = t.clientX; st.lastY = t.clientY;
+  }
+  function finish(ok){
+    if(!st) return; var s0 = st; st = null;
+    document.removeEventListener('touchmove', tmove, {passive: false});
+    if(s0.timer) clearTimeout(s0.timer); if(s0.raf) cancelAnimationFrame(s0.raf);
+    if(!s0.active) return;
+    var tg = ok ? (function(){ st = s0; var t = target(s0.lastX, s0.lastY); st = null; return t; })() : null;
+    s0.el.classList.remove('zg-drag'); document.body.classList.remove('hc-dragging'); supUntil = Date.now() + 500;
+    if(tg){
+      var P = s0.P; setPos(P, s0.key, tg.r, tg.c, tg.half);
+      try{ data[KEY] = P; save(); }catch(e){}
+    }
+    hideCells(); apply();
+  }
+  function cancel(){ if(st && st.timer) clearTimeout(st.timer); if(st && !st.active) st = null; else finish(false); }
+  document.addEventListener('touchstart', function(e){ if(e.touches.length !== 1){ cancel(); return; } var t = e.touches[0]; begin(e.target, t.clientX, t.clientY, t.identifier); }, {passive: true});
+  document.addEventListener('touchmove', function(e){
+    if(!st || st.active) return; var t = null; for(var i = 0; i < e.touches.length; i++) if(e.touches[i].identifier === st.id) t = e.touches[i];
+    if(!t) return; if(Math.abs(t.clientX - st.sx) > TOL || Math.abs(t.clientY - st.sy) > TOL) cancel(); else { st.lastX = t.clientX; st.lastY = t.clientY; }
+  }, {passive: true});
+  function tEnd(e){ lastTE = Date.now(); if(st) finish(e.type === 'touchend'); }
+  document.addEventListener('touchend', tEnd, {passive: true}); document.addEventListener('touchcancel', tEnd, {passive: true});
+  document.addEventListener('mousedown', function(e){ if(e.button !== 0 || Date.now() - lastTE < 700) return; begin(e.target, e.clientX, e.clientY, 'm'); });
+  document.addEventListener('mousemove', function(e){
+    if(!st || st.id !== 'm') return;
+    if(!st.active){ if(Math.abs(e.clientX - st.sx) > TOL || Math.abs(e.clientY - st.sy) > TOL) cancel(); else { st.lastX = e.clientX; st.lastY = e.clientY; } return; }
+    e.preventDefault(); st.lastX = e.clientX; st.lastY = e.clientY;
+  });
+  document.addEventListener('mouseup', function(){ if(st && st.id === 'm') finish(true); });
+  document.addEventListener('contextmenu', function(e){ if(st || (freeOf(e.target) && Date.now() < supUntil + 300)) e.preventDefault(); }, true);
+  document.addEventListener('click', function(e){ if(Date.now() < supUntil && freeOf(e.target)){ e.stopPropagation(); e.preventDefault(); } }, true);
+  window.addEventListener('blur', function(){ if(st) finish(true); });
+  try{ var _oz = window.openZakHero; if(typeof _oz === 'function') window.openZakHero = function(){ var r = _oz.apply(this, arguments); apply(); return r; }; }catch(e){}
+  window.zakGridApply = apply;
+  apply();
+})();
 </script>
 </body>
 </html>
