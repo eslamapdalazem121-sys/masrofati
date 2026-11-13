@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-13.8437">
+<meta name="app-version" content="2026-11-13.8438">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -2959,6 +2959,23 @@ html{ overscroll-behavior:none; }
 #quickAddOverlay .btn-save:active,#quickAddOverlay .btn-cancel:active{transform:translateY(5px); box-shadow:0 1px 0 rgba(0,0,0,.3);}
 /* ===== QUICK ADD FULL PAGE 3D END ===== */
 
+
+/* ===== شريحة سنة الزكاة + قائمة السنوات (زكاتي) ===== */
+.zk-yr-chip{display:inline-flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; padding:6px 18px; border-radius:999px; cursor:pointer; font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:calc(17px * var(--fs,1)); letter-spacing:1px; direction:ltr; color:#4a2e00; background:linear-gradient(180deg,#ffe58a,#f2b823 55%,#d8960a); box-shadow:inset 0 2px 0 rgba(255,255,255,.55), 0 3px 0 rgba(120,72,0,.45), 0 6px 12px rgba(0,0,0,.18);}
+.zk-yr-chip::after{content:"▾"; font-size:.7em; opacity:.8;}
+.zk-yr-chip:active{transform:translateY(2px);}
+.zy-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:6px 0 10px; max-height:52vh; overflow-y:auto; padding:4px;}
+.zy-chip{border:0; cursor:pointer; padding:12px 4px 9px; border-radius:16px; display:flex; flex-direction:column; align-items:center; gap:3px; font-family:inherit; color:var(--text); background:var(--bg); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 4px 0 rgba(0,0,0,.14), 0 8px 12px rgba(0,0,0,.10);}
+.zy-chip b{font-family:Arial,Helvetica,sans-serif; font-size:calc(20px * var(--fs,1)); font-weight:900; letter-spacing:1px;}
+.zy-chip small{font-size:calc(11px * var(--fs,1)); font-weight:700; opacity:.85;}
+.zy-chip:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.14);}
+.zy-chip.paid{color:#fff; background:linear-gradient(180deg,#34d399,#12b27a 55%,#0b8a5c); box-shadow:inset 0 2px 0 rgba(255,255,255,.45), 0 4px 0 rgba(6,78,59,.55), 0 8px 12px rgba(0,0,0,.18);}
+.zy-chip.part{color:#4a2e00; background:linear-gradient(180deg,#ffe58a,#f2b823 60%,#d8960a); box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 rgba(120,72,0,.45), 0 8px 12px rgba(0,0,0,.16);}
+.zy-chip.sel{outline:3px solid var(--accent); outline-offset:2px;}
+.zy-chip.paid.sel{outline-color:#065f46;}
+.zy-legend{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 14px; font-size:calc(12px * var(--fs,1)); color:var(--muted); margin-bottom:8px;}
+.zy-dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-left:5px; vertical-align:middle; background:var(--bg); box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.25);}
+.zy-dot.paid{background:#12b27a; box-shadow:none;} .zy-dot.part{background:#f2b823; box-shadow:none;}
 /* ===== ZAKAT CARD GOLD TILE START ===== */
 .zk-wrap.yr-zm .zm-av{color:#4a2c00; text-shadow:0 1px 0 rgba(255,255,255,.55);
   background:linear-gradient(160deg,#fff4c2,#f6c445 55%,#d18d0a);
@@ -3824,11 +3841,20 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <button type="button" class="fs-close" onclick="closeZakHero()" aria-label="رجوع">✕</button>
     <div class="ch-ptitle">🕌 زكاتي</div>
     <div id="zkGrid" class="zk-grid">
-    <div class="cap-hero-wrap zk-pg-wrap" id="zakPgWrap" data-gk="zk"><button type="button" class="cap-hero" id="zakPgBtn" onclick="zkTabGo('zk')" data-hold-ok aria-label="زكاتي"><span class="ch-stage"><span class="ch-ico" id="zakPgIco"></span></span></button></div>
+    <div class="cap-hero-wrap zk-pg-wrap" id="zakPgWrap" data-gk="zk"><button type="button" class="cap-hero" id="zakPgBtn" onclick="zkTabGo('zk')" data-hold-ok aria-label="زكاتي"><span class="ch-stage"><span class="ch-ico" id="zakPgIco"></span></span><span class="zk-yr-chip" id="zkYrChip" data-hold-ok role="button" tabindex="0" onclick="event.stopPropagation(); zkYrOpen()" aria-label="اختيار سنة الزكاة"></span></button></div>
     <div class="cap-hero-wrap zk-pg-wrap" id="zkcPgWrap" data-gk="zkc"><button type="button" class="cap-hero" id="zkcPgBtn" onclick="openZkCalc()" data-hold-ok aria-label="زكاة المال — حساب الزكاة وموعد الاستحقاق"><span class="ch-stage"><span class="ch-ico" id="zkcPgIco"></span></span><span class="ch-lbl" id="zkcPgLbl">حساب زكاة</span></button></div>
     <div class="cap-hero-wrap zk-pg-wrap" id="donPgWrap" data-gk="don"><button type="button" class="cap-hero" id="donPgBtn" onclick="dnOpen()" data-hold-ok aria-label="تبرعات وصدقات"><span class="ch-stage"><span class="ch-ico" id="donPgIco"></span></span><span class="ch-lbl">تبرعات وصدقات</span></button></div>
     <div id="zakHeroHost" data-gk="card"></div>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="zkYrOverlay" style="z-index:97;" onclick="if(event.target===this) zkYrClose()">
+  <div class="modal-box">
+    <h3>🕌 سنوات الزكاة</h3>
+    <div class="zy-grid" id="zkYrGrid"></div>
+    <div class="zy-legend"><span><i class="zy-dot paid"></i>تم دفعها</span><span><i class="zy-dot part"></i>مدفوعة جزئيًا</span><span><i class="zy-dot"></i>لم تُدفع</span></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="zkYrClose()">إغلاق</button></div>
   </div>
 </div>
 
@@ -7077,6 +7103,7 @@ function renderZM(){
   document.getElementById('zmLeftLbl').textContent = bad ? 'العجز' : 'المتبقي';
   document.getElementById('zmLeft').textContent = fmt(Math.abs(left));
   try{ renderZmDue(); }catch(e){}
+  try{ zkYrChipRefresh(); }catch(e){}
 }
 function zmPaidTotal(){ return zmPaidFor(currentYear); }
 // الرصيد المتاح للزكاة لسنة = كل الوارد للزكاة في السنة (تحويلات/دخل/إضافات) − المنصرف
@@ -16391,6 +16418,40 @@ function closeZakHero(){
   var card = document.getElementById('yrZM'), host = document.getElementById('zakHeroHost');
   if(card && host && card.parentNode === host && _zhPh && _zhPh.parentNode){ _zhPh.parentNode.insertBefore(card, _zhPh); _zhPh.parentNode.removeChild(_zhPh); _zhPh = null; card.classList.toggle('open', _zhWasOpen); }
   document.getElementById('zakHeroOverlay').classList.remove('open');
+}
+
+/* ===== سنة الزكاة: شريحة تحت أيقونة الجامع + قائمة السنوات (المدفوعة بالأخضر) ===== */
+function zkYrStatus(y){
+  var zm = 0, paid = 0; try{ zm = Number(zpZmOf(y)) || 0; paid = Number(zmPaidFor(y)) || 0; }catch(e){}
+  if(paid > 0 && zm > 0 && paid >= zm - 0.5) return 'paid';
+  if(paid > 0) return 'part';
+  return '';
+}
+function zkYrChipRefresh(){ var c = document.getElementById('zkYrChip'); if(c) c.textContent = toArabicDigits(currentYear); }
+function zkYrList(){
+  var ry = new Date().getFullYear(), set = {}; set[ry] = 1; set[ry + 1] = 1; set[currentYear] = 1;
+  for(var y = ry - 8; y <= ry + 1; y++){ if(zkYrStatus(y)) set[y] = 1; }
+  return Object.keys(set).map(Number).sort(function(a, b){ return b - a; });
+}
+function zkYrOpen(){
+  var ry = new Date().getFullYear();
+  document.getElementById('zkYrGrid').innerHTML = zkYrList().map(function(y){
+    var st = zkYrStatus(y), sub = st === 'paid' ? '✅ تم الدفع' : st === 'part' ? 'جزئي' : (y === ry ? 'الحالية' : (y > ry ? 'القادمة' : ''));
+    return '<button type="button" class="zy-chip' + (st ? ' ' + st : '') + (y === currentYear ? ' sel' : '') + '" onclick="zkYrPick(' + y + ')"><b>' + toArabicDigits(y) + '</b><small>' + (sub || '&nbsp;') + '</small></button>';
+  }).join('');
+  document.getElementById('zkYrOverlay').classList.add('open');
+}
+function zkYrClose(){ document.getElementById('zkYrOverlay').classList.remove('open'); }
+function zkYrPick(y){
+  zkYrClose();
+  if(y !== currentYear){
+    if(!data[y]) ensureYear(y);
+    setCurrentYear(y); try{ save(); }catch(e){}
+    try{ renderMonths(); }catch(e){}
+    showToast('تم التبديل لسنة ' + toArabicDigits(y), true);
+  }
+  try{ renderZM(); }catch(e){}
+  zkYrChipRefresh();
 }
 zakIcoApply(settings);
 
