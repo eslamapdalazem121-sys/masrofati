@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-14.8447">
+<meta name="app-version" content="2026-11-14.8448">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -18712,13 +18712,18 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok, old); } else old(); }catch(e){ old(); }
   }
   /* 8443: تأكيد المسح جوه التطبيق (نافذة confirm بتتمنع في بعض المتصفحات فكان المسح مش بيشتغل) */
-  function aeAsk(b, q){ if(!aeBar) return; aeBar.innerHTML = ''; var s = document.createElement('span'); s.className = 'ae-q'; s.textContent = q; aeBar.appendChild(s); [['✅ أيوه، امسح', 'del', function(){ aeDelete(b, true); }], ['لأ', '', function(){ aeOpenBar(b); }]].forEach(function(a){ var x = document.createElement('button'); x.type = 'button'; x.textContent = a[0]; if(a[1]) x.className = a[1]; x.onclick = function(ev){ ev.stopPropagation(); a[2](); }; aeBar.appendChild(x); }); }
+  function aeAsk(b, q, opts){ if(!aeBar) return; aeBar.innerHTML = ''; var s = document.createElement('span'); s.className = 'ae-q'; s.textContent = q; aeBar.appendChild(s); (opts || [['✅ أيوه، امسح', 'del', function(){ aeDelete(b, true); }], ['لأ', '', function(){ aeOpenBar(b); }]]).forEach(function(a){ var x = document.createElement('button'); x.type = 'button'; x.textContent = a[0]; if(a[1]) x.className = a[1]; x.onclick = function(ev){ ev.stopPropagation(); a[2](); }; aeBar.appendChild(x); }); }
   function aeDelete(b, sure){
     if(busy){ toast('استنى المساعد يخلّص رده الأول', false); return; }
-    var isU = b.classList.contains('u'), list = [b], n = b.nextElementSibling;
-    if(isU){ while(n && !(n.classList.contains('ai-b') && n.classList.contains('u'))){ list.push(n); n = n.nextElementSibling; } }
+    var isU = b.classList.contains('u'), list = [b], n = b.nextElementSibling, hasRep = false;
+    if(isU){ while(n && !(n.classList.contains('ai-b') && n.classList.contains('u'))){ if(!n.classList.contains('ai-act')) hasRep = true; list.push(n); n = n.nextElementSibling; } }
     else { while(n && n.classList.contains('ai-meta')){ list.push(n); n = n.nextElementSibling; } }
-    if(!sure){ aeAsk(b, isU && list.length > 1 ? 'تمسح رسالتك ورد المساعد عليها؟' : 'تمسح الرسالة دي؟'); return; }
+    /* 8448: مسح رسالتي بس من غير رد المساعد */
+    if(isU && sure === 'one') list = [b];
+    if(!sure){
+      if(isU && hasRep){ aeAsk(b, 'تمسح إيه؟', [['🗑️ رسالتي بس', 'del', function(){ aeDelete(b, 'one'); }], ['🗑️ رسالتي والرد', 'del', function(){ aeDelete(b, true); }], ['لأ', '', function(){ aeOpenBar(b); }]]); return; }
+      aeAsk(b, 'تمسح الرسالة دي؟'); return;
+    }
     var mids = {}, del = {};
     list.forEach(function(el){ if(el.dataset && el.dataset.mid) mids[el.dataset.mid] = 1; });
     hist.forEach(function(m, k){ if(m.b && mids[m.b]) del[k] = 1; });
@@ -18772,7 +18777,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     bar.className = 'ai-act ' + (isU ? 'u' : 'a'); bar._b = b;
     function mk(txt, cls, fn){ var x = document.createElement('button'); x.type = 'button'; x.textContent = txt; if(cls) x.className = cls; x.onclick = function(ev){ ev.stopPropagation(); fn(b); }; bar.appendChild(x); }
     if(!isErr){ mk('✏️ تعديل', '', aeEdit); mk('📋 نسخ', '', aeCopy); }
-    mk('🗑️ مسح', 'del', aeDelete);
+    mk(isU ? '🗑️ مسح رسالتي' : '🗑️ مسح الرد', 'del', aeDelete);
     var at = b; while(at.nextElementSibling && at.nextElementSibling.classList.contains('ai-meta')) at = at.nextElementSibling;
     at.parentNode.insertBefore(bar, at.nextSibling); b.classList.add('ae-sel'); aeBar = bar;
     try{ bar.scrollIntoView({block: 'nearest', behavior: 'smooth'}); }catch(e){}
