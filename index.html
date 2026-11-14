@@ -35,7 +35,7 @@
   try{
     var raw = window.localStorage, P = Storage.prototype, g0 = P.getItem, s0 = P.setItem, r0 = P.removeItem;
     var META_K = 'masrofati_enc_v1', FAILK = 'masrofati_enc_fail_v1';
-    var SENS = {'budget_data_v1':1, 'budget_backups_local_v1':1, 'budget_prev_snapshot_v1':1, 'masrofati_ai_gkey':1, 'masrofati_ai_p2key':1, 'masrofati_ai_p3key':1, 'masrofati_ai_p4key':1, 'masrofati_ai_chat_v1':1, 'masrofati_ai_chats_v1':1};
+    var SENS = {'budget_data_v1':1, 'budget_backups_local_v1':1, 'budget_prev_snapshot_v1':1, 'masrofati_ai_gkey':1, 'masrofati_ai_p2key':1, 'masrofati_ai_p3key':1, 'masrofati_ai_p4key':1, 'masrofati_ai_tavkey':1, 'masrofati_ai_chat_v1':1, 'masrofati_ai_chats_v1':1};
     var ST = window.MSR_ENC = {on:false, locked:false, mem:{}, key:null, meta:null, pending:{}, timer:0, SENS:SENS, META_K:META_K};
     var subtle = (window.crypto && crypto.subtle) || null, TE = new TextEncoder(), TD = new TextDecoder();
     ST.ok = !!subtle;
@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-14.8445">
+<meta name="app-version" content="2026-11-14.8447">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -368,7 +368,7 @@ h1{
 }
 .pattern-grid{
   position:relative; display:grid; grid-template-columns:repeat(3,1fr); width:240px; max-width:100%;
-  margin:0 auto; padding:0; background:var(--card); border-radius:18px; border:1px solid var(--border);
+  margin:0 auto; padding:0; background:var(--card); border-radius:18px; border:0; box-shadow:inset 0 0 0 1px var(--border);
   touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
 }
 .pattern-cell{height:80px; display:flex; align-items:center; justify-content:center; pointer-events:none;}
@@ -377,7 +377,7 @@ h1{
   pointer-events:none; transition:background .12s ease, border-color .12s ease, transform .12s ease;
 }
 .pattern-dot.active{background:var(--accent); border-color:var(--accent-dark); transform:scale(1.25);}
-.pattern-lines{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible;}
+.pattern-lines{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:hidden; border-radius:inherit;}
 .settings-fab{
   position:fixed; left:16px; top:calc(16px + env(safe-area-inset-top,0px));
   width:42px; height:42px; border-radius:50%; border:none;
@@ -15104,6 +15104,8 @@ function buildPatternGrid(containerId, onComplete){
 
   function computeCenters(){
     gridRect = grid.getBoundingClientRect();
+    svg.setAttribute('viewBox', '0 0 ' + gridRect.width + ' ' + gridRect.height);
+    svg.setAttribute('preserveAspectRatio', 'none');
     centers = dots.map(d=>{
       const r = d.getBoundingClientRect();
       return { x: r.left + r.width/2 - gridRect.left, y: r.top + r.height/2 - gridRect.top };
@@ -15130,7 +15132,8 @@ function buildPatternGrid(containerId, onComplete){
     poly.setAttribute('points', pts.join(' '));
   }
   function localPoint(e){
-    return { x: e.clientX - gridRect.left, y: e.clientY - gridRect.top };
+    /* 8447: نقطة الإصبع بتتحصر جوه المربع عشان الخط ما يخرجش برّه النقط */
+    return { x: Math.min(gridRect.width, Math.max(0, e.clientX - gridRect.left)), y: Math.min(gridRect.height, Math.max(0, e.clientY - gridRect.top)) };
   }
 
   grid.onpointerdown = (e)=>{
@@ -17488,7 +17491,10 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     <label>الموديل</label>
     <input type="text" id="aiModel" placeholder="gemini-flash-latest">
     <div class="ai-note">مجاني من غير كارت: ادخل aistudio.google.com/apikey بحساب Google واضغط Create API key. المفتاح بيتحفظ على جهازك بس.<br>تنبيه: في الخطة المجانية جوجل ممكن تستخدم الأسئلة والردود لتحسين موديلاتها.</div>
-    <div class="ai-chk"><input type="checkbox" id="aiSearch"><label for="aiSearch">🌐 البحث في جوجل (أسعار وأخبار ومعلومات حديثة)</label></div>
+    <div class="ai-chk"><input type="checkbox" id="aiSearch"><label for="aiSearch">🌐 البحث في الإنترنت (أسعار وأخبار ومعلومات حديثة)</label></div>
+    <label for="aiTav">مفتاح بحث Tavily (مجاني — بديل بحث جوجل، اختياري)</label>
+    <input type="password" id="aiTav" placeholder="tvly-..." autocomplete="off">
+    <div class="ai-note">مجاني ١٠٠٠ بحث في الشهر من غير كارت: ادخل app.tavily.com وسجّل واعمل API key. لو حطيته، البحث بيتم بيه بدل جوجل، وأي ذكاء اصطناعي من اللي فوق بيستفيد من نتايجه.</div>
     <div class="ai-chk"><input type="checkbox" id="aiSaveChat"><label for="aiSaveChat">💾 حفظ المحادثات على الجهاز (بترجع لما تفتح المساعد تاني)</label></div>
     <div class="ai-chk"><input type="checkbox" id="aiAuto"><label for="aiAuto">🔁 رأي الذكاءات التانية (التاني والتالت والرابع) يظهر تلقائيًا بعد كل رد</label></div>
     <div class="ai-sep"></div>
@@ -17548,7 +17554,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 (function(){
   var KEYK = 'masrofati_ai_gkey', MODK = 'masrofati_ai_gmodel', DEFMOD = 'gemini-flash-latest';
   /* 8364: بحث جوجل + ذكاء اصطناعي تاني (متوافق مع OpenAI) */
-  var SRCHK = 'masrofati_ai_search', P2K = 'masrofati_ai_p2', P2KEY = 'masrofati_ai_p2key', P2MOD = 'masrofati_ai_p2model', P2URL = 'masrofati_ai_p2url', P3K = 'masrofati_ai_p3', P3KEY = 'masrofati_ai_p3key', P3MOD = 'masrofati_ai_p3model', P3URL = 'masrofati_ai_p3url', P4K = 'masrofati_ai_p4', P4KEY = 'masrofati_ai_p4key', P4MOD = 'masrofati_ai_p4model', P4URL = 'masrofati_ai_p4url', AUTOK = 'masrofati_ai_auto';
+  var SRCHK = 'masrofati_ai_search', P2K = 'masrofati_ai_p2', P2KEY = 'masrofati_ai_p2key', P2MOD = 'masrofati_ai_p2model', P2URL = 'masrofati_ai_p2url', P3K = 'masrofati_ai_p3', P3KEY = 'masrofati_ai_p3key', P3MOD = 'masrofati_ai_p3model', P3URL = 'masrofati_ai_p3url', P4K = 'masrofati_ai_p4', P4KEY = 'masrofati_ai_p4key', P4MOD = 'masrofati_ai_p4model', P4URL = 'masrofati_ai_p4url', AUTOK = 'masrofati_ai_auto', TAVK = 'masrofati_ai_tavkey';
   var P2PRE = {
     groq: {name: 'Groq', base: 'https://api.groq.com/openai/v1', model: 'openai/gpt-oss-120b'},
     openrouter: {name: 'OpenRouter', base: 'https://openrouter.ai/api/v1', model: 'openrouter/free'},
@@ -17588,7 +17594,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function p4cfg(){ return pcfg(P4K, P4KEY, P4MOD, P4URL, 4); }
   function loadSet(){
     $('aiKey').value = lsGet(KEYK, ''); $('aiModel').value = lsGet(MODK, DEFMOD);
-    $('aiSearch').checked = lsGet(SRCHK, '0') === '1'; $('aiAuto').checked = lsGet(AUTOK, '0') === '1'; $('aiSaveChat').checked = lsGet('masrofati_ai_savechat', '1') !== '0';
+    $('aiTav').value = lsGet(TAVK, ''); $('aiSearch').checked = lsGet(SRCHK, '0') === '1'; $('aiAuto').checked = lsGet(AUTOK, '0') === '1'; $('aiSaveChat').checked = lsGet('masrofati_ai_savechat', '1') !== '0';
     $('aiP2').value = lsGet(P2K, ''); $('aiP2Key').value = lsGet(P2KEY, ''); $('aiP2Model').value = lsGet(P2MOD, ''); $('aiP2Url').value = lsGet(P2URL, '');
     window.aiP2Change(true);
     $('aiP3').value = lsGet(P3K, ''); $('aiP3Key').value = lsGet(P3KEY, ''); $('aiP3Model').value = lsGet(P3MOD, ''); $('aiP3Url').value = lsGet(P3URL, '');
@@ -17600,16 +17606,22 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   /* 8444: مزامنة أسماء ومفاتيح الذكاء الاصطناعي مع الحساب (موبايل ↔ كمبيوتر) */
   var CFGAT = 'masrofati_ai_cfg_at';
-  var CFGKEYS = [KEYK, MODK, P2K, P2KEY, P2MOD, P2URL, P3K, P3KEY, P3MOD, P3URL, P4K, P4KEY, P4MOD, P4URL];
+  var CFGKEYS = [KEYK, MODK, P2K, P2KEY, P2MOD, P2URL, P3K, P3KEY, P3MOD, P3URL, P4K, P4KEY, P4MOD, P4URL, TAVK];
   function cfgVals(){ var v = {}; CFGKEYS.forEach(function(k){ var x = lsGet(k, ''); if(x) v[k] = x; }); return v; }
   function cfgSnap(){ return JSON.stringify(cfgVals()); }
-  window.__aiCfgGet = function(){ var v = cfgVals(), at = Number(lsGet(CFGAT, '0')) || 0; if(!at && !Object.keys(v).length) return null; return {at: at, v: v}; };
+  /* 8446: الإعدادات بتتحسب «حقيقية» بس لو فيها مفتاح API واحد على الأقل (الموديل الافتراضي لوحده مش بيتزامن ولا بيمسح حاجة) */
+  var CFGAPIK = [KEYK, P2KEY, P3KEY, P4KEY];
+  function hasApi(v){ return CFGAPIK.some(function(k){ return !!(v && v[k]); }); }
+  window.__aiCfgGet = function(){ var v = cfgVals(); if(!hasApi(v)) return null; return {at: Number(lsGet(CFGAT, '0')) || 0, v: v}; };
   window.__aiCfgSet = function(o){
-    if(!o || !o.v || typeof o.v !== 'object') return 'none';
+    if(!o || !o.v || typeof o.v !== 'object' || !hasApi(o.v)) return 'none';
     var lat = Number(lsGet(CFGAT, '0')) || 0, rat = Number(o.at) || 0, mine = cfgVals();
-    if(JSON.stringify(mine) === JSON.stringify(o.v)){ if(rat > lat) lsSet(CFGAT, String(rat)); return 'same'; }
-    if(Object.keys(mine).length && lat > rat) return 'local-newer';
-    CFGKEYS.forEach(function(k){ var x = o.v[k]; if(typeof x === 'string' && x){ lsSet(k, x); } else { try{ localStorage.removeItem(k); }catch(e){} } });
+    if(hasApi(mine) && lat > rat) return 'local-newer';
+    /* دمج بس: بنكتب القيم اللي في الحساب، وعمره ما بيمسح حاجة موجودة على الجهاز */
+    var merged = {}, k; for(k in mine) merged[k] = mine[k];
+    CFGKEYS.forEach(function(q){ var x = o.v[q]; if(typeof x === 'string' && x) merged[q] = x; });
+    if(JSON.stringify(merged) === JSON.stringify(mine)){ if(rat > lat) lsSet(CFGAT, String(rat)); return 'same'; }
+    CFGKEYS.forEach(function(q){ if(merged[q] !== mine[q]) lsSet(q, merged[q]); });
     lsSet(CFGAT, String(rat || Date.now()));
     try{ if($('aiOv').classList.contains('open')) loadSet(); }catch(e){}
     return 'applied';
@@ -17617,18 +17629,18 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function saveSet(){
     var before = cfgSnap();
     saveSetRaw();
-    if(cfgSnap() !== before){ lsSet(CFGAT, String(Date.now())); try{ if(typeof window.__onDataSaved === 'function') window.__onDataSaved(); }catch(e){} }
+    if(cfgSnap() !== before && hasApi(cfgVals())){ lsSet(CFGAT, String(Date.now())); try{ if(typeof window.__onDataSaved === 'function') window.__onDataSaved(); }catch(e){} }
   }
   /* مرة واحدة: لو على الجهاز مفاتيح قديمة ما اتزامنتش، نرفعها أول ما الحساب يكون متصل */
   (function(){ var n = 0, t = setInterval(function(){ n++; var u = null; try{ u = cloud && cloud.user; }catch(e){}
-    if(u){ clearInterval(t); if(!lsGet(CFGAT, '') && Object.keys(cfgVals()).length){ lsSet(CFGAT, String(Date.now())); try{ window.__onDataSaved(); }catch(e){} } }
+    if(u){ clearInterval(t); if(!lsGet(CFGAT, '') && hasApi(cfgVals())){ lsSet(CFGAT, String(Date.now())); try{ window.__onDataSaved(); }catch(e){} } }
     else if(n > 20) clearInterval(t); }, 4000); })();
   /* 8445: زرار «مزامنة الذكاء الاصطناعي» جوه إعدادات المساعد (سحب أو رفع + تأكيد إن الحساب فيه الإعدادات) */
   async function readRemoteAi(){
     var remote = await cloudGetDoc(false);
     if(!remote || !remote.blob) return null;
     var res = await decodeTransferCode(remote.blob);
-    return (res && res.ok && res.ai && res.ai.v) ? res.ai : null;
+    return (res && res.ok && res.ai && res.ai.v && hasApi(res.ai.v)) ? res.ai : null;
   }
   function cnt(o){ return o && o.v ? Object.keys(o.v).length : 0; }
   window.aiCloudSync = async function(){
@@ -17639,7 +17651,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     if(!navigator.onLine){ say('مفيش نت دلوقتي.', false); return; }
     if(btn) btn.disabled = true; say('🔄 بيتزامن…');
     try{
-      var ra = await readRemoteAi(), mine = cfgVals(), mk = Object.keys(mine).length, rk = cnt(ra);
+      var ra = await readRemoteAi(), mine = cfgVals(), mk = hasApi(mine) ? Object.keys(mine).length : 0, rk = cnt(ra);
       var lat = Number(lsGet(CFGAT, '0')) || 0, rat = ra ? (Number(ra.at) || 0) : 0;
       if(!rk && !mk){ say('مفيش إعدادات ذكاء اصطناعي لا على الجهاز ده ولا في الحساب. على الجهاز اللي عليه المفاتيح اضغط «حفظ» وبعدها «مزامنة».', false); return; }
       if(rk && mk && JSON.stringify(ra.v) === JSON.stringify(mine)){ say('✅ متطابقة: الجهاز والحساب فيهم نفس الإعدادات (' + rk + ' بند).', true); return; }
@@ -17665,7 +17677,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   };
   function saveSetRaw(){
     lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
-    lsSet(SRCHK, $('aiSearch').checked ? '1' : '0'); lsSet(AUTOK, $('aiAuto').checked ? '1' : '0'); lsSet('masrofati_ai_savechat', $('aiSaveChat').checked ? '1' : '0'); chatSave();
+    lsSet(TAVK, $('aiTav').value.trim()); lsSet(SRCHK, $('aiSearch').checked ? '1' : '0'); lsSet(AUTOK, $('aiAuto').checked ? '1' : '0'); lsSet('masrofati_ai_savechat', $('aiSaveChat').checked ? '1' : '0'); chatSave();
     lsSet(P2K, $('aiP2').value); lsSet(P2KEY, $('aiP2Key').value.trim()); lsSet(P2MOD, $('aiP2Model').value.trim()); lsSet(P2URL, $('aiP2Url').value.trim());
     lsSet(P3K, $('aiP3').value); lsSet(P3KEY, $('aiP3Key').value.trim()); lsSet(P3MOD, $('aiP3Model').value.trim()); lsSet(P3URL, $('aiP3Url').value.trim());
     lsSet(P4K, $('aiP4').value); lsSet(P4KEY, $('aiP4Key').value.trim()); lsSet(P4MOD, $('aiP4Model').value.trim()); lsSet(P4URL, $('aiP4Url').value.trim());
@@ -18174,6 +18186,32 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   function netErr(ctl, e){ var er = new Error(ctl.timedOut ? 'TIMEOUT' : 'NETWORK'); er.raw = String(e && e.message || e); return er; }
 
+  /* ===== 8447: بحث الإنترنت المجاني (Tavily) ===== */
+  var curWeb = null, WEBRE = /(سعر|أسعار|اسعار|بكام|اخبار|أخبار|خبر|النهاردة|النهارده|دلوقتي|حاليا|حاليًا|أحدث|احدث|الذهب|دهب|الدولار|اليورو|العملة|عملات|البورصة|سهم|اسهم|أسهم|طقس|الطقس|نتيجة|مباراة|ابحث|دوّر|دور لي|دورلي|دور على|دور علي|search|price|news|today|latest|current|weather)/i;
+  function lastQ(){ var h = trimHist(); for(var i = h.length - 1; i >= 0; i--){ if(h[i].role === 'user'){ var t = (h[i].parts || []).map(function(p){ return p.text || ''; }).join(' ').trim(); if(t) return t; } } return ''; }
+  async function tavilySearch(q, force){
+    var key = lsGet(TAVK, ''); if(!key) throw new Error('NOTAV');
+    var ctl = new AbortController(), tm = setTimeout(function(){ ctl.abort(); }, 15000), r;
+    try{ r = await fetch('https://api.tavily.com/search', {method: 'POST', signal: ctl.signal, headers: {'content-type': 'application/json', 'authorization': 'Bearer ' + key}, body: JSON.stringify({query: q.slice(0, 380), search_depth: 'basic', max_results: 5, include_answer: false})}); }
+    catch(e){ clearTimeout(tm); var n = new Error(ctl.signal.aborted ? 'TIMEOUT' : 'NETWORK'); throw n; }
+    clearTimeout(tm);
+    if(!r.ok){ var t = ''; try{ var jj = await r.json(); t = (jj.detail && (jj.detail.error || jj.detail)) || jj.error || jj.message || ''; }catch(e){} var er = new Error('HTTP' + r.status); er.status = r.status; er.msg = String(typeof t === 'string' ? t : JSON.stringify(t)); throw er; }
+    var j = await r.json(), res = (j.results || []).filter(function(x){ return x && /^https?:\/\//i.test(x.url || ''); }).slice(0, 5);
+    if(!res.length) throw new Error('EMPTY');
+    var txt = res.map(function(x, i){ return '[' + (i + 1) + '] ' + String(x.title || x.url).slice(0, 120) + ' — ' + x.url + '\n' + String(x.content || '').replace(/\s+/g, ' ').slice(0, 600); }).join('\n\n');
+    return {q: q, text: txt, sources: res.map(function(x){ return {uri: x.url, title: String(x.title || x.url).slice(0, 100)}; })};
+  }
+  function webWhy(e){
+    var s = e && e.status;
+    if(s === 401 || s === 403) return 'مفتاح Tavily غلط أو مش شغال';
+    if(s === 429 || s === 432 || s === 433) return 'حصة Tavily المجانية خلصت';
+    if(e && e.message === 'TIMEOUT') return 'بحث Tavily اتأخر';
+    if(e && e.message === 'NETWORK') return 'مفيش اتصال ببحث Tavily';
+    if(e && e.message === 'EMPTY') return 'البحث ما رجّعش نتايج';
+    return 'بحث Tavily فشل' + (s ? ' (' + s + ')' : '');
+  }
+  function webCtx(w){ return '\n\n=== نتايج بحث الإنترنت (Tavily) للسؤال: ' + w.q + ' ===\n' + w.text + '\n=== نهاية النتايج ===\nاستخدم النتايج دي للمعلومات الخارجية والحديثة بس (أسعار، أخبار، معلومات عامة)، ومتستخدمهاش لبيانات المستخدم نفسه. قول إن المعلومة من الإنترنت، واذكر رقم المصدر [١] زي ما هو، ولو النتايج مش كفاية قول كده بصراحة. الاستثناء الوحيد من «متخترعش أرقام» هو المعلومة الخارجية اللي جاية من النتايج دي.'; }
+
   /* ===== Gemini (ستريمنج + بحث جوجل) ===== */
   function gChunk(agg, j, hooks){
     if(j && j.error){ var er = new Error('HTTP' + (j.error.code || 0)); er.status = Number(j.error.code) || 0; er.msg = String(j.error.message || ''); er.isAi = true; throw er; }
@@ -18262,16 +18300,16 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   async function geminiRun(mode, hooks){
     if(!lsGet(KEYK, '')) throw new Error('NOKEY');
-    var useSearch = mode === 'chat' && lsGet(SRCHK, '0') === '1';
+    var useSearch = mode === 'chat' && lsGet(SRCHK, '0') === '1' && !curWeb && !lsGet(TAVK, '');
     var base = {contents: trimHist(), generationConfig: {maxOutputTokens: 2500}};
-    var ctx = '\n\n=== بيانات المستخدم ===\n' + buildCtx();
+    var ctx = '\n\n=== بيانات المستخدم ===\n' + buildCtx() + (curWeb ? webCtx(curWeb) : '');
     var bodyMain = Object.assign({systemInstruction: {parts: [{text: SYS + (useSearch ? SYS_WEB : '') + ctx}]}, tools: useSearch ? [{google_search: {}}] : GTOOLS}, base);
     var bodyAlt = useSearch ? Object.assign({systemInstruction: {parts: [{text: SYS + ctx}]}, tools: GTOOLS}, base) : null;
     return gModels(bodyMain, bodyAlt, hooks);
   }
 
   /* ===== الذكاء التاني (متوافق مع OpenAI: Groq / OpenRouter / مخصص) ===== */
-  function p2Sys(){ return SYS + ' (ملحوظة: مفيش بحث في الإنترنت في الرد ده، اعتمد على بيانات التطبيق بس.)\n\n=== بيانات المستخدم ===\n' + buildCtx(); }
+  function p2Sys(){ return SYS + (curWeb ? '' : ' (ملحوظة: مفيش بحث في الإنترنت في الرد ده، اعتمد على بيانات التطبيق بس.)') + '\n\n=== بيانات المستخدم ===\n' + buildCtx() + (curWeb ? webCtx(curWeb) : ''); }
   function p2Msgs(arr, sysText){
     var out = [{role: 'system', content: sysText}];
     arr.forEach(function(m){
@@ -18342,7 +18380,20 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 
   /* ===== التوزيع: Gemini أولًا، ولو وقع بيجاوب الذكاء التاني ===== */
   async function converse(mode, hooks, hasImg){
-    var chain = [p2cfg(), p3cfg(), p4cfg()].filter(Boolean), needTools = mode === 'tool' || lsGet(SRCHK, '0') !== '1';
+    var web = null, webErr = null;
+    if(mode === 'chat' && lsGet(SRCHK, '0') === '1' && lsGet(TAVK, '')){
+      var wq = lastQ();
+      if(wq && WEBRE.test(wq)){ try{ web = await tavilySearch(wq); }catch(e){ webErr = e; } }
+    }
+    curWeb = web;
+    var r0 = await converse2(mode, hooks, hasImg, !!lsGet(TAVK, ''));
+    if(web && r0){ r0.g = r0.g || {q: [], chunks: [], html: ''}; r0.g.q = [web.q]; r0.g.chunks = web.sources; r0.webVia = 'Tavily'; }
+    if(webErr && r0){ r0.noSearch = true; r0.swhy = webWhy(webErr); }
+    curWeb = null;
+    return r0;
+  }
+  async function converse2(mode, hooks, hasImg, tavOn){
+    var chain = [p2cfg(), p3cfg(), p4cfg()].filter(Boolean), needTools = mode === 'tool' || lsGet(SRCHK, '0') !== '1' || tavOn;
     async function runChain(why){
       var last = null;
       for(var i = 0; i < chain.length; i++){
@@ -18372,7 +18423,11 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
         var res = await gModels({contents: [{role: 'user', parts: [{text: 'رد بكلمة واحدة بس: تمام'}]}], generationConfig: {maxOutputTokens: 60}}, null, NOHOOK);
         out.push('✅ Gemini شغال (' + (res.model || '') + ')' + (res.text.trim() ? ' — الرد: ' + res.text.trim() : '')); show();
       }catch(e){ bad = true; out.push('❌ Gemini: ' + errCore(e, 'Gemini') + (e && e.status ? '  [كود ' + e.status + ']' : '') + (e && e.raw ? '  [' + e.raw.slice(0, 80) + ']' : '')); show(); }
-      if(!bad && lsGet(SRCHK, '0') === '1'){
+      if(lsGet(TAVK, '')){
+        out.push('… بجرّب بحث Tavily'); show();
+        try{ var tr = await tavilySearch('سعر أونصة الذهب عالميا اليوم'); out.pop(); out.push('✅ بحث Tavily شغال (' + tr.sources.length + ' مصادر)'); show(); }
+        catch(e){ bad = true; out.pop(); out.push('❌ ' + webWhy(e) + (e && e.msg ? ' — ' + String(e.msg).slice(0, 80) : '')); show(); }
+      }else if(!bad && lsGet(SRCHK, '0') === '1'){
         out.push('… بجرّب بحث جوجل'); show();
         try{
           var rs = await gSearchTry({tools: [{google_search: {}}], contents: [{role: 'user', parts: [{text: 'دوّر في جوجل وقولي سعر أونصة الذهب عالميًا النهاردة بالدولار، الرقم بس.'}]}], generationConfig: {maxOutputTokens: 400}});
@@ -18437,9 +18492,9 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function addMeta(info){
     var m = document.createElement('div'), g = info.g; m.className = 'ai-meta';
     if(info.viaNote) m.appendChild(mNote('⚡ جاوب ' + info.viaNote + (info.why ? ' (' + info.why + ')' : '')));
-    if(info.noSearch) m.appendChild(mNote('⚠️ بحث جوجل مش متاح دلوقتي، الرد ده من غير بحث.' + (info.swhy ? ' السبب: ' + info.swhy : '')));
+    if(info.noSearch) m.appendChild(mNote('⚠️ ' + (info.webVia || info.swhy && /Tavily/.test(info.swhy) ? 'بحث الإنترنت' : 'بحث جوجل') + ' مش متاح دلوقتي، الرد ده من غير بحث.' + (info.swhy ? ' السبب: ' + info.swhy : '')));
     if(g && (g.q.length || g.chunks.length)){
-      if(g.q.length) m.appendChild(mNote('🌐 دوّرت في جوجل: ' + g.q.slice(0, 3).join(' • ')));
+      if(g.q.length) m.appendChild(mNote('🌐 دوّرت في ' + (info.webVia || 'جوجل') + ': ' + g.q.slice(0, 3).join(' • ')));
       if(g.chunks.length){
         var s = document.createElement('div'); s.className = 'ai-srcs';
         g.chunks.slice(0, 6).forEach(function(k){ var a = document.createElement('a'); a.className = 'ai-src'; a.href = k.uri; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = String(k.title).slice(0, 48); s.appendChild(a); });
