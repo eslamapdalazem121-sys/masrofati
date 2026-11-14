@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-14.8444">
+<meta name="app-version" content="2026-11-14.8445">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -17527,6 +17527,10 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     </div>
     <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:14px;"><input type="checkbox" id="aiAutoMic"> 🎤 الميكروفون يشتغل لوحده أول ما أفتح الروبوت</label>
     <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:14px;"><input type="checkbox" id="aiVoiceOut"> 🔊 الروبوت يقرأ كل الردود بصوت عالي (لو بتكلمه بالصوت بيرد بالصوت تلقائي)</label>
+    <div class="ai-sep"></div>
+    <button class="ai-btn" id="aiSyncBtn" style="width:100%; background:linear-gradient(180deg,#6aa8ff,#2f6fe0); color:#fff; box-shadow:0 3px 0 #1d4fa8;" onclick="aiCloudSync()">☁️ مزامنة الذكاء الاصطناعي مع حسابي</button>
+    <div id="aiSyncOut" class="ai-note" style="display:none; font-weight:800; opacity:1;"></div>
+    <div class="ai-note">اضغط «حفظ» الأول لو غيّرت حاجة، وبعدين «مزامنة». على الجهاز اللي عليه المفاتيح بترفعها للحساب، وعلى الجهاز التاني بتسحبها.</div>
     <div style="display:flex; gap:8px; margin-top:10px;"><button class="ai-btn" style="flex:1; background:linear-gradient(180deg,#58e3ab,#12b27a); color:#fff; box-shadow:0 3px 0 #0b7a55;" onclick="aiSaveSet()">حفظ</button><button class="ai-btn" onclick="aiTest()">اختبار الاتصال</button><button class="ai-btn" onclick="aiClear()">محادثة جديدة</button></div><div id="aiTestOut" class="ai-note" style="display:none; font-weight:800; opacity:1; direction:rtl; word-break:break-word;"></div>
     </div>
   </div>
@@ -17619,6 +17623,46 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   (function(){ var n = 0, t = setInterval(function(){ n++; var u = null; try{ u = cloud && cloud.user; }catch(e){}
     if(u){ clearInterval(t); if(!lsGet(CFGAT, '') && Object.keys(cfgVals()).length){ lsSet(CFGAT, String(Date.now())); try{ window.__onDataSaved(); }catch(e){} } }
     else if(n > 20) clearInterval(t); }, 4000); })();
+  /* 8445: زرار «مزامنة الذكاء الاصطناعي» جوه إعدادات المساعد (سحب أو رفع + تأكيد إن الحساب فيه الإعدادات) */
+  async function readRemoteAi(){
+    var remote = await cloudGetDoc(false);
+    if(!remote || !remote.blob) return null;
+    var res = await decodeTransferCode(remote.blob);
+    return (res && res.ok && res.ai && res.ai.v) ? res.ai : null;
+  }
+  function cnt(o){ return o && o.v ? Object.keys(o.v).length : 0; }
+  window.aiCloudSync = async function(){
+    var out = $('aiSyncOut'), btn = $('aiSyncBtn');
+    function say(t, ok){ out.style.display = 'block'; out.textContent = t; out.style.color = ok === false ? '#c0392b' : (ok ? '#0b7a55' : ''); }
+    var cl = null; try{ cl = cloud; }catch(e){}
+    if(!cl || !cl.user){ say('سجّل دخول الأول: الإعدادات ← «الحساب والمزامنة بين الأجهزة».', false); return; }
+    if(!navigator.onLine){ say('مفيش نت دلوقتي.', false); return; }
+    if(btn) btn.disabled = true; say('🔄 بيتزامن…');
+    try{
+      var ra = await readRemoteAi(), mine = cfgVals(), mk = Object.keys(mine).length, rk = cnt(ra);
+      var lat = Number(lsGet(CFGAT, '0')) || 0, rat = ra ? (Number(ra.at) || 0) : 0;
+      if(!rk && !mk){ say('مفيش إعدادات ذكاء اصطناعي لا على الجهاز ده ولا في الحساب. على الجهاز اللي عليه المفاتيح اضغط «حفظ» وبعدها «مزامنة».', false); return; }
+      if(rk && mk && JSON.stringify(ra.v) === JSON.stringify(mine)){ say('✅ متطابقة: الجهاز والحساب فيهم نفس الإعدادات (' + rk + ' بند).', true); return; }
+      if(rk && (!mk || rat >= lat)){
+        window.__aiCfgSet(ra); loadSet();
+        say('✅ اتسحبت إعدادات الذكاء الاصطناعي من حسابك (' + rk + ' بند).', true); return;
+      }
+      /* رفع: الجهاز فيه إعدادات والحساب مفيهوش أو أقدم */
+      var n = 0, got = 0;
+      for(n = 0; n < 2 && !got; n++){
+        if(!lat){ lsSet(CFGAT, String(Date.now())); lat = 1; }
+        try{ window.__onDataSaved(); }catch(e){}
+        await cloudSync('manual');
+        if(cl.pendingChoice){ say('ظهرتلك رسالة اختيار بين بيانات الجهاز والحساب. اختار منها وبعدين اضغط «مزامنة» تاني.', false); return; }
+        if(cl.lastError){ say('⚠️ ' + cl.lastError, false); return; }
+        var chk = await readRemoteAi(); got = cnt(chk);
+      }
+      if(got){ say('✅ اترفعت إعدادات الذكاء الاصطناعي للحساب (' + got + ' بند). افتح التطبيق على الجهاز التاني واضغط «مزامنة» هنا.', true); }
+      else { say('⚠️ المزامنة خلصت بس الحساب لسه مفيهوش الإعدادات. اضغط «حفظ» وجرّب تاني.', false); }
+    }catch(e){
+      say('⚠️ حصلت مشكلة في المزامنة' + (e && (e.code || e.message) ? ' (' + (e.code || e.message) + ')' : '') + '.', false);
+    }finally{ if(btn) btn.disabled = false; }
+  };
   function saveSetRaw(){
     lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
     lsSet(SRCHK, $('aiSearch').checked ? '1' : '0'); lsSet(AUTOK, $('aiAuto').checked ? '1' : '0'); lsSet('masrofati_ai_savechat', $('aiSaveChat').checked ? '1' : '0'); chatSave();
