@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-14.8443">
+<meta name="app-version" content="2026-11-14.8444">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -13496,8 +13496,11 @@ async function pipeBytes(stream, bytes){
   return new Uint8Array(await new Response(stream.readable).arrayBuffer());
 }
 // الكود = MSRB1 + (1 مضغوط | 0 عادي) + . + بصمة + . + البيانات base64
-async function encodeTransferCode(){
-  const payload = JSON.stringify({app:'masrofati-b', v:1, exportedAt:new Date().toISOString(), data});
+async function encodeTransferCode(opts){
+  const pl = {app:'masrofati-b', v:1, exportedAt:new Date().toISOString(), data};
+  /* 8444: إعدادات الذكاء الاصطناعي (الأسماء والمفاتيح) بتتبعت مع مزامنة السحابة بس */
+  if(opts && opts.ai){ try{ const a = typeof window.__aiCfgGet === 'function' ? window.__aiCfgGet() : null; if(a) pl.ai = a; }catch(e){} }
+  const payload = JSON.stringify(pl);
   const raw = new TextEncoder().encode(payload);
   let mode = '0', body = raw;
   if(typeof CompressionStream === 'function'){
@@ -13530,7 +13533,7 @@ async function decodeTransferCode(text){
     const obj = JSON.parse(new TextDecoder().decode(bytes));
     if(!obj || typeof obj.data !== 'object' || obj.data === null) return {error:'الكود مفيهوش بيانات'};
     const years = Object.keys(obj.data).filter(k => !isNaN(Number(k))).sort();
-    return {ok:true, data:obj.data, exportedAt:obj.exportedAt, entries:countExpensesInData(obj.data), years};
+    return {ok:true, data:obj.data, ai:(obj.ai && typeof obj.ai === 'object') ? obj.ai : null, exportedAt:obj.exportedAt, entries:countExpensesInData(obj.data), years};
   }catch(e){
     return {error:'مش قادر أقرأ الكود ده'};
   }
@@ -13943,12 +13946,14 @@ async function cloudApplyRemote(remote){
   const t = Number(remote.updatedAt) || Date.now();
   cloudSetKey(CLOUD_KEYS.updated, t);
   cloudSetKey(CLOUD_KEYS.synced, t);
+  /* 8444: إعدادات الذكاء الاصطناعي من الحساب (لو أحدث من اللي على الجهاز) */
+  try{ if(res.ai && typeof window.__aiCfgSet === 'function'){ if(window.__aiCfgSet(res.ai) === 'local-newer'){ setTimeout(()=>{ try{ window.__onDataSaved(); }catch(e){} }, 300); } } }catch(e){}
 }
 async function cloudPush(){
   // نقرا وقت التعديل قبل ما نجهّز البيانات: لو اتعدّل حاجة أثناء الرفع، يفضل «التعديل أحدث من المرفوع» وتترفع في اللفة الجاية
   let t = cloudNum(CLOUD_KEYS.updated);
   if(!t){ t = Date.now(); cloudSetKey(CLOUD_KEYS.updated, t); }
-  const blob = await encodeTransferCode();
+  const blob = await encodeTransferCode({ai:true});
   if(blob.length > 900000) throw Object.assign(new Error('too-big'), {code:'app/too-big'});
   // نداء commit (POST) هو نفسه اللي مكتبة Firebase بتستخدمه؛ من غير updateMask ولا شرط = استبدال/إنشاء المستند كله (زي setDoc)
   const body = {writes:[{update:{
@@ -17589,7 +17594,32 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     $('aiVoiceOut').checked = lsGet('masrofati_ai_voiceout', '0') === '1';
     $('aiAutoMic').checked = lsGet('masrofati_ai_automic', '1') === '1';
   }
+  /* 8444: مزامنة أسماء ومفاتيح الذكاء الاصطناعي مع الحساب (موبايل ↔ كمبيوتر) */
+  var CFGAT = 'masrofati_ai_cfg_at';
+  var CFGKEYS = [KEYK, MODK, P2K, P2KEY, P2MOD, P2URL, P3K, P3KEY, P3MOD, P3URL, P4K, P4KEY, P4MOD, P4URL];
+  function cfgVals(){ var v = {}; CFGKEYS.forEach(function(k){ var x = lsGet(k, ''); if(x) v[k] = x; }); return v; }
+  function cfgSnap(){ return JSON.stringify(cfgVals()); }
+  window.__aiCfgGet = function(){ var v = cfgVals(), at = Number(lsGet(CFGAT, '0')) || 0; if(!at && !Object.keys(v).length) return null; return {at: at, v: v}; };
+  window.__aiCfgSet = function(o){
+    if(!o || !o.v || typeof o.v !== 'object') return 'none';
+    var lat = Number(lsGet(CFGAT, '0')) || 0, rat = Number(o.at) || 0, mine = cfgVals();
+    if(JSON.stringify(mine) === JSON.stringify(o.v)){ if(rat > lat) lsSet(CFGAT, String(rat)); return 'same'; }
+    if(Object.keys(mine).length && lat > rat) return 'local-newer';
+    CFGKEYS.forEach(function(k){ var x = o.v[k]; if(typeof x === 'string' && x){ lsSet(k, x); } else { try{ localStorage.removeItem(k); }catch(e){} } });
+    lsSet(CFGAT, String(rat || Date.now()));
+    try{ if($('aiOv').classList.contains('open')) loadSet(); }catch(e){}
+    return 'applied';
+  };
   function saveSet(){
+    var before = cfgSnap();
+    saveSetRaw();
+    if(cfgSnap() !== before){ lsSet(CFGAT, String(Date.now())); try{ if(typeof window.__onDataSaved === 'function') window.__onDataSaved(); }catch(e){} }
+  }
+  /* مرة واحدة: لو على الجهاز مفاتيح قديمة ما اتزامنتش، نرفعها أول ما الحساب يكون متصل */
+  (function(){ var n = 0, t = setInterval(function(){ n++; var u = null; try{ u = cloud && cloud.user; }catch(e){}
+    if(u){ clearInterval(t); if(!lsGet(CFGAT, '') && Object.keys(cfgVals()).length){ lsSet(CFGAT, String(Date.now())); try{ window.__onDataSaved(); }catch(e){} } }
+    else if(n > 20) clearInterval(t); }, 4000); })();
+  function saveSetRaw(){
     lsSet(KEYK, $('aiKey').value.trim()); lsSet(MODK, $('aiModel').value.trim() || DEFMOD);
     lsSet(SRCHK, $('aiSearch').checked ? '1' : '0'); lsSet(AUTOK, $('aiAuto').checked ? '1' : '0'); lsSet('masrofati_ai_savechat', $('aiSaveChat').checked ? '1' : '0'); chatSave();
     lsSet(P2K, $('aiP2').value); lsSet(P2KEY, $('aiP2Key').value.trim()); lsSet(P2MOD, $('aiP2Model').value.trim()); lsSet(P2URL, $('aiP2Url').value.trim());
