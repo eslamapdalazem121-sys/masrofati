@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-14.8448">
+<meta name="app-version" content="2026-11-15.8450">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -1929,6 +1929,7 @@ html.perf #capHeroOverlay,
 html.perf #zakHeroOverlay,
 html.perf #msHeroOverlay,
 html.perf #yiHeroOverlay,
+html.perf #wkOverlay,
 html.perf #yrCap.cap-subglass .cap-sub,
 html.perf #cmChipAll .cm-all-ico,
 html.perf #cmChipAll .cm-all-body,
@@ -3135,7 +3136,7 @@ html{ overscroll-behavior:none; }
 #yrCap.cap-subglass .cap-sub .c2-pill, #yrCap.cap-subglass .cap-sub .c2-rows .r, #yrCap.cap-subglass .cap-sub .c2-karat > span{background:rgba(128,128,128,.12); border:1px solid rgba(128,128,128,.22); box-shadow:none;}
 @media (prefers-reduced-motion: reduce){ #yrCap .cap-sub .cs-ico svg{animation:none;} }
 </style>
-<style id="heroZfix">#capHeroOverlay,#zakHeroOverlay,#msHeroOverlay,#yiHeroOverlay{z-index:94;}#cmChipAll.cm-all{flex-direction:row !important; align-items:center; justify-content:center; gap:14px;}
+<style id="heroZfix">#capHeroOverlay,#zakHeroOverlay,#msHeroOverlay,#yiHeroOverlay,#wkOverlay{z-index:94;}#cmChipAll.cm-all{flex-direction:row !important; align-items:center; justify-content:center; gap:14px;}
 #cmChipAll .cm-all-ico{flex:none; width:calc(64px * var(--cm-sc,1)); height:calc(64px * var(--cm-sc,1));}
 #cmChipAll .cm-all-ico svg{width:100%; height:100%; display:block; overflow:visible; filter:drop-shadow(0 4px 3px rgba(0,0,0,.25));}
 #cmChipAll .cm-all-body{display:flex; flex-direction:column; align-items:center; min-width:0;}
@@ -3849,6 +3850,92 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
       <span class="gi-col"><span>المصروفات الشهرية</span><span class="yr-amt" id="msAmt">0</span></span>
       <span class="plus-badge in-card ms-plus" onclick="event.stopPropagation(); openMsSummary()" role="button" aria-label="ملخص المصروفات">+</span>
     </div>
+  </div>
+  <div class="cap-hero-wrap" id="wkHeroWrap">
+    <button type="button" class="cap-hero" id="wkHeroBtn" onclick="openWkHero()" data-hold-ok aria-label="عملي">
+      <span class="ch-stage"><span class="ch-ico" id="wkHeroIco"></span></span>
+      <span class="ch-lbl">عملي</span>
+    </button>
+  </div>
+</div>
+
+<style id="wkStyle">
+#wkOverlay{align-items:stretch !important; justify-content:stretch !important; background:var(--bg); backdrop-filter:none;}
+#wkOverlay .modal-box{width:100%; max-width:none; height:100%; max-height:none; border-radius:0; overflow-y:auto; position:relative; box-sizing:border-box; padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px));}
+#wkOverlay .ch-ptitle{text-align:center; font-weight:900; font-size:calc(20px * var(--fs,1)); margin:6px 0 10px;}
+.wk-mnav{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 12px}
+.wk-mnav button{width:40px;height:40px;border-radius:50%;border:0;background:var(--card);color:var(--text);box-shadow:var(--shadow);font-size:18px;font-weight:900;cursor:pointer;font-family:inherit}
+.wk-mnav .wk-mt{min-width:150px;text-align:center;font-weight:900;font-size:calc(16px * var(--fs,1))}
+.wk-sum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.wk-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px 6px;text-align:center;box-shadow:var(--shadow)}
+.wk-box small{display:block;color:var(--muted);font-size:calc(11px * var(--fs,1));margin-bottom:4px}
+.wk-box b{font-size:calc(15px * var(--fs,1));font-weight:900;overflow-wrap:anywhere}
+.wk-box.g b{color:var(--accent-dark)} .wk-box.o b{color:var(--c-excluded-txt)}
+.wk-year{text-align:center;color:var(--muted);font-size:calc(12px * var(--fs,1));margin:0 0 12px}
+.wk-add{width:100%;border:0;border-radius:16px;padding:13px;font-weight:900;font-size:calc(15px * var(--fs,1));color:#fff;background:linear-gradient(180deg,#34d399,#0e8c5c);box-shadow:0 3px 0 #0a6b45;cursor:pointer;margin-bottom:12px;font-family:inherit}
+.wk-form{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:12px;margin-bottom:12px;box-shadow:var(--shadow)}
+.wk-form label{display:block;font-weight:800;font-size:calc(13px * var(--fs,1));margin:8px 0 4px}
+.wk-form input[type=text],.wk-form input[type=number],.wk-form input[type=date]{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;font-size:calc(15px * var(--fs,1));text-align:right}
+.wk-chk{display:flex;align-items:center;gap:8px;margin:10px 0 2px;font-weight:800}
+.wk-chk input{width:20px;height:20px}
+.wk-fb{display:flex;gap:8px;margin-top:12px}
+.wk-fb button{flex:1;border:0;border-radius:14px;padding:12px;font:inherit;font-weight:900;cursor:pointer}
+.wk-fb .ok{color:#fff;background:linear-gradient(180deg,#34d399,#0e8c5c)} .wk-fb .no{background:var(--bg2);color:var(--text)}
+.wk-row{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow)}
+.wk-r1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.wk-t{font-weight:900;font-size:calc(15px * var(--fs,1));overflow-wrap:anywhere}
+.wk-a{font-weight:900;color:var(--accent-dark);white-space:nowrap}
+.wk-r2{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;color:var(--muted);font-size:calc(12px * var(--fs,1))}
+.wk-n{margin-top:4px;color:var(--muted);font-size:calc(12px * var(--fs,1));overflow-wrap:anywhere}
+.wk-st{border:0;border-radius:999px;padding:4px 10px;font:inherit;font-size:calc(12px * var(--fs,1));font-weight:900;cursor:pointer}
+.wk-st.p{background:var(--accent-soft);color:var(--accent-dark)} .wk-st.u{background:var(--c-excluded);color:var(--c-excluded-txt)}
+.wk-ib{border:0;background:var(--bg2);color:var(--text);border-radius:10px;padding:5px 9px;font:inherit;cursor:pointer;font-size:calc(13px * var(--fs,1))}
+.wk-ib.del{color:var(--c-deficit-txt)}
+.wk-sp{flex:1}
+.wk-q{color:var(--c-deficit-txt);font-weight:900}
+.wk-empty{text-align:center;color:var(--muted);padding:26px 10px;line-height:1.8}
+/* 8450: تحت التاريخ — أيقونة عملي + رأس مال العمل، وتحتها أيقونة إضافة وصرف */
+.wk-cap{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 12px}
+.wk-capi{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;gap:2px}
+.wk-capi .cap-hero-wrap{margin:0;--ch-sc:.55}
+.wk-capi .cap-hero{padding:0 6px}
+.wk-capi .cap-hero .ch-lbl{font-size:calc(13px * var(--fs,1));text-align:center;line-height:1.3}
+.wk-capi .wk-stat{cursor:default}
+.wk-capi .wk-stat:active .ch-stage{transform:none}
+.wk-capcard{position:relative;flex:1 1 0;min-width:0;align-self:center;min-height:124px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:22px;padding:18px 10px;text-align:center;background:var(--card);background:linear-gradient(160deg,var(--card),color-mix(in srgb,var(--card) 86%,var(--accent)));border:1px solid var(--border);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.18),0 5px 0 rgba(10,107,73,.22)}
+.wk-capcard,.wk-cf{--wk-pos:var(--accent-dark);--wk-neg:#d6382a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .wk-capcard,:root:not([data-theme="light"]) .wk-cf{--wk-pos:#34d399;--wk-neg:#ff7a6e}}
+:root[data-theme="dark"] .wk-capcard,:root[data-theme="dark"] .wk-cf{--wk-pos:#34d399;--wk-neg:#ff7a6e}
+.wk-capcard small{font-weight:800;color:var(--muted);font-size:calc(13px * var(--fs,1))}
+.wk-capcard b{font-size:calc(clamp(26px,8.6vw,38px) * var(--fs,1));font-weight:900;color:var(--wk-pos);overflow-wrap:anywhere;line-height:1.15;font-variant-numeric:tabular-nums}
+.wk-capcard.neg b{color:var(--wk-neg)}
+.wk-capcard.up{animation:wkCapUp 1.1s ease}
+.wk-capcard.down{animation:wkCapDown 1.1s ease}
+@keyframes wkCapUp{0%,100%{box-shadow:var(--shadow),0 5px 0 rgba(10,107,73,.22)}35%{box-shadow:0 0 0 3px rgba(22,168,112,.55),0 0 26px rgba(22,168,112,.55),0 5px 0 rgba(10,107,73,.22)}}
+@keyframes wkCapDown{0%,100%{box-shadow:var(--shadow),0 5px 0 rgba(10,107,73,.22)}35%{box-shadow:0 0 0 3px rgba(214,56,42,.5),0 0 26px rgba(214,56,42,.5),0 5px 0 rgba(10,107,73,.22)}}
+.wk-capd{position:absolute;top:8px;inset-inline:0;margin:auto;width:max-content;font-weight:900;font-size:calc(14px * var(--fs,1));opacity:0;pointer-events:none}
+.wk-capd.u{color:var(--wk-pos)} .wk-capd.d{color:var(--wk-neg)}
+.wk-capd.show{animation:wkChip 1.5s ease forwards}
+@keyframes wkChip{0%{opacity:0;transform:translateY(10px)}18%{opacity:1}100%{opacity:0;transform:translateY(-16px)}}
+.wk-kind{display:flex;gap:8px;margin-bottom:4px}
+.wk-kind button{flex:1;border:0;border-radius:14px;padding:12px;font:inherit;font-weight:900;cursor:pointer;background:var(--bg2);color:var(--text)}
+.wk-kind button.on.a{background:linear-gradient(180deg,#34d399,#0e8c5c);color:#fff;box-shadow:0 3px 0 #0a6b45}
+.wk-kind button.on.o{background:linear-gradient(180deg,#ff8a7a,#d6382a);color:#fff;box-shadow:0 3px 0 #9e1f14}
+.wk-cf.k-o .wk-fb .ok{background:linear-gradient(180deg,#ff8a7a,#d6382a)}
+.wk-clog{margin-top:14px}
+.wk-clog h4{margin:0 0 4px;font-size:calc(13px * var(--fs,1));color:var(--muted);font-weight:800}
+.wk-cl{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:calc(13px * var(--fs,1))}
+.wk-cl .wk-cm{font-weight:900;white-space:nowrap}
+.wk-cl .wk-cm.a{color:var(--wk-pos)} .wk-cl .wk-cm.o{color:var(--wk-neg)}
+.wk-cl .wk-cn2{flex:1;min-width:0;overflow-wrap:anywhere}
+.wk-cl .wk-cdt{color:var(--muted);white-space:nowrap;font-size:calc(12px * var(--fs,1))}
+@media (prefers-reduced-motion:reduce){.wk-capcard.up,.wk-capcard.down,.wk-capd.show{animation:none}.wk-capd.show{opacity:1}}
+</style>
+<div class="modal-overlay" id="wkOverlay">
+  <div class="modal-box ch-page">
+    <button type="button" class="fs-close" onclick="closeWkHero()" aria-label="رجوع">✕</button>
+    <div class="ch-ptitle">🧰 عملي</div>
+    <div id="wkHost"></div>
   </div>
 </div>
 
@@ -5118,6 +5205,19 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
       <div class="vol-val" id="yiIcoSizeLabel">100%</div>
       <div class="ch-prev" id="yiIcoPrev"></div>
       </div></details>
+<details class="ico-grp"><summary>🧰 عملي — الأيقونة والحجم</summary><div class="ico-body">
+<div class="opt-row" id="optWkIcon" data-nosound>
+        <button type="button" class="opt-chip" data-val="briefcase" onclick="nfSet('wkIcon','briefcase')">💼 حقيبة عمل</button><button type="button" class="opt-chip" data-val="wklaptop" onclick="nfSet('wkIcon','wklaptop')">💻 لابتوب شغل</button><button type="button" class="opt-chip" data-val="wktools" onclick="nfSet('wkIcon','wktools')">🧰 عدّة شغل</button><button type="button" class="opt-chip" data-val="wkhelmet" onclick="nfSet('wkIcon','wkhelmet')">⛑️ خوذة عمل</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('wkIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="cash" onclick="nfSet('wkIcon','cash')">💵 فلوس</button><button type="button" class="opt-chip" data-val="growth" onclick="nfSet('wkIcon','growth')">📈 نمو الدخل</button><button type="button" class="opt-chip" data-val="envelope" onclick="nfSet('wkIcon','envelope')">✉️ ظرف الراتب</button><button type="button" class="opt-chip" data-val="calendar" onclick="nfSet('wkIcon','calendar')">🗓️ تقويم</button><button type="button" class="opt-chip" data-val="receipt" onclick="nfSet('wkIcon','receipt')">🧾 فاتورة</button><button type="button" class="opt-chip" data-val="n4target" onclick="nfSet('wkIcon','n4target')">🎯 هدف 4D</button><button type="button" class="opt-chip" data-val="n4medal" onclick="nfSet('wkIcon','n4medal')">🏅 ميدالية 4D</button><button type="button" class="opt-chip" data-val="n4calendar" onclick="nfSet('wkIcon','n4calendar')">📅 تقويم 4D</button><button type="button" class="opt-chip" data-val="n4wallet" onclick="nfSet('wkIcon','n4wallet')">👝 محفظة 4D</button><button type="button" class="opt-chip" data-val="n4cash" onclick="nfSet('wkIcon','n4cash')">💰 فلوس 4D</button><button type="button" class="opt-chip" data-val="trophy" onclick="nfSet('wkIcon','trophy')">🏆 كأس</button><button type="button" class="opt-chip" data-val="bars" onclick="nfSet('wkIcon','bars')">📊 أعمدة</button>
+      </div>
+      <div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(عملي بس)</small></div>
+      <div class="vol-row" data-nosound>
+        <span class="vol-end">صغيرة</span>
+        <input type="range" id="wkIcoSize" min="60" max="180" step="5" value="100" oninput="wkIcoSizeInput()">
+        <span class="vol-end">كبيرة</span>
+      </div>
+      <div class="vol-val" id="wkIcoSizeLabel">100%</div>
+      <div class="ch-prev" id="wkIcoPrev"></div>
+      </div></details>
       </div></details>
       <div class="nf-sub" style="margin-top:14px;">اضغط على أي أيقونة ضغطة طويلة في الصفحة الأولى وحرّكها لأي مكان بين الأيقونات (فوق وتحت ويمين وشمال حسب الترتيب اللي اخترته)</div>
     </div>
@@ -5919,7 +6019,7 @@ function ensureFont(name){
   add('https://fonts.googleapis.com/css2?family=' + fam + ':wght@400;700&display=swap', 'https://fonts.googleapis.com/css2?family=' + fam + '&display=swap');
 }
 let settings = {
-  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, msCardBox:false, clk24:false, clkSec:true, clkMini:'right', clkHome:true, yiIcon:'growth', yiIconSize:100, homeCols:1,
+  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, msCardBox:false, clk24:false, clkSec:true, clkMini:'right', clkHome:true, yiIcon:'growth', yiIconSize:100, wkIcon:'briefcase', wkIconSize:100, homeCols:1,
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -5982,6 +6082,7 @@ function applySettings(s){
   try{ donIcoApply(s); }catch(e){}
   try{ msIcoApply(s); }catch(e){}
   try{ yiIcoApply(s); }catch(e){}
+  try{ wkIcoApply(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
   const root = document.documentElement;
   const newMode = s.digits === 'en' ? 'en' : 'ar';
@@ -6079,6 +6180,7 @@ function refreshSettingsUI(s){
   try{ msIcoRender(s); }catch(e){}
   try{ clkRender(s); }catch(e){}
   try{ yiIcoRender(s); }catch(e){}
+  try{ wkIcoRender(s); }catch(e){}
   try{ fabSettingsUI(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
   ['theme','accent','font','depth','digits','clickType','introSound'].forEach(key=>{
@@ -15351,7 +15453,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 <script>
 /* نقل بطاقات الصفحة الأولى */
 (function(){
-  var KEY = 'masrofati_home_order_v1', IDS = ['yiHeroWrap','yrGI','zakHeroWrap','yrZM','capHeroWrap','yrCap','msHeroWrap','yrMS'];
+  var KEY = 'masrofati_home_order_v1', IDS = ['yiHeroWrap','yrGI','zakHeroWrap','yrZM','capHeroWrap','yrCap','msHeroWrap','yrMS','wkHeroWrap'];
   function host(){ return document.getElementById('homeExtras'); }
   function currentOrder(){ var h = host(); if(!h) return IDS.slice(); return Array.prototype.slice.call(h.children).map(function(c){ return c.id; }).filter(function(id){ return IDS.indexOf(id) > -1; }); }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(currentOrder())); }catch(e){} }
@@ -15412,7 +15514,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 /* نقل العناصر بالضغط المطوّل والسحب في كل الصفحات (الرئيسية والداخلية) + خيار القفل من الإعدادات */
 (function(){
   var KEYM = 'masrofati_move_v1', HINT = 'masrofati_home_hint_v1', HOLD = 380, TOL = 9;
-  var IDS = ['yiHeroWrap', 'yrGI', 'zakHeroWrap', 'yrZM', 'capHeroWrap', 'yrCap', 'msHeroWrap', 'yrMS'];
+  var IDS = ['yiHeroWrap', 'yrGI', 'zakHeroWrap', 'yrZM', 'capHeroWrap', 'yrCap', 'msHeroWrap', 'yrMS', 'wkHeroWrap'];
   /* 8428: ترتيب أيقونات وبطاقات صفحة الزكاة */
   var ZK_BOX = {zmRowBox: 'zmrow', zmDuoBox: 'zmduo'}, ZK_KEY = {zmrow: 'zmRowOrder', zmduo: 'zmDuoOrder'};
   function gridKind(k){ return k === 'cmokind' || k === 'cmodest' || k === 'zmrow' || k === 'zmduo'; }
@@ -17028,6 +17130,223 @@ body.kb-open .fab{display:none !important;}
 </script>
 
 <script>
+/* 8449: أيقونة «عملي» في الصفحة الأولى + صفحة تسجيل الشغل والدخل منه (البيانات جوه data.work فبتتزامن مع الحساب والنسخ الاحتياطي) */
+var WKICO_SVG = {"wklaptop": "<svg viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\"><defs><filter id=\"sh__U__\" x=\"-30%\" y=\"-100%\" width=\"160%\" height=\"300%\"><feGaussianBlur stdDeviation=\"2.4\"/></filter>\n<linearGradient id=\"bz__U__\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#4a5a78\"/><stop offset=\"1\" stop-color=\"#151d2c\"/></linearGradient>\n<linearGradient id=\"sc__U__\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#7fe0ff\"/><stop offset=\".55\" stop-color=\"#3b8df0\"/><stop offset=\"1\" stop-color=\"#2358c9\"/></linearGradient>\n<linearGradient id=\"bs__U__\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#f4f7fb\"/><stop offset=\".55\" stop-color=\"#c3ccd9\"/><stop offset=\"1\" stop-color=\"#8793a6\"/></linearGradient>\n<linearGradient id=\"gd__U__\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#fff3b0\"/><stop offset=\"1\" stop-color=\"#e0a419\"/></linearGradient></defs><ellipse cx=\"60\" cy=\"108\" rx=\"36\" ry=\"5.5\" fill=\"rgba(0,0,0,.22)\" filter=\"url(#sh__U__)\"/>\n<rect x=\"20\" y=\"18\" width=\"80\" height=\"58\" rx=\"7\" fill=\"url(#bz__U__)\"/>\n<rect x=\"25\" y=\"23\" width=\"70\" height=\"46\" rx=\"3.5\" fill=\"url(#sc__U__)\"/>\n<path d=\"M25 23h70v15C75 44 50 30 25 40z\" fill=\"#fff\" opacity=\".18\"/>\n<rect x=\"34\" y=\"50\" width=\"9\" height=\"13\" rx=\"1.5\" fill=\"#fff\" opacity=\".92\"/><rect x=\"47\" y=\"42\" width=\"9\" height=\"21\" rx=\"1.5\" fill=\"#fff\" opacity=\".92\"/><rect x=\"60\" y=\"34\" width=\"9\" height=\"29\" rx=\"1.5\" fill=\"url(#gd__U__)\"/>\n<path d=\"M73 52l5 5 11-13\" fill=\"none\" stroke=\"#fff\" stroke-width=\"4.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M10 78h100l-7 12a5 5 0 0 1-4.3 2.5H21.3A5 5 0 0 1 17 90z\" fill=\"url(#bs__U__)\"/>\n<rect x=\"48\" y=\"80\" width=\"24\" height=\"4\" rx=\"2\" fill=\"#7b8799\" opacity=\".75\"/></svg>", "wktools": "<svg viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\"><defs><filter id=\"sh__U__\" x=\"-30%\" y=\"-100%\" width=\"160%\" height=\"300%\"><feGaussianBlur stdDeviation=\"2.4\"/></filter>\n<linearGradient id=\"rd__U__\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff8a76\"/><stop offset=\".5\" stop-color=\"#e53a2f\"/><stop offset=\"1\" stop-color=\"#a81f1a\"/></linearGradient>\n<linearGradient id=\"rl__U__\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ff6f5d\"/><stop offset=\"1\" stop-color=\"#c52a22\"/></linearGradient>\n<linearGradient id=\"hd__U__\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#eef1f6\"/><stop offset=\"1\" stop-color=\"#7d8798\"/></linearGradient>\n<linearGradient id=\"gd__U__\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#fff3b0\"/><stop offset=\"1\" stop-color=\"#d9981a\"/></linearGradient></defs><ellipse cx=\"60\" cy=\"108\" rx=\"36\" ry=\"5.5\" fill=\"rgba(0,0,0,.22)\" filter=\"url(#sh__U__)\"/>\n<path d=\"M40 50V38a8 8 0 0 1 8-8h24a8 8 0 0 1 8 8v12\" fill=\"none\" stroke=\"url(#hd__U__)\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n<rect x=\"12\" y=\"48\" width=\"96\" height=\"54\" rx=\"9\" fill=\"url(#rd__U__)\"/>\n<path d=\"M12 57a9 9 0 0 1 9-9h78a9 9 0 0 1 9 9v10H12z\" fill=\"url(#rl__U__)\"/>\n<rect x=\"12\" y=\"66\" width=\"96\" height=\"3.5\" fill=\"#7d1410\" opacity=\".55\"/>\n<path d=\"M21 52h78\" stroke=\"#fff\" stroke-opacity=\".45\" stroke-width=\"2.4\" stroke-linecap=\"round\"/>\n<rect x=\"50\" y=\"62\" width=\"20\" height=\"14\" rx=\"3.5\" fill=\"url(#gd__U__)\"/><circle cx=\"60\" cy=\"69\" r=\"2.6\" fill=\"#8a5a00\"/>\n<rect x=\"19\" y=\"78\" width=\"82\" height=\"3\" rx=\"1.5\" fill=\"#fff\" opacity=\".18\"/></svg>", "wkhelmet": "<svg viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\"><defs><filter id=\"sh__U__\" x=\"-30%\" y=\"-100%\" width=\"160%\" height=\"300%\"><feGaussianBlur stdDeviation=\"2.4\"/></filter>\n<linearGradient id=\"yl__U__\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#fff08a\"/><stop offset=\".5\" stop-color=\"#ffc619\"/><stop offset=\"1\" stop-color=\"#e08a00\"/></linearGradient>\n<linearGradient id=\"yb__U__\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#ffd23a\"/><stop offset=\"1\" stop-color=\"#c97800\"/></linearGradient>\n<linearGradient id=\"rg__U__\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#ffe35c\"/><stop offset=\".5\" stop-color=\"#fff6b8\"/><stop offset=\"1\" stop-color=\"#f0a800\"/></linearGradient></defs><ellipse cx=\"60\" cy=\"108\" rx=\"36\" ry=\"5.5\" fill=\"rgba(0,0,0,.22)\" filter=\"url(#sh__U__)\"/>\n<path d=\"M18 82C18 42 36 28 60 28s42 14 42 54z\" fill=\"url(#yl__U__)\"/>\n<path d=\"M50 29h20v53H50z\" fill=\"url(#rg__U__)\"/><path d=\"M50 29h20\" stroke=\"#b86e00\" stroke-opacity=\".35\" stroke-width=\"1.6\"/>\n<path d=\"M50 29v53M70 29v53\" stroke=\"#c98200\" stroke-opacity=\".45\" stroke-width=\"1.6\"/>\n<rect x=\"9\" y=\"80\" width=\"102\" height=\"15\" rx=\"7.5\" fill=\"url(#yb__U__)\"/>\n<rect x=\"13\" y=\"82\" width=\"94\" height=\"3\" rx=\"1.5\" fill=\"#fff\" opacity=\".4\"/>\n<ellipse cx=\"36\" cy=\"49\" rx=\"9\" ry=\"5\" fill=\"#fff\" opacity=\".5\" transform=\"rotate(-32 36 49)\"/></svg>"};
+var WK_OK = {"briefcase": 1, "wallet": 1, "cash": 1, "growth": 1, "envelope": 1, "calendar": 1, "receipt": 1, "n4target": 1, "n4medal": 1, "n4calendar": 1, "n4wallet": 1, "n4cash": 1, "trophy": 1, "bars": 1};
+function wkIcoSvg(k){
+  if(WKICO_SVG[k]) return WKICO_SVG[k];
+  if(!WK_OK[k]) return undefined;
+  /* الأيقونات الجاهزة موزّعة على أكتر من مكتبة (وبتتجمّع في CAPICO_SVG بعد التحميل) فبندوّر في كلهم */
+  var libs = [];
+  try{ libs.push(CAPICO_SVG); }catch(e){} try{ libs.push(YIICO_SVG); }catch(e){} try{ libs.push(MSICO_SVG); }catch(e){} try{ libs.push(ZAKICO_SVG); }catch(e){} try{ libs.push(CAPSUB_SVG); }catch(e){}
+  for(var i = 0; i < libs.length; i++){ if(libs[i] && libs[i][k]) return libs[i][k]; }
+  return undefined;
+}
+function wkIcoKey(s){ var k = s && s.wkIcon; return wkIcoSvg(k) ? k : 'briefcase'; }
+function wkIcoApply(s){
+  s = s || settings;
+  var k = wkIcoKey(s), sc = Math.min(180, Math.max(60, Number(s && s.wkIconSize) || 100)) / 100;
+  var el = document.getElementById('wkHeroIco'); if(el && el.getAttribute('data-k') !== k){ el.innerHTML = wkIcoSvg(k).replace(/__U__/g, 'wkh'); el.setAttribute('data-k', k); }
+  var w = document.getElementById('wkHeroWrap'); if(w) w.style.setProperty('--ch-sc', String(sc));
+}
+function wkIcoRender(s){
+  s = s || settings; wkIcoApply(s);
+  var k = wkIcoKey(s), sz = Math.min(180, Math.max(60, Math.round(Number(s.wkIconSize) || 100)));
+  var r = document.getElementById('optWkIcon'); if(r) Array.prototype.forEach.call(r.children, function(c){ c.classList.toggle('active', c.getAttribute('data-val') === k); });
+  var sl = document.getElementById('wkIcoSize'); if(sl && Number(sl.value) !== sz) sl.value = sz;
+  var lb = document.getElementById('wkIcoSizeLabel'); if(lb) lb.textContent = (typeof toArabicDigits === 'function' ? toArabicDigits(sz) : sz) + '٪';
+  var pv = document.getElementById('wkIcoPrev'); if(pv && pv.getAttribute('data-k') !== k){ pv.innerHTML = wkIcoSvg(k).replace(/__U__/g, 'wkp'); pv.setAttribute('data-k', k); }
+}
+function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getElementById('wkIcoSize').value) || 100); }
+
+(function(){
+  var MON = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  var st = {y: null, m: null, form: false, edit: null, del: null, capForm: false, ck: 'a', cd: {a: '', d: '', n: ''}, capDel: null, capFrom: null}, host = null;
+  /* 8450: أيقونة «إضافة وصرف» (عملة + علامة + خضراء للإضافة وعلامة − حمراء للصرف) */
+  var AS_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><defs>'
+    + '<linearGradient id="ag__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".55" stop-color="#f6c744"/><stop offset="1" stop-color="#b97a0a"/></linearGradient>'
+    + '<linearGradient id="ap__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ee8b5"/><stop offset=".5" stop-color="#16a870"/><stop offset="1" stop-color="#0a6b49"/></linearGradient>'
+    + '<linearGradient id="am__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb4a6"/><stop offset=".5" stop-color="#e5483a"/><stop offset="1" stop-color="#9a1d12"/></linearGradient></defs>'
+    + '<ellipse cx="60" cy="112" rx="38" ry="6" fill="#000" opacity=".18"/>'
+    + '<circle cx="60" cy="68" r="34" fill="#b97a0a" stroke="#9a6204" stroke-width="2.5"/>'
+    + '<circle cx="60" cy="62" r="34" fill="url(#ag__U__)" stroke="#9a6204" stroke-width="2.5"/>'
+    + '<circle cx="60" cy="62" r="24" fill="none" stroke="#fff6cc" stroke-width="2.2"/>'
+    + '<path d="M38 50 Q60 36 82 48" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="5" stroke-linecap="round"/>'
+    + '<circle cx="92" cy="28" r="21" fill="url(#ap__U__)" stroke="#07553a" stroke-width="2.5"/>'
+    + '<path d="M92 18v20M82 28h20" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/>'
+    + '<path d="M78 20 Q86 11 96 12" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>'
+    + '<circle cx="28" cy="94" r="21" fill="url(#am__U__)" stroke="#7a130b" stroke-width="2.5"/>'
+    + '<path d="M18 94h20" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/>'
+    + '<path d="M14 86 Q22 77 32 78" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/></svg>';
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function dg(t){ return (typeof toArabicDigits === 'function') ? toArabicDigits(t) : String(t); }
+  function money(n){ n = Math.round((Number(n) || 0) * 100) / 100; return (typeof fmt === 'function') ? fmt(n) : String(n); }
+  function items(){ if(!data.work || !Array.isArray(data.work.items)) data.work = {items: []}; return data.work.items; }
+  /* 8450: حركات رأس مال العمل (إضافة k:'a' / صرف k:'o') جوه data.work.cap فبتتزامن وتدخل في النسخ الاحتياطي زي باقي عملي */
+  function capArr(){ items(); if(!Array.isArray(data.work.cap)) data.work.cap = []; return data.work.cap; }
+  function capTotal(){ var t = 0; capArr().forEach(function(x){ if(!x) return; var a = Number(x.a) || 0; t += (x.k === 'o' ? -a : a); }); return Math.round(t * 100) / 100; }
+  function capBlock(){
+    var now = capTotal(), shown = (st.capFrom != null) ? st.capFrom : now, ik = (typeof wkIcoKey === 'function') ? wkIcoKey(settings) : 'briefcase';
+    var wsv = ((typeof wkIcoSvg === 'function' && wkIcoSvg(ik)) || '').replace(/__U__/g, 'wkpg');
+    var b = '<div class="wk-cap"><div class="wk-capi">'
+      + '<div class="cap-hero-wrap"><div class="cap-hero wk-stat" role="img" aria-label="عملي"><span class="ch-stage"><span class="ch-ico">' + wsv + '</span></span><span class="ch-lbl">عملي</span></div></div>'
+      + '<div class="cap-hero-wrap"><button type="button" class="cap-hero" data-wk="capopen" aria-label="إضافة وصرف"><span class="ch-stage"><span class="ch-ico">' + AS_SVG.replace(/__U__/g, 'wkas') + '</span></span><span class="ch-lbl">إضافة وصرف</span></button></div>'
+      + '</div><div class="wk-capcard' + (shown < 0 ? ' neg' : '') + '" id="wkCapCard"><small>رأس مال العمل</small><b id="wkCapV">' + money(shown) + '</b><i class="wk-capd" id="wkCapD"></i></div></div>';
+    if(st.capForm){
+      var td = iso(new Date()), cd = st.cd, k = st.ck === 'o' ? 'o' : 'a';
+      b += '<div class="wk-form wk-cf' + (k === 'o' ? ' k-o' : '') + '"><div class="wk-kind"><button type="button" class="a' + (k === 'a' ? ' on' : '') + '" data-wk="ck" data-k="a">➕ إضافة</button><button type="button" class="o' + (k === 'o' ? ' on' : '') + '" data-wk="ck" data-k="o">➖ صرف</button></div>'
+        + '<label for="wkCA">المبلغ</label><input type="text" id="wkCA" inputmode="decimal" placeholder="0" value="' + esc(cd.a) + '">'
+        + '<label for="wkCD">التاريخ</label><input type="date" id="wkCD" value="' + esc(cd.d || td) + '">'
+        + '<label for="wkCN">ملاحظة (اختياري)</label><input type="text" id="wkCN" maxlength="160" value="' + esc(cd.n) + '">'
+        + '<div class="wk-fb"><button type="button" class="ok" data-wk="csave">💾 حفظ</button><button type="button" class="no" data-wk="ccancel">إلغاء</button></div>';
+      var lg = capArr().filter(function(x){ return x && x.d; }).sort(function(a, c){ return a.d < c.d ? 1 : (a.d > c.d ? -1 : (c.ts || 0) - (a.ts || 0)); }).slice(0, 50);
+      if(lg.length){
+        b += '<div class="wk-clog"><h4>آخر الحركات</h4>';
+        lg.forEach(function(x){
+          var o = x.k === 'o';
+          b += '<div class="wk-cl"><span class="wk-cm ' + (o ? 'o' : 'a') + '">' + (o ? '−' : '+') + money(x.a) + '</span><span class="wk-cn2">' + esc(x.n || (o ? 'صرف' : 'إضافة')) + '</span><span class="wk-cdt">' + dayTxt(x.d) + '</span>';
+          if(st.capDel === x.id){ b += '<span class="wk-q">تمسح؟</span><button type="button" class="wk-ib del" data-wk="cdelyes" data-id="' + esc(x.id) + '">أيوه</button><button type="button" class="wk-ib" data-wk="cdelno">لأ</button>'; }
+          else { b += '<button type="button" class="wk-ib del" data-wk="cdel" data-id="' + esc(x.id) + '" aria-label="مسح">🗑️</button>'; }
+          b += '</div>';
+        });
+        b += '</div>';
+      }
+      b += '</div>';
+    }
+    return b;
+  }
+  /* رأس المال بيتحرك: الرقم بيعدّ من القيمة القديمة للجديدة + وميض أخضر (إضافة) / أحمر (صرف) + شريحة بالفرق */
+  function animCap(from, to){
+    var el = $('wkCapV'), card = $('wkCapCard'), chip = $('wkCapD'); if(!el || from === to) return;
+    var up = to > from;
+    if(card){ card.classList.remove('up', 'down'); void card.offsetWidth; card.classList.add(up ? 'up' : 'down'); setTimeout(function(){ if(card) card.classList.remove('up', 'down'); }, 1200); }
+    if(chip){ chip.textContent = (up ? '+' : '−') + money(Math.abs(to - from)); chip.className = 'wk-capd show ' + (up ? 'u' : 'd'); }
+    var reduce = false; try{ reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+    function fin(){ el.textContent = money(to); if(card) card.classList.toggle('neg', to < 0); }
+    if(reduce){ fin(); return; }
+    var t0 = null, dur = 750;
+    (function step(t){
+      if(!document.body.contains(el)) return;
+      if(t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / dur); k = 1 - Math.pow(1 - k, 3);
+      var cur = from + (to - from) * k; if(Math.abs(to - from) >= 20) cur = Math.round(cur);   // أثناء العدّ أرقام صحيحة، والرقم النهائي بالظبط
+      el.textContent = money(cur);
+      if(k < 1) requestAnimationFrame(step); else fin();
+    })(performance.now());
+    if(card) card.classList.toggle('neg', to < 0);
+  }
+  function capChanged(from){ st.capFrom = from; try{ save(); }catch(e){ console.error(e); } render(); try{ $('wkOverlay').querySelector('.modal-box').scrollTo({top: 0, behavior: 'smooth'}); }catch(e){} }
+  function iso(d){ var m = d.getMonth() + 1, dd = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (dd < 10 ? '0' : '') + dd; }
+  function parseNum(v){ var s = String(v || '').replace(/[٠-٩]/g, function(d){ return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); }).replace(/٫/g, '.').replace(/[^\d.]/g, ''); var n = parseFloat(s); return isNaN(n) ? 0 : n; }
+  function toast(m, ok){ try{ if(typeof showToast === 'function') showToast(m, ok); }catch(e){} }
+  function inMonth(x){ return x && x.d && +x.d.slice(0, 4) === st.y && (+x.d.slice(5, 7) - 1) === st.m; }
+  function dayTxt(d){ var p = String(d).split('-'); return dg(p[2] + '/' + p[1] + '/' + p[0]); }
+  function render(){
+    if(!host) host = $('wkHost'); if(!host) return;
+    var all = items(), mi = all.filter(inMonth).sort(function(a, b){ return a.d < b.d ? 1 : (a.d > b.d ? -1 : (b.ts || 0) - (a.ts || 0)); });
+    var tot = 0, paid = 0, yr = 0;
+    mi.forEach(function(x){ tot += +x.a || 0; if(x.p) paid += +x.a || 0; });
+    all.forEach(function(x){ if(x && x.d && +x.d.slice(0, 4) === st.y) yr += +x.a || 0; });
+    var h = '<div class="wk-mnav"><button type="button" data-wk="prev" aria-label="الشهر اللي قبله">›</button><div class="wk-mt">' + MON[st.m] + ' ' + dg(st.y) + '</div><button type="button" data-wk="next" aria-label="الشهر اللي بعده">‹</button></div>';
+    h += capBlock();
+    h += '<div class="wk-sum"><div class="wk-box"><small>دخل الشهر</small><b>' + money(tot) + '</b></div><div class="wk-box g"><small>اتقبض</small><b>' + money(paid) + '</b></div><div class="wk-box o"><small>لسه مستحق</small><b>' + money(tot - paid) + '</b></div></div>';
+    h += '<div class="wk-year">إجمالي دخل ' + dg(st.y) + ' من الشغل: <b>' + money(yr) + '</b></div>';
+    if(st.form){
+      var e = st.edit ? all.filter(function(x){ return x.id === st.edit; })[0] : null;
+      var td = new Date(), def = (td.getFullYear() === st.y && td.getMonth() === st.m) ? iso(td) : (st.y + '-' + (st.m + 1 < 10 ? '0' : '') + (st.m + 1) + '-01');
+      h += '<div class="wk-form"><label for="wkT">الشغل / المهمة</label><input type="text" id="wkT" maxlength="80" placeholder="مثال: تصميم شعار لعميل" value="' + esc(e ? e.t : '') + '">'
+        + '<label for="wkA">المبلغ</label><input type="text" id="wkA" inputmode="decimal" placeholder="0" value="' + (e ? esc(e.a) : '') + '">'
+        + '<label for="wkD">التاريخ</label><input type="date" id="wkD" value="' + esc(e ? e.d : def) + '">'
+        + '<label for="wkN">ملاحظة (اختياري)</label><input type="text" id="wkN" maxlength="160" value="' + esc(e ? e.n : '') + '">'
+        + '<label class="wk-chk"><input type="checkbox" id="wkP"' + (e ? (e.p ? ' checked' : '') : '') + '> اتقبض المبلغ</label>'
+        + '<div class="wk-fb"><button type="button" class="ok" data-wk="save">' + (e ? '💾 حفظ التعديل' : '💾 حفظ') + '</button><button type="button" class="no" data-wk="cancel">إلغاء</button></div></div>';
+    }else{
+      h += '<button type="button" class="wk-add" data-wk="new">＋ تسجيل شغل جديد</button>';
+    }
+    if(!mi.length){ h += '<div class="wk-empty">مفيش شغل متسجّل في الشهر ده.<br>دوس «تسجيل شغل جديد» وسجّل شغلك ودخلك منه.</div>'; }
+    mi.forEach(function(x){
+      h += '<div class="wk-row"><div class="wk-r1"><span class="wk-t">' + esc(x.t || 'شغل') + '</span><span class="wk-a">' + money(x.a) + '</span></div>'
+        + '<div class="wk-r2"><span>' + dayTxt(x.d) + '</span><button type="button" class="wk-st ' + (x.p ? 'p' : 'u') + '" data-wk="tog" data-id="' + esc(x.id) + '">' + (x.p ? '✅ اتقبض' : '⏳ لسه') + '</button><span class="wk-sp"></span>';
+      if(st.del === x.id){ h += '<span class="wk-q">تمسح؟</span><button type="button" class="wk-ib del" data-wk="delyes" data-id="' + esc(x.id) + '">أيوه</button><button type="button" class="wk-ib" data-wk="delno">لأ</button>'; }
+      else { h += '<button type="button" class="wk-ib" data-wk="edit" data-id="' + esc(x.id) + '" aria-label="تعديل">✏️</button><button type="button" class="wk-ib del" data-wk="del" data-id="' + esc(x.id) + '" aria-label="مسح">🗑️</button>'; }
+      h += '</div>' + (x.n ? '<div class="wk-n">' + esc(x.n) + '</div>' : '') + '</div>';
+    });
+    host.innerHTML = h;
+    if(st.capFrom != null){ var cf = st.capFrom; st.capFrom = null; animCap(cf, capTotal()); }
+  }
+  function commit(){ try{ save(); }catch(e){ console.error(e); } render(); }
+  function onClick(ev){
+    var b = ev.target.closest ? ev.target.closest('[data-wk]') : null; if(!b || !host || !host.contains(b)) return;
+    var a = b.getAttribute('data-wk'), id = b.getAttribute('data-id');
+    /* 8450: إضافة / صرف رأس مال العمل */
+    if(a === 'capopen'){
+      if(st.capForm){ st.capForm = false; st.capDel = null; render(); return; }
+      st.capForm = true; st.ck = 'a'; st.cd = {a: '', d: iso(new Date()), n: ''}; st.capDel = null; st.form = false; st.edit = null; st.del = null; render();
+      try{ var cfm = host.querySelector('.wk-cf'); if(cfm) cfm.scrollIntoView({behavior: 'smooth', block: 'nearest'}); $('wkCA').focus({preventScroll: true}); }catch(e){}
+      return;
+    }
+    if(a === 'ck'){
+      st.ck = b.getAttribute('data-k') === 'o' ? 'o' : 'a';
+      var cf2 = host.querySelector('.wk-cf'); if(cf2) cf2.classList.toggle('k-o', st.ck === 'o');
+      Array.prototype.forEach.call(host.querySelectorAll('[data-wk="ck"]'), function(x){ x.classList.toggle('on', x.getAttribute('data-k') === st.ck); });
+      return;
+    }
+    if(a === 'ccancel'){ st.capForm = false; st.capDel = null; render(); return; }
+    if(a === 'cdel'){ st.capDel = id; render(); return; }
+    if(a === 'cdelno'){ st.capDel = null; render(); return; }
+    if(a === 'cdelyes'){
+      var ca = capArr(), ci = ca.findIndex(function(x){ return x && x.id === id; }), cfrom = capTotal();
+      if(ci > -1) ca.splice(ci, 1);
+      st.capDel = null; capChanged(cfrom); toast('اتمسح ✅', true); return;
+    }
+    if(a === 'csave'){
+      var camt = parseNum($('wkCA').value), cdt = $('wkCD').value;
+      if(!(camt > 0)){ toast('اكتب المبلغ', false); return; }
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(cdt)){ toast('اختار التاريخ', false); return; }
+      var cfrom2 = capTotal(), isOut = st.ck === 'o';
+      capArr().push({id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), k: isOut ? 'o' : 'a', a: camt, d: cdt, n: $('wkCN').value.trim(), ts: Date.now()});
+      st.capForm = false; st.capDel = null; st.cd = {a: '', d: '', n: ''};
+      capChanged(cfrom2); toast(isOut ? 'اتصرف ✅' : 'اتضاف ✅', true); return;
+    }
+    if(a === 'prev' || a === 'next'){ st.m += (a === 'next' ? 1 : -1); if(st.m < 0){ st.m = 11; st.y--; } if(st.m > 11){ st.m = 0; st.y++; } st.form = false; st.edit = null; st.del = null; render(); return; }
+    if(a === 'new'){ st.form = true; st.edit = null; st.del = null; st.capForm = false; st.capDel = null; render(); try{ $('wkT').focus(); }catch(e){} return; }
+    if(a === 'cancel'){ st.form = false; st.edit = null; render(); return; }
+    if(a === 'edit'){ st.form = true; st.edit = id; st.del = null; st.capForm = false; st.capDel = null; render(); try{ host.querySelector('.wk-form').scrollIntoView({block: 'nearest'}); }catch(e){} return; }
+    if(a === 'del'){ st.del = id; render(); return; }
+    if(a === 'delno'){ st.del = null; render(); return; }
+    if(a === 'delyes'){ var arr = items(), i = arr.findIndex(function(x){ return x.id === id; }); if(i > -1) arr.splice(i, 1); st.del = null; commit(); toast('اتمسح ✅', true); return; }
+    if(a === 'tog'){ var it = items().filter(function(x){ return x.id === id; })[0]; if(it){ it.p = it.p ? 0 : 1; commit(); } return; }
+    if(a === 'save'){
+      var amt = parseNum($('wkA').value), d = $('wkD').value;
+      if(!(amt > 0)){ toast('اكتب المبلغ', false); return; }
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ toast('اختار التاريخ', false); return; }
+      var rec = {t: $('wkT').value.trim() || 'شغل', a: amt, d: d, n: $('wkN').value.trim(), p: $('wkP').checked ? 1 : 0}, arr2 = items();
+      if(st.edit){ var o = arr2.filter(function(x){ return x.id === st.edit; })[0]; if(o){ o.t = rec.t; o.a = rec.a; o.d = rec.d; o.n = rec.n; o.p = rec.p; } }
+      else { rec.id = 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); rec.ts = Date.now(); arr2.push(rec); }
+      st.y = +d.slice(0, 4); st.m = +d.slice(5, 7) - 1; st.form = false; st.edit = null;
+      commit(); toast('اتحفظ ✅', true);
+    }
+  }
+  window.openWkHero = function(){
+    host = $('wkHost'); if(!host) return;
+    if(st.y === null){ var n = new Date(); st.y = n.getFullYear(); st.m = n.getMonth(); }
+    if(!host._wk){
+      host.addEventListener('click', onClick);
+      /* حفظ اللي اتكتب في خانات إضافة/صرف عشان ما يضيعش لو الصفحة اتعاد رسمها (مثلًا عند تأكيد مسح حركة) */
+      host.addEventListener('input', function(ev){ var t = ev.target; if(!t || !t.id) return; if(t.id === 'wkCA') st.cd.a = t.value; else if(t.id === 'wkCD') st.cd.d = t.value; else if(t.id === 'wkCN') st.cd.n = t.value; });
+      host._wk = 1;
+    }
+    st.form = false; st.edit = null; st.del = null; st.capForm = false; st.capDel = null; st.capFrom = null; render();
+    $('wkOverlay').classList.add('open');
+  };
+  window.closeWkHero = function(){ var o = $('wkOverlay'); if(o) o.classList.remove('open'); };
+  window.wkRender = function(){ var o = $('wkOverlay'); if(o && o.classList.contains('open')) render(); };
+})();
+try{ wkIcoApply(settings); }catch(e){}
+</script>
+
+<script>
 /* 8286: مربعات الأيقونات — دوس على أي مربع تظهر كل الأيقونات (مكتبة واحدة من غير تكرار) */
 (function(){
   try{
@@ -17044,9 +17363,10 @@ body.kb-open .fab{display:none !important;}
     {key:'zakIcon',   n:'الزكاة',            d:'mosque', f:function(k){ return zakIcoSvg(k); }},
     {key:'donIcon',   n:'التبرعات والصدقات', d:'heart',  f:function(k){ return zakIcoSvg(k); }},
     {key:'msIcon',    n:'المصروفات الشهرية', d:'cash',   f:function(k){ return msIcoSvg(k); }},
-    {key:'yiIcon',    n:'التقارير',          d:'growth', f:function(k){ return yiIcoSvg(k); }}
+    {key:'yiIcon',    n:'التقارير',          d:'growth', f:function(k){ return yiIcoSvg(k); }},
+    {key:'wkIcon',    n:'عملي',              d:'briefcase', f:function(k){ return (typeof wkIcoSvg === 'function') ? wkIcoSvg(k) : ''; }}
   ];
-  var ALL = [['bag','كيس نقود'],['bank','مبنى البنك'],['coins','مجموعة نقود'],['btc','بيتكوين'],['cash','فلوس'],['wallet','محفظة'],['pound','جنيه ذهب'],['bar','سبيكة ذهب'],['piggy','حصالة'],['envelope','ظرف الراتب'],['briefcase','حقيبة عمل'],['growth','نمو الدخل'],['tree','شجرة الدخل'],['calendar','تقويم شهري'],['cart','عربة مصاريف'],['receipt','فاتورة'],['mosque','جامع ذهبي'],['moon','هلال ونجمة'],['lantern','فانوس'],['heart','قلب الصدقة'],['quran','مصحف'],
+  var ALL = [['wklaptop','لابتوب شغل'],['wktools','عدّة شغل'],['wkhelmet','خوذة عمل'],['bag','كيس نقود'],['bank','مبنى البنك'],['coins','مجموعة نقود'],['btc','بيتكوين'],['cash','فلوس'],['wallet','محفظة'],['pound','جنيه ذهب'],['bar','سبيكة ذهب'],['piggy','حصالة'],['envelope','ظرف الراتب'],['briefcase','حقيبة عمل'],['growth','نمو الدخل'],['tree','شجرة الدخل'],['calendar','تقويم شهري'],['cart','عربة مصاريف'],['receipt','فاتورة'],['mosque','جامع ذهبي'],['moon','هلال ونجمة'],['lantern','فانوس'],['heart','قلب الصدقة'],['quran','مصحف'],
     ['n4safe','خزنة 4D'],['n4wallet','محفظة 4D'],['n4cash','فلوس 4D'],['n4coin','عملة ذهبية 4D'],['n4goldbar','سبيكة 4D'],['n4piggy','حصالة 4D'],['n4bag','شنطة تسوق 4D'],['n4cart','عربة 4D'],['n4receipt','فاتورة 4D'],['n4calendar','تقويم 4D'],['n4target','هدف 4D'],['n4tree','شجرة فلوس 4D'],['n4medal','ميدالية 4D'],['n4crescent','هلال 4D'],['n4lantern','فانوس 4D'],['n4heart','قلب 4D'],['n4gift','هدية 4D'],['n4mosque','مسجد 4D']];
   var _open = null, _uc = 0;
   function cur(s){ return s || (typeof _draftSettings !== 'undefined' && _draftSettings) || settings; }
