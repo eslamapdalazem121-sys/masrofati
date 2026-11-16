@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-16.8454">
+<meta name="app-version" content="2026-11-16.8455">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -3942,7 +3942,15 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 .wk-vfrow .wk-acc-bal{flex-direction:column;align-items:center;gap:2px;width:100%;padding:8px}
 .wk-vfrow .wk-acc-bal b{font-size:calc(clamp(17px,5.4vw,24px) * var(--fs,1))}
 .wk-vfrow .wk-acc-btn{padding:10px 6px;font-size:calc(13px * var(--fs,1));width:100%}
-.wk-vsw{margin-bottom:8px}
+.wk-asw{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}
+.wk-asw button{border:2px solid var(--border);border-radius:14px;padding:8px 6px;font:inherit;font-weight:800;background:var(--bg2);color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.wk-asw button small{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk-asw button.on{border-color:#16a870;background:rgba(22,168,112,.14)}
+.wk-xf select{width:100%;box-sizing:border-box;padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font:inherit}
+.wk-xsw{display:block;margin:8px auto 0;border:0;border-radius:12px;padding:7px 16px;font:inherit;font-weight:900;background:var(--bg2);color:var(--text);cursor:pointer}
+.wk-capi{display:grid !important;grid-template-columns:1fr 1fr;justify-items:center;gap:0 4px}
+.wk-capi > .cap-hero-wrap:first-child{grid-column:1 / -1}
+.wk-capi > .cap-hero-wrap:not(:first-child){--ch-sc:.5}
 .wk-acc{position:relative;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:14px 20px 14px 14px;box-shadow:var(--shadow),0 5px 0 rgba(143,0,0,.18);overflow:hidden}
 .wk-acc::before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:0;width:9px;background:linear-gradient(180deg,#ff7a7a,#b00000)}
 .wk-acc{padding-inline-start:22px}
@@ -17194,6 +17202,15 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
   var MON = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   var st = {y: null, m: null, form: false, edit: null, del: null, capForm: false, ck: 'a', cd: {a: '', d: '', n: ''}, capDel: null, capFrom: null, pick: false, sig: '', csig: '', shown: 0}, host = null, pollT = null;
   /* 8450: أيقونة «إضافة وصرف» (عملة + علامة + خضراء للإضافة وعلامة − حمراء للصرف) */
+  var XF_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><defs>'
+    + '<linearGradient id="xg__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".55" stop-color="#f6c744"/><stop offset="1" stop-color="#b97a0a"/></linearGradient>'
+    + '<linearGradient id="xb__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fd0ff"/><stop offset=".5" stop-color="#2a8be0"/><stop offset="1" stop-color="#0b4f99"/></linearGradient></defs>'
+    + '<ellipse cx="60" cy="112" rx="38" ry="6" fill="#000" opacity=".18"/>'
+    + '<circle cx="60" cy="66" r="36" fill="#b97a0a" stroke="#9a6204" stroke-width="2.5"/>'
+    + '<circle cx="60" cy="60" r="36" fill="url(#xg__U__)" stroke="#9a6204" stroke-width="2.5"/>'
+    + '<path d="M30 50h46M66 38l14 12-14 12" fill="none" stroke="url(#xb__U__)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '<path d="M90 72H44M54 60L40 72l14 12" fill="none" stroke="#e5483a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '</svg>';
   var AS_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><defs>'
     + '<linearGradient id="ag__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".55" stop-color="#f6c744"/><stop offset="1" stop-color="#b97a0a"/></linearGradient>'
     + '<linearGradient id="ap__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ee8b5"/><stop offset=".5" stop-color="#16a870"/><stop offset="1" stop-color="#0a6b49"/></linearGradient>'
@@ -17216,7 +17233,7 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
   function items(){ if(!data.work) data.work = {}; if(!Array.isArray(data.work.items)) data.work.items = []; return data.work.items; }
   /* 8451: رأس مال العمل = المبلغ المباشر (إضافة/صرف) + حساب فودافون كاش (مستقل عن البنك) + رصيد الحساب الفرعي المربوط من صفحة أموال.
      الحركات المباشرة جوه data.work.cap، وفودافون كاش جوه data.work.vf (إضافة k:'a' / صرف k:'o')، والربط بالحساب الفرعي مرجع (data.work.link.id) مش نسخة بيانات، فمفيش حاجة تتفرّق. */
-  function led(t){ items(); var k = (t === 'vf2') ? 'vf2' : 'vf'; if(!Array.isArray(data.work[k])) data.work[k] = []; return data.work[k]; }
+  function led(t){ items(); var k = (t === 'vf2') ? 'vf2' : (t === 'cap' ? 'cap' : (t === 'sub' ? 'sub' : 'vf')); if(!Array.isArray(data.work[k])) data.work[k] = []; return data.work[k]; }
   function ledTotal(t){ var s0 = 0; led(t).forEach(function(x){ if(!x) return; var a1 = Number(x.a) || 0; s0 += (x.k === 'o' ? -a1 : a1); }); return Math.round(s0 * 100) / 100; }
   function nrm(t){ return String(t == null ? '' : t).toLowerCase().replace(/[ً-ٰٟـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ''); }
   function isAaib(z){ var t = nrm((z.bank || '') + ' ' + (z.name || '') + ' ' + (z.accName || '')); return (t.indexOf('العربي') > -1 && t.indexOf('افريقي') > -1) || t.indexOf('aaib') > -1; }
@@ -17233,16 +17250,62 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
     if(c.length === 1){ w.link = {id: c[0].id}; try{ save(); }catch(e){} }
   }
   function candSig(){ var c = aaibSubs(), l = c.length ? c : subsList(); return l.map(function(z){ return z.id + ':' + (Number(z.amount) || 0) + ':' + (z.name || ''); }).join('|'); }
-  function capTotal(){ var o = origSub(); return Math.round((ledTotal('vf') + ledTotal('vf2') + (o ? (Number(o.amount) || 0) : 0)) * 100) / 100; }
-  function partsTxt(){ var o = origSub(), p = ['فودافون ' + money(ledTotal('vf')), 'فودافون ٢ ' + money(ledTotal('vf2'))]; if(o) p.push('الفرعي ' + money(Number(o.amount) || 0)); return p.join(' · '); }
+  function capTotal(){ var o = origSub(); return Math.round((ledTotal('cap') + ledTotal('vf') + ledTotal('vf2') + (o ? (Number(o.amount) || 0) : 0)) * 100) / 100; }
+  /* 8455: أربع حسابات داخل رأس المال: فودافون كاش، فودافون كاش ٢، الحساب الفرعي (مربوط بصفحة أموال)، ورأس المال العمل المباشر. إضافة/صرف/تحويل بينهم */
+  var ACC = {vf: 'فودافون كاش', vf2: 'فودافون كاش ٢', sub: 'الحساب الفرعي', cap: 'رأس المال العمل'};
+  var ACC_ORDER = ['vf', 'vf2', 'sub', 'cap'];
+  function wkId(){ return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function accBal(t){ if(t === 'sub'){ var o = origSub(); return o ? (Number(o.amount) || 0) : 0; } return ledTotal(t); }
+  function subIsBank(o){ try{ return capSubOf(o) === 'bank'; }catch(e){ return false; } }
+  function subRound(o, v){ try{ return subIsBank(o) ? cgInt(v) : cgRound(v); }catch(e){ return Math.round(v * 100) / 100; } }
+  /* تحريك حساب واحد: بيرجّع نص الخطأ لو مينفعش، أو '' لو تمام */
+  function pushMove(t, k, amt, date, note, xid){
+    var out = (k === 'o'), e = {id: wkId(), k: out ? 'o' : 'a', a: amt, d: date, n: note || '', ts: Date.now()};
+    if(xid) e.x = xid;
+    if(t === 'sub'){
+      var o = origSub(); if(!o) return 'الحساب الفرعي مش مربوط لسه';
+      var bal = Number(o.amount) || 0;
+      if(out && amt > bal + 0.001) return 'المبلغ أكبر من رصيد الحساب الفرعي (' + money(bal) + ')';
+      o.amount = subRound(o, bal + (out ? -amt : amt));
+      if(subIsBank(o)){ if(!Array.isArray(o.chg)) o.chg = []; o.chg.push({id: e.id, t: new Date(date + 'T12:00:00').getTime(), delta: out ? -amt : amt, xf: 1}); }
+    }
+    led(t).push(e); return '';
+  }
+  /* مسح حركة (ولو تحويل بيمسح الطرفين). بيرجّع خطأ لو الرجوع هيخلّي رصيد سالب في الفرعي */
+  function dropMove(t, id){
+    var arr = led(t), e = arr.filter(function(x){ return x && x.id === id; })[0]; if(!e) return '';
+    var legs = [];
+    if(e.x){ ACC_ORDER.forEach(function(tt){ led(tt).forEach(function(x){ if(x && x.x === e.x) legs.push({t: tt, e: x}); }); }); }
+    else legs.push({t: t, e: e});
+    var o = origSub(), subDelta = 0;
+    legs.forEach(function(l){ if(l.t === 'sub') subDelta += (l.e.k === 'o' ? Number(l.e.a) : -Number(l.e.a)); });
+    if(subDelta !== 0){ if(!o) return 'الحساب الفرعي مش مربوط'; if((Number(o.amount) || 0) + subDelta < -0.001) return 'رصيد الحساب الفرعي أقل من المبلغ — اتصرف منه بعد الحركة، فمينفعش تتمسح'; }
+    legs.forEach(function(l){
+      var a2 = led(l.t), ix = a2.indexOf(l.e); if(ix > -1) a2.splice(ix, 1);
+      if(l.t === 'sub' && o){ o.amount = subRound(o, (Number(o.amount) || 0) + (l.e.k === 'o' ? Number(l.e.a) : -Number(l.e.a))); if(Array.isArray(o.chg)) o.chg = o.chg.filter(function(c){ return !(c && c.id === l.e.id); }); }
+    });
+    return '';
+  }
+  function doTransfer(from, to, amt, date, note){
+    if(from === to) return 'اختار حسابين مختلفين';
+    if(amt > accBal(from) + 0.001) return 'المبلغ أكبر من رصيد «' + ACC[from] + '» (' + money(accBal(from)) + ')';
+    if((from === 'sub' || to === 'sub') && !origSub()) return 'الحساب الفرعي مش مربوط لسه';
+    var xid = 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    var er = pushMove(from, 'o', amt, date, 'تحويل إلى ' + ACC[to] + (note ? ' · ' + note : ''), xid); if(er) return er;
+    er = pushMove(to, 'a', amt, date, 'تحويل من ' + ACC[from] + (note ? ' · ' + note : ''), xid);
+    if(er){ dropMove(from, led(from).filter(function(x){ return x && x.x === xid; })[0].id); return er; }
+    return '';
+  }
+  function partsTxt(){ var o = origSub(), p = ['المباشر ' + money(ledTotal('cap')), 'فودافون ' + money(ledTotal('vf')), 'فودافون ٢ ' + money(ledTotal('vf2'))]; if(o) p.push('الفرعي ' + money(Number(o.amount) || 0)); return p.join(' · '); }
   /* 8450: أيقونة «إضافة وصرف» (عملة + علامة + خضراء للإضافة وعلامة − حمراء للصرف) — الرسمة في AS_SVG فوق */
   function panelHtml(t){
     var td = iso(new Date()), cd = st.cd, k = st.ck === 'o' ? 'o' : 'a';
-    var b = '<div class="wk-form wk-cf' + (k === 'o' ? ' k-o' : '') + '"><div class="wk-cft">' + (t === 'vf2' ? '📱 فودافون كاش ٢' : '📱 فودافون كاش') + '</div>' + (st.hero ? '<div class="wk-kind wk-vsw"><button type="button" class="a' + (t !== 'vf2' ? ' on' : '') + '" data-wk="cacc" data-t="vf">📱 فودافون كاش</button><button type="button" class="a' + (t === 'vf2' ? ' on' : '') + '" data-wk="cacc" data-t="vf2">📱 فودافون كاش ٢</button></div>' : '') + '<div class="wk-kind"><button type="button" class="a' + (k === 'a' ? ' on' : '') + '" data-wk="ck" data-k="a">➕ إضافة</button><button type="button" class="o' + (k === 'o' ? ' on' : '') + '" data-wk="ck" data-k="o">➖ صرف</button></div>'
+    var b = '<div class="wk-form wk-cf' + (k === 'o' ? ' k-o' : '') + '"><div class="wk-cft">' + (t === 'sub' ? '🗂 الحساب الفرعي' : (t === 'cap' ? '💼 رأس المال العمل' : (t === 'vf2' ? '📱 فودافون كاش ٢' : '📱 فودافون كاش'))) + '</div>' + (st.hero ? '<div class="wk-asw">' + ACC_ORDER.map(function(z){ return '<button type="button" class="' + (t === z ? 'on' : '') + '" data-wk="cacc" data-t="' + z + '"><span>' + (z === 'sub' ? '🗂 ' : (z === 'cap' ? '💼 ' : '📱 ')) + ACC[z] + '</span><small>' + money(accBal(z)) + '</small></button>'; }).join('') + '</div>' : '') + '<div class="wk-kind"><button type="button" class="a' + (k === 'a' ? ' on' : '') + '" data-wk="ck" data-k="a">➕ إضافة</button><button type="button" class="o' + (k === 'o' ? ' on' : '') + '" data-wk="ck" data-k="o">➖ صرف</button></div>'
       + '<label for="wkCA">المبلغ</label><input type="text" id="wkCA" inputmode="decimal" placeholder="0" value="' + esc(cd.a) + '">'
       + '<label for="wkCD">التاريخ</label><input type="date" id="wkCD" value="' + esc(cd.d || td) + '">'
       + '<label for="wkCN">ملاحظة (اختياري)</label><input type="text" id="wkCN" maxlength="160" value="' + esc(cd.n) + '">'
       + '<div class="wk-fb"><button type="button" class="ok" data-wk="csave">💾 حفظ</button><button type="button" class="no" data-wk="ccancel">إلغاء</button></div>';
+    if(t === 'sub' && !origSub()) return '<div class="wk-form wk-cf"><div class="wk-cft">🗂 الحساب الفرعي</div>' + (st.hero ? '<div class="wk-asw">' + ACC_ORDER.map(function(z){ return '<button type="button" class="' + (t === z ? 'on' : '') + '" data-wk="cacc" data-t="' + z + '"><span>' + (z === 'sub' ? '🗂 ' : (z === 'cap' ? '💼 ' : '📱 ')) + ACC[z] + '</span><small>' + money(accBal(z)) + '</small></button>'; }).join('') + '</div>' : '') + '<div class="wk-empty" style="padding:10px 6px">الحساب الفرعي مش مربوط لسه — اختاره من الأسفل الأول.</div></div>';
     var lg = led(t).filter(function(x){ return x && x.d; }).sort(function(a, c){ return a.d < c.d ? 1 : (a.d > c.d ? -1 : (c.ts || 0) - (a.ts || 0)); }).slice(0, 50);
     if(lg.length){
       b += '<div class="wk-clog"><h4>آخر الحركات</h4>';
@@ -17257,6 +17320,19 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
     }
     return b + '</div>';
   }
+  function xfHtml(){
+    var d = st.xfd || (st.xfd = {from: 'vf', to: 'vf2', a: '', d: '', n: ''}), td = iso(new Date());
+    function sel(id, cur){ return '<select id="' + id + '">' + ACC_ORDER.map(function(z){ return '<option value="' + z + '"' + (cur === z ? ' selected' : '') + '>' + ACC[z] + ' — ' + money(accBal(z)) + '</option>'; }).join('') + '</select>'; }
+    return '<div class="wk-form wk-cf wk-xf"><div class="wk-cft">🔁 تحويل بين الحسابات</div>'
+      + '<label for="wkXF">من</label>' + sel('wkXF', d.from)
+      + '<button type="button" class="wk-xsw" data-wk="xfswap" aria-label="عكس">⇅ عكس</button>'
+      + '<label for="wkXT">إلى</label>' + sel('wkXT', d.to)
+      + '<label for="wkXA">المبلغ</label><input type="text" id="wkXA" inputmode="decimal" placeholder="0" value="' + esc(d.a) + '">'
+      + '<label for="wkXD">التاريخ</label><input type="date" id="wkXD" value="' + esc(d.d || td) + '">'
+      + '<label for="wkXN">ملاحظة (اختياري)</label><input type="text" id="wkXN" maxlength="160" value="' + esc(d.n) + '">'
+      + '<div class="wk-fb"><button type="button" class="ok" data-wk="xfsave">💾 تحويل</button><button type="button" class="no" data-wk="xfcancel">إلغاء</button></div></div>';
+  }
+  function xfRead(){ var g = function(i){ var e = $(i); return e ? e.value : ''; }; st.xfd = {from: g('wkXF') || 'vf', to: g('wkXT') || 'vf2', a: g('wkXA'), d: g('wkXD'), n: g('wkXN')}; return st.xfd; }
   function pickerHtml(){
     var c = aaibSubs(), list = c.length ? c : subsList(), h = '<div class="wk-pick">';
     if(!list.length) return h + '<div class="wk-empty" style="padding:14px 6px">مفيش حساب فرعي في صفحة أموال لسه.<br>اعمل حساب فرعي تحت حساب العربي الأفريقي من صفحة أموال وهتظهر نسخة منه هنا لوحدها.</div></div>';
@@ -17287,8 +17363,10 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
     var b = '<div class="wk-cap"><div class="wk-capi">'
       + '<div class="cap-hero-wrap"><div class="cap-hero wk-stat" role="img" aria-label="عملي"><span class="ch-stage"><span class="ch-ico">' + wsv + '</span></span><span class="ch-lbl">عملي</span></div></div>'
       + '<div class="cap-hero-wrap"><button type="button" class="cap-hero" data-wk="capopen" data-t="hero" aria-label="إضافة وصرف"><span class="ch-stage"><span class="ch-ico">' + AS_SVG.replace(/__U__/g, 'wkas') + '</span></span><span class="ch-lbl">إضافة وصرف</span></button></div>'
+      + '<div class="cap-hero-wrap"><button type="button" class="cap-hero" data-wk="xfopen" aria-label="تحويل"><span class="ch-stage"><span class="ch-ico">' + XF_SVG.replace(/__U__/g, 'wkxf') + '</span></span><span class="ch-lbl">تحويل</span></button></div>'
       + '</div><div class="wk-capcard' + (shown < 0 ? ' neg' : '') + '" id="wkCapCard"><small>رأس مال العمل</small><b id="wkCapV">' + money(shown) + '</b><span class="wk-cparts" id="wkCParts">' + esc(partsTxt()) + '</span><i class="wk-capd" id="wkCapD"></i></div></div>';
     if(st.hero && st.capForm) b += panelHtml(st.capForm);
+    if(st.xf) b += xfHtml();
     return b + acctBlock();
   }
   /* بطاقة الحساب الفرعي: نفس بطاقة صفحة أموال بالظبط (mcCard) من نفس البند، فهي مربوطة بالأصل مش نسخة منفصلة */
@@ -17390,13 +17468,24 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
     var a = b.getAttribute('data-wk'), id = b.getAttribute('data-id');
     /* 8450: إضافة / صرف رأس مال العمل */
     if(a === 'capopen'){
-      var dt = b.getAttribute('data-t'), tg = dt === 'vf2' ? 'vf2' : 'vf', hr = dt === 'hero';
+      var dt = b.getAttribute('data-t'), tg = dt === 'vf2' ? 'vf2' : 'vf', hr = dt === 'hero'; if(hr){ tg = 'vf'; }
       if(st.capForm && (hr ? st.hero : (st.capForm === tg && !st.hero))){ st.capForm = false; st.hero = false; st.capDel = null; render(); return; }
-      st.hero = hr; st.capForm = tg; st.ck = 'a'; st.cd = {a: '', d: iso(new Date()), n: ''}; st.capDel = null; st.form = false; st.edit = null; st.del = null; render();
+      st.xf = false; st.hero = hr; st.capForm = hr ? ((dt === 'hero' && st.capForm) ? st.capForm : 'vf') : tg; st.ck = 'a'; st.cd = {a: '', d: iso(new Date()), n: ''}; st.capDel = null; st.form = false; st.edit = null; st.del = null; render();
       try{ var cfm = host.querySelector('.wk-cf'); if(cfm) cfm.scrollIntoView({behavior: 'smooth', block: 'nearest'}); $('wkCA').focus({preventScroll: true}); }catch(e){}
       return;
     }
-    if(a === 'cacc'){ st.capForm = b.getAttribute('data-t') === 'vf2' ? 'vf2' : 'vf'; st.capDel = null; var ca0 = $('wkCA'), cn0 = $('wkCN'), cd0 = $('wkCD'); if(ca0) st.cd.a = ca0.value; if(cn0) st.cd.n = cn0.value; if(cd0) st.cd.d = cd0.value; render(); return; }
+    if(a === 'xfopen'){ if(st.xf){ st.xf = false; render(); return; } st.xf = true; st.capForm = false; st.hero = false; st.capDel = null; st.form = false; st.edit = null; st.del = null; st.xfd = {from: 'vf', to: 'vf2', a: '', d: '', n: ''}; render(); try{ var xe = host.querySelector('.wk-xf'); if(xe) xe.scrollIntoView({behavior: 'smooth', block: 'nearest'}); $('wkXA').focus({preventScroll: true}); }catch(e){} return; }
+    if(a === 'xfcancel'){ st.xf = false; render(); return; }
+    if(a === 'xfswap'){ var xd = xfRead(), tmp = xd.from; xd.from = xd.to; xd.to = tmp; render(); return; }
+    if(a === 'xfsave'){
+      var xv = xfRead(), xamt = parseNum(xv.a);
+      if(!(xamt > 0)){ toast('اكتب المبلغ', false); return; }
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(xv.d)){ toast('اختار التاريخ', false); return; }
+      var xfrom = capTotal(), xer = doTransfer(xv.from, xv.to, xamt, xv.d, (xv.n || '').trim());
+      if(xer){ toast(xer, false); return; }
+      st.xf = false; st.xfd = null; capChanged(xfrom); toast('اتحوّل ✅', true); return;
+    }
+    if(a === 'cacc'){ var cnt = b.getAttribute('data-t'); st.capForm = ACC[cnt] ? cnt : 'vf'; st.capDel = null; var ca0 = $('wkCA'), cn0 = $('wkCN'), cd0 = $('wkCD'); if(ca0) st.cd.a = ca0.value; if(cn0) st.cd.n = cn0.value; if(cd0) st.cd.d = cd0.value; render(); return; }
     if(a === 'ck'){
       st.ck = b.getAttribute('data-k') === 'o' ? 'o' : 'a';
       var cf2 = host.querySelector('.wk-cf'); if(cf2) cf2.classList.toggle('k-o', st.ck === 'o');
@@ -17410,8 +17499,8 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
     if(a === 'cdel'){ st.capDel = id; render(); return; }
     if(a === 'cdelno'){ st.capDel = null; render(); return; }
     if(a === 'cdelyes'){
-      var ca = led(st.capForm === 'vf2' ? 'vf2' : 'vf'), ci = ca.findIndex(function(x){ return x && x.id === id; }), cfrom = capTotal();
-      if(ci > -1) ca.splice(ci, 1);
+      var cfrom = capTotal(), cer = dropMove(st.capForm || 'vf', id);
+      if(cer){ st.capDel = null; render(); toast(cer, false); return; }
       st.capDel = null; capChanged(cfrom); toast('اتمسح ✅', true); return;
     }
     if(a === 'csave'){
@@ -17419,12 +17508,13 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
       if(!(camt > 0)){ toast('اكتب المبلغ', false); return; }
       if(!/^\d{4}-\d{2}-\d{2}$/.test(cdt)){ toast('اختار التاريخ', false); return; }
       var cfrom2 = capTotal(), isOut = st.ck === 'o';
-      led(st.capForm === 'vf2' ? 'vf2' : 'vf').push({id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), k: isOut ? 'o' : 'a', a: camt, d: cdt, n: $('wkCN').value.trim(), ts: Date.now()});
+      var cser = pushMove(st.capForm || 'vf', isOut ? 'o' : 'a', camt, cdt, $('wkCN').value.trim());
+      if(cser){ toast(cser, false); return; }
       st.capForm = false; st.capDel = null; st.cd = {a: '', d: '', n: ''};
       capChanged(cfrom2); toast(isOut ? 'اتصرف ✅' : 'اتضاف ✅', true); return;
     }
     if(a === 'prev' || a === 'next'){ st.m += (a === 'next' ? 1 : -1); if(st.m < 0){ st.m = 11; st.y--; } if(st.m > 11){ st.m = 0; st.y++; } st.form = false; st.edit = null; st.del = null; render(); return; }
-    if(a === 'new'){ st.form = true; st.edit = null; st.del = null; st.capForm = false; st.capDel = null; render(); try{ $('wkT').focus(); }catch(e){} return; }
+    if(a === 'new'){ st.xf = false; st.form = true; st.edit = null; st.del = null; st.capForm = false; st.capDel = null; render(); try{ $('wkT').focus(); }catch(e){} return; }
     if(a === 'cancel'){ st.form = false; st.edit = null; render(); return; }
     if(a === 'edit'){ st.form = true; st.edit = id; st.del = null; st.capForm = false; st.capDel = null; render(); try{ host.querySelector('.wk-form').scrollIntoView({block: 'nearest'}); }catch(e){} return; }
     if(a === 'del'){ st.del = id; render(); return; }
