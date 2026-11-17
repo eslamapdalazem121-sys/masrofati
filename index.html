@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-16.8455">
+<meta name="app-version" content="2026-11-16.8459">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -3961,6 +3961,11 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 .wk-acc-bal small{opacity:.92;font-weight:800}
 .wk-acc-bal b{font-size:calc(clamp(22px,7vw,30px) * var(--fs,1));font-weight:900;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .wk-acc-bal.neg b{color:#ffd0d0}
+.wk-dir{box-shadow:var(--shadow),0 5px 0 rgba(8,52,128,.2)}
+.wk-dir::before{background:linear-gradient(180deg,#6aa8ff,#0b3f9e)}
+.wk-dir .wk-acc-ic{background:radial-gradient(circle at 32% 26%,#b8d4ff,#1f6fe0 62%,#0b3f9e);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #082f73}
+.wk-dir .wk-acc-bal{background:linear-gradient(135deg,#1f6fe0,#0b3f9e);box-shadow:inset 0 2px 0 rgba(255,255,255,.25),inset 0 -3px 0 rgba(0,0,0,.2),0 5px 0 #082f73}
+.wk-dir .wk-acc-bal.neg b{color:#ffd0d0}
 .wk-acc-btn{grid-column:1 / -1;border:0;border-radius:14px;padding:12px;font:inherit;font-weight:900;cursor:pointer;color:var(--text);background:var(--bg2)}
 .wk-mirhd{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:900;font-size:calc(14px * var(--fs,1));margin-top:4px}
 .wk-lnk{border:0;background:var(--bg2);color:var(--text);border-radius:10px;padding:6px 12px;font:inherit;font-weight:800;cursor:pointer;font-size:calc(12.5px * var(--fs,1))}
@@ -15961,6 +15966,13 @@ function dueAlertScan(){
       if(zi && zi.state === 'due' && zi.key){ var zk = 'zd:' + zi.key; if(!seen[zk]){ seen[zk] = 1; changed = true; if(fire) nfEvent('zdue', '🔔 وجب موعد زكاة المال — لازم تخرجها', zk); } }
       else if(zi && zi.state === 'wait' && zi.days <= 30 && zi.next){ var wk = 'zw:' + zkIso(zi.next); if(!seen[wk]){ seen[wk] = 1; changed = true; if(fire) nfEvent('zdue', '🔔 باقي ' + toArabicDigits(zi.days) + ' يوم على موعد زكاة المال', wk); } }
     }catch(e){}
+    try{   // المساعد الذكي: تنبيهات إضافية قبل موعد الزكاة (٦٠ / ١٤ / ٧ / ٣ / يوم)
+      var za = window.zkaInfo && window.zkaInfo();
+      if(za && za.lvl > 0 && za.days > 0){
+        var zl = [1, 3, 7, 14, 60].filter(function(L){ return za.days <= L; })[0];
+        if(zl !== undefined){ var zak = 'za:' + zkIso(za.T) + ':' + zl; if(!seen[zak]){ seen[zak] = 1; changed = true; if(fire) nfEvent('zdue', '🤖 ' + window.zkaText(za), zak); } }
+      }
+    }catch(e){}
     if(changed){ var ks = Object.keys(seen); if(ks.length > 400) ks.slice(0, ks.length - 400).forEach(function(k){ delete seen[k]; }); try{ localStorage.setItem(KEY, JSON.stringify(seen)); }catch(e){} }
   }catch(e){}
 }
@@ -16392,7 +16404,7 @@ function pushBuildEvents(extra){
   try{
     const zi = zkDueInfo();
     if(zi && zi.next && zi.state !== 'unset'){
-      [30, 7].forEach(function(L){ add('zw:' + iso(zi.next) + ':' + L, at(shift(zi.next, -L)), '🔔 باقي ' + toArabicDigits(L) + ' يوم على موعد زكاة المال', 'zdue', farEnd); });
+      [60, 30, 14, 7, 3, 1].forEach(function(L){ add('zw:' + iso(zi.next) + ':' + L, at(shift(zi.next, -L)), '🔔 باقي ' + toArabicDigits(L) + ' يوم على موعد زكاة المال', 'zdue', farEnd); });
       add('zd:' + iso(zi.next), at(zi.next), '🔔 وجب موعد زكاة المال — لازم تخرجها', 'zdue', farEnd);
     }
   }catch(e){}
@@ -17252,7 +17264,7 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
   function candSig(){ var c = aaibSubs(), l = c.length ? c : subsList(); return l.map(function(z){ return z.id + ':' + (Number(z.amount) || 0) + ':' + (z.name || ''); }).join('|'); }
   function capTotal(){ var o = origSub(); return Math.round((ledTotal('cap') + ledTotal('vf') + ledTotal('vf2') + (o ? (Number(o.amount) || 0) : 0)) * 100) / 100; }
   /* 8455: أربع حسابات داخل رأس المال: فودافون كاش، فودافون كاش ٢، الحساب الفرعي (مربوط بصفحة أموال)، ورأس المال العمل المباشر. إضافة/صرف/تحويل بينهم */
-  var ACC = {vf: 'فودافون كاش', vf2: 'فودافون كاش ٢', sub: 'الحساب الفرعي', cap: 'رأس المال العمل'};
+  var ACC = {vf: 'فودافون كاش', vf2: 'فودافون كاش ٢', sub: 'الحساب الفرعي', cap: 'الحساب المباشر'};
   var ACC_ORDER = ['vf', 'vf2', 'sub', 'cap'];
   function wkId(){ return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function accBal(t){ if(t === 'sub'){ var o = origSub(); return o ? (Number(o.amount) || 0) : 0; } return ledTotal(t); }
@@ -17300,7 +17312,7 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
   /* 8450: أيقونة «إضافة وصرف» (عملة + علامة + خضراء للإضافة وعلامة − حمراء للصرف) — الرسمة في AS_SVG فوق */
   function panelHtml(t){
     var td = iso(new Date()), cd = st.cd, k = st.ck === 'o' ? 'o' : 'a';
-    var b = '<div class="wk-form wk-cf' + (k === 'o' ? ' k-o' : '') + '"><div class="wk-cft">' + (t === 'sub' ? '🗂 الحساب الفرعي' : (t === 'cap' ? '💼 رأس المال العمل' : (t === 'vf2' ? '📱 فودافون كاش ٢' : '📱 فودافون كاش'))) + '</div>' + (st.hero ? '<div class="wk-asw">' + ACC_ORDER.map(function(z){ return '<button type="button" class="' + (t === z ? 'on' : '') + '" data-wk="cacc" data-t="' + z + '"><span>' + (z === 'sub' ? '🗂 ' : (z === 'cap' ? '💼 ' : '📱 ')) + ACC[z] + '</span><small>' + money(accBal(z)) + '</small></button>'; }).join('') + '</div>' : '') + '<div class="wk-kind"><button type="button" class="a' + (k === 'a' ? ' on' : '') + '" data-wk="ck" data-k="a">➕ إضافة</button><button type="button" class="o' + (k === 'o' ? ' on' : '') + '" data-wk="ck" data-k="o">➖ صرف</button></div>'
+    var b = '<div class="wk-form wk-cf' + (k === 'o' ? ' k-o' : '') + '"><div class="wk-cft">' + (t === 'sub' ? '🗂 الحساب الفرعي' : (t === 'cap' ? '💼 الحساب المباشر' : (t === 'vf2' ? '📱 فودافون كاش ٢' : '📱 فودافون كاش'))) + '</div>' + (st.hero ? '<div class="wk-asw">' + ACC_ORDER.map(function(z){ return '<button type="button" class="' + (t === z ? 'on' : '') + '" data-wk="cacc" data-t="' + z + '"><span>' + (z === 'sub' ? '🗂 ' : (z === 'cap' ? '💼 ' : '📱 ')) + ACC[z] + '</span><small>' + money(accBal(z)) + '</small></button>'; }).join('') + '</div>' : '') + '<div class="wk-kind"><button type="button" class="a' + (k === 'a' ? ' on' : '') + '" data-wk="ck" data-k="a">➕ إضافة</button><button type="button" class="o' + (k === 'o' ? ' on' : '') + '" data-wk="ck" data-k="o">➖ صرف</button></div>'
       + '<label for="wkCA">المبلغ</label><input type="text" id="wkCA" inputmode="decimal" placeholder="0" value="' + esc(cd.a) + '">'
       + '<label for="wkCD">التاريخ</label><input type="date" id="wkCD" value="' + esc(cd.d || td) + '">'
       + '<label for="wkCN">ملاحظة (اختياري)</label><input type="text" id="wkCN" maxlength="160" value="' + esc(cd.n) + '">'
@@ -17350,7 +17362,12 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
     h += '<div class="wk-acc wk-vf" id="wkVf2"><span class="wk-acc-ic" aria-hidden="true">📱</span><div class="wk-acc-t"><b>فودافون كاش ٢</b><small>حساب مستقل · داخل في رأس المال</small></div>'
       + '<div class="wk-acc-bal' + (vf2 < 0 ? ' neg' : '') + '"><small>الرصيد</small><b>' + money(vf2) + '</b></div>'
       + '<button type="button" class="wk-acc-btn" data-wk="capopen" data-t="vf2">＋ إضافة وصرف</button></div></div>';
-    if(st.capForm && !st.hero) h += panelHtml(st.capForm);
+    if(st.capForm && !st.hero && st.capForm !== 'cap') h += panelHtml(st.capForm);
+    var dr = ledTotal('cap');
+    h += '<div class="wk-acc wk-dir" id="wkDir"><span class="wk-acc-ic" aria-hidden="true">💼</span><div class="wk-acc-t"><b>الحساب المباشر</b><small>رصيد مباشر · داخل في رأس المال</small></div>'
+      + '<div class="wk-acc-bal' + (dr < 0 ? ' neg' : '') + '"><small>الرصيد</small><b>' + money(dr) + '</b></div>'
+      + '<button type="button" class="wk-acc-btn" data-wk="capopen" data-t="cap">＋ إضافة وصرف</button></div>';
+    if(st.capForm === 'cap' && !st.hero) h += panelHtml('cap');
     h += '<div class="wk-mirhd"><span>🗂 نسخة طبق الأصل من الحساب الفرعي</span>' + (o && !st.pick ? '<button type="button" class="wk-lnk" data-wk="mirchg">تغيير</button>' : '') + '</div>';
     if(o && !st.pick) h += '<div id="wkMir" class="wk-mir"></div><div class="wk-mircap">🔗 مربوطة بالحساب الأصلي في صفحة أموال: أي حركة في أي مكان بتظهر في الاتنين وبتأثّر في رأس مال العمل.</div>';
     else h += pickerHtml();
@@ -17468,7 +17485,7 @@ function wkIcoSizeInput(){ previewSetting('wkIconSize', Number(document.getEleme
     var a = b.getAttribute('data-wk'), id = b.getAttribute('data-id');
     /* 8450: إضافة / صرف رأس مال العمل */
     if(a === 'capopen'){
-      var dt = b.getAttribute('data-t'), tg = dt === 'vf2' ? 'vf2' : 'vf', hr = dt === 'hero'; if(hr){ tg = 'vf'; }
+      var dt = b.getAttribute('data-t'), tg = (dt === 'vf2' || dt === 'cap') ? dt : 'vf', hr = dt === 'hero'; if(hr){ tg = 'vf'; }
       if(st.capForm && (hr ? st.hero : (st.capForm === tg && !st.hero))){ st.capForm = false; st.hero = false; st.capDel = null; render(); return; }
       st.xf = false; st.hero = hr; st.capForm = hr ? ((dt === 'hero' && st.capForm) ? st.capForm : 'vf') : tg; st.ck = 'a'; st.cd = {a: '', d: iso(new Date()), n: ''}; st.capDel = null; st.form = false; st.edit = null; st.del = null; render();
       try{ var cfm = host.querySelector('.wk-cf'); if(cfm) cfm.scrollIntoView({behavior: 'smooth', block: 'nearest'}); $('wkCA').focus({preventScroll: true}); }catch(e){}
@@ -20355,6 +20372,161 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   try{ var _oz = window.openZakHero; if(typeof _oz === 'function') window.openZakHero = function(){ var r = _oz.apply(this, arguments); apply(); return r; }; }catch(e){}
   window.zakGridApply = apply;
   apply();
+})();
+</script>
+<style id="zkaCss">
+@keyframes zkaGlow{0%,100%{box-shadow:0 0 0 2px var(--zc),0 0 10px 2px var(--zc)}50%{box-shadow:0 0 0 3px rgba(255,255,255,.85),0 0 26px 9px var(--zc)}}
+@keyframes zkaSweep{0%{transform:translateX(120%)}100%{transform:translateX(-120%)}}
+@keyframes zkaIco{0%,100%{filter:drop-shadow(0 0 3px var(--zc))}50%{filter:drop-shadow(0 0 14px var(--zc)) drop-shadow(0 0 4px #fff)}}
+@keyframes zkaPop{0%{transform:translate(-50%,-140%);opacity:0}60%{transform:translate(-50%,6%);opacity:1}100%{transform:translate(-50%,0);opacity:1}}
+.zka-l1{--zc:#ffc400;--c1:#ffe27a;--c2:#f2a900;--tx:#3b2f00;--sp:2.2s}
+.zka-l2{--zc:#ff8a00;--c1:#ffb74d;--c2:#e65f00;--tx:#fff;--sp:1.5s}
+.zka-l3{--zc:#ff2d2d;--c1:#ff7a7a;--c2:#d50000;--tx:#fff;--sp:1s}
+.zka-l4{--zc:#ff0033;--c1:#ff4a4a;--c2:#8f0000;--tx:#fff;--sp:.7s}
+.zka-banner{position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;margin:8px 0 12px;padding:11px 14px;border-radius:18px;color:var(--tx);font-weight:800;line-height:1.55;background:linear-gradient(150deg,var(--c1),var(--c2));animation:zkaGlow var(--sp) ease-in-out infinite;text-align:start;cursor:pointer;font-size:calc(14px * var(--fs,1))}
+.zka-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);animation:zkaSweep calc(var(--sp) * 2) linear infinite;pointer-events:none}
+.zka-banner .zi{font-size:30px;flex:none;animation:zkaIco var(--sp) ease-in-out infinite}
+.zka-banner .zt{display:block;font-weight:900;font-size:calc(15.5px * var(--fs,1))}
+.zka-banner .zs{display:block;font-weight:700;opacity:.95;font-size:calc(12.5px * var(--fs,1))}
+.zka-glow{animation:zkaGlow var(--sp) ease-in-out infinite !important;border-radius:22px}
+@keyframes zkaAlarm{0%,100%{filter:drop-shadow(0 0 6px var(--zc)) drop-shadow(0 0 14px var(--zc));transform:scale(1)}50%{filter:drop-shadow(0 0 16px var(--zc)) drop-shadow(0 0 34px var(--zc)) drop-shadow(0 0 5px #fff);transform:scale(1.1)}}
+.zka-alarm{overflow:visible}
+.zka-alarm .ch-stage,.zka-alarm .ch-ico{overflow:visible}
+.zka-alarm .ch-ico{animation:zkaAlarm var(--sp) ease-in-out infinite;will-change:transform,filter}
+.zka-alarm .ch-ico::after{content:"";position:absolute;inset:-14%;border-radius:50%;background:radial-gradient(circle,var(--zc) 0%,transparent 68%);opacity:.55;animation:zkaGlow var(--sp) ease-in-out infinite;box-shadow:none;pointer-events:none;z-index:-1}
+.zka-glow .ch-ico,.zka-glow .zk-ico,.zka-glow .cmo-di{animation:zkaIco var(--sp) ease-in-out infinite}
+.zka-badge{position:absolute;top:-4px;inset-inline-start:-4px;min-width:26px;height:26px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-weight:900;font-size:12px;color:var(--tx);background:linear-gradient(150deg,var(--c1),var(--c2));box-shadow:0 0 0 2px #fff,0 0 12px 3px var(--zc);animation:zkaGlow var(--sp) ease-in-out infinite;z-index:5;pointer-events:none}
+.zka-host{position:relative}
+.zka-pill{display:inline-block;margin-inline-start:6px;padding:2px 10px;border-radius:999px;font-weight:900;font-size:calc(11.5px * var(--fs,1));color:var(--tx);background:linear-gradient(150deg,var(--c1),var(--c2));animation:zkaGlow var(--sp) ease-in-out infinite}
+#zkaAi{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translate(-50%,0);width:min(92vw,440px);z-index:100000;border-radius:22px;padding:14px 16px;color:var(--tx);background:linear-gradient(150deg,var(--c1),var(--c2));animation:zkaPop .55s cubic-bezier(.2,.9,.3,1.2) both,zkaGlow var(--sp) ease-in-out .55s infinite;direction:rtl;font-weight:800;display:none}
+#zkaAi.show{display:block}
+#zkaAi .ah{display:flex;align-items:center;gap:8px;font-weight:900;font-size:calc(15px * var(--fs,1))}
+#zkaAi .ah i{font-style:normal;font-size:24px;animation:zkaIco var(--sp) ease-in-out infinite}
+#zkaAi .am{margin:6px 0 10px;line-height:1.7;font-size:calc(14px * var(--fs,1));font-weight:800}
+#zkaAi .ab{display:flex;gap:8px}
+#zkaAi .ab button{flex:1;border:0;border-radius:14px;padding:10px;font:inherit;font-weight:900;cursor:pointer;color:#1c2430;background:rgba(255,255,255,.92);box-shadow:0 3px 0 rgba(0,0,0,.22)}
+#zkaAi .ab button.go{background:#fff;color:#b00020}
+@media (prefers-reduced-motion:reduce){.zka-banner,.zka-banner::after,.zka-glow,.zka-badge,.zka-pill,#zkaAi,.zka-banner .zi,.zka-alarm .ch-ico,.zka-alarm .ch-ico::after{animation:none !important}.zka-banner{box-shadow:0 0 0 3px var(--zc),0 0 16px 4px var(--zc)}}
+</style>
+<script>
+/* إنذار الزكاة المضيء + إشعارات المساعد الذكي (نسخة ٨٤٥٨) */
+(function(){
+  var SEEN = 'masrofati_zka_v1';
+  function ar(n){ try{ return yFmt(n); }catch(e){ return String(n); } }
+  function money(v){ try{ return fmt(v); }catch(e){ return String(v); } }
+  function info(){
+    try{
+      if(typeof zkDueInfo !== 'function' || typeof data !== 'object' || !data || !data.zakatStart) return null;
+      var di = zkDueInfo(); if(!di || di.state === 'unset') return null;
+      var now = new Date(), y = now.getFullYear(), yd = zkYearDue(y);
+      var zm = (y === currentYear) ? zmGet() : (Number(data.zakatMal && data.zakatMal[y]) || 0);
+      var yp = zkYearPay(y, zm), full = yp.zm > 0 && yp.full, T, cur = false;
+      if(di.state === 'paid' || full){ T = di.next || yd; }
+      else { T = yd || di.next || di.due; cur = !!yd; }
+      if(!T) return null;
+      var days = Math.ceil((T - now) / 864e5), lvl = 0;
+      if(days <= 0) lvl = cur ? 4 : 0; else if(days <= 7) lvl = 3; else if(days <= 30) lvl = 2; else if(days <= 60) lvl = 1;
+      return {lvl: lvl, days: days, T: T, yr: T.getFullYear(), req: cur ? yp.zm : 0, paid: cur ? yp.paid : 0, left: cur ? yp.left : 0, cur: cur};
+    }catch(e){ return null; }
+  }
+  window.zkaInfo = info;
+  function head(I){
+    var yy = ar(I.yr);
+    if(I.lvl === 4) return '🚨 وجب موعد زكاة ' + yy + ' — أخرجها الآن';
+    return '⏰ باقي ' + ar(I.days) + ' يوم على موعد زكاة ' + yy;
+  }
+  function sub(I){
+    var s = 'تاريخ الاستحقاق: ' + zkBoth(I.T);
+    if(I.req > 0) s += ' · المتبقي ' + money(I.left);
+    return s;
+  }
+  window.zkaText = function(I){   // صياغة المساعد الذكي (بتُستخدم في الإشعار والنافذة)
+    I = I || info(); if(!I || !I.lvl) return '';
+    var yy = ar(I.yr), d = ar(I.days), t = '', amt = I.req > 0 ? ' المطلوب ' + money(I.req) + ' والمتبقي ' + money(I.left) + '.' : '';
+    if(I.lvl === 4) t = 'وجب موعد زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' أخرجها فور الوجوب ولا تؤجلها بدون عذر.';
+    else if(I.lvl === 3) t = 'فاضل ' + d + ' أيام بس على زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' جهّز المبلغ وأخرجها قريب.';
+    else if(I.lvl === 2) t = 'باقي ' + d + ' يوم على زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' راجع حساب الزكاة وابدأ جهّز المبلغ.';
+    else t = 'اقترب موعد زكاة ' + yy + ' — باقي ' + d + ' يوم (' + zkBoth(I.T) + ').' + amt + ' ابدأ استعد من دلوقتي.';
+    return t;
+  };
+  function mk(cls, html){ var e = document.createElement('div'); e.className = cls; e.innerHTML = html; return e; }
+  function openZ(){ try{ if(typeof openZakHero === 'function') openZakHero(); }catch(e){} }
+  function banner(I){
+    var b = mk('zka-banner zka-l' + I.lvl, '<span class="zi">' + (I.lvl >= 3 ? '🚨' : '⏰') + '</span><span><span class="zt"></span><span class="zs"></span></span>');
+    b.setAttribute('data-zka', '1'); b.setAttribute('role', 'alert');
+    b.querySelector('.zt').textContent = head(I); b.querySelector('.zs').textContent = sub(I);
+    return b;
+  }
+  function put(host, I, mode){
+    if(!host) return;
+    var old = host.querySelector(':scope > [data-zka]'); if(old) old.remove();
+    if(!I || !I.lvl) return;
+    var b = banner(I);
+    if(mode === 'first') host.insertBefore(b, host.firstChild);
+    else { var h = host.querySelector(':scope > h3, :scope > .ch-ptitle, :scope > .zkp-top'); if(h && h.nextSibling) host.insertBefore(b, h.nextSibling); else host.insertBefore(b, host.firstChild); }
+  }
+  var LV = ['zka-l1', 'zka-l2', 'zka-l3', 'zka-l4', 'zka-glow', 'zka-host', 'zka-alarm'];
+  function mark(el, I, badge, pill){
+    if(!el) return;
+    LV.forEach(function(c){ el.classList.remove(c); });
+    var ob = el.querySelector('.zka-badge'); if(ob) ob.remove();
+    var op = el.querySelector('.zka-pill'); if(op) op.remove();
+    if(!I || !I.lvl) return;
+    el.classList.add('zka-l' + I.lvl, 'zka-glow', 'zka-host');
+    if(badge){ var bd = mk('zka-badge', ''); bd.textContent = I.lvl === 4 ? '!' : ar(I.days); bd.title = head(I); var bh = el.querySelector('.ch-stage') || el; bh.classList.add('zka-host'); bh.appendChild(bd); }
+    if(pill){ var pl = mk('zka-pill', ''); pl.textContent = I.lvl === 4 ? '🚨 وجبت' : '⏰ ' + ar(I.days) + ' يوم'; var tgt = el.querySelector(pill); if(tgt) tgt.appendChild(pl); }
+  }
+  function refresh(){
+    try{
+      var I = info();
+      /* الرئيسية: الأيقونة نفسها بتبقى إنذار مضيء قوي (من غير مربع ولا شريط حواليها) */
+      var hw = document.getElementById('zakHeroWrap'); mark(hw, I, true);
+      if(hw && I && I.lvl){ hw.classList.remove('zka-glow'); hw.classList.add('zka-alarm'); }
+      /* صفحة زكاتي: إطار الإنذار حوالين أيقونتي زكاتي وحساب الزكاة بس + التنبيهات */
+      ['zakPgWrap', 'zkcPgWrap'].forEach(function(id){ mark(document.getElementById(id), I, true); });
+      mark(document.getElementById('yrZM'), null);
+      mark(document.getElementById('giDestZk'), I, false);
+      var cz = document.querySelector('#cmoDest button[data-id="zakat"]'); mark(cz, I, false);
+      put(document.querySelector('#zmOverlay > .modal-box'), I);
+      put(document.querySelector('#zkOverlay > .modal-box'), I);
+      put(document.getElementById('zakPgBox'), I);
+      put(document.getElementById('zkcBody'), I, 'first');
+    }catch(e){}
+  }
+  window.zkaRefresh = refresh;
+  /* نافذة المساعد الذكي المضيئة */
+  function seenGet(){ try{ return JSON.parse(localStorage.getItem(SEEN)) || {}; }catch(e){ return {}; } }
+  function seenSet(o){ try{ localStorage.setItem(SEEN, JSON.stringify(o)); }catch(e){} }
+  function aiClose(){ var a = document.getElementById('zkaAi'); if(a) a.classList.remove('show'); }
+  window.zkaAiClose = aiClose;
+  function aiShow(force){
+    try{
+      var I = info(); if(!I || !I.lvl) return false;
+      var ls = document.getElementById('lockScreen'); if(ls && ls.style.display !== 'none' && getComputedStyle(ls).display !== 'none') return false;
+      var s = seenGet(), now = Date.now(), gap = I.lvl >= 3 ? 6 * 36e5 : 22 * 36e5;
+      if(!force && s.t && now - s.t < gap && s.l >= I.lvl) return false;
+      var a = document.getElementById('zkaAi');
+      if(!a){ a = document.createElement('div'); a.id = 'zkaAi'; a.setAttribute('role', 'alert'); document.body.appendChild(a); }
+      a.className = 'zka-l' + I.lvl;
+      a.innerHTML = '<div class="ah"><i>🤖</i><span>تنبيه من المساعد الذكي</span></div><div class="am"></div><div class="ab"><button type="button" class="go">🕌 افتح الزكاة</button><button type="button" class="no">لاحقًا</button></div>';
+      a.querySelector('.am').textContent = zkaText(I);
+      a.querySelector('.go').onclick = function(){ aiClose(); openZ(); };
+      a.querySelector('.no').onclick = aiClose;
+      void a.offsetWidth; a.classList.add('show');
+      try{ if(!force && settings && settings.notify) { if(typeof nfFlash === 'function') nfFlash(); if(navigator.vibrate) navigator.vibrate([150, 80, 150]); } }catch(e){}
+      s.t = now; s.l = I.lvl; seenSet(s);
+      clearTimeout(window._zkaAT); window._zkaAT = setTimeout(aiClose, 20000);
+      return true;
+    }catch(e){ return false; }
+  }
+  window.zkaAiShow = aiShow;
+  ['renderZmDue', 'renderZkCalc', 'renderZakat', 'renderZM', 'openZakat', 'openZM', 'openZkCalc', 'openZakHero'].forEach(function(n){
+    try{ var o = window[n]; if(typeof o === 'function') window[n] = function(){ var r = o.apply(this, arguments); setTimeout(refresh, 40); return r; }; }catch(e){}
+  });
+  document.addEventListener('click', function(e){ var b = e.target && e.target.closest && e.target.closest('.zka-banner'); if(b){ var ov = b.closest('.modal-overlay'); if(!ov) openZ(); } }, true);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ refresh(); setTimeout(function(){ aiShow(false); }, 1200); } });
+  setTimeout(refresh, 1500); setTimeout(function(){ aiShow(false); }, 4500);
+  setInterval(function(){ if(document.visibilityState === 'visible') refresh(); }, 30000);
 })();
 </script>
 </body>
