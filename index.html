@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-16.8464">
+<meta name="app-version" content="2026-11-18.8466">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -5344,6 +5344,8 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
           <button type="button" class="opt-chip" data-val="1" onclick="nfSet('nfLead',1)">قبلها بيوم</button>
           <button type="button" class="opt-chip" data-val="2" onclick="nfSet('nfLead',2)">قبلها بيومين</button>
         </div>
+        <div class="nf-sub" style="margin-top:14px;">💱 تنبيهات الدولار والذهب <small>(شغّل/وقّف + حد التحرك)</small></div>
+        <div id="pxBox"></div>
         <div class="nf-sub" style="margin-top:14px;">⚙️ التحكم لكل بند <small>(دوس على عنوان العمود يشغّل/يوقّف الكل)</small></div>
         <div id="nfMatrix"></div>
         <p class="nf-note">💬 رسالة = إشعار على الموبايل + شريط فوق الشاشة · 🔊 صوت = نغمة · 💡 ضوء = وميض على حواف الشاشة. لمبة الإشعار (LED) وصوت الإشعار نفسه وهو التطبيق مقفول بيتحكم فيهم الموبايل من إعدادات إشعارات التطبيق.</p>
@@ -15817,7 +15819,7 @@ var NF_CATS = [
   ['cap','💼','رأس المال (أموال / ذهب)'], ['cgp','🗂️','مجموعات رأس المال'],
   ['bank','🏦','استحقاق فايدة بنك'], ['pension','💳','استحقاق معاش'],
   ['bankup','⏰','قبل استحقاق شهادة / فايدة'], ['certend','📜','قرب انتهاء الشهادة / تجديدها'], ['penup','⏰','قبل استحقاق معاش'],
-  ['zdue','🔔','موعد الزكاة'], ['pct','📊','نسبة مصروفات الشهر من الدخل'], ['backup','🗄️','نسخة احتياطية']
+  ['zdue','🔔','موعد الزكاة'], ['pct','📊','نسبة مصروفات الشهر من الدخل'], ['px','💱','تحرك الدولار والذهب'], ['backup','🗄️','نسخة احتياطية']
 ];
 var NF_DEF_OFF = {backup: {s:false, l:false}};
 function nfCfg(cat){
@@ -19753,7 +19755,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     if(late) items.push({i:'⏰', c:'warn', t:'متأخر ' + toArabicDigits(late), f:bpOpen});
     try{ var _dt = bdDayTotal(Date.now()); if(c.on && lv.length && _dt > lv[0]){ items = items.filter(function(x){ return x.i !== '🤖'; }); items.push({i:'⚠️', c:'warn', t:'صرفت اليوم حتى الآن ' + fmt(_dt) + ' ج', f:bdOpen}); } }catch(e){}
     try{ if(cloud && cloud.user && cloud.lastError) items.push({i:'☁️', c:'warn', t:'مشكلة في المزامنة'}); }catch(e){}
-    var KEYS = {'🤖':'today', '⏳':'pend', '⏰':'late', '⚠️':'limit', '☁️':'sync'}, dis = robotDisGet();
+    try{ var _pb = window._pxBubble; if(_pb && _pb.until > Date.now()) items.push({i:'💱', c:'', t:_pb.t, f:function(){ try{ openCapGold(); }catch(e){} }}); }catch(e){}
+    var KEYS = {'🤖':'today', '⏳':'pend', '⏰':'late', '⚠️':'limit', '☁️':'sync', '💱':'px'}, dis = robotDisGet();
     items.forEach(function(it){ it.k = KEYS[it.i]; });
     items = items.filter(function(it){ return it.k === 'today' || dis.indexOf(it.k) < 0; });
     items = items.slice(0, 5);
@@ -20513,6 +20516,90 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ refresh(); } });
   setTimeout(refresh, 1500);
   setInterval(function(){ if(document.visibilityState === 'visible') refresh(); }, 30000);
+})();
+</script>
+<script>
+/* ===== 8465: تنبيهات تحرك الدولار (البنوك + الصاغة) والذهب (عالمي + محلي) — إشعار موبايل + الروبوت ===== */
+(function(){
+  var KEY = 'masrofati_px_alert_v1';
+  /* حد التحرك (٪ من آخر سعر وصّل تنبيه) */
+  var SERIES = [
+    {id:'bank',  ico:'🏦', nm:'دولار البنوك',  pct:0.20, unit:'ج', get:function(g){ return g.rate > 0 ? {v:g.rate, ts:g.rateTs} : null; }},
+    {id:'sagha', ico:'🏪', nm:'دولار الصاغة', pct:0.30, unit:'ج', get:function(g){ return g.autoSar > 0 ? {v:(g.autoSarPx > 0 ? g.autoSarPx : g.autoSar), ts:g.sarTs} : null; }},
+    {id:'world', ico:'🌍', nm:'الذهب العالمي (الأونصة)', pct:0.30, unit:'$', get:function(g){ return g.usd > 0 ? {v:g.usd, ts:g.usdTs} : null; }},
+    {id:'local', ico:'🥇', nm:'الذهب المحلي (عيار ٢٤)', pct:0.30, unit:'ج', get:function(g){ return g.localP24 > 0 ? {v:g.localP24, ts:g.sarTs} : null; }}
+  ];
+  function ld(){ try{ var o = JSON.parse(localStorage.getItem(KEY)); return (o && typeof o === 'object') ? o : {}; }catch(e){ return {}; } }
+  function sv(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
+  function num(v, id){ return id === 'local' ? fmt(Math.round(v)) : glF2(v); }
+  function clearDis(){
+    try{ var o = JSON.parse(localStorage.getItem('robot_dis') || '{}'); if(Array.isArray(o.k) && o.k.indexOf('px') >= 0){ o.k = o.k.filter(function(k){ return k !== 'px'; }); localStorage.setItem('robot_dis', JSON.stringify(o)); } }catch(e){}
+  }
+  var CK = 'masrofati_px_cfg_v1';
+  function cfgAll(){ try{ var o = JSON.parse(localStorage.getItem(CK)); return (o && typeof o === 'object') ? o : {}; }catch(e){ return {}; } }
+  function pxCfgOf(id){
+    var S = SERIES.filter(function(x){ return x.id === id; })[0], c = cfgAll()[id] || {};
+    return {on: c.on !== false, pct: Number(c.pct) > 0 ? Number(c.pct) : S.pct};
+  }
+  function cfgSet(id, k, v){ var o = cfgAll(); o[id] = Object.assign({}, o[id] || {}); o[id][k] = v; try{ localStorage.setItem(CK, JSON.stringify(o)); }catch(e){} }
+  var PCTS = [0.1, 0.2, 0.3, 0.5, 1];
+  window.pxRenderCfg = function(){
+    var box = document.getElementById('pxBox'); if(!box) return; box.innerHTML = '';
+    SERIES.forEach(function(S){
+      var c = pxCfgOf(S.id), r = document.createElement('div'); r.className = 'nf-row';
+      var n = document.createElement('span'); n.className = 'nf-n'; n.textContent = S.ico + ' ' + S.nm; r.appendChild(n);
+      var t = document.createElement('button'); t.type = 'button'; t.className = 'nf-tg' + (c.on ? ' on' : ''); t.textContent = c.on ? '🔔' : '🔕'; t.setAttribute('data-nosound', '');
+      t.setAttribute('aria-pressed', c.on ? 'true' : 'false');
+      t.onclick = function(){ cfgSet(S.id, 'on', !pxCfgOf(S.id).on); pxRenderCfg(); };
+      r.appendChild(t);
+      var sel = document.createElement('select'); sel.setAttribute('aria-label', 'حد التحرك'); sel.style.cssText = 'padding:6px 4px; border-radius:10px; font:inherit; font-weight:700;';
+      var list = PCTS.slice(); if(list.indexOf(c.pct) < 0) list.push(c.pct); list.sort(function(a, b){ return a - b; });
+      list.forEach(function(v){ var o = document.createElement('option'); o.value = String(v); o.textContent = toArabicDigits(String(v)) + '٪'; if(v === c.pct) o.selected = true; sel.appendChild(o); });
+      sel.disabled = !c.on; sel.onchange = function(){ cfgSet(S.id, 'pct', Number(sel.value)); };
+      r.appendChild(sel); box.appendChild(r);
+    });
+    var p = document.createElement('p'); p.className = 'nf-note'; p.textContent = '🔔 شغّال / 🔕 موقوف · الحد = أقل نسبة تحرك عن آخر سعر وصّل عليه تنبيه (كل ما قلّ الرقم زادت التنبيهات). بتتطبّق فورًا.';
+    box.appendChild(p);
+  };
+  try{ pxRenderCfg(); }catch(e){}
+  window.pxCheck = function(){
+    try{
+      var g = (typeof _gl !== 'undefined') ? _gl : null; if(!g) return;
+      var st = ld(), now = Date.now(), moves = [], changed = false;
+      SERIES.forEach(function(S){
+        var cf = pxCfgOf(S.id); if(!cf.on) return;
+        var r = S.get(g); if(!r || !(r.v > 0)) return;
+        if(!r.ts || now - r.ts > 20 * 60 * 1000) return;   // سعر قديم/أوفلاين: ما نقارنش بيه
+        var base = Number(st[S.id]);
+        if(!(base > 0)){ st[S.id] = r.v; changed = true; return; }   // أول مرة: نسجّل السعر بس من غير إشعار
+        var d = r.v - base, p = d / base * 100;
+        if(Math.abs(p) >= cf.pct){ moves.push({S:S, from:base, to:r.v, d:d, p:p}); st[S.id] = r.v; changed = true; }
+      });
+      if(changed) sv(st);
+      if(!moves.length) return;
+      var lines = moves.map(function(m){
+        var up = m.d > 0;
+        return (up ? '🔺' : '🔻') + ' ' + m.S.nm + ' ' + (up ? 'زاد' : 'نزل') + ' ' + (m.S.id === 'local' ? fmt(Math.round(Math.abs(m.d))) : glF2(Math.abs(m.d))) + ' ' + m.S.unit + ' (' + toArabicDigits(Math.abs(m.p).toFixed(1)) + '٪) — بقى ' + num(m.to, m.S.id) + ' ' + m.S.unit;
+      });
+      var body = lines.join('\n');
+      nfFire(nfCfg('px'), '💱 تحرك الأسعار', body, 'px' + now);
+      var first = moves[0], up0 = first.d > 0;
+      window._pxBubble = {t: moves.length > 1 ? ('💱 تحرك ' + toArabicDigits(moves.length) + ' أسعار — اضغط للتفاصيل') : (first.S.ico + ' ' + first.S.nm + ' ' + (up0 ? '▲' : '▼') + ' ' + num(first.to, first.S.id) + ' ' + first.S.unit), until: now + 15 * 60 * 1000};
+      clearDis();
+      try{ bdBadges(); }catch(e){}
+      clearTimeout(window._pxBubT); window._pxBubT = setTimeout(function(){ try{ bdBadges(); }catch(e){} }, 15 * 60 * 1000 + 500);
+    }catch(e){ console.error(e); }
+  };
+  /* بعد كل تحديث للأسعار نفحص التحرك */
+  ['goldLiveRefresh', 'goldTick'].forEach(function(n){
+    try{
+      var o = window[n]; if(typeof o !== 'function') return;
+      window[n] = async function(){ var r = await o.apply(this, arguments); try{ pxCheck(); }catch(e){} return r; };
+    }catch(e){}
+  });
+  /* لو الصفحة مفتوحة بس الشاشة الأولى: التحديث الدوري بتاع الذهب بيتنادى باسمه القديم، فنفحص كمان كل نص دقيقة */
+  setInterval(function(){ try{ if(document.visibilityState === 'visible') { if(navigator.onLine && typeof goldLiveRefresh === 'function') goldLiveRefresh(false); pxCheck(); } }catch(e){} }, 30 * 1000);
+  setTimeout(function(){ try{ if(navigator.onLine && typeof goldLiveRefresh === 'function') goldLiveRefresh(false); }catch(e){} }, 3500);
 })();
 </script>
 </body>
