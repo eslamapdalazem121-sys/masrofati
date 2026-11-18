@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-16.8463">
+<meta name="app-version" content="2026-11-16.8464">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -20420,14 +20420,16 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       if(!T) return null;
       var days = Math.ceil((T - now) / 864e5), lvl = 0;
       if(days <= 0) lvl = cur ? 4 : 0; else if(days <= 7) lvl = 3; else if(days <= 30) lvl = 2; else if(days <= 60) lvl = 1;
-      return {lvl: lvl, days: days, T: T, yr: T.getFullYear(), req: cur ? yp.zm : 0, paid: cur ? yp.paid : 0, left: cur ? yp.left : 0, cur: cur};
+      var dsp = days <= 30 ? Math.max(0, Math.floor((T - now) / 864e5)) : days;   /* نفس حساب العدّاد في التطبيق: آخر شهر أيام كاملة، وبعده تقريب لأعلى */
+      return {lvl: lvl, days: days, d: dsp, T: T, yr: T.getFullYear(), req: cur ? yp.zm : 0, paid: cur ? yp.paid : 0, left: cur ? yp.left : 0, cur: cur};
     }catch(e){ return null; }
   }
   window.zkaInfo = info;
+  function dleft(I){ return I.d <= 0 ? 'أقل من يوم' : ar(I.d) + ' يوم'; }
   function head(I){
     var yy = ar(I.yr);
     if(I.lvl === 4) return '🚨 وجب موعد زكاة ' + yy + ' — أخرجها الآن';
-    return '⏰ باقي ' + ar(I.days) + ' يوم على موعد زكاة ' + yy;
+    return '⏰ باقي ' + dleft(I) + ' على موعد زكاة ' + yy;
   }
   function sub(I){
     var s = 'تاريخ الاستحقاق: ' + zkBoth(I.T);
@@ -20436,11 +20438,11 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   }
   window.zkaText = function(I){   // صياغة المساعد الذكي (بتُستخدم في الإشعار والنافذة)
     I = I || info(); if(!I || !I.lvl) return '';
-    var yy = ar(I.yr), d = ar(I.days), t = '', amt = I.req > 0 ? ' المطلوب ' + money(I.req) + ' والمتبقي ' + money(I.left) + '.' : '';
+    var yy = ar(I.yr), d = dleft(I), t = '', amt = I.req > 0 ? ' المطلوب ' + money(I.req) + ' والمتبقي ' + money(I.left) + '.' : '';
     if(I.lvl === 4) t = 'وجب موعد زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' أخرجها فور الوجوب ولا تؤجلها بدون عذر.';
-    else if(I.lvl === 3) t = 'فاضل ' + d + ' أيام بس على زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' جهّز المبلغ وأخرجها قريب.';
-    else if(I.lvl === 2) t = 'باقي ' + d + ' يوم على زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' راجع حساب الزكاة وابدأ جهّز المبلغ.';
-    else t = 'اقترب موعد زكاة ' + yy + ' — باقي ' + d + ' يوم (' + zkBoth(I.T) + ').' + amt + ' ابدأ استعد من دلوقتي.';
+    else if(I.lvl === 3) t = 'فاضل ' + d + ' بس على زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' جهّز المبلغ وأخرجها قريب.';
+    else if(I.lvl === 2) t = 'باقي ' + d + ' على زكاة ' + yy + ' (' + zkBoth(I.T) + ').' + amt + ' راجع حساب الزكاة وابدأ جهّز المبلغ.';
+    else t = 'اقترب موعد زكاة ' + yy + ' — باقي ' + d + ' (' + zkBoth(I.T) + ').' + amt + ' ابدأ استعد من دلوقتي.';
     return t;
   };
   function mk(cls, html){ var e = document.createElement('div'); e.className = cls; e.innerHTML = html; return e; }
@@ -20467,8 +20469,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var op = el.querySelector('.zka-pill'); if(op) op.remove();
     if(!I || !I.lvl) return;
     el.classList.add('zka-l' + I.lvl, 'zka-glow', 'zka-host');
-    if(badge){ var bd = mk('zka-badge', ''); bd.textContent = I.lvl === 4 ? '!' : ar(I.days); bd.title = head(I); var bh = el.querySelector('.ch-stage') || el; bh.classList.add('zka-host'); bh.appendChild(bd); }
-    if(pill){ var pl = mk('zka-pill', ''); pl.textContent = I.lvl === 4 ? '🚨 وجبت' : '⏰ ' + ar(I.days) + ' يوم'; var tgt = el.querySelector(pill); if(tgt) tgt.appendChild(pl); }
+    if(badge){ var bd = mk('zka-badge', ''); bd.textContent = I.lvl === 4 ? '!' : (I.d <= 0 ? '<١' : ar(I.d)); bd.title = head(I); var bh = el.querySelector('.ch-stage') || el; bh.classList.add('zka-host'); bh.appendChild(bd); }
+    if(pill){ var pl = mk('zka-pill', ''); pl.textContent = I.lvl === 4 ? '🚨 وجبت' : '⏰ ' + dleft(I); var tgt = el.querySelector(pill); if(tgt) tgt.appendChild(pl); }
   }
   function refresh(){
     try{
@@ -20498,7 +20500,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
         document.body.appendChild(c);
       }
       c.className = 'zka-l' + I.lvl + ' show';
-      c.textContent = I.lvl === 4 ? '🚨 زكاتك وجبت' : '⏰ زكاة · ' + ar(I.days) + ' يوم';
+      c.textContent = I.lvl === 4 ? '🚨 زكاتك وجبت' : '⏰ زكاة · ' + dleft(I);
       c.title = zkaText(I);
     }catch(e){}
   }
