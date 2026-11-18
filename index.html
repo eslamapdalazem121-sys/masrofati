@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-18.8466">
+<meta name="app-version" content="2026-11-19.8468">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -19755,8 +19755,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     if(late) items.push({i:'⏰', c:'warn', t:'متأخر ' + toArabicDigits(late), f:bpOpen});
     try{ var _dt = bdDayTotal(Date.now()); if(c.on && lv.length && _dt > lv[0]){ items = items.filter(function(x){ return x.i !== '🤖'; }); items.push({i:'⚠️', c:'warn', t:'صرفت اليوم حتى الآن ' + fmt(_dt) + ' ج', f:bdOpen}); } }catch(e){}
     try{ if(cloud && cloud.user && cloud.lastError) items.push({i:'☁️', c:'warn', t:'مشكلة في المزامنة'}); }catch(e){}
-    try{ var _pb = window._pxBubble; if(_pb && _pb.until > Date.now()) items.push({i:'💱', c:'', t:_pb.t, f:function(){ try{ openCapGold(); }catch(e){} }}); }catch(e){}
-    var KEYS = {'🤖':'today', '⏳':'pend', '⏰':'late', '⚠️':'limit', '☁️':'sync', '💱':'px'}, dis = robotDisGet();
+    try{ var _pbs = window._pxBubbles || {}; Object.keys(_pbs).forEach(function(id){ var _pb = _pbs[id]; if(_pb && _pb.until > Date.now()) items.push({i:_pb.ico, c:'', t:_pb.t, f:function(){ try{ openCapGold(); }catch(e){} }}); }); }catch(e){}
+    var KEYS = {'🤖':'today', '⏳':'pend', '⏰':'late', '⚠️':'limit', '☁️':'sync', '🏦':'px-bank', '🏪':'px-sagha', '🌍':'px-world', '🥇':'px-local'}, dis = robotDisGet();
     items.forEach(function(it){ it.k = KEYS[it.i]; });
     items = items.filter(function(it){ return it.k === 'today' || dis.indexOf(it.k) < 0; });
     items = items.slice(0, 5);
@@ -20532,8 +20532,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function ld(){ try{ var o = JSON.parse(localStorage.getItem(KEY)); return (o && typeof o === 'object') ? o : {}; }catch(e){ return {}; } }
   function sv(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
   function num(v, id){ return id === 'local' ? fmt(Math.round(v)) : glF2(v); }
-  function clearDis(){
-    try{ var o = JSON.parse(localStorage.getItem('robot_dis') || '{}'); if(Array.isArray(o.k) && o.k.indexOf('px') >= 0){ o.k = o.k.filter(function(k){ return k !== 'px'; }); localStorage.setItem('robot_dis', JSON.stringify(o)); } }catch(e){}
+  function clearDis(k){
+    try{ var o = JSON.parse(localStorage.getItem('robot_dis') || '{}'); if(Array.isArray(o.k) && o.k.indexOf(k) >= 0){ o.k = o.k.filter(function(x){ return x !== k; }); localStorage.setItem('robot_dis', JSON.stringify(o)); } }catch(e){}
   }
   var CK = 'masrofati_px_cfg_v1';
   function cfgAll(){ try{ var o = JSON.parse(localStorage.getItem(CK)); return (o && typeof o === 'object') ? o : {}; }catch(e){ return {}; } }
@@ -20560,6 +20560,25 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     });
     var p = document.createElement('p'); p.className = 'nf-note'; p.textContent = '🔔 شغّال / 🔕 موقوف · الحد = أقل نسبة تحرك عن آخر سعر وصّل عليه تنبيه (كل ما قلّ الرقم زادت التنبيهات). بتتطبّق فورًا.';
     box.appendChild(p);
+    var tb = document.createElement('button'); tb.type = 'button'; tb.className = 'opt-chip'; tb.style.marginTop = '8px'; tb.setAttribute('data-nosound', ''); tb.textContent = '🧪 جرّب تنبيهات الأسعار (واحد لكل بند)';
+    tb.onclick = function(){ pxTest(); };
+    box.appendChild(tb);
+  };
+  window.pxTest = async function(){
+    try{
+      if(typeof Notification !== 'undefined' && Notification.permission === 'default'){ try{ await Notification.requestPermission(); }catch(e){} }
+      var g = (typeof _gl !== 'undefined') ? _gl : null, st = ld(), n = Date.now(), k = 0;
+      window._pxBubbles = window._pxBubbles || {};
+      SERIES.forEach(function(S){
+        var r = g && S.get(g); if(!r || !(r.v > 0)) return;
+        st[S.id] = r.v; var idx = k++;
+        setTimeout(function(){ try{ nfFire(nfCfg('px'), S.ico + ' ' + S.nm, '🧪 تجربة — السعر الحالي ' + num(r.v, S.id) + ' ' + S.unit, 'pxtest-' + S.id + '-' + n, true); }catch(e){} }, idx * 1500);
+        window._pxBubbles[S.id] = {ico: S.ico, t: S.nm + ' ' + num(r.v, S.id) + ' ' + S.unit, until: n + 60 * 1000};
+      });
+      sv(st);
+      if(!k){ showToast('الأسعار لسه ما اتحمّلتش — افتح صفحة الذهب ودوس 🔄 تحديث', false); return; }
+      try{ bdBadges(); }catch(e){}
+    }catch(e){ console.error(e); }
   };
   try{ pxRenderCfg(); }catch(e){}
   window.pxCheck = function(){
@@ -20577,15 +20596,16 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       });
       if(changed) sv(st);
       if(!moves.length) return;
-      var lines = moves.map(function(m){
-        var up = m.d > 0;
-        return (up ? '🔺' : '🔻') + ' ' + m.S.nm + ' ' + (up ? 'زاد' : 'نزل') + ' ' + (m.S.id === 'local' ? fmt(Math.round(Math.abs(m.d))) : glF2(Math.abs(m.d))) + ' ' + m.S.unit + ' (' + toArabicDigits(Math.abs(m.p).toFixed(1)) + '٪) — بقى ' + num(m.to, m.S.id) + ' ' + m.S.unit;
+      window._pxBubbles = window._pxBubbles || {};
+      moves.forEach(function(m, idx){
+        var up = m.d > 0, S = m.S;
+        var title = S.ico + ' ' + S.nm;
+        var body = (up ? '🔺 زاد ' : '🔻 نزل ') + (S.id === 'local' ? fmt(Math.round(Math.abs(m.d))) : glF2(Math.abs(m.d))) + ' ' + S.unit + ' (' + toArabicDigits(Math.abs(m.p).toFixed(1)).replace('.', '٫') + '٪) — بقى ' + num(m.to, S.id) + ' ' + S.unit;
+        /* كل بند إشعار مستقل (tag مختلف) وبينزلوا ورا بعض */
+        setTimeout(function(){ try{ nfFire(nfCfg('px'), title, body, 'px-' + S.id + '-' + now, true); }catch(e){} }, idx * 1500);
+        window._pxBubbles[S.id] = {ico: S.ico, t: S.nm + ' ' + (up ? '▲' : '▼') + ' ' + num(m.to, S.id) + ' ' + S.unit, until: now + 15 * 60 * 1000};
+        clearDis('px-' + S.id);
       });
-      var body = lines.join('\n');
-      nfFire(nfCfg('px'), '💱 تحرك الأسعار', body, 'px' + now);
-      var first = moves[0], up0 = first.d > 0;
-      window._pxBubble = {t: moves.length > 1 ? ('💱 تحرك ' + toArabicDigits(moves.length) + ' أسعار — اضغط للتفاصيل') : (first.S.ico + ' ' + first.S.nm + ' ' + (up0 ? '▲' : '▼') + ' ' + num(first.to, first.S.id) + ' ' + first.S.unit), until: now + 15 * 60 * 1000};
-      clearDis();
       try{ bdBadges(); }catch(e){}
       clearTimeout(window._pxBubT); window._pxBubT = setTimeout(function(){ try{ bdBadges(); }catch(e){} }, 15 * 60 * 1000 + 500);
     }catch(e){ console.error(e); }
