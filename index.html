@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8468">
+<meta name="app-version" content="2026-11-19.8471">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -1732,6 +1732,11 @@ details.ops-grp > summary{cursor:pointer; font-weight:800; padding:8px 0; font-s
 @keyframes zkLed{0%,100%{opacity:1; transform:scale(1)}50%{opacity:.35; transform:scale(.8)}}
 @keyframes zkBoxGlow{0%,100%{box-shadow:0 5px 0 var(--sh), 0 0 12px 1px var(--gl), 0 12px 18px rgba(0,0,0,.18), inset 0 2px 0 rgba(255,255,255,.35)}50%{box-shadow:0 5px 0 var(--sh), 0 0 30px 8px var(--gl), 0 12px 18px rgba(0,0,0,.18), inset 0 2px 0 rgba(255,255,255,.35)}}
 html.perf .zkd-yb.due,html.perf .zkd-yb.month{animation:none;}
+/* 8471: تحذير ضوئي خفيف للمربع البرتقالي (نبض هادي بالشفافية بس — خفيف على الموبايل) */
+.zkd-yb.month, html.perf .zkd-yb.month{animation:none;}
+.zkd-yb.month::before{content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; box-shadow:0 0 16px 5px var(--gl); opacity:.2; animation:zkSoftWarn 2.8s ease-in-out infinite;}
+@keyframes zkSoftWarn{0%,100%{opacity:.18}50%{opacity:.8}}
+@media (prefers-reduced-motion: reduce){ .zkd-yb.month::before{animation:none; opacity:.5;} }
 .zx-card .zkd-yb{margin-left:0;margin-right:0;}
 .zkd-due{border-radius:22px; padding:14px 12px; margin:4px 2px 14px; text-align:center; color:#fff; font-weight:800; line-height:1.7; font-size:calc(14.5px * var(--fs,1));}
 .zkd-due .h{font-size:calc(19px * var(--fs,1)); font-weight:900;}
@@ -7421,11 +7426,38 @@ function zkPrevLines(i){
     return L;
   }catch(e){ return []; }
 }
+function zkHM(ms){   // مدة بالساعات والدقايق
+  const m = Math.max(1, Math.round(ms / 6e4)), h = Math.floor(m / 60), mm = m % 60;
+  const hs = h === 1 ? 'ساعة' : (h === 2 ? 'ساعتين' : yFmt(h) + (h <= 10 ? ' ساعات' : ' ساعة'));
+  const ms2 = mm === 1 ? 'دقيقة' : (mm === 2 ? 'دقيقتين' : yFmt(mm) + (mm <= 10 ? ' دقايق' : ' دقيقة'));
+  if(h < 1) return ms2;
+  return hs + (mm ? ' و' + ms2 : '');
+}
+function zkMsToDue(due){   // الوقت لحد أول يوم الاستحقاق (12 بالليل)
+  try{ if(!due) return null; return new Date(due.getFullYear(), due.getMonth(), due.getDate()).getTime() - Date.now(); }catch(e){ return null; }
+}
+function zkRemainShort(due, days){   // «٣ ساعات» لو أقل من يوم، غير كده «N يوم»
+  const ms = zkMsToDue(due);
+  if(ms !== null && ms > 0 && ms < 864e5) return zkHM(ms);
+  return yFmt(days) + ' يوم';
+}
+function zkLeftTxt(days, due){   // نص الوقت المتبقي على الموعد حسب الأيام/الساعات الفعلية
+  const ms = zkMsToDue(due);
+  if(ms !== null){
+    if(ms <= 0) return '🔴 حلّ الموعد — راجع مالك وأخرجها';
+    if(ms < 864e5) return '🔔 فاضل حوالي ' + zkHM(ms) + ' على بداية يوم الاستحقاق (بعد منتصف الليل) — راجع مالك وأخرجها';
+    days = Math.ceil(ms / 864e5);
+  }
+  const d = Number(days) || 0;
+  if(d <= 0) return '🔴 حلّ الموعد — راجع مالك وأخرجها';
+  const w = d === 1 ? 'يوم واحد' : (d === 2 ? 'يومين' : yFmt(d) + (d <= 10 ? ' أيام' : ' يوم'));
+  return '🔔 فاضل ' + w + ' على الموعد — راجع مالك وأخرجها';
+}
 function zkDueText(i){ return zkDueText0(i).concat(zkPrevLines(i)); }
 function zkDueText0(i){   // مصفوفة سطور
   if(i.state === 'due') return ['🔔 وجب موعد زكاة ' + zkYear(i.due), 'تاريخ الاستحقاق: ' + zkBoth(i.due), '⚠️ تُخرج فور الوجوب — لا يجوز التأخير ولا التقسيط بعد الموعد بدون عذر', 'وبعد إخراجها تقدر تعجّل زكاة ' + zkYear(i.next) + ' (استحقاقها ' + zkBoth(i.next) + ')'];
   if(i.state === 'paid') return ['✅ تم إخراج زكاة ' + zkYear(i.due),
-    i.winOpen ? '🟢 تعجيل زكاة ' + zkYear(i.next) + ' متاح من ' + gFmt(i.due) + ' م حتى قبل ' + zkBoth(i.winEnd) + ' — باقي ' + yFmt(i.days) + ' يوم' : '🔔 فاضل أقل من شهر على موعد زكاة ' + zkYear(i.next) + ' — راجع مالك وأخرجها',
+    i.winOpen ? '🟢 تعجيل زكاة ' + zkYear(i.next) + ' متاح من ' + gFmt(i.due) + ' م حتى قبل ' + zkBoth(i.winEnd) + ' — باقي ' + yFmt(i.days) + ' يوم' : zkLeftTxt(Math.ceil((i.next - new Date()) / 864e5), i.next).replace('على الموعد', 'على موعد زكاة ' + zkYear(i.next)),
     'موعد استحقاقها: ' + zkBoth(i.next)];
   if(i.state === 'wait') return ['⏳ باقي ' + yFmt(i.days) + ' يوم على موعد زكاة ' + zkYear(i.next), 'تاريخ الاستحقاق: ' + zkBoth(i.next), i.winOpen ? '🟢 تعجيل الزكاة متاح الآن حتى قبل ' + zkBoth(i.winEnd) : ''];
   return ['📅 حدّد تاريخ استحقاق الزكاة عشان يظهر لك تنبيه'];
@@ -7595,11 +7627,11 @@ function renderZkCalc(){
       const nd = Math.ceil((di.next - new Date()) / 864e5), nl = [];
       let ncls = 'prep', npill = '🔵 استعد — باقي ' + yFmt(nd) + ' يوم';
       if(nd <= 0){ ncls = 'due'; npill = '🔴 حلّ الموعد'; }
-      else if(nd <= 30){ ncls = 'month'; npill = '🟠 باقي ' + yFmt(nd) + ' يوم — اقترب جدًا'; }
+      else if(nd <= 30){ ncls = 'month'; npill = '🟠 باقي ' + zkRemainShort(di.next, nd) + ' — اقترب جدًا'; }
       else if(nd <= 183){ ncls = 'near'; npill = '🟡 اقترب — باقي ' + yFmt(nd) + ' يوم'; }
       if(di.state === 'paid'){
         if(di.winOpen) nl.push('🟢 تعجيل الزكاة متاح من ' + gFmt(di.due) + ' م حتى قبل ' + zkBoth(di.winEnd) + ' — باقي ' + yFmt(di.days) + ' يوم');
-        else nl.push('🔔 فاضل أقل من شهر على الموعد — راجع مالك وأخرجها');
+        else nl.push(zkLeftTxt(nd, di.next));
       } else if(di.state === 'wait'){ if(di.winOpen) nl.push('🟢 تعجيل الزكاة متاح الآن حتى قبل ' + zkBoth(di.winEnd)); }
       else nl.push('بعد إخراج زكاة ' + zkYear(di.due) + ' تقدر تعجّل هذه السنة');
       const bn = mkYB(ncls, di.next, npill, nl);
