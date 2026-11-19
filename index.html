@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8473">
+<meta name="app-version" content="2026-11-19.8474">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -20512,6 +20512,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   function refresh(){
     try{
       var I = info();
+      /* 8474: الإنذار المضيء مربوط بالسنة المختارة — سنة مسدّدة/مش هي سنة الإنذار → من غير إضاءة */
+      try{ if(I && I.lvl){ var cy0 = currentYear, ny0 = new Date().getFullYear(); if(cy0 !== I.yr && cy0 !== ny0) I = null; } }catch(e){}
       /* الرئيسية: الأيقونة نفسها بتبقى إنذار مضيء قوي (من غير مربع ولا شريط حواليها) */
       var hw = document.getElementById('zakHeroWrap'); mark(hw, I, true);
       if(hw && I && I.lvl){ hw.classList.remove('zka-glow'); hw.classList.add('zka-alarm'); }
@@ -20550,6 +20552,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ refresh(); } });
   setTimeout(refresh, 1500);
   setInterval(function(){ if(document.visibilityState === 'visible') refresh(); }, 30000);
+  var _zkaLastY = null;   /* 8474: أول ما السنة المختارة تتغيّر الإضاءة تتحدّث فورًا */
+  setInterval(function(){ try{ if(_zkaLastY !== currentYear){ _zkaLastY = currentYear; refresh(); } }catch(e){} }, 300);
 })();
 </script>
 <script>
