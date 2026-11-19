@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8472">
+<meta name="app-version" content="2026-11-19.8473">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -7258,7 +7258,7 @@ function zkYearStatus(y, zm){
   if(!data.zakatStart) return '📅 لسه ما اتحدّدش تاريخ استحقاق الزكاة (من علامة + )';
   const d = zkYearDue(y); if(!d) return '';
   const now = new Date(), when = zkBoth(d);
-  if(now < d){ const days = Math.max(1, Math.ceil((d - now) / 864e5)); return '⏳ لم يحن موعد استحقاقها — تاريخ الاستحقاق: ' + when + ' (باقي ' + yFmt(days) + ' يوم)'; }
+  if(now < d){ const days = Math.max(1, Math.ceil((d - now) / 864e5)); return '⏳ لم يحن موعد استحقاقها — تاريخ الاستحقاق: ' + when + ' (باقي ' + zkRemainShort(d, days) + ')'; }
   const paidAll = zm > 0 && zmPaidFor(y) >= zm;
   return '🔔 تم استحقاقها بتاريخ ' + when + (paidAll ? ' — ✅ وتم إخراجها بالكامل' : '');
 }
