@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8471">
+<meta name="app-version" content="2026-11-19.8472">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -7251,7 +7251,7 @@ function zmGet(){
 function zkYearDue(y){
   const iso = data.zakatStart; if(!iso) return null;
   const start = new Date(iso + 'T12:00:00'); if(isNaN(start)) return null;
-  for(let k = -80; k <= 80; k++){ const d = zkDueAt(start, k); if(d && d.getFullYear() === Number(y)) return d; }
+  for(let k = -80; k <= 80; k++){ const d = zkDueAt(start, k); if(d && d.getFullYear() === Number(y)) return zkDay0(d); }
   return null;
 }
 function zkYearStatus(y, zm){
@@ -7390,6 +7390,7 @@ function hjAnniv(start, hy){   // تاريخ ميلادي لنفس يوم وشه
 function zkMode(){ return data.zakatMode === 'hij' ? 'hij' : 'greg'; }   // greg: موعد ثابت بالميلادي كل سنة (٢٫٥٧٧٪) | hij: الحول الهجري (٢٫٥٪)
 function zkRate(){ return zkMode() === 'greg' ? 0.02577 : 0.025; }
 function zkRateTxt(){ return zkMode() === 'greg' ? '٢٫٥٧٧٪' : '٢٫٥٪'; }
+function zkDay0(d){ return d ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : d; }   // 8472: الموعد دايمًا من أول يوم الاستحقاق (12 بالليل) زي البطاقة البرتقالية
 function zkIso(d){ return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function zkDueAt(start, k){   // موعد الاستحقاق رقم k بعد التاريخ المُدخل (k=0 هو التاريخ نفسه)
   if(k === 0) return new Date(start.getTime());
@@ -7399,11 +7400,11 @@ function zkDueAt(start, k){   // موعد الاستحقاق رقم k بعد ا�
 function zkWinEnd(next){ const d = new Date(next.getTime()); if(zkMode() === 'greg') d.setMonth(d.getMonth() - 1); else d.setDate(d.getDate() - 30); return d; }   // آخر يوم للتعجيل: قبل الموعد بشهر
 function zkDueInfo(){
   const iso = data.zakatStart; if(!iso) return {state: 'unset'};
-  const start = new Date(iso + 'T12:00:00'); if(isNaN(start)) return {state: 'unset'};
-  const now = new Date();
-  if(now < start){ const prev = zkDueAt(start, -1), winEnd = zkWinEnd(start); return {state: 'wait', next: start, prev, winEnd, days: Math.max(0, Math.ceil((start - now) / 864e5)), winOpen: now >= prev && now <= winEnd}; }
-  let k = 0; while(k < 400 && zkDueAt(start, k + 1) <= now) k++;
-  const due = zkDueAt(start, k), next = zkDueAt(start, k + 1), winEnd = zkWinEnd(next), key = zkIso(due), paid = !!(data.zakatPaidD && data.zakatPaidD[key]);
+  const start0 = new Date(iso + 'T12:00:00'); if(isNaN(start0)) return {state: 'unset'};
+  const now = new Date(), start = zkDay0(start0), D = function(n){ return zkDay0(zkDueAt(start0, n)); };
+  if(now < start){ const prev = D(-1), winEnd = zkDay0(zkWinEnd(start)); return {state: 'wait', next: start, prev, winEnd, days: Math.max(0, Math.ceil((start - now) / 864e5)), winOpen: now >= prev && now <= winEnd}; }
+  let k = 0; while(k < 400 && D(k + 1) <= now) k++;
+  const due = D(k), next = D(k + 1), winEnd = zkDay0(zkWinEnd(next)), key = zkIso(due), paid = !!(data.zakatPaidD && data.zakatPaidD[key]);
   return {state: paid ? 'paid' : 'due', due, next, winEnd, key, days: Math.max(0, Math.ceil((winEnd - now) / 864e5)), winOpen: now <= winEnd};
 }
 function zkBoth(d){ return gFmt(d) + ' م = ' + hjFmt(d); }
@@ -7481,9 +7482,10 @@ function zkPrevCard(){
 function zkCdLines(yd, cy, reqTxt){
   let ms = Math.max(0, yd - new Date()); const d = Math.floor(ms / 864e5); ms -= d * 864e5; const h = Math.floor(ms / 36e5); ms -= h * 36e5; const m = Math.floor(ms / 6e4), sc = Math.floor((ms - m * 6e4) / 1000);
   const ar = function(n){ return yFmt(String(n).padStart(2, '0')); };
-  const lines = ['🟠 باقي ' + yFmt(d) + ' يوم على استحقاق زكاة ' + cy, '⏱️ ' + yFmt(d) + ' يوم · ' + ar(h) + ' ساعة · ' + ar(m) + ' دقيقة · ' + ar(sc) + ' ثانية', 'تاريخ الاستحقاق: ' + zkBoth(yd)];
+  const sh = d < 1 ? zkHM(Math.max(1, yd - new Date())) : yFmt(d) + ' يوم';
+  const lines = ['🟠 باقي ' + sh + ' على استحقاق زكاة ' + cy, '⏱️ ' + yFmt(d) + ' يوم · ' + ar(h) + ' ساعة · ' + ar(m) + ' دقيقة · ' + ar(sc) + ' ثانية', 'تاريخ الاستحقاق: ' + zkBoth(yd)];
   if(reqTxt) lines.push(reqTxt);
-  return {lines: lines, bell: '⏳ باقي ' + yFmt(d) + ' يوم على الزكاة'};
+  return {lines: lines, bell: '⏳ باقي ' + sh + ' على الزكاة'};
 }
 function renderZmDue(){
   if(window._zkCdT){ clearInterval(window._zkCdT); window._zkCdT = null; }
@@ -15998,7 +16000,7 @@ function dueAlertScan(){
     try{
       var zi = zkDueInfo();
       if(zi && zi.state === 'due' && zi.key){ var zk = 'zd:' + zi.key; if(!seen[zk]){ seen[zk] = 1; changed = true; if(fire) nfEvent('zdue', '🔔 وجب موعد زكاة المال — لازم تخرجها', zk); } }
-      else if(zi && zi.state === 'wait' && zi.days <= 30 && zi.next){ var wk = 'zw:' + zkIso(zi.next); if(!seen[wk]){ seen[wk] = 1; changed = true; if(fire) nfEvent('zdue', '🔔 باقي ' + toArabicDigits(zi.days) + ' يوم على موعد زكاة المال', wk); } }
+      else if(zi && (zi.state === 'wait' || zi.state === 'paid') && zi.next && (zi.next - new Date()) > 0 && Math.ceil((zi.next - new Date()) / 864e5) <= 30){ var wk = 'zw:' + zkIso(zi.next), wd = Math.ceil((zi.next - new Date()) / 864e5); if(!seen[wk]){ seen[wk] = 1; changed = true; if(fire) nfEvent('zdue', '🔔 باقي ' + zkRemainShort(zi.next, wd) + ' على موعد زكاة المال (' + zkBoth(zi.next) + ')', wk); } }
     }catch(e){}
     try{   // المساعد الذكي: تنبيهات إضافية قبل موعد الزكاة (٦٠ / ١٤ / ٧ / ٣ / يوم)
       var za = window.zkaInfo && window.zkaInfo();
@@ -20460,7 +20462,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     }catch(e){ return null; }
   }
   window.zkaInfo = info;
-  function dleft(I){ return I.d <= 0 ? 'أقل من يوم' : ar(I.d) + ' يوم'; }
+  function dleft(I){ if(I.d <= 0){ var ms0 = I.T - new Date(); return ms0 > 0 ? zkHM(ms0) : 'أقل من يوم'; } return ar(I.d) + ' يوم'; }
   function head(I){
     var yy = ar(I.yr);
     if(I.lvl === 4) return '🚨 وجب موعد زكاة ' + yy + ' — أخرجها الآن';
