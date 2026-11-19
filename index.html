@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8474">
+<meta name="app-version" content="2026-11-19.8475">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -16663,9 +16663,25 @@ function zakIcoRender(s){
 }
 function zakIcoSizeInput(){ previewSetting('zakIconSize', Number(document.getElementById('zakIcoSize').value) || 100); }
 var _zhPh = null, _zhWasOpen = false;
+/* 8475: سنة صفحة الزكاة منفصلة تمامًا عن سنة الصفحة الرئيسية (كل واحدة بتتحفظ لوحدها) */
+var _zkSwapHome = null;
+function zkSwapIn(){
+  if(_zkSwapHome !== null) return;
+  _zkSwapHome = currentYear;
+  var zy = 0; try{ zy = Number(localStorage.getItem('zakat_view_year')) || 0; }catch(e){}
+  if(zy > 2000 && zy !== currentYear){ try{ if(!data[zy]) ensureYear(zy); }catch(e){} currentYear = zy; }
+}
+function zkSwapOut(){
+  if(_zkSwapHome === null) return;
+  try{ localStorage.setItem('zakat_view_year', String(currentYear)); }catch(e){}
+  var hy = _zkSwapHome; _zkSwapHome = null;
+  if(currentYear !== hy){ currentYear = hy; try{ renderMonths(); }catch(e){} }
+  try{ yearBtnRefresh(); }catch(e){}
+}
 function openZakHero(){
   var card = document.getElementById('yrZM'), host = document.getElementById('zakHeroHost'); if(!card || !host) return;
   if(card.parentNode !== host){ _zhPh = document.createComment('zakHero'); card.parentNode.insertBefore(_zhPh, card); _zhWasOpen = card.classList.contains('open'); host.appendChild(card); }
+  zkSwapIn();
   card.classList.add('open');
   document.getElementById('zakHeroOverlay').classList.add('open');
   try{ if(typeof renderZM === 'function') renderZM(); }catch(e){}
@@ -16674,6 +16690,7 @@ function closeZakHero(){
   var card = document.getElementById('yrZM'), host = document.getElementById('zakHeroHost');
   if(card && host && card.parentNode === host && _zhPh && _zhPh.parentNode){ _zhPh.parentNode.insertBefore(card, _zhPh); _zhPh.parentNode.removeChild(_zhPh); _zhPh = null; card.classList.toggle('open', _zhWasOpen); }
   document.getElementById('zakHeroOverlay').classList.remove('open');
+  zkSwapOut();
 }
 
 /* ===== سنة الزكاة: شريحة تحت أيقونة الجامع + قائمة السنوات (المدفوعة بالأخضر) ===== */
@@ -16701,10 +16718,11 @@ function zkYrClose(){ document.getElementById('zkYrOverlay').classList.remove('o
 function zkYrPick(y){
   zkYrClose();
   if(y !== currentYear){
+    if(_zkSwapHome === null) zkSwapIn();
     if(!data[y]) ensureYear(y);
-    setCurrentYear(y); try{ save(); }catch(e){}
-    try{ renderMonths(); }catch(e){}
-    showToast('تم التبديل لسنة ' + toArabicDigits(y), true);
+    currentYear = y; try{ localStorage.setItem('zakat_view_year', String(y)); }catch(e){}
+    try{ save(); }catch(e){}
+    showToast('تم التبديل لسنة الزكاة ' + toArabicDigits(y), true);
   }
   try{ renderZM(); }catch(e){}
   zkYrChipRefresh();
