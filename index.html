@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8476">
+<meta name="app-version" content="2026-11-19.8479">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -9698,10 +9698,35 @@ function zigPerLabel(per, cnt){
 }
 /* ===== الوضع اللحظي: بنسجّل قيمة المؤشر كل ٦ ثواني (للذهب مع سعر الذهب العالمي الحي) ونرسمها زي شاشات البورصة ===== */
 var _zlBuf = null, _zlSaveT = 0, ZL_KEY = 'amwali_zig_live_v1';
-function zlLoad(){ if(_zlBuf) return _zlBuf; try{ _zlBuf = JSON.parse(localStorage.getItem(ZL_KEY) || '{}') || {}; }catch(e){ _zlBuf = {}; } return _zlBuf; }
+function zlClean(b){
+  /* 8477: شيل القراءات الشاذة القديمة (بعيدة أكتر من ١٫٨٪ عن وسيط جيرانها) من سعر الذهب، وكمان من الأرباح في نفس التوقيت */
+  try{
+    var a = b.gx; if(!a || a.length < 5) return;
+    var out = [], bad = [], i, j;
+    for(i = 0; i < a.length; i++){
+      var w = []; for(j = Math.max(0, i - 7); j < Math.min(a.length, i + 8); j++){ if(j !== i) w.push(a[j][1]); }
+      w.sort(function(p, q){ return p - q; });
+      var med = w[w.length >> 1];
+      if(med > 0 && Math.abs(a[i][1] - med) / med > 0.018) bad.push(a[i][0]); else out.push(a[i]);
+    }
+    if(!bad.length) return;
+    b.gx = out;
+    ['gp', 'gold', 'goldpage'].forEach(function(k){ if(b[k]) b[k] = b[k].filter(function(q){ return !bad.some(function(t){ return Math.abs(q[0] - t) <= 45000; }); }); });
+    try{ localStorage.setItem(ZL_KEY, JSON.stringify(b)); }catch(e){}
+  }catch(e){}
+}
+function zlLoad(){ if(_zlBuf) return _zlBuf; try{ _zlBuf = JSON.parse(localStorage.getItem(ZL_KEY) || '{}') || {}; }catch(e){ _zlBuf = {}; } zlClean(_zlBuf); return _zlBuf; }
+var _zlPend = {};
 function zigLiveSample(card, v){
   v = Number(v); if(!isFinite(v)) return;
+  try{ if(/^(gold|goldpage|gx|gp)$/.test(card) && typeof _gl !== 'undefined' && _gl && _gl.usdSrc === 'تقريبي (يومي)') return; }catch(e){}
   var b = zlLoad(), a = b[card] = b[card] || [], now = Date.now(), last = a[a.length - 1];
+  /* 8477: قفزة مفاجئة في سعر الذهب (أكتر من ٢٪) ما تتسجّلش إلا لما قراءة تانية قريبة منها تأكّدها */
+  if(card === 'gx' && last && last[1] > 0 && Math.abs(v - last[1]) / last[1] > 0.02){
+    var pd = _zlPend[card];
+    if(!pd || Math.abs(v - pd[1]) / pd[1] > 0.004 || now - pd[0] > 5 * 60 * 1000){ _zlPend[card] = [now, v]; return; }
+    delete _zlPend[card];
+  } else if(_zlPend[card]) delete _zlPend[card];
   if(!last || last[1] !== v || now - last[0] >= 30000) a.push([now, v]);
   while(a.length && (a.length > 400 || now - a[0][0] > 86400000)) a.shift();
   if(now - _zlSaveT > 20000){ _zlSaveT = now; try{ localStorage.setItem(ZL_KEY, JSON.stringify(b)); }catch(e){} }
@@ -10887,20 +10912,73 @@ async function glXauInvesting(){
   _glInvCache = {v: v, t: t, at: now};
   return {v: v, t: t, src: 'Investing.com'};
 }
+/* 8479: TradingView (TVC:GOLD ثم OANDA:XAUUSD) كمصدر تاني للذهب العالمي — من واجهة الماسح العامة (بدون مفتاح). لو القراءة متأخرة (delayed) بنأخّر وقتها فما تتقدمش على المصدر الحي */
+var _glTvCache = {v: 0, t: 0, at: 0};
+async function glXauTradingView(){
+  const now = Date.now();
+  if(_glTvCache.v > 0 && now - _glTvCache.at < 15 * 1000) return {v: _glTvCache.v, t: _glTvCache.t, src: 'TradingView'};
+  let lastErr = null;
+  for(const sym of ['TVC:GOLD', 'OANDA:XAUUSD']){
+    try{
+      const j = await glFetchJsonAny('https://scanner.tradingview.com/symbol?symbol=' + encodeURIComponent(sym) + '&fields=close,update_mode&no_404=true&_=' + now);
+      let v = Number(j && j.close), um = String((j && j.update_mode) || '');
+      if(!(v > 0) && j && j.data && j.data[0] && j.data[0].d){ v = Number(j.data[0].d[0]); um = String(j.data[0].d[1] || ''); }
+      if(!(v > 500 && v < 50000)) throw new Error('tv parse');
+      let t = now; const dm = um.match(/delayed[^\d]*(\d+)/i); if(dm) t = now - Number(dm[1]) * 1000; else if(/delayed|eod|pulsed/i.test(um)) t = now - 15 * 60 * 1000;
+      _glTvCache = {v: v, t: t, at: now};
+      return {v: v, t: t, src: 'TradingView'};
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('tv');
+}
 async function glXauSources(){
   const defs = [
     ['Investing.com', glXauInvesting],
+    ['TradingView', glXauTradingView],
     ['gold-api', async function(){ const j = await glFetchJson('https://api.gold-api.com/price/XAU?_=' + Date.now()); const v = Number(j && j.price); if(!(v > 500)) throw new Error('bad'); const t = j && j.updatedAt ? Date.parse(j.updatedAt) : 0; return {v: v, t: t > 0 ? t : Date.now(), src: 'gold-api'}; }],
     ['goldprice', async function(){ const j = await glFetchJsonAny('https://data-asg.goldprice.org/dbXRates/USD'); const it = j && j.items && j.items[0], v = Number(it && it.xauPrice); if(!(v > 500)) throw new Error('bad'); const t = Number(j.ts) > 0 ? Number(j.ts) : Date.now(); return {v: v, t: t, src: 'goldprice'}; }]
   ];
   const res = await Promise.allSettled(defs.map(function(d){ return d[1](); }));
   return defs.map(function(d, i){ const r = res[i]; return (r.status === 'fulfilled' && r.value && r.value.v > 0) ? {name: d[0], ok: true, v: r.value.v, t: r.value.t, src: r.value.src} : {name: d[0], ok: false}; });
 }
-var GL_XAU_ORDER = ['Investing.com', 'gold-api', 'goldprice', 'iSagha'];
+var GL_XAU_ORDER = ['Investing.com', 'TradingView', 'gold-api', 'goldprice', 'iSagha'];
+var GL_REJ_KEY = 'amwali_xau_rej_v1';
+function glRejLog(x, ref){
+  try{
+    var a = JSON.parse(localStorage.getItem(GL_REJ_KEY) || '[]') || [], last = a[a.length - 1];
+    if(last && last.s === x.src && last.v === x.v) return;
+    a.push({at: Date.now(), s: x.src, v: x.v, t: x.t || 0, ref: ref});
+    while(a.length > 12) a.shift();
+    localStorage.setItem(GL_REJ_KEY, JSON.stringify(a));
+  }catch(e){}
+}
 function glPickXau(list){
   if(!list || !list.length) return null;
   let use = list;
   if(list.length >= 3){ const med = glMedian(list.map(function(x){ return x.v; })); const g = list.filter(function(x){ return Math.abs(x.v - med) / med <= 0.01; }); if(g.length) use = g; }
+  else if(list.length === 2){   /* 8477: مصدرين بس — لو بينهم فرق أكتر من ١٪ نعتمد على الأقرب لآخر سعر معروف، ولو مفيش نفضّل مصدر السوق على iSagha */
+    const a = list[0], b = list[1];
+    if(Math.abs(a.v - b.v) / Math.min(a.v, b.v) > 0.01){
+      let ref = 0; try{ if(_gl && _gl.usd > 0 && _gl.usdTs && Date.now() - _gl.usdTs < 24 * 3600 * 1000 && _gl.usdSrc !== 'تقريبي (يومي)') ref = _gl.usd; }catch(e){}
+      if(ref > 0) use = [Math.abs(a.v - ref) <= Math.abs(b.v - ref) ? a : b];
+      else { const m = list.filter(function(x){ return x.src !== 'iSagha'; }); if(m.length === 1) use = m; }
+    }
+  }
+  /* 8478: أي قراءة بعيدة عن آخر سعر حي أكتر من المسموح (١٫٢٪ + ٠٫٨٪ لكل ساعة، بحد أقصى ٦٪) ومحدش أكّدها = قراءة غلط → نتجاهلها ونسجّل مصدرها في سجل الفحص */
+  try{
+    if(_gl && _gl.usd > 0 && _gl.usdTs && _gl.usdSrc !== 'تقريبي (يومي)'){
+      const ageH = (Date.now() - _gl.usdTs) / 3600000, tol = Math.min(0.06, 0.012 + 0.008 * Math.max(0, ageH));
+      const far = use.filter(function(x){ return Math.abs(x.v - _gl.usd) / _gl.usd > tol; });
+      if(far.length){
+        const ok = use.filter(function(x){ return far.indexOf(x) < 0; });
+        const confirmed = use.length >= 2 && Math.max.apply(null, use.map(function(x){ return x.v; })) / Math.min.apply(null, use.map(function(x){ return x.v; })) - 1 <= 0.004;
+        if(!confirmed){
+          far.forEach(function(x){ glRejLog(x, _gl.usd); });
+          if(ok.length) use = ok; else return null;
+        }
+      }
+    }
+  }catch(e){}
   const newest = Math.max.apply(null, use.map(function(x){ return x.t || 0; }));
   const inv = use.find(function(x){ return x.src === 'Investing.com'; });
   if(inv && (inv.t || 0) >= newest - 120 * 1000) return inv;
@@ -10942,6 +11020,7 @@ async function glDiagnose(){
   try{
     const ss = await glXauSources(), ago = function(t){ const d = Math.max(0, Math.round((Date.now() - t) / 1000)); return d < 90 ? toArabicDigits(d) + ' ث' : toArabicDigits(Math.round(d / 60)) + ' د'; };
     ss.forEach(function(r){ L.push(r.ok ? '✅ ذهب عالمي · ' + r.name + ': $' + f2(r.v) + ' · ' + glTmS(r.t) + ' (منذ ' + ago(r.t) + ')' : '❌ ذهب عالمي · ' + r.name + ': ما وصلش'); });
+    try{ const rj = JSON.parse(localStorage.getItem(GL_REJ_KEY) || '[]') || []; if(rj.length){ L.push('🚫 قراءات اتتجاهلت (بعيدة عن السعر الحي):'); rj.slice(-6).forEach(function(q){ L.push('   ' + q.s + ' $' + f2(q.v) + ' بدل ~$' + f2(q.ref) + ' · ' + glTmS(q.at)); }); } }catch(e){}
     const pk = glPickXau(ss.filter(function(r){ return r.ok; }));
     L.push(pk ? '⭐ المعتمد للذهب العالمي: ' + pk.src + ' $' + f2(pk.v) : '❌ الذهب العالمي: كل المصادر فشلت');
   }catch(e){ L.push('❌ الذهب العالمي: مش شغال'); }
@@ -10978,7 +11057,11 @@ async function goldLiveRefresh(manual){
     const cands = xs.filter(function(r){ return r.ok; });
     if(sg && sg.oz > 0 && sg.stampMs > 0) cands.push({v: sg.oz, t: sg.stampMs, src: 'iSagha'});
     let xp = glPickXau(cands), xau = xp ? xp.v : 0;
-    if(!xau){ xau = await glGetXauUsd(); if(xau > 0) xp = {v: xau, t: 0, src: 'تقريبي (يومي)'}; }
+    if(!xau){
+      /* 8477: السعر اليومي التقريبي (قديم) ما ينفعش يحل محل سعر حي موجود — ده كان بيعمل قمة غلط في المؤشر */
+      const keep = !!(_gl && _gl.usd > 0 && _gl.usdTs && now - _gl.usdTs < 12 * 3600 * 1000 && _gl.usdSrc !== 'تقريبي (يومي)');
+      if(!keep){ xau = await glGetXauUsd(); if(xau > 0) xp = {v: xau, t: 0, src: 'تقريبي (يومي)'}; }
+    }
     const usd = xau || (sg && sg.oz) || 0;
     if(usd > 0){ nl.usd = usd; nl.usdTs = now; nl.usdT = (xp && xp.t) || now; nl.usdSrc = xp ? xp.src : (sg ? 'iSagha' : ''); }
     if(bank && bank.length){
