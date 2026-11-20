@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8475">
+<meta name="app-version" content="2026-11-19.8476">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -5279,23 +5279,23 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
  <div id="zigLegacy" style="display:none;">
       <p style="font-size:12px; color:var(--muted); margin:0 0 4px; line-height:1.6;">اختار الشكل والفترة لكل بطاقة: 📡 لحظي (بيتحدّث كل ٦ ثواني) · يومي (آخر ١٠ أيام فيها حركة) · أسبوعي (آخر ١٢ أسبوع) · شهري (آخر ١٢ شهر) · ربع سنوي · نصف سنوي (آخر ٨) · سنوي (آخر ٨ سنين). التغيير بيظهر فورًا. «📉 بورصة» = مؤشر زي شاشات البورصة: خط بتدرّج تحته، خط متقطع عند نقطة البداية، محور تواريخ وشبكة، ونقطة حيّة نابضة عند آخر قيمة.</p>
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">💵 إجمالي الأموال</div>
-      <div class="opt-row" id="optZig_total"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('total','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('total','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('total','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('total','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('total','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('total','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('total','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('total','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('total','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('total','off')">🚫 بدون</button></div>
+      <div class="opt-row" id="optZig_total"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('total','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="tview" onclick="zigSetStyle('total','tview')">📈 تريدينغ فيو</button><button type="button" class="opt-chip" data-val="invest" onclick="zigSetStyle('total','invest')">📊 إنفستينج</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('total','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('total','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('total','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('total','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('total','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('total','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('total','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('total','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('total','off')">🚫 بدون</button></div>
       <div style="font-weight:700; font-size:12px; color:var(--muted); margin:8px 0 4px;">الفترة</div>
       <div class="opt-row" id="optZigP_total"><button type="button" class="opt-chip" data-val="live" onclick="zigSetPeriod('total','live')">📡 لحظي</button><button type="button" class="opt-chip" data-val="day" onclick="zigSetPeriod('total','day')">📅 يومي</button><button type="button" class="opt-chip" data-val="week" onclick="zigSetPeriod('total','week')">🗓️ أسبوعي</button><button type="button" class="opt-chip" data-val="month" onclick="zigSetPeriod('total','month')">🗓️ شهري</button><button type="button" class="opt-chip" data-val="quarter" onclick="zigSetPeriod('total','quarter')">🗓️ ربع سنوي</button><button type="button" class="opt-chip" data-val="half" onclick="zigSetPeriod('total','half')">🗓️ نصف سنوي</button><button type="button" class="opt-chip" data-val="year" onclick="zigSetPeriod('total','year')">📆 سنوي</button></div>
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">💰 أموال</div>
-      <div class="opt-row" id="optZig_money"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('money','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('money','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('money','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('money','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('money','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('money','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('money','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('money','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('money','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('money','off')">🚫 بدون</button></div>
+      <div class="opt-row" id="optZig_money"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('money','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="tview" onclick="zigSetStyle('money','tview')">📈 تريدينغ فيو</button><button type="button" class="opt-chip" data-val="invest" onclick="zigSetStyle('money','invest')">📊 إنفستينج</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('money','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('money','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('money','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('money','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('money','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('money','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('money','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('money','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('money','off')">🚫 بدون</button></div>
       <div style="font-weight:700; font-size:12px; color:var(--muted); margin:8px 0 4px;">الفترة</div>
       <div class="opt-row" id="optZigP_money"><button type="button" class="opt-chip" data-val="live" onclick="zigSetPeriod('money','live')">📡 لحظي</button><button type="button" class="opt-chip" data-val="day" onclick="zigSetPeriod('money','day')">📅 يومي</button><button type="button" class="opt-chip" data-val="week" onclick="zigSetPeriod('money','week')">🗓️ أسبوعي</button><button type="button" class="opt-chip" data-val="month" onclick="zigSetPeriod('money','month')">🗓️ شهري</button><button type="button" class="opt-chip" data-val="quarter" onclick="zigSetPeriod('money','quarter')">🗓️ ربع سنوي</button><button type="button" class="opt-chip" data-val="half" onclick="zigSetPeriod('money','half')">🗓️ نصف سنوي</button><button type="button" class="opt-chip" data-val="year" onclick="zigSetPeriod('money','year')">📆 سنوي</button></div>
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">🪙 ذهب</div>
-      <div class="opt-row" id="optZig_gold"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('gold','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('gold','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('gold','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('gold','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('gold','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('gold','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('gold','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('gold','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('gold','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('gold','off')">🚫 بدون</button></div>
+      <div class="opt-row" id="optZig_gold"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('gold','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="tview" onclick="zigSetStyle('gold','tview')">📈 تريدينغ فيو</button><button type="button" class="opt-chip" data-val="invest" onclick="zigSetStyle('gold','invest')">📊 إنفستينج</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('gold','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('gold','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('gold','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('gold','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('gold','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('gold','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('gold','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('gold','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('gold','off')">🚫 بدون</button></div>
       <div style="font-weight:700; font-size:12px; color:var(--muted); margin:8px 0 4px;">الفترة</div>
       <div class="opt-row" id="optZigP_gold"><button type="button" class="opt-chip" data-val="live" onclick="zigSetPeriod('gold','live')">📡 لحظي</button><button type="button" class="opt-chip" data-val="day" onclick="zigSetPeriod('gold','day')">📅 يومي</button><button type="button" class="opt-chip" data-val="week" onclick="zigSetPeriod('gold','week')">🗓️ أسبوعي</button><button type="button" class="opt-chip" data-val="month" onclick="zigSetPeriod('gold','month')">🗓️ شهري</button><button type="button" class="opt-chip" data-val="quarter" onclick="zigSetPeriod('gold','quarter')">🗓️ ربع سنوي</button><button type="button" class="opt-chip" data-val="half" onclick="zigSetPeriod('gold','half')">🗓️ نصف سنوي</button><button type="button" class="opt-chip" data-val="year" onclick="zigSetPeriod('gold','year')">📆 سنوي</button></div>
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">🪙 صفحة الذهب (قيمة الذهب)</div>
-      <div class="opt-row" id="optZig_goldpage"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('goldpage','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('goldpage','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('goldpage','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('goldpage','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('goldpage','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('goldpage','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('goldpage','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('goldpage','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('goldpage','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('goldpage','off')">🚫 بدون</button></div>
+      <div class="opt-row" id="optZig_goldpage"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('goldpage','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="tview" onclick="zigSetStyle('goldpage','tview')">📈 تريدينغ فيو</button><button type="button" class="opt-chip" data-val="invest" onclick="zigSetStyle('goldpage','invest')">📊 إنفستينج</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('goldpage','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('goldpage','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('goldpage','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('goldpage','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('goldpage','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('goldpage','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('goldpage','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('goldpage','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('goldpage','off')">🚫 بدون</button></div>
       <div style="font-weight:700; font-size:12px; color:var(--muted); margin:8px 0 4px;">الفترة</div>
       <div class="opt-row" id="optZigP_goldpage"><button type="button" class="opt-chip" data-val="live" onclick="zigSetPeriod('goldpage','live')">📡 لحظي</button><button type="button" class="opt-chip" data-val="day" onclick="zigSetPeriod('goldpage','day')">📅 يومي</button><button type="button" class="opt-chip" data-val="week" onclick="zigSetPeriod('goldpage','week')">🗓️ أسبوعي</button><button type="button" class="opt-chip" data-val="month" onclick="zigSetPeriod('goldpage','month')">🗓️ شهري</button><button type="button" class="opt-chip" data-val="quarter" onclick="zigSetPeriod('goldpage','quarter')">🗓️ ربع سنوي</button><button type="button" class="opt-chip" data-val="half" onclick="zigSetPeriod('goldpage','half')">🗓️ نصف سنوي</button><button type="button" class="opt-chip" data-val="year" onclick="zigSetPeriod('goldpage','year')">📆 سنوي</button></div>
       <div style="font-weight:900; font-size:13.5px; margin:14px 0 6px;">📊 متوسط الإنفاق اليومي (صفحة الشهر)</div>
-      <div class="opt-row" id="optZig_avg"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('avg','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('avg','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('avg','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('avg','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('avg','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('avg','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('avg','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('avg','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('avg','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('avg','off')">🚫 بدون</button></div>
+      <div class="opt-row" id="optZig_avg"><button type="button" class="opt-chip" data-val="market" onclick="zigSetStyle('avg','market')">📉 بورصة</button><button type="button" class="opt-chip" data-val="tview" onclick="zigSetStyle('avg','tview')">📈 تريدينغ فيو</button><button type="button" class="opt-chip" data-val="invest" onclick="zigSetStyle('avg','invest')">📊 إنفستينج</button><button type="button" class="opt-chip" data-val="smooth" onclick="zigSetStyle('avg','smooth')">〰️ منحنى</button><button type="button" class="opt-chip" data-val="zig" onclick="zigSetStyle('avg','zig')">⚡ زجزاج</button><button type="button" class="opt-chip" data-val="step" onclick="zigSetStyle('avg','step')">🪜 سلم</button><button type="button" class="opt-chip" data-val="bars" onclick="zigSetStyle('avg','bars')">📊 أعمدة</button><button type="button" class="opt-chip" data-val="area" onclick="zigSetStyle('avg','area')">🏔️ مساحة</button><button type="button" class="opt-chip" data-val="lollipop" onclick="zigSetStyle('avg','lollipop')">🍭 عصي</button><button type="button" class="opt-chip" data-val="dots" onclick="zigSetStyle('avg','dots')">⚪ نقاط</button><button type="button" class="opt-chip" data-val="gauge" onclick="zigSetStyle('avg','gauge')">🎯 عداد</button><button type="button" class="opt-chip" data-val="off" onclick="zigSetStyle('avg','off')">🚫 بدون</button></div>
     </div>
  </div>
 
@@ -6074,7 +6074,7 @@ let settings = {
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
-var ZIG_STYLES = ['smooth','zig','step','bars','area','lollipop','dots','gauge','market','dual','off'], ZIG_PERIODS = ['live','day','week','month','quarter','half','year'];
+var ZIG_STYLES = ['smooth','zig','step','bars','area','lollipop','dots','gauge','market','tview','invest','dual','off'], ZIG_PERIODS = ['live','day','week','month','quarter','half','year'];
 function zigStyleOf(card){
   try{ var z = (_draftSettings || settings).zig || {}, v = z[card]; return ZIG_STYLES.indexOf(v) >= 0 ? v : ((card === 'avg' || card === 'gdual') ? 'market' : 'smooth'); }catch(e){ return 'smooth'; }
 }
@@ -9723,6 +9723,87 @@ async function zigLiveLoop(){
   }catch(e){}
   try{ cmZigRender(); }catch(e){} try{ goldPageZigRender(); }catch(e){} try{ capZigRender(); }catch(e){} try{ gdualRender(); }catch(e){}
 }
+/* 8476: شكلين جداد للمؤشرات — «تريدينغ فيو» (خط ومساحة + إغلاق سابق متقطع + أسعار على اليمين + بطاقة السعر الحالي) و«إنفستينج» (شبكة + خط أزرق + سعر حالي متقطع + O/H/L/C) */
+function zigTickLab(t, per){
+  var dt = new Date(t);
+  if(per === 'live') return dt.toLocaleTimeString(dateLocale(), {hour: 'numeric', minute: '2-digit'});
+  if(per === 'year') return toArabicDigits(dt.getFullYear());
+  if(per === 'month' || per === 'quarter' || per === 'half') return dt.toLocaleDateString(dateLocale(), {month: 'short', year: '2-digit'});
+  return dt.toLocaleDateString(dateLocale(), {day: 'numeric', month: 'short'});
+}
+function zigProMarkup(kind, c){
+  var days = c.days, pts = c.pts, n = c.n, per = c.per, o = c.o, mn = c.mn, mx = c.mx, rg = c.rg, uid = c.uid, tip = c.tip, svg = c.svg, up = c.up;
+  var rw = 300; try{ rw = svg.getBoundingClientRect().width || 300; }catch(e){}
+  var small = rw < 170, DMS = 86400000, inv = kind === 'invest';
+  var MH = small ? 62 : (o.H ? o.H + 66 : 130);
+  var fv = function(v){ return (v < 0 ? '−' : '') + zigAr(v); };
+  var fz = Math.max(8, Math.min(13, 9.5 * 300 / Math.max(rw, 1)));
+  var mxLen = Math.max(fv(mx).length, fv(mn).length);
+  var axW = small ? 0 : Math.max(34, Math.min(72, mxLen * fz * 0.62 + 9));
+  var mL = 3, mR = 297 - axW, plotT = small ? 6 : (inv ? 22 : 8), plotB = small ? MH - 5 : MH - 18, axY = MH - 5;
+  var tt = days.map(function(g){ return g.t; }), t1 = tt[tt.length - 1], tf = tt[0];
+  var gap0 = days.length > 1 ? (t1 - tf) / (days.length - 1) * 0.5 : DMS;
+  gap0 = per === 'live' ? Math.max(1000, gap0) : Math.max(DMS, gap0);
+  tt.unshift(tf - gap0);
+  for(var ti = 1; ti < tt.length; ti++){ if(tt[ti] <= tt[ti - 1]) tt[ti] = tt[ti - 1] + 1000; }
+  var T0 = tt[0], TE = tt[tt.length - 1], TR = TE + (TE - T0) * 0.05;
+  var xAt = function(t){ return mL + (t - T0) / (TR - T0) * (mR - mL); };
+  var lo2 = mn - rg * 0.1, hi2 = mx + rg * 0.1, yAt = function(v){ return plotB - (v - lo2) / (hi2 - lo2) * (plotB - plotT); };
+  var xy = pts.map(function(v, i){ return [xAt(tt[i]), yAt(v)]; });
+  var ln = xy.map(function(q, i){ return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' ');
+  var lx = xy[xy.length - 1][0], ly = xy[xy.length - 1][1], fx = xy[0][0];
+  var LINE = inv ? (o.color || ((o.upCol || o.dnCol) ? c.col : '#2962c4')) : (o.color || ((o.upCol || o.dnCol) ? c.col : (up ? '#089981' : '#f23645')));
+  var mk = '', K = small ? 3 : (inv ? 4 : 3), gi, tagH = fz * 1.55, tagY = [];
+  var txt = function(x, y, s, anchor, ex){ return '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" text-anchor="' + anchor + '" font-size="' + fz.toFixed(1) + '" ' + (ex || '') + ' style="direction:ltr;unicode-bidi:isolate">' + s + '</text>'; };
+  var tag = function(y, s, fill){ tagY.push(y); return '<rect x="' + (mR + 1.5).toFixed(1) + '" y="' + (y - tagH / 2).toFixed(1) + '" width="' + (axW - 3).toFixed(1) + '" height="' + tagH.toFixed(1) + '" rx="2" fill="' + fill + '"/>' + txt(mR + axW / 2, y + fz * 0.36, s, 'middle', 'font-weight="700" fill="#fff"'); };
+  mk += '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + LINE + '" stop-opacity="' + (inv ? '.26' : '.34') + '"/><stop offset="1" stop-color="' + LINE + '" stop-opacity="' + (inv ? '.04' : '0') + '"/></linearGradient></defs>';
+  var yTicks = [], yi;
+  for(yi = 0; yi < 4; yi++){ yTicks.push(mn + rg * yi / 3); }
+  if(inv){
+    yTicks.forEach(function(v){ var y = yAt(v).toFixed(1); mk += '<line x1="' + mL + '" y1="' + y + '" x2="' + mR + '" y2="' + y + '" stroke="rgba(128,128,128,.22)" stroke-width="1" vector-effect="non-scaling-stroke"/>'; });
+  }
+  for(gi = 0; gi < K; gi++){
+    var gt = T0 + gi * (TE - T0) / (K - 1), gx = xAt(gt);
+    if(inv) mk += '<line x1="' + gx.toFixed(1) + '" y1="' + plotT + '" x2="' + gx.toFixed(1) + '" y2="' + plotB + '" stroke="rgba(128,128,128,.22)" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+    if(!small) mk += txt(gx, axY, zigTickLab(gt, per), gi === 0 ? 'start' : (gi === K - 1 ? 'end' : 'middle'), 'font-weight="700" fill="currentColor" fill-opacity=".62"');
+  }
+  mk += '<line x1="' + mL + '" y1="' + plotB + '" x2="' + (small ? mR : mR + axW - 3) + '" y2="' + plotB + '" stroke="rgba(128,128,128,.34)" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  mk += '<path d="' + ln + ' L' + lx.toFixed(1) + ' ' + plotB + ' L' + fx.toFixed(1) + ' ' + plotB + ' Z" fill="url(#' + uid + ')"/>';
+  var pcY = yAt(pts[0]);
+  if(!inv){
+    mk += '<line x1="' + mL + '" y1="' + pcY.toFixed(1) + '" x2="' + mR + '" y2="' + pcY.toFixed(1) + '" stroke="rgba(120,120,130,.9)" stroke-width="1.2" stroke-dasharray="1.2 3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+  }
+  mk += '<path class="cm-zl" pathLength="1" d="' + ln + '" fill="none" stroke="' + LINE + '" stroke-width="' + (inv ? '1.6' : '1.9') + '" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+  if(inv){
+    mk += '<line x1="' + mL + '" y1="' + ly.toFixed(1) + '" x2="' + mR + '" y2="' + ly.toFixed(1) + '" stroke="#222" stroke-opacity=".85" stroke-width="1.1" stroke-dasharray="3 2.4" vector-effect="non-scaling-stroke"/>';
+  }
+  days.forEach(function(g, i){ mk += '<circle cx="' + xy[i + 1][0].toFixed(1) + '" cy="' + xy[i + 1][1].toFixed(1) + '" r="6" fill="rgba(0,0,0,0)" stroke="none">' + tip(g) + '</circle>'; });
+  mk += '<circle class="mk-pulse" cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3.4" fill="' + LINE + '" fill-opacity=".45"/>';
+  mk += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="' + (inv ? '2.6' : '3') + '" fill="' + LINE + '" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke">' + tip(days[days.length - 1]) + '</circle>';
+  if(!small){
+    var lastV = pts[n - 1];
+    if(inv){
+      mk += tag(ly, fv(lastV), '#1f2328');
+    } else {
+      mk += tag(pcY, fv(pts[0]), '#7d7f86');
+      if(Math.abs(pcY - ly) > tagH * 0.9) mk += tag(ly, fv(lastV), LINE); else mk += tag(ly, fv(lastV), LINE);
+      var lbl = (per === 'live' || per === 'day') ? 'الإغلاق السابق' : 'بداية الفترة', lw = lbl.length * fz * 0.5 + 12;
+      mk += '<rect x="' + (mR - lw - 4).toFixed(1) + '" y="' + (pcY - tagH / 2).toFixed(1) + '" width="' + lw.toFixed(1) + '" height="' + tagH.toFixed(1) + '" rx="2" fill="#7d7f86"/><text x="' + (mR - 4 - lw / 2).toFixed(1) + '" y="' + (pcY + fz * 0.36).toFixed(1) + '" text-anchor="middle" font-size="' + fz.toFixed(1) + '" font-weight="700" fill="#fff">' + lbl + '</text>';
+    }
+    yTicks.forEach(function(v){
+      var y = yAt(v), clash = tagY.some(function(ty){ return Math.abs(ty - y) < tagH * 0.95; });
+      if(!clash) mk += txt(mR + axW - 3, y + fz * 0.36, fv(v), 'end', 'fill="currentColor" fill-opacity=".66"');
+    });
+    if(inv){
+      var chg = pts[n - 1] - pts[0], pcv = pts[0] ? chg / Math.abs(pts[0]) * 100 : null, cc = chg >= 0 ? '#0f9d78' : '#d6336c';
+      var chTxt = (chg >= 0 ? '+' : '−') + zigAr(chg) + (pcv !== null ? ' (' + (chg >= 0 ? '+' : '−') + toArabicDigits(Math.abs(pcv).toFixed(2)) + '%)' : '');
+      var hd = mxLen <= 6 ? 'O <tspan font-weight="700">' + fv(pts[0]) + '</tspan>  H <tspan font-weight="700">' + fv(mx) + '</tspan>  L <tspan font-weight="700">' + fv(mn) + '</tspan>  C <tspan font-weight="700">' + fv(pts[n - 1]) + '</tspan>  ' : '';
+      mk += txt(mL + 2, 13, hd + '<tspan font-weight="700" fill="' + cc + '">' + chTxt + '</tspan>', 'start', 'fill="currentColor" fill-opacity=".85"');
+    }
+  }
+  svg.setAttribute('viewBox', '0 0 300 ' + MH);
+  return mk;
+}
 function zigPaint(svg, cap, o){
   if(!svg) return;
   var per = o.period || 'day'; if(__zigDemo && per === 'live' && !o.demoLive) per = 'day';
@@ -9805,6 +9886,7 @@ function zigPaint(svg, cap, o){
     svg.setAttribute('viewBox', '0 0 300 ' + MH);
     return done(mk);
   }
+  if(sty === 'tview' || sty === 'invest'){ return done(zigProMarkup(sty, {svg: svg, days: days, pts: pts, mn: mn, mx: mx, rg: rg, n: n, per: per, o: o, up: up, col: col, uid: uid, tip: tip})); }
   if(sty === 'dual'){
     /* 8328: مؤشر مزدوج — فوق: خط القيمة (كل جزء أزرق لو زاد وأحمر لو نزل) · تحت: أعمدة التغيّر في كل فترة (أزرق فوق الخط / أحمر تحته) */
     var UPc = o.upCol || '#2f6fed', DNc = o.dnCol || '#e03131', topB = Math.round(H * 0.56), botT = Math.round(H * 0.68), botB = H - P, midY = (botT + botB) / 2;
@@ -17693,7 +17775,7 @@ try{ wkIcoApply(settings); }catch(e){}
     {c:'avg',      n:'متوسط الإنفاق اليومي',  per:false},
     {c:'gdual',    n:'مؤشر الذهب والأرباح (مزدوج)', per:true}
   ];
-  var STY = [['market','📉 بورصة'],['dual','🔀 مزدوج'],['smooth','〰️ منحنى'],['zig','⚡ زجزاج'],['step','🪜 سلم'],['bars','📊 أعمدة'],['area','🏔️ مساحة'],['lollipop','🍭 عصي'],['dots','⚪ نقاط'],['gauge','🎯 عداد'],['off','🚫 بدون']];
+  var STY = [['market','📉 بورصة'],['tview','📈 تريدينغ فيو'],['invest','📊 إنفستينج'],['dual','🔀 مزدوج'],['smooth','〰️ منحنى'],['zig','⚡ زجزاج'],['step','🪜 سلم'],['bars','📊 أعمدة'],['area','🏔️ مساحة'],['lollipop','🍭 عصي'],['dots','⚪ نقاط'],['gauge','🎯 عداد'],['off','🚫 بدون']];
   var PER = [['live','📡 لحظي'],['day','📅 يومي'],['week','🗓️ أسبوعي'],['month','🗓️ شهري'],['quarter','🗓️ ربع سنوي'],['half','🗓️ نصف سنوي'],['year','📆 سنوي']];
   var _open = null, _sig = '', _dd = null;
   function esc(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
