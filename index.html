@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8479">
+<meta name="app-version" content="2026-11-19.8480">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -9607,6 +9607,28 @@ function zigDate(t){ return new Date(t).toLocaleDateString(dateLocale(), {day: '
 /* ===== 8326: المؤشر المزدوج «الذهب العالمي + أرباحي» — الزيادة أزرق والنزول أحمر ===== */
 var GD_BLUE = '#2f6fed', GD_RED = '#e03131', GD_KEY = 'amwali_gd_daily_v1', _gdD = null, _gdSaveT = 0;
 function gdLoad(){ if(_gdD) return _gdD; try{ _gdD = JSON.parse(localStorage.getItem(GD_KEY) || '{}') || {}; }catch(e){ _gdD = {}; } _gdD.gx = _gdD.gx || {}; _gdD.gp = _gdD.gp || {}; return _gdD; }
+/* 8480: حالة بورصة الذهب العالمي — 🟢 حية / 🔴 مغلقة (عطلة نهاية الأسبوع أو الاستراحة اليومية) / ⚠️ متأخرة. جدول الذهب (XAU/USD): من الأحد ٦ م لحد الجمعة ٥ م بتوقيت نيويورك، واستراحة يومية ٥–٦ م */
+function glMktOpenAt(d){
+  var p = {}; try{ new Intl.DateTimeFormat('en-US', {timeZone: 'America/New_York', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23'}).formatToParts(d).forEach(function(x){ p[x.type] = x.value; }); }catch(e){ return {open: true}; }
+  var wd = p.weekday, m = (Number(p.hour) % 24) * 60 + Number(p.minute);
+  if(wd === 'Sat' || (wd === 'Fri' && m >= 17 * 60) || (wd === 'Sun' && m < 18 * 60)) return {open: false, why: 'weekend'};
+  if(m >= 17 * 60 && m < 18 * 60) return {open: false, why: 'break'};
+  return {open: true};
+}
+function glMarketState(){
+  var now = new Date(), st = glMktOpenAt(now), age = null;
+  try{ if(_gl && _gl.usdT) age = now.getTime() - _gl.usdT; }catch(e){}
+  if(!st.open){
+    var nx = null, t = now.getTime() + 15 * 60000, i;
+    for(i = 0; i < 800; i++, t += 15 * 60000){ if(glMktOpenAt(new Date(t)).open){ nx = t; break; } }
+    var when = '';
+    if(nx){ try{ when = ' — تفتح ' + new Date(nx).toLocaleString(dateLocale(), {weekday: 'long', hour: 'numeric', minute: '2-digit'}); }catch(e){} }
+    return {state: 'closed', short: '🔴 مغلقة', long: '🔴 البورصة مغلقة (' + (st.why === 'break' ? 'استراحة يومية' : 'عطلة نهاية الأسبوع') + ') — السعر هو آخر إغلاق' + when};
+  }
+  if(age !== null && age > 15 * 60 * 1000) return {state: 'stale', short: '⚠️ متأخر', long: '⚠️ البورصة مفتوحة لكن السعر متأخر عن الحي'};
+  return {state: 'live', short: '🟢 حي', long: '🟢 البورصة مفتوحة — أسعار حيّة'};
+}
+function gdMkBadge(){ try{ var m = glMarketState(); return ' <small class="gd-mk gd-mk-' + m.state + '" title="' + m.long.replace(/"/g, '') + '">' + m.short + '</small>'; }catch(e){ return ''; } }
 function gdValues(){
   var gx = 0, gp = null;
   try{ gx = Number((_gl && _gl.usd) || 0); }catch(e){}
@@ -9655,7 +9677,7 @@ function gdualRender(){
       if(cur === null) val.innerHTML = '<span class="gd-na">—</span>';
       else{
         var up = c === 'gx' ? ch >= 0 : cur >= 0, col = up ? GD_BLUE : GD_RED, txt = c === 'gx' ? '$' + toArabicDigits(fmt(Math.round(cur * 100) / 100)) : (cur >= 0 ? '+' : '−') + toArabicDigits(fmt(Math.round(Math.abs(cur))));
-        val.innerHTML = '<span style="color:' + col + '">' + txt + '</span>' + (prevV !== null && Math.abs(ch) > 0.0001 ? ' <small style="color:' + (ch >= 0 ? GD_BLUE : GD_RED) + '">' + (ch >= 0 ? '▲' : '▼') + ' ' + toArabicDigits(fmt(Math.round(Math.abs(ch) * 100) / 100)) + '</small>' : '') + (stale ? ' <small class="gd-na">⏱ آخر قراءة</small>' : '');
+        val.innerHTML = '<span style="color:' + col + '">' + txt + '</span>' + (prevV !== null && Math.abs(ch) > 0.0001 ? ' <small style="color:' + (ch >= 0 ? GD_BLUE : GD_RED) + '">' + (ch >= 0 ? '▲' : '▼') + ' ' + toArabicDigits(fmt(Math.round(Math.abs(ch) * 100) / 100)) + '</small>' : '') + (stale ? ' <small class="gd-na">⏱ آخر قراءة</small>' : '') + (c === 'gx' ? gdMkBadge() : '');
       }
     }
     zigPaint(svg, cap, {days: days, cap: (__zigDemo ? '' : ''), style: st, period: per, card: __zigDemo ? c + 'd' : c, empty: r[6], upCol: GD_BLUE, dnCol: GD_RED, demoLive: true});
@@ -11146,7 +11168,7 @@ function glStatusRender(){
   const row = document.createElement('div'); row.className = 'gd-chips3';
   chips.forEach(function(c){ const d = document.createElement('div'); d.innerHTML = '<span></span><small></small><b></b>'; d.children[0].textContent = c[0]; d.children[1].textContent = c[1]; d.children[2].textContent = c[2]; row.appendChild(d); });
   el.appendChild(row);
-  const parts = []; if(_gl.usd > 0 && _gl.usdTs) parts.push(glTmS(_gl.usdT || _gl.usdTs)); if(_gl.usd > 0 && _gl.usdSrc) parts.push(_gl.usdSrc); if(_gl.usdT && Date.now() - _gl.usdT > 15 * 60 * 1000) parts.push('⚠️ متأخر');
+  const parts = []; if(_gl.usd > 0 && _gl.usdTs) parts.push(glTmS(_gl.usdT || _gl.usdTs)); if(_gl.usd > 0 && _gl.usdSrc) parts.push(_gl.usdSrc); if(_gl.usd > 0) parts.push(glMarketState().long);
   if(!navigator.onLine) parts.push('أوفلاين');
   if(parts.length){ const tm = document.createElement('div'); tm.className = 'gd-time'; tm.textContent = parts.join(' · '); el.appendChild(tm); }
 }
@@ -11156,7 +11178,7 @@ function glInfoPanel(){
   const usd = _gl && _gl.usd > 0 ? _gl.usd : 0, r = glRate(), b24 = glBase24(), se = glSarEff(), f2 = glF2;
   w.textContent = usd ? '$' + f2(usd) : '—';
   const wn = document.getElementById('glWorldNote');
-  if(wn){ const parts = []; if(usd && _gl.usdSrc) parts.push('المصدر: ' + _gl.usdSrc); if(usd && _gl.usdTs) parts.push(glTmS(_gl.usdT || _gl.usdTs)); if(usd && _gl.usdT && Date.now() - _gl.usdT > 15 * 60 * 1000) parts.push('⚠️ متأخر'); wn.textContent = parts.join(' · '); }
+  if(wn){ const parts = []; if(usd && _gl.usdSrc) parts.push('المصدر: ' + _gl.usdSrc); if(usd && _gl.usdTs) parts.push(glTmS(_gl.usdT || _gl.usdTs)); if(usd) parts.push(glMarketState().long); wn.textContent = parts.join(' · '); }
   document.getElementById('glInfoUsd').textContent = r ? (Number(_glAdj.usdManual) > 0 ? f2(r) + ' ج (يدوي)' : f2(_gl.rateBuy) + ' / ' + f2(r) + ' ج') : '—';
   let un = '';
   if(Number(_glAdj.usdManual) > 0) un = 'بتستخدم الدولار اللي كتبته بإيدك' + (_gl && _gl.rate > 0 ? ' (التلقائي دلوقتي: ' + f2(_gl.rate) + ')' : '') + ' — امسح الخانة للرجوع للتلقائي';
@@ -17902,6 +17924,12 @@ try{ wkIcoApply(settings); }catch(e){}
   try{ zigHubRender(true); }catch(e){}
 })();
 </script>
+<style>
+.gd-mk{font-size:10px;font-weight:800;padding:1px 6px;border-radius:9px;margin-inline-start:4px;white-space:nowrap;vertical-align:middle}
+.gd-mk-live{background:rgba(15,157,120,.16);color:#0b7a5c}
+.gd-mk-closed{background:rgba(224,49,49,.14);color:#c92a2a}
+.gd-mk-stale{background:rgba(245,159,0,.2);color:#b36b00}
+</style>
 <style>
 #privShield{position:fixed; inset:0; z-index:2147483000; display:none; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:radial-gradient(circle at 30% 20%,#17425e,#0a1f2e 70%); color:#fff; font-family:inherit;}
 #privShield b{font-size:20px} #privShield i{font-style:normal; font-size:60px}
