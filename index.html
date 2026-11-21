@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8482">
+<meta name="app-version" content="2026-11-21.8487">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -9635,35 +9635,94 @@ function glMarketState(){
 }
 function gdMkBadge(){ try{ var m = glMarketState(); return ' <small class="gd-mk gd-mk-' + m.state + '" title="' + m.long.replace(/"/g, '') + '">' + m.short + '</small>'; }catch(e){ return ''; } }
 /* 8481: أرباح الذهب السنوية — سعر الذهب العالمي وقيمة ذهبي أول السنة وآخرها + ربح السنة بالنسبة المئوية (بعد خصم مشتريات السنة) */
-var GY_OPEN_KEY = 'masrofati_gy_open_v1', _gyYear = null;
-function gyKY(k){ return Number(String(k).slice(0, 4)); }
-function gyPick(keys, Y){
-  var before = null, first = null, last = null, i;
-  for(i = 0; i < keys.length; i++){ var y = gyKY(keys[i]); if(y < Y) before = keys[i]; else if(y === Y){ if(!first) first = keys[i]; last = keys[i]; } }
-  if(!last) return null;
-  return {s: before || first, e: last, sb: !!before};
+var GY_OPEN_KEY = 'masrofati_gy_open_v1', GY_MODE_KEY = 'masrofati_gy_mode_v1', _gyYear = null, _gyModeV = null;
+/* 8484: الحساب بمواعيد الزكاة (من موعد الزكاة لحد الموعد اللي بعده) أو بالسنة الميلادية */
+function gyZkOk(){ try{ return !!(data && data.zakatStart && zkYearDue(new Date().getFullYear())); }catch(e){ return false; } }
+function gyMode(){
+  if(_gyModeV === null){ try{ _gyModeV = localStorage.getItem(GY_MODE_KEY) || ''; }catch(e){ _gyModeV = ''; } }
+  if(_gyModeV === 'cal') return 'cal';
+  return gyZkOk() ? 'zk' : 'cal';
 }
+function gyModeSet(m){ _gyModeV = m; _gyYear = null; try{ localStorage.setItem(GY_MODE_KEY, m); }catch(e){} glYearRender(); }
+function gyKY(k){ return Number(String(k).slice(0, 4)); }
+function gyKeyDate(k){ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 12).getTime(); }
 function gyDayEnd(k){ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 23, 59, 59, 999).getTime(); }
 function gyPieces(){ var o = []; try{ goldPieces().forEach(function(x){ var t = opsMs(x.date) || 0; if(t) o.push({t: t, c: cgInt(x.amount)}); }); }catch(e){} return o; }
 function gyCostAt(pcs, k){ var te = gyDayEnd(k), c = 0; pcs.forEach(function(q){ if(q.t <= te) c += q.c; }); return c; }
+function gyRange(Y){
+  if(gyMode() === 'zk'){ var a = zkYearDue(Y - 1), b = zkYearDue(Y); if(a && b) return {lo: a, hi: b, zk: true}; }
+  return {lo: new Date(Y, 0, 1), hi: new Date(Y, 11, 31, 23, 59, 59, 999), zk: false};
+}
+/* أقرب قراءة لبداية الفترة ولنهايتها (بحد أقصى ٢٠ يوم بعيد عن الموعد)؛ لو مفيش قراءة قريبة قبل البداية بناخد أول قراءة جوه الفترة */
+function gyPick(keys, rg){
+  var DAYMS = 86400000, loT = rg.lo.getTime(), hiT = rg.hi.getTime(), nowT = Date.now(), loK = gdDayKey(loT), hiEffK = gdDayKey(Math.min(hiT, nowT)), todayK = gdDayKey(nowT);
+  var before = null, firstIn = null, lastIn = null, firstAfter = null, i;
+  for(i = 0; i < keys.length; i++){
+    var k = keys[i];
+    if(k <= loK) before = k;
+    else if(k <= hiEffK){ if(!firstIn) firstIn = k; lastIn = k; }
+    else if(hiT <= nowT && k <= todayK && !firstAfter) firstAfter = k;
+  }
+  var sC = [];
+  if(before && loT - gyKeyDate(before) <= 20 * DAYMS) sC.push({k: before, d: loT - gyKeyDate(before), sb: true});
+  if(firstIn) sC.push({k: firstIn, d: Math.abs(gyKeyDate(firstIn) - loT), sb: false});
+  var eC = [];
+  if(lastIn) eC.push({k: lastIn, d: Math.abs(hiT - gyKeyDate(lastIn))});
+  if(firstAfter && gyKeyDate(firstAfter) - hiT <= 20 * DAYMS) eC.push({k: firstAfter, d: Math.abs(gyKeyDate(firstAfter) - hiT)});
+  if(!sC.length || !eC.length) return null;
+  sC.sort(function(x, y){ return x.d - y.d || (y.sb ? 1 : 0) - (x.sb ? 1 : 0); }); eC.sort(function(x, y){ return x.d - y.d; });
+  var st = sC[0], en = eC[0];
+  if(en.k <= st.k) return null;
+  return {s: st.k, e: en.k, sb: st.sb};
+}
+/* 8487: السنة الميلادية: تواريخ الحساب + عنوان صافي ربح بدون كلمة زكاة */ /* 8486: زكاة الذهب فقط — بتتخصم من ربح الذهب في وضع «بمواعيد الزكاة».
+   زكاة السنة (المثبّتة، أو آخر حساب حي للسنة الحالية) فيها الذهب + الفلوس والبنوك؛ هنا بناخد نصيب الذهب بس:
+   قيمة الذهب الداخل في وعاء الزكاة ÷ الوعاء كله × قيمة زكاة السنة. الفلوس والبنوك وباقي الأموال مش بتتخصم من ربح الذهب.
+   بترجّع: zv = زكاة الذهب، tot = إجمالي زكاة السنة، known = اتحسبت ولا لأ */
+function gyZkGold(Y){
+  var o = {zv: 0, tot: 0, known: false};
+  try{
+    zkSnapInit(); Y = Number(Y);
+    var cy = new Date().getFullYear(); if(Y > cy) return o;
+    var sn = data.zakatSnap && data.zakatSnap[Y], c = (sn && sn.c) ? sn.c : null;
+    if(!c){ try{ c = (Y === cy) ? zkcCompute() : zkComputeAsOf(Y); }catch(e){ c = null; } }
+    if(!c) return o;
+    var st = Number(data.zakatMal && data.zakatMal[Y]) || 0, cz = Number(c.zk) || 0;
+    var auto = (Y === cy) && !zkIsFrozen(Y) && (!(st > 0) || (typeof data.zakatMalAuto === 'boolean' ? data.zakatMalAuto : false));   /* نفس منطق zmAuto لكن من غير الاعتماد على السنة المعروضة */
+    var tot = (auto || !(st > 0)) ? cz : st, base = Number(c.base) || 0, gi = Number(c.goldIn);
+    if(!isFinite(gi)) gi = base - (Number(c.zkMoney) || 0);
+    if(!(tot > 0) || !(base > 0)) return o;
+    o.tot = tot; o.known = true; o.zv = Math.max(0, Math.min(tot, tot * gi / base));
+  }catch(e){}
+  return o;
+}
 function gyCompute(Y, src){
-  var D = src ? src.D : gdLoad(), gxK = Object.keys(D.gx).sort(), gpK = Object.keys(D.gp).sort(), r = {Y: Y}, pcs = src ? src.pcs : gyPieces();
-  var w = gyPick(gxK, Y);
+  var D = src ? src.D : gdLoad(), gxK = Object.keys(D.gx).sort(), gpK = Object.keys(D.gp).sort(), pcs = src ? src.pcs : gyPieces(), rg = gyRange(Y), r = {Y: Y, lo: rg.lo, hi: rg.hi, zk: rg.zk};
+  var w = gyPick(gxK, rg);
   if(w && w.s !== w.e){ r.w = {ks: w.s, ke: w.e, sb: w.sb, xs: D.gx[w.s], xe: D.gx[w.e]}; r.w.d = r.w.xe - r.w.xs; r.w.pct = r.w.xs > 0 ? r.w.d / r.w.xs * 100 : null; }
-  var m = gyPick(gpK, Y);
+  var m = gyPick(gpK, rg);
   if(m && m.s !== m.e && pcs.length){
-    var vs = gyCostAt(pcs, m.s) + D.gp[m.s], ve = gyCostAt(pcs, m.e) + D.gp[m.e], ts = gyDayEnd(m.s), te = gyDayEnd(m.e), buys = 0;
-    pcs.forEach(function(q){ if(q.t > ts && q.t <= te) buys += q.c; });
-    var profit = ve - vs - buys, base = vs + buys;
-    r.m = {ks: m.s, ke: m.e, sb: m.sb, vs: cgInt(vs), ve: cgInt(ve), buys: cgInt(buys), profit: cgInt(profit), pct: base > 0 ? profit / base * 100 : null};
+    var vs = gyCostAt(pcs, m.s) + D.gp[m.s], ve = gyCostAt(pcs, m.e) + D.gp[m.e], ts = gyDayEnd(m.s), te = gyDayEnd(m.e), buys = 0, buysY = 0, pre = 0, lo = rg.lo.getTime();
+    pcs.forEach(function(q){
+      if(q.t > ts && q.t <= te) buys += q.c;
+      if(q.t >= lo && q.t <= te){ buysY += q.c; if(q.t <= ts) pre += q.c; }
+    });
+    var gross = ve - vs - buys, base = vs + buys, zg = rg.zk ? (src ? {zv: Math.round(ve * 0.025), tot: Math.round(ve * 0.025), known: true} : gyZkGold(Y)) : {zv: 0, tot: 0, known: false}, zv = zg.zv, profit = gross - zv;
+    r.m = {ks: m.s, ke: m.e, sb: m.sb, vs: cgInt(vs), ve: cgInt(ve), buys: cgInt(buys), buysY: cgInt(buysY), pre: cgInt(m.sb ? 0 : pre), gross: cgInt(gross), grossPct: base > 0 ? gross / base * 100 : null, zv: cgInt(zv), zvAll: cgInt(zg.tot), zkKnown: zg.known, zk: rg.zk, profit: cgInt(profit), pct: base > 0 ? profit / base * 100 : null};
   }
   return r;
 }
 function gyYears(src){
-  var D = src ? src.D : gdLoad(), set = {}, cy = new Date().getFullYear();
-  Object.keys(D.gx).concat(Object.keys(D.gp)).forEach(function(k){ set[gyKY(k)] = 1; });
-  set[cy] = 1;
-  return Object.keys(set).map(Number).filter(function(y){ return y > 2000; }).sort(function(a, b){ return b - a; });
+  var D = src ? src.D : gdLoad(), keys = Object.keys(D.gx).concat(Object.keys(D.gp)).sort(), cy = new Date().getFullYear(), out = [], set = {}, y;
+  if(!keys.length){ return [cy]; }
+  var fy = gyKY(keys[0]), fT = gyKeyDate(keys[0]), now = Date.now();
+  for(y = fy; y <= cy + 1; y++){
+    var rg = gyRange(y), lo = rg.lo.getTime(), hi = rg.hi.getTime();
+    if(rg.zk ? (hi >= fT && lo <= now) : (y <= cy)) set[y] = 1;
+  }
+  Object.keys(set).forEach(function(k){ out.push(Number(k)); });
+  if(!out.length) out.push(cy);
+  return out.sort(function(a, b){ return b - a; });
 }
 function gyDate(k){ try{ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(dateLocale(), {day: 'numeric', month: 'short', year: 'numeric'}); }catch(e){ return k; } }
 function gyPct(v){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : (v < 0 ? '−' : '')) + glF2(Math.abs(v)) + '%'; }
@@ -9692,41 +9751,60 @@ function gyDemoToggle(){ _gyDemo = !_gyDemo; _gyDemoD = null; _gyYear = null; gl
 function gyDemoRegen(){ _gyDemoD = null; glYearRender(); }
 function gyToggle(){ var b = document.getElementById('gyBody'), ch = document.getElementById('gyChev'); if(!b) return; var open = b.style.display === 'none'; b.style.display = open ? '' : 'none'; if(ch) ch.textContent = open ? '▾' : '◂'; try{ localStorage.setItem(GY_OPEN_KEY, open ? '1' : '0'); }catch(e){} }
 function gyPickYear(y){ _gyYear = y; glYearRender(); }
-function gyPoint(lbl, val, k, sb, isEnd, nowK){
+function gyPoint(lbl, val, k, sb, isEnd){
   var sub = gyDate(k) + (!isEnd && !sb ? ' · أول قراءة' : '');
   return '<div class="gy-pt"><small>' + lbl + '</small><b>' + val + '</b><i>' + sub + '</i></div>';
 }
 function glYearRender(){
   var box = document.getElementById('gyBody'); if(!box) return;
   try{ var op = localStorage.getItem(GY_OPEN_KEY); if(op === '0'){ box.style.display = 'none'; var ch0 = document.getElementById('gyChev'); if(ch0) ch0.textContent = '◂'; } }catch(e){}
-  var dm = gyIsDemo(), src = dm ? gyDemoSrc() : null, years = gyYears(src), cy = new Date().getFullYear(), nowK = gdDayKey(Date.now());
-  if(_gyYear === null || years.indexOf(_gyYear) < 0) _gyYear = years.indexOf(cy) >= 0 ? cy : years[0];
-  var Y = _gyYear, r = gyCompute(Y, src), h = '';
+  var dm = gyIsDemo(), src = dm ? gyDemoSrc() : null, years = gyYears(src), cy = new Date().getFullYear(), nowK = gdDayKey(Date.now()), zk = gyMode() === 'zk';
+  if(_gyYear === null || years.indexOf(_gyYear) < 0){
+    _gyYear = years[0]; var yi;
+    for(yi = 0; yi < years.length; yi++){ var qq = gyCompute(years[yi], src); if(qq.w || qq.m){ _gyYear = years[yi]; break; } }   /* أحدث سنة فيها بيانات */
+  }
+  var Y = _gyYear, r = gyCompute(Y, src), h = '', ended = r.hi.getTime() < Date.now();
   h += '<div class="gy-demo-row"><button type="button" class="gy-demo' + (dm ? ' on' : '') + '" onclick="gyDemoToggle()">🎲 ' + (dm ? 'أرقام تجريبية شغّالة — اضغط للرجوع لأرقامك' : 'أرقام عشوائية للتجربة') + '</button>' + (dm ? '<button type="button" class="gy-demo" onclick="gyDemoRegen()">🔄 أرقام جديدة</button>' : '') + '</div>';
-  h += '<div class="gy-years">' + years.map(function(y){ return '<button type="button" class="gy-y' + (y === Y ? ' on' : '') + '" onclick="gyPickYear(' + y + ')">' + toArabicDigits(y) + '</button>'; }).join('') + '</div>';
+  h += '<div class="gy-modes"><button type="button" class="gy-mode' + (zk ? ' on' : '') + '" onclick="' + (gyZkOk() ? "gyModeSet('zk')" : "showToast('حدّد موعد الزكاة الأول من صفحة زكاتي', false)") + '">🕌 بمواعيد الزكاة</button><button type="button" class="gy-mode' + (!zk ? ' on' : '') + '" onclick="gyModeSet(\'cal\')">🗓️ السنة الميلادية</button></div>';
+  h += '<div class="gy-years">' + years.map(function(y){ return '<button type="button" class="gy-y' + (y === Y ? ' on' : '') + '" onclick="gyPickYear(' + y + ')">' + (zk ? 'زكاة ' : '') + toArabicDigits(y) + '</button>'; }).join('') + '</div>';
+  if(zk && r.zk){
+    h += '<div class="gy-period"><div><small>من</small> <b>' + zkBoth(r.lo) + '</b></div><div><small>إلى</small> <b>' + zkBoth(r.hi) + '</b>' + (ended ? '' : ' <small>(لسه مخلصتش)</small>') + '</div></div>';
+  }
+  if(!zk){
+    var pk = r.m || r.w, usedTxt = '';
+    if(pk && (pk.ks !== gdDayKey(r.lo.getTime()) || pk.ke !== gdDayKey(Math.min(r.hi.getTime(), Date.now())))){ usedTxt = '<div><small>الحساب فعليًا على قراءات من</small> <b>' + gyDate(pk.ks) + '</b> <small>إلى</small> <b>' + gyDate(pk.ke) + '</b></div>'; }
+    h += '<div class="gy-period"><div><small>من</small> <b>' + gFmt(r.lo) + '</b></div><div><small>إلى</small> <b>' + gFmt(r.hi) + '</b>' + (ended ? '' : ' <small>(لسه مخلصتش)</small>') + '</div>' + usedTxt + '</div>';
+  }
+  var stName = zk ? 'بداية سنة الزكاة' : 'أول السنة', enName = zk ? 'نهاية سنة الزكاة' : 'آخر السنة';
+  var yL = (zk ? 'زكاة ' : '') + toArabicDigits(Y);
   if(r.w){
-    var w = r.w, endLbl = (w.ke === nowK) ? 'الآن' : 'آخر السنة';
+    var w = r.w, endLbl = (w.ke === nowK) ? 'الآن' : (ended ? enName : 'آخر قراءة');
     h += '<div class="gy-card"><div class="gy-t"><span>🌍 الذهب العالمي <small>(دولار / أونصة)</small></span><span class="gy-pill ' + gyCls(w.d) + '">' + gyArrow(w.d) + ' ' + gyPct(w.pct) + '</span></div>'
-      + '<div class="gy-row">' + gyPoint('أول السنة', '$' + glF2(w.xs), w.ks, w.sb, false) + '<div class="gy-ar">←</div>' + gyPoint(endLbl, '$' + glF2(w.xe), w.ke, true, true) + '</div>'
+      + '<div class="gy-row">' + gyPoint(w.sb ? stName : 'أول قراءة بالفترة', '$' + glF2(w.xs), w.ks, w.sb, false) + '<div class="gy-ar">←</div>' + gyPoint(endLbl, '$' + glF2(w.xe), w.ke, true, true) + '</div>'
       + '<div class="gy-big ' + gyCls(w.d) + '">' + (w.d > 0 ? '+' : (w.d < 0 ? '−' : '')) + '$' + glF2(Math.abs(w.d)) + ' للأونصة</div></div>';
   } else {
-    h += '<div class="gy-card gy-empty">🌍 مفيش قراءات كفاية لسعر الذهب العالمي في ' + toArabicDigits(Y) + ' — بيتسجّل سعر يومي كل ما تفتح التطبيق.</div>';
+    h += '<div class="gy-card gy-empty">🌍 مفيش قراءات كفاية لسعر الذهب العالمي في ' + yL + ' — بيتسجّل سعر يومي كل ما تفتح التطبيق.</div>';
   }
   if(r.m){
-    var m = r.m, endL2 = (m.ke === nowK) ? 'الآن' : 'آخر السنة';
+    var m = r.m, endL2 = (m.ke === nowK) ? 'الآن' : (ended ? enName : 'آخر قراءة');
     h += '<div class="gy-card"><div class="gy-t"><span>🪙 ذهبي أنا <small>(جنيه)</small></span><span class="gy-pill ' + gyCls(m.profit) + '">' + gyArrow(m.profit) + ' ' + gyPct(m.pct) + '</span></div>'
-      + '<div class="gy-row">' + gyPoint('قيمة ذهبي أول السنة', fmt(m.vs), m.ks, m.sb, false) + '<div class="gy-ar">←</div>' + gyPoint('قيمة ذهبي ' + endL2, fmt(m.ve), m.ke, true, true) + '</div>'
-      + '<div class="gy-line"><span>🛒 مشتريات السنة</span><b>' + fmt(m.buys) + '</b></div>'
-      + '<div class="gy-big ' + gyCls(m.profit) + '">💰 ربح ' + toArabicDigits(Y) + ': ' + glSigned(m.profit) + ' جنيه' + (m.pct !== null ? ' (' + gyPct(m.pct) + ')' : '') + '</div>'
-      + '<div class="gy-note">الربح = قيمة آخر السنة − قيمة أول السنة − مشتريات السنة · النسبة من (قيمة أول السنة + المشتريات)</div></div>';
+      + '<div class="gy-row">' + gyPoint(m.sb ? 'قيمة ذهبي ' + (zk ? 'بداية الزكاة' : 'أول السنة') : 'قيمة ذهبي أول قراءة', fmt(m.vs), m.ks, m.sb, false) + '<div class="gy-ar">←</div>' + gyPoint('قيمة ذهبي ' + endL2, fmt(m.ve), m.ke, true, true) + '</div>'
+      + '<div class="gy-line"><span>🛒 مشتريات ' + (zk ? 'سنة الزكاة' : 'السنة') + '</span><b>' + fmt(m.buysY) + '</b></div>'
+      + (m.pre > 0 ? '<div class="gy-note">منها ' + fmt(m.pre) + ' اتشتروا قبل أول قراءة (' + gyDate(m.ks) + ') فهي داخلة في قيمة البداية ومش بتتخصم تاني من الربح</div>' : '')
+      + (m.zk ? '<div class="gy-line"><span>📈 الربح قبل الزكاة</span><b class="' + gyCls(m.gross) + '">' + glSigned(m.gross) + ' (' + gyPct(m.grossPct) + ')</b></div>'
+        + (m.zv > 0 ? '<div class="gy-line"><span>🕌 زكاة الذهب فقط ' + toArabicDigits(Y) + '</span><b class="gy-dn">−' + fmt(m.zv) + '</b></div>'
+            + (m.zvAll > m.zv + 0.5 ? '<div class="gy-note">إجمالي زكاة ' + toArabicDigits(Y) + ' = ' + fmt(m.zvAll) + ' — اللي بيتخصم من ربح الذهب نصيب الذهب بس (' + fmt(m.zv) + ')، والباقي زكاة الفلوس والبنوك خارج الحساب ده</div>' : '')
+          : (m.zkKnown ? '<div class="gy-note">مفيش ذهب داخل في وعاء زكاة ' + toArabicDigits(Y) + ' (الذهب مستبعد من الزكاة) فمفيش زكاة ذهب بتتخصم</div>' : '<div class="gy-note">زكاة الذهب لسنة ' + toArabicDigits(Y) + ' مش متسجّلة لسه — افتح صفحة الزكاة عشان تتسجّل وتتخصم هنا</div>')) : '')
+      + '<div class="gy-big ' + gyCls(m.profit) + '">💰 ' + (m.zk ? 'صافي ربح ' : 'ربح ') + toArabicDigits(Y) + (m.zk && m.zv > 0 ? ' بعد زكاة الذهب' : '') + (m.sb ? '' : ' (من أول قراءة)') + ': ' + glSigned(m.profit) + ' جنيه' + (m.pct !== null ? ' (' + gyPct(m.pct) + ')' : '') + '</div>'
+      + '<div class="gy-note">' + (m.zk ? 'الصافي = قيمة النهاية − قيمة البداية − المشتريات بعد البداية − زكاة الذهب' : 'الربح = قيمة النهاية − قيمة البداية − المشتريات بعد البداية') + ' · النسبة من (قيمة البداية + المشتريات بعدها)' + (m.sb ? '' : '<br>مفيش قراءة عند بداية الفترة، فالحساب بيبدأ من أول قراءة اتسجّلت فيها') + '</div></div>';
   } else {
-    h += '<div class="gy-card gy-empty">🪙 مفيش قراءات كفاية لقيمة ذهبك في ' + toArabicDigits(Y) + ' (لازم قراءتين على الأقل واتضاف ذهب).</div>';
+    h += '<div class="gy-card gy-empty">🪙 مفيش قراءات كفاية لقيمة ذهبك في ' + yL + ' (لازم قراءتين على الأقل واتضاف ذهب).</div>';
   }
   var rows = '';
   years.forEach(function(y){ var q = gyCompute(y, src); if(!q.w && !q.m) return;
-    rows += '<div class="gy-tr"><b>' + toArabicDigits(y) + '</b><span class="' + (q.w ? gyCls(q.w.d) : '') + '">' + (q.w ? gyPct(q.w.pct) : '—') + '</span><span class="' + (q.m ? gyCls(q.m.profit) : '') + '">' + (q.m ? glSigned(q.m.profit) : '—') + '</span><span class="' + (q.m ? gyCls(q.m.profit) : '') + '">' + (q.m ? gyPct(q.m.pct) : '—') + '</span></div>'; });
+    rows += '<div class="gy-tr"><b>' + (zk ? 'زكاة ' : '') + toArabicDigits(y) + '</b><span class="' + (q.w ? gyCls(q.w.d) : '') + '">' + (q.w ? gyPct(q.w.pct) : '—') + '</span><span class="' + (q.m ? gyCls(q.m.profit) : '') + '">' + (q.m ? glSigned(q.m.profit) : '—') + '</span><span class="' + (q.m ? gyCls(q.m.profit) : '') + '">' + (q.m ? gyPct(q.m.pct) : '—') + '</span></div>'; });
   if(rows) h += '<div class="gy-card gy-tbl"><div class="gy-t"><span>📊 كل السنين</span></div><div class="gy-tr gy-th"><b>السنة</b><span>العالمي</span><span>ربحي</span><span>النسبة</span></div>' + rows + '</div>';
-  h += '<div class="gy-note gy-foot">الأرقام معتمدة على قراءات التطبيق اليومية: أول وآخر يوم اتسجّل فيه سعر في السنة، فكل ما تفتح التطبيق أكتر الحساب أدق.</div>';
+  h += '<div class="gy-note gy-foot">الأرقام معتمدة على قراءات التطبيق اليومية: أقرب قراءة لبداية ونهاية الفترة، فكل ما تفتح التطبيق أكتر الحساب أدق.</div>';
   box.innerHTML = h;
 }
 function gdValues(){
@@ -18053,6 +18131,12 @@ try{ wkIcoApply(settings); }catch(e){}
 .gy-demo-row{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
 .gy-demo{border:0;border-radius:14px;padding:7px 12px;font-weight:900;font-family:inherit;font-size:calc(12px * var(--fs,1));background:rgba(124,92,255,.14);color:#4c2fb8;box-shadow:0 3px 0 rgba(76,47,184,.25);cursor:pointer}
 .gy-demo.on{background:linear-gradient(180deg,#9b82ff,#6a4be8);color:#fff;box-shadow:0 3px 0 #3f27a8}
+.gy-modes{display:flex;gap:6px;margin:0 0 8px}
+.gy-mode{flex:1;border:0;border-radius:14px;padding:8px 6px;font-weight:900;font-family:inherit;font-size:calc(12.5px * var(--fs,1));background:rgba(18,165,111,.12);color:#0a6b47;box-shadow:0 3px 0 rgba(10,107,71,.25);cursor:pointer}
+.gy-mode.on{background:linear-gradient(180deg,#2bd89f,#12a56f);color:#fff;box-shadow:0 3px 0 #0a6644}
+.gy-period{border-radius:16px;padding:9px 12px;margin:0 0 6px;background:rgba(255,179,0,.14);font-size:calc(12px * var(--fs,1));font-weight:800;color:#5a3f00;line-height:1.9}
+.gy-period small{opacity:.7;font-weight:700}
+
 .gy-empty{text-align:center;font-weight:800;font-size:calc(12.5px * var(--fs,1));opacity:.85}
 .gy-tr{display:grid;grid-template-columns:.8fr 1fr 1.3fr 1fr;gap:4px;padding:7px 4px;border-top:1px solid rgba(160,110,0,.18);text-align:center;font-weight:800;font-size:calc(12.5px * var(--fs,1));align-items:center}
 .gy-tr span{direction:ltr;border-radius:9px;padding:2px 3px}
