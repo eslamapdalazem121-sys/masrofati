@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-19.8480">
+<meta name="app-version" content="2026-11-19.8482">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -4320,6 +4320,11 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
           <div class="gl-in" id="glDiag" style="display:none;"></div>
         </div>
       </div>
+    </div>
+
+    <div class="gl-panel gd-panel gy-panel" id="gyPanel">
+      <div class="gl-head" onclick="gyToggle()"><span class="gd-hl"><b>📅 أرباح الذهب السنوية</b></span><span class="gy-chev" id="gyChev">▾</span></div>
+      <div id="gyBody"></div>
     </div>
 
     <div class="gi-sumrow gd-chips" id="cgKaratRow"></div>
@@ -9629,6 +9634,101 @@ function glMarketState(){
   return {state: 'live', short: '🟢 حي', long: '🟢 البورصة مفتوحة — أسعار حيّة'};
 }
 function gdMkBadge(){ try{ var m = glMarketState(); return ' <small class="gd-mk gd-mk-' + m.state + '" title="' + m.long.replace(/"/g, '') + '">' + m.short + '</small>'; }catch(e){ return ''; } }
+/* 8481: أرباح الذهب السنوية — سعر الذهب العالمي وقيمة ذهبي أول السنة وآخرها + ربح السنة بالنسبة المئوية (بعد خصم مشتريات السنة) */
+var GY_OPEN_KEY = 'masrofati_gy_open_v1', _gyYear = null;
+function gyKY(k){ return Number(String(k).slice(0, 4)); }
+function gyPick(keys, Y){
+  var before = null, first = null, last = null, i;
+  for(i = 0; i < keys.length; i++){ var y = gyKY(keys[i]); if(y < Y) before = keys[i]; else if(y === Y){ if(!first) first = keys[i]; last = keys[i]; } }
+  if(!last) return null;
+  return {s: before || first, e: last, sb: !!before};
+}
+function gyDayEnd(k){ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 23, 59, 59, 999).getTime(); }
+function gyPieces(){ var o = []; try{ goldPieces().forEach(function(x){ var t = opsMs(x.date) || 0; if(t) o.push({t: t, c: cgInt(x.amount)}); }); }catch(e){} return o; }
+function gyCostAt(pcs, k){ var te = gyDayEnd(k), c = 0; pcs.forEach(function(q){ if(q.t <= te) c += q.c; }); return c; }
+function gyCompute(Y, src){
+  var D = src ? src.D : gdLoad(), gxK = Object.keys(D.gx).sort(), gpK = Object.keys(D.gp).sort(), r = {Y: Y}, pcs = src ? src.pcs : gyPieces();
+  var w = gyPick(gxK, Y);
+  if(w && w.s !== w.e){ r.w = {ks: w.s, ke: w.e, sb: w.sb, xs: D.gx[w.s], xe: D.gx[w.e]}; r.w.d = r.w.xe - r.w.xs; r.w.pct = r.w.xs > 0 ? r.w.d / r.w.xs * 100 : null; }
+  var m = gyPick(gpK, Y);
+  if(m && m.s !== m.e && pcs.length){
+    var vs = gyCostAt(pcs, m.s) + D.gp[m.s], ve = gyCostAt(pcs, m.e) + D.gp[m.e], ts = gyDayEnd(m.s), te = gyDayEnd(m.e), buys = 0;
+    pcs.forEach(function(q){ if(q.t > ts && q.t <= te) buys += q.c; });
+    var profit = ve - vs - buys, base = vs + buys;
+    r.m = {ks: m.s, ke: m.e, sb: m.sb, vs: cgInt(vs), ve: cgInt(ve), buys: cgInt(buys), profit: cgInt(profit), pct: base > 0 ? profit / base * 100 : null};
+  }
+  return r;
+}
+function gyYears(src){
+  var D = src ? src.D : gdLoad(), set = {}, cy = new Date().getFullYear();
+  Object.keys(D.gx).concat(Object.keys(D.gp)).forEach(function(k){ set[gyKY(k)] = 1; });
+  set[cy] = 1;
+  return Object.keys(set).map(Number).filter(function(y){ return y > 2000; }).sort(function(a, b){ return b - a; });
+}
+function gyDate(k){ try{ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(dateLocale(), {day: 'numeric', month: 'short', year: 'numeric'}); }catch(e){ return k; } }
+function gyPct(v){ return v === null || v === undefined ? '—' : (v > 0 ? '+' : (v < 0 ? '−' : '')) + glF2(Math.abs(v)) + '%'; }
+function gyCls(v){ return v > 0 ? 'gy-up' : (v < 0 ? 'gy-dn' : 'gy-eq'); }
+function gyArrow(v){ return v > 0 ? '▲' : (v < 0 ? '▼' : '■'); }
+var _gyDemo = false, _gyDemoD = null;
+function gyIsDemo(){ try{ return _gyDemo || (typeof __zigDemo !== 'undefined' && !!__zigDemo); }catch(e){ return _gyDemo; } }
+function gyDemoSrc(){
+  if(_gyDemoD) return _gyDemoD;
+  var cy = new Date().getFullYear(), DAY = 86400000, t0 = new Date(cy - 2, 0, 1, 12).getTime(), now = Date.now(), x = 2300 + Math.random() * 300, rate = 42 + Math.random() * 4;
+  var series = [], t;
+  for(t = t0; t <= now; t += DAY){ x *= 1 + (Math.random() - 0.46) * 0.014; rate *= 1 + (Math.random() - 0.44) * 0.003; series.push({t: t, x: x, g21: x / GL_OZ * rate * 21 / 24 * 0.99}); }
+  var n = series.length, picks = [0.08, 0.35, 0.58, 0.82], pcs = [], i;
+  for(i = 0; i < picks.length; i++){ var q = series[Math.floor(n * picks[i] + Math.random() * 20)] || series[n - 1], amt = Math.round((90000 + Math.random() * 160000) / 1000) * 1000; pcs.push({t: q.t, c: amt, g: amt / q.g21}); }
+  var D = {gx: {}, gp: {}};
+  series.forEach(function(q){
+    var k = gdDayKey(q.t), cost = 0, val = 0;
+    pcs.forEach(function(c){ if(c.t <= q.t){ cost += c.c; val += c.g * q.g21; } });
+    D.gx[k] = Math.round(q.x * 100) / 100;
+    if(cost > 0) D.gp[k] = Math.round(val - cost);
+  });
+  _gyDemoD = {D: D, pcs: pcs.map(function(c){ return {t: c.t, c: c.c}; })};
+  return _gyDemoD;
+}
+function gyDemoToggle(){ _gyDemo = !_gyDemo; _gyDemoD = null; _gyYear = null; glYearRender(); }
+function gyDemoRegen(){ _gyDemoD = null; glYearRender(); }
+function gyToggle(){ var b = document.getElementById('gyBody'), ch = document.getElementById('gyChev'); if(!b) return; var open = b.style.display === 'none'; b.style.display = open ? '' : 'none'; if(ch) ch.textContent = open ? '▾' : '◂'; try{ localStorage.setItem(GY_OPEN_KEY, open ? '1' : '0'); }catch(e){} }
+function gyPickYear(y){ _gyYear = y; glYearRender(); }
+function gyPoint(lbl, val, k, sb, isEnd, nowK){
+  var sub = gyDate(k) + (!isEnd && !sb ? ' · أول قراءة' : '');
+  return '<div class="gy-pt"><small>' + lbl + '</small><b>' + val + '</b><i>' + sub + '</i></div>';
+}
+function glYearRender(){
+  var box = document.getElementById('gyBody'); if(!box) return;
+  try{ var op = localStorage.getItem(GY_OPEN_KEY); if(op === '0'){ box.style.display = 'none'; var ch0 = document.getElementById('gyChev'); if(ch0) ch0.textContent = '◂'; } }catch(e){}
+  var dm = gyIsDemo(), src = dm ? gyDemoSrc() : null, years = gyYears(src), cy = new Date().getFullYear(), nowK = gdDayKey(Date.now());
+  if(_gyYear === null || years.indexOf(_gyYear) < 0) _gyYear = years.indexOf(cy) >= 0 ? cy : years[0];
+  var Y = _gyYear, r = gyCompute(Y, src), h = '';
+  h += '<div class="gy-demo-row"><button type="button" class="gy-demo' + (dm ? ' on' : '') + '" onclick="gyDemoToggle()">🎲 ' + (dm ? 'أرقام تجريبية شغّالة — اضغط للرجوع لأرقامك' : 'أرقام عشوائية للتجربة') + '</button>' + (dm ? '<button type="button" class="gy-demo" onclick="gyDemoRegen()">🔄 أرقام جديدة</button>' : '') + '</div>';
+  h += '<div class="gy-years">' + years.map(function(y){ return '<button type="button" class="gy-y' + (y === Y ? ' on' : '') + '" onclick="gyPickYear(' + y + ')">' + toArabicDigits(y) + '</button>'; }).join('') + '</div>';
+  if(r.w){
+    var w = r.w, endLbl = (w.ke === nowK) ? 'الآن' : 'آخر السنة';
+    h += '<div class="gy-card"><div class="gy-t"><span>🌍 الذهب العالمي <small>(دولار / أونصة)</small></span><span class="gy-pill ' + gyCls(w.d) + '">' + gyArrow(w.d) + ' ' + gyPct(w.pct) + '</span></div>'
+      + '<div class="gy-row">' + gyPoint('أول السنة', '$' + glF2(w.xs), w.ks, w.sb, false) + '<div class="gy-ar">←</div>' + gyPoint(endLbl, '$' + glF2(w.xe), w.ke, true, true) + '</div>'
+      + '<div class="gy-big ' + gyCls(w.d) + '">' + (w.d > 0 ? '+' : (w.d < 0 ? '−' : '')) + '$' + glF2(Math.abs(w.d)) + ' للأونصة</div></div>';
+  } else {
+    h += '<div class="gy-card gy-empty">🌍 مفيش قراءات كفاية لسعر الذهب العالمي في ' + toArabicDigits(Y) + ' — بيتسجّل سعر يومي كل ما تفتح التطبيق.</div>';
+  }
+  if(r.m){
+    var m = r.m, endL2 = (m.ke === nowK) ? 'الآن' : 'آخر السنة';
+    h += '<div class="gy-card"><div class="gy-t"><span>🪙 ذهبي أنا <small>(جنيه)</small></span><span class="gy-pill ' + gyCls(m.profit) + '">' + gyArrow(m.profit) + ' ' + gyPct(m.pct) + '</span></div>'
+      + '<div class="gy-row">' + gyPoint('قيمة ذهبي أول السنة', fmt(m.vs), m.ks, m.sb, false) + '<div class="gy-ar">←</div>' + gyPoint('قيمة ذهبي ' + endL2, fmt(m.ve), m.ke, true, true) + '</div>'
+      + '<div class="gy-line"><span>🛒 مشتريات السنة</span><b>' + fmt(m.buys) + '</b></div>'
+      + '<div class="gy-big ' + gyCls(m.profit) + '">💰 ربح ' + toArabicDigits(Y) + ': ' + glSigned(m.profit) + ' جنيه' + (m.pct !== null ? ' (' + gyPct(m.pct) + ')' : '') + '</div>'
+      + '<div class="gy-note">الربح = قيمة آخر السنة − قيمة أول السنة − مشتريات السنة · النسبة من (قيمة أول السنة + المشتريات)</div></div>';
+  } else {
+    h += '<div class="gy-card gy-empty">🪙 مفيش قراءات كفاية لقيمة ذهبك في ' + toArabicDigits(Y) + ' (لازم قراءتين على الأقل واتضاف ذهب).</div>';
+  }
+  var rows = '';
+  years.forEach(function(y){ var q = gyCompute(y, src); if(!q.w && !q.m) return;
+    rows += '<div class="gy-tr"><b>' + toArabicDigits(y) + '</b><span class="' + (q.w ? gyCls(q.w.d) : '') + '">' + (q.w ? gyPct(q.w.pct) : '—') + '</span><span class="' + (q.m ? gyCls(q.m.profit) : '') + '">' + (q.m ? glSigned(q.m.profit) : '—') + '</span><span class="' + (q.m ? gyCls(q.m.profit) : '') + '">' + (q.m ? gyPct(q.m.pct) : '—') + '</span></div>'; });
+  if(rows) h += '<div class="gy-card gy-tbl"><div class="gy-t"><span>📊 كل السنين</span></div><div class="gy-tr gy-th"><b>السنة</b><span>العالمي</span><span>ربحي</span><span>النسبة</span></div>' + rows + '</div>';
+  h += '<div class="gy-note gy-foot">الأرقام معتمدة على قراءات التطبيق اليومية: أول وآخر يوم اتسجّل فيه سعر في السنة، فكل ما تفتح التطبيق أكتر الحساب أدق.</div>';
+  box.innerHTML = h;
+}
 function gdValues(){
   var gx = 0, gp = null;
   try{ gx = Number((_gl && _gl.usd) || 0); }catch(e){}
@@ -11257,6 +11357,7 @@ function renderCapGold(){
   document.getElementById('cgTotal').textContent = fmt(t.gold);
   document.getElementById('cgGrams').textContent = fmt(cgRound(t.grams)) + ' جم';
   glPanel(); glInfoPanel();
+  try{ glYearRender(); }catch(e){}
   try{ goldPageZigRender(); }catch(e){}
   // وزن كل عيار
   const ks = goldKaratStats(all), kr = document.getElementById('cgKaratRow'); kr.innerHTML = '';
@@ -17929,6 +18030,35 @@ try{ wkIcoApply(settings); }catch(e){}
 .gd-mk-live{background:rgba(15,157,120,.16);color:#0b7a5c}
 .gd-mk-closed{background:rgba(224,49,49,.14);color:#c92a2a}
 .gd-mk-stale{background:rgba(245,159,0,.2);color:#b36b00}
+.gy-years{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+.gy-years::-webkit-scrollbar{display:none}
+.gy-y{border:0;border-radius:14px;padding:7px 16px;font-weight:900;font-size:calc(13px * var(--fs,1));font-family:inherit;background:rgba(255,179,0,.16);color:#6b4a00;box-shadow:0 3px 0 rgba(160,110,0,.25);cursor:pointer;white-space:nowrap}
+.gy-y.on{background:linear-gradient(180deg,#ffd44d,#f5a600);color:#3d2a00;box-shadow:0 3px 0 #b87800,0 1px 0 rgba(255,255,255,.6) inset}
+.gy-card{border-radius:20px;padding:12px;margin:8px 0;background:linear-gradient(160deg,#fffaf0,#ffeec2);box-shadow:0 4px 0 #e3c46a,0 10px 16px rgba(160,110,0,.14),inset 0 1px 0 #fff;color:#3d2a00}
+.gy-t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:900;color:#5a3f00;margin-bottom:10px;font-size:calc(14px * var(--fs,1))}
+.gy-t small{font-weight:700;opacity:.7;font-size:calc(11px * var(--fs,1))}
+.gy-pill{padding:3px 10px;border-radius:12px;font-weight:900;font-size:calc(13px * var(--fs,1));direction:ltr;white-space:nowrap}
+.gy-up{background:rgba(15,157,120,.16);color:#0a6b47}.gy-dn{background:rgba(224,49,49,.14);color:#b42323}.gy-eq{background:rgba(100,100,100,.12);color:#555}
+.gy-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:6px;text-align:center}
+.gy-pt{background:rgba(255,255,255,.6);border-radius:14px;padding:9px 4px;min-width:0;box-shadow:0 3px 0 rgba(160,110,0,.12)}
+.gy-pt small{display:block;font-size:calc(11px * var(--fs,1));font-weight:800;color:#6b4a00}
+.gy-pt b{display:block;font-size:calc(17px * var(--fs,1));font-weight:900;direction:ltr;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0}
+.gy-pt i{display:block;font-style:normal;font-size:calc(10px * var(--fs,1));opacity:.65}
+.gy-ar{align-self:center;font-size:20px;font-weight:900;color:#b87800}
+.gy-line{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:7px 12px;border-radius:12px;background:rgba(255,255,255,.45);font-weight:800;font-size:calc(13px * var(--fs,1))}
+.gy-line b{direction:ltr}
+.gy-big{text-align:center;padding:10px;border-radius:16px;margin-top:8px;font-weight:900;font-size:calc(15px * var(--fs,1));direction:rtl}
+.gy-note{font-size:calc(10.5px * var(--fs,1));opacity:.65;text-align:center;margin-top:7px;line-height:1.6}
+.gy-foot{margin:4px 6px 2px}
+.gy-demo-row{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
+.gy-demo{border:0;border-radius:14px;padding:7px 12px;font-weight:900;font-family:inherit;font-size:calc(12px * var(--fs,1));background:rgba(124,92,255,.14);color:#4c2fb8;box-shadow:0 3px 0 rgba(76,47,184,.25);cursor:pointer}
+.gy-demo.on{background:linear-gradient(180deg,#9b82ff,#6a4be8);color:#fff;box-shadow:0 3px 0 #3f27a8}
+.gy-empty{text-align:center;font-weight:800;font-size:calc(12.5px * var(--fs,1));opacity:.85}
+.gy-tr{display:grid;grid-template-columns:.8fr 1fr 1.3fr 1fr;gap:4px;padding:7px 4px;border-top:1px solid rgba(160,110,0,.18);text-align:center;font-weight:800;font-size:calc(12.5px * var(--fs,1));align-items:center}
+.gy-tr span{direction:ltr;border-radius:9px;padding:2px 3px}
+.gy-th{border-top:0;font-size:calc(11px * var(--fs,1));color:#6b4a00}
+.gy-th span{background:none !important;color:#6b4a00 !important}
+.gy-chev{font-weight:900;color:#12a56f;font-size:18px}
 </style>
 <style>
 #privShield{position:fixed; inset:0; z-index:2147483000; display:none; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:radial-gradient(circle at 30% 20%,#17425e,#0a1f2e 70%); color:#fff; font-family:inherit;}
