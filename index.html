@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-21.8487">
+<meta name="app-version" content="2026-11-21.8489">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -171,6 +171,7 @@ function clkFmt(ts, sec){
   try{ var p = clkParts(ts, sec); return p.hour + ':' + p.minute + (sec && p.second ? ':' + p.second : '') + (p.dayPeriod ? ' ' + p.dayPeriod : ''); }catch(e){ return ''; }
 }
 function entryTimeTxt(x){ var t = entryTs(x); return t ? clkFmt(t, false) : ''; }
+/* 8488: تاريخ كامل بالسنة في كارت قطعة الذهب */ function dtxY(ts, x){ var d = ''; try{ d = new Date(ts).toLocaleDateString(dateLocale(), {day:'numeric', month:'long', year:'numeric'}); }catch(e){ try{ d = formatDate(ts); }catch(e2){} } var t = entryTimeTxt(x); return d + (t ? (d ? ' · ' : '') + '🕒 ' + t : ''); }
 function dtx(ts, x){ var d = ''; try{ d = formatDate(ts); }catch(e){} var t = entryTimeTxt(x); return d + (t ? (d ? ' · ' : '') + '🕒 ' + t : ''); }
 </script>
 <script>try{ if(localStorage.getItem('masrofati_perf_v1') !== 'off') document.documentElement.classList.add('perf'); }catch(e){ document.documentElement.classList.add('perf'); }</script>
@@ -9647,10 +9648,25 @@ function gyModeSet(m){ _gyModeV = m; _gyYear = null; try{ localStorage.setItem(G
 function gyKY(k){ return Number(String(k).slice(0, 4)); }
 function gyKeyDate(k){ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 12).getTime(); }
 function gyDayEnd(k){ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 23, 59, 59, 999).getTime(); }
-function gyPieces(){ var o = []; try{ goldPieces().forEach(function(x){ var t = opsMs(x.date) || 0; if(t) o.push({t: t, c: cgInt(x.amount)}); }); }catch(e){} return o; }
+/* 8489: أسعار تاريخية تقريبية (الذهب العالمي بالدولار + دولار البنوك) لأواخر الشهور — بتتستخدم بس لتقدير قيمة بداية الفترة لما مفيش قراءة مسجّلة وقتها */
+var GH_HIST = [['2025-02-28', 2894.73, 50.66], ['2025-03-31', 2983.25, 50.58], ['2025-04-30', 3207.48, 50.81], ['2025-05-31', 3277.99, 49.75], ['2025-06-30', 3352.00, 49.93], ['2025-07-31', 3338.31, 48.69], ['2025-08-31', 3362.99, 48.61], ['2025-09-30', 3665.20, 48.08], ['2025-10-31', 4053.28, 47.24], ['2025-11-30', 4082.95, 47.64], ['2025-12-31', 4289.48, 47.71], ['2026-01-31', 4744.46, 47.20]];
+function ghT(k){ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 12).getTime(); }
+function ghAt(t){
+  var a = GH_HIST, i;
+  if(!a.length || t < ghT(a[0][0]) || t > ghT(a[a.length - 1][0])) return null;
+  for(i = 0; i < a.length - 1; i++){
+    var t0 = ghT(a[i][0]), t1 = ghT(a[i + 1][0]);
+    if(t >= t0 && t <= t1){ var f = (t - t0) / (t1 - t0); return {x: a[i][1] + (a[i + 1][1] - a[i][1]) * f, fx: a[i][2] + (a[i + 1][2] - a[i][2]) * f}; }
+  }
+  return null;
+}
+function ghNow(){ var x = 0, fx = 0; try{ x = Number(_gl && _gl.usd) || 0; }catch(e){} try{ fx = Number(glRate()) || 0; }catch(e){} return {x: x, fx: fx}; }
+function gyPieces(){ var o = []; try{ goldPieces().forEach(function(x){ var t = opsMs(x.date) || 0; if(t) o.push({t: t, c: cgInt(x.amount), g: Number(x.grams) || 0, k: Number(x.karat) || 0}); }); }catch(e){} return o; }
 function gyCostAt(pcs, k){ var te = gyDayEnd(k), c = 0; pcs.forEach(function(q){ if(q.t <= te) c += q.c; }); return c; }
 function gyRange(Y){
   if(gyMode() === 'zk'){ var a = zkYearDue(Y - 1), b = zkYearDue(Y); if(a && b) return {lo: a, hi: b, zk: true}; }
+  var cyN = new Date(), cyY = cyN.getFullYear();
+  if(Number(Y) === cyY) return {lo: new Date(cyY - 1, cyN.getMonth(), cyN.getDate()), hi: new Date(cyY, cyN.getMonth(), cyN.getDate(), 23, 59, 59, 999), zk: false, roll: true};   /* 8489: السنة الحالية = سنة كاملة لحد النهارده */
   return {lo: new Date(Y, 0, 1), hi: new Date(Y, 11, 31, 23, 59, 59, 999), zk: false};
 }
 /* أقرب قراءة لبداية الفترة ولنهايتها (بحد أقصى ٢٠ يوم بعيد عن الموعد)؛ لو مفيش قراءة قريبة قبل البداية بناخد أول قراءة جوه الفترة */
@@ -9699,17 +9715,26 @@ function gyZkGold(Y){
 function gyCompute(Y, src){
   var D = src ? src.D : gdLoad(), gxK = Object.keys(D.gx).sort(), gpK = Object.keys(D.gp).sort(), pcs = src ? src.pcs : gyPieces(), rg = gyRange(Y), r = {Y: Y, lo: rg.lo, hi: rg.hi, zk: rg.zk};
   var w = gyPick(gxK, rg);
-  if(w && w.s !== w.e){ r.w = {ks: w.s, ke: w.e, sb: w.sb, xs: D.gx[w.s], xe: D.gx[w.e]}; r.w.d = r.w.xe - r.w.xs; r.w.pct = r.w.xs > 0 ? r.w.d / r.w.xs * 100 : null; }
-  var m = gyPick(gpK, rg);
+  var est = src ? null : ghAt(rg.lo.getTime() + 43200000), nw = est ? ghNow() : null, canEst = !!(est && nw && nw.x > 0 && nw.fx > 0), loKey = gdDayKey(rg.lo.getTime());
+  var wEst = false;
+  if(w && !w.sb && canEst){ w = {s: loKey, e: w.e, sb: true}; wEst = true; }
+  if(w && w.s !== w.e){ r.w = {ks: w.s, ke: w.e, sb: w.sb, est: wEst, xs: wEst ? est.x : D.gx[w.s], xe: D.gx[w.e]}; r.w.d = r.w.xe - r.w.xs; r.w.pct = r.w.xs > 0 ? r.w.d / r.w.xs * 100 : null; }
+  var m = gyPick(gpK, rg), mEst = false, vsEst = 0;
+  if(m && !m.sb && canEst && pcs.length){
+    var tsE = gyDayEnd(loKey), fac = (est.x * est.fx) / (nw.x * nw.fx), sumE = 0, anyE = false;
+    pcs.forEach(function(q){ if(q.t <= tsE){ anyE = true; sumE += q.g * glSellPpg(q.k) * fac; } });
+    if(!anyE || sumE > 0){ vsEst = Math.round(sumE); m = {s: loKey, e: m.e, sb: true}; mEst = true; }
+  }
   if(m && m.s !== m.e && pcs.length){
-    var vs = gyCostAt(pcs, m.s) + D.gp[m.s], ve = gyCostAt(pcs, m.e) + D.gp[m.e], ts = gyDayEnd(m.s), te = gyDayEnd(m.e), buys = 0, buysY = 0, pre = 0, lo = rg.lo.getTime();
+    var vs = mEst ? vsEst : (gyCostAt(pcs, m.s) + D.gp[m.s]), ve = gyCostAt(pcs, m.e) + D.gp[m.e], ts = gyDayEnd(m.s), te = gyDayEnd(m.e), buys = 0, buysY = 0, pre = 0, lo = rg.lo.getTime();
     pcs.forEach(function(q){
       if(q.t > ts && q.t <= te) buys += q.c;
       if(q.t >= lo && q.t <= te){ buysY += q.c; if(q.t <= ts) pre += q.c; }
     });
     var gross = ve - vs - buys, base = vs + buys, zg = rg.zk ? (src ? {zv: Math.round(ve * 0.025), tot: Math.round(ve * 0.025), known: true} : gyZkGold(Y)) : {zv: 0, tot: 0, known: false}, zv = zg.zv, profit = gross - zv;
-    r.m = {ks: m.s, ke: m.e, sb: m.sb, vs: cgInt(vs), ve: cgInt(ve), buys: cgInt(buys), buysY: cgInt(buysY), pre: cgInt(m.sb ? 0 : pre), gross: cgInt(gross), grossPct: base > 0 ? gross / base * 100 : null, zv: cgInt(zv), zvAll: cgInt(zg.tot), zkKnown: zg.known, zk: rg.zk, profit: cgInt(profit), pct: base > 0 ? profit / base * 100 : null};
+    r.m = {est: mEst, ks: m.s, ke: m.e, sb: m.sb, vs: cgInt(vs), ve: cgInt(ve), buys: cgInt(buys), buysY: cgInt(buysY), pre: cgInt(m.sb ? 0 : pre), gross: cgInt(gross), grossPct: base > 0 ? gross / base * 100 : null, zv: cgInt(zv), zvAll: cgInt(zg.tot), zkKnown: zg.known, zk: rg.zk, profit: cgInt(profit), pct: base > 0 ? profit / base * 100 : null};
   }
+  r.est = !!((r.w && r.w.est) || (r.m && r.m.est)); r.roll = !!rg.roll;
   return r;
 }
 function gyYears(src){
@@ -9760,8 +9785,9 @@ function glYearRender(){
   try{ var op = localStorage.getItem(GY_OPEN_KEY); if(op === '0'){ box.style.display = 'none'; var ch0 = document.getElementById('gyChev'); if(ch0) ch0.textContent = '◂'; } }catch(e){}
   var dm = gyIsDemo(), src = dm ? gyDemoSrc() : null, years = gyYears(src), cy = new Date().getFullYear(), nowK = gdDayKey(Date.now()), zk = gyMode() === 'zk';
   if(_gyYear === null || years.indexOf(_gyYear) < 0){
-    _gyYear = years[0]; var yi;
-    for(yi = 0; yi < years.length; yi++){ var qq = gyCompute(years[yi], src); if(qq.w || qq.m){ _gyYear = years[yi]; break; } }   /* أحدث سنة فيها بيانات */
+    _gyYear = years[0]; var yi, fbY = null, okY = false;
+    for(yi = 0; yi < years.length; yi++){ var qq = gyCompute(years[yi], src); if(qq.w || qq.m){ if(zk && (Date.now() - qq.lo.getTime()) < 30 * 86400000){ if(fbY === null) fbY = years[yi]; continue; } _gyYear = years[yi]; okY = true; break; } }   /* أحدث سنة فيها بيانات (وفي الزكاة: السنة اللي عدّى عليها أكتر من ٣٠ يوم، عشان ما تبقاش على يوم واحد) */
+    if(!okY && fbY !== null) _gyYear = fbY;
   }
   var Y = _gyYear, r = gyCompute(Y, src), h = '', ended = r.hi.getTime() < Date.now();
   h += '<div class="gy-demo-row"><button type="button" class="gy-demo' + (dm ? ' on' : '') + '" onclick="gyDemoToggle()">🎲 ' + (dm ? 'أرقام تجريبية شغّالة — اضغط للرجوع لأرقامك' : 'أرقام عشوائية للتجربة') + '</button>' + (dm ? '<button type="button" class="gy-demo" onclick="gyDemoRegen()">🔄 أرقام جديدة</button>' : '') + '</div>';
@@ -9773,7 +9799,7 @@ function glYearRender(){
   if(!zk){
     var pk = r.m || r.w, usedTxt = '';
     if(pk && (pk.ks !== gdDayKey(r.lo.getTime()) || pk.ke !== gdDayKey(Math.min(r.hi.getTime(), Date.now())))){ usedTxt = '<div><small>الحساب فعليًا على قراءات من</small> <b>' + gyDate(pk.ks) + '</b> <small>إلى</small> <b>' + gyDate(pk.ke) + '</b></div>'; }
-    h += '<div class="gy-period"><div><small>من</small> <b>' + gFmt(r.lo) + '</b></div><div><small>إلى</small> <b>' + gFmt(r.hi) + '</b>' + (ended ? '' : ' <small>(لسه مخلصتش)</small>') + '</div>' + usedTxt + '</div>';
+    h += '<div class="gy-period"><div><small>من</small> <b>' + gFmt(r.lo) + '</b></div><div><small>إلى</small> <b>' + gFmt(r.hi) + '</b>' + ((ended || r.roll) ? '' : ' <small>(لسه مخلصتش)</small>') + '</div>' + usedTxt + '</div>';
   }
   var stName = zk ? 'بداية سنة الزكاة' : 'أول السنة', enName = zk ? 'نهاية سنة الزكاة' : 'آخر السنة';
   var yL = (zk ? 'زكاة ' : '') + toArabicDigits(Y);
@@ -9781,7 +9807,7 @@ function glYearRender(){
     var w = r.w, endLbl = (w.ke === nowK) ? 'الآن' : (ended ? enName : 'آخر قراءة');
     h += '<div class="gy-card"><div class="gy-t"><span>🌍 الذهب العالمي <small>(دولار / أونصة)</small></span><span class="gy-pill ' + gyCls(w.d) + '">' + gyArrow(w.d) + ' ' + gyPct(w.pct) + '</span></div>'
       + '<div class="gy-row">' + gyPoint(w.sb ? stName : 'أول قراءة بالفترة', '$' + glF2(w.xs), w.ks, w.sb, false) + '<div class="gy-ar">←</div>' + gyPoint(endLbl, '$' + glF2(w.xe), w.ke, true, true) + '</div>'
-      + '<div class="gy-big ' + gyCls(w.d) + '">' + (w.d > 0 ? '+' : (w.d < 0 ? '−' : '')) + '$' + glF2(Math.abs(w.d)) + ' للأونصة</div></div>';
+      + '<div class="gy-big ' + gyCls(w.d) + '">' + (w.d > 0 ? '+' : (w.d < 0 ? '−' : '')) + '$' + glF2(Math.abs(w.d)) + ' للأونصة</div>' + (w.est ? '<div class="gy-note">⚠️ سعر بداية الفترة تقريبي (سعر تاريخي) لأن التطبيق ماكانش بيسجّل قراءات وقتها</div>' : '') + '</div>';
   } else {
     h += '<div class="gy-card gy-empty">🌍 مفيش قراءات كفاية لسعر الذهب العالمي في ' + yL + ' — بيتسجّل سعر يومي كل ما تفتح التطبيق.</div>';
   }
@@ -9796,7 +9822,7 @@ function glYearRender(){
             + (m.zvAll > m.zv + 0.5 ? '<div class="gy-note">إجمالي زكاة ' + toArabicDigits(Y) + ' = ' + fmt(m.zvAll) + ' — اللي بيتخصم من ربح الذهب نصيب الذهب بس (' + fmt(m.zv) + ')، والباقي زكاة الفلوس والبنوك خارج الحساب ده</div>' : '')
           : (m.zkKnown ? '<div class="gy-note">مفيش ذهب داخل في وعاء زكاة ' + toArabicDigits(Y) + ' (الذهب مستبعد من الزكاة) فمفيش زكاة ذهب بتتخصم</div>' : '<div class="gy-note">زكاة الذهب لسنة ' + toArabicDigits(Y) + ' مش متسجّلة لسه — افتح صفحة الزكاة عشان تتسجّل وتتخصم هنا</div>')) : '')
       + '<div class="gy-big ' + gyCls(m.profit) + '">💰 ' + (m.zk ? 'صافي ربح ' : 'ربح ') + toArabicDigits(Y) + (m.zk && m.zv > 0 ? ' بعد زكاة الذهب' : '') + (m.sb ? '' : ' (من أول قراءة)') + ': ' + glSigned(m.profit) + ' جنيه' + (m.pct !== null ? ' (' + gyPct(m.pct) + ')' : '') + '</div>'
-      + '<div class="gy-note">' + (m.zk ? 'الصافي = قيمة النهاية − قيمة البداية − المشتريات بعد البداية − زكاة الذهب' : 'الربح = قيمة النهاية − قيمة البداية − المشتريات بعد البداية') + ' · النسبة من (قيمة البداية + المشتريات بعدها)' + (m.sb ? '' : '<br>مفيش قراءة عند بداية الفترة، فالحساب بيبدأ من أول قراءة اتسجّلت فيها') + '</div></div>';
+      + '<div class="gy-note">' + (m.zk ? 'الصافي = قيمة النهاية − قيمة البداية − المشتريات بعد البداية − زكاة الذهب' : 'الربح = قيمة النهاية − قيمة البداية − المشتريات بعد البداية') + ' · النسبة من (قيمة البداية + المشتريات بعدها)' + (m.est ? '<br>⚠️ قيمة البداية تقريبية: جرامات وعيارات القطع اللي اتسجّلت قبل البداية × سعر الذهب العالمي والدولار يوم البداية (أسعار تاريخية). والنهاية والمشتريات بأرقامك الحقيقية' : (m.sb ? '' : '<br>مفيش قراءة عند بداية الفترة، فالحساب بيبدأ من أول قراءة اتسجّلت فيها')) + '</div></div>';
   } else {
     h += '<div class="gy-card gy-empty">🪙 مفيش قراءات كفاية لقيمة ذهبك في ' + yL + ' (لازم قراءتين على الأقل واتضاف ذهب).</div>';
   }
@@ -11472,7 +11498,7 @@ function renderCapGold(){
     d.innerHTML = '<div class="pc-top"><span class="pc-ic"></span><div class="pc-nm"><b class="pc-name"></b><small class="pc-tags"></small></div><b class="pc-val"></b><div class="pc-acts"><button type="button">✏️</button><button type="button">🗑</button></div></div><div class="pc-grid"></div>';
     d.querySelector('.pc-ic').textContent = cgUseOf(x) === 'jewel' ? '💍' : '🪙';
     d.querySelector('.pc-name').textContent = x.name; edAdd(d.querySelector('.pc-name'), x);
-    d.querySelector('.pc-tags').textContent = 'عيار ' + toArabicDigits(x.karat || '') + ' · ' + fmt(x.grams) + ' جم · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + dtx(x.date, x) : '');
+    d.querySelector('.pc-tags').textContent = 'عيار ' + toArabicDigits(x.karat || '') + ' · ' + fmt(x.grams) + ' جم · ' + (cgUseOf(x) === 'jewel' ? 'زينة' : 'ادخار') + (x.date ? ' · ' + dtxY(x.date, x) : '');
     const grid = d.querySelector('.pc-grid');
     const cell = (cls, lb, big, sm)=>{ const c = document.createElement('div'); c.className = 'pc-c ' + cls; const l = document.createElement('small'); l.textContent = lb; const bb = document.createElement('b'); bb.textContent = big; c.appendChild(l); c.appendChild(bb); if(sm){ const em = document.createElement('em'); em.textContent = sm; c.appendChild(em); } grid.appendChild(c); };
     const cp = glSellPpg(x.karat);
