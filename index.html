@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-22.8492">
+<meta name="app-version" content="2026-11-22.8496">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -9690,6 +9690,10 @@ function gyMode(){
   if(_gyModeV === 'cal') return 'cal';
   return gyZkOk() ? 'zk' : 'cal';
 }
+/* 8495: في السنة الميلادية: اختيار خصم زكاة الذهب من الربح والنسبة (شغّال/مقفول) */
+var GY_ZKD_KEY = 'masrofati_gy_zkd_v1';
+function gyZkdOn(){ try{ return localStorage.getItem(GY_ZKD_KEY) === '1'; }catch(e){ return false; } }
+function gyZkdSet(v){ try{ localStorage.setItem(GY_ZKD_KEY, v ? '1' : '0'); }catch(e){} glYearRender(); }
 function gyModeSet(m){ _gyModeV = m; _gyYear = null; try{ localStorage.setItem(GY_MODE_KEY, m); }catch(e){} glYearRender(); }
 function gyKY(k){ return Number(String(k).slice(0, 4)); }
 function gyKeyDate(k){ var p = String(k).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 12).getTime(); }
@@ -9715,8 +9719,7 @@ function gySales(lo, hi){ var a = 0, n = 0; try{ (Array.isArray(data.goldSales) 
 function gyCostAt(pcs, k){ var te = gyDayEnd(k), c = 0; pcs.forEach(function(q){ if(q.t <= te && !(q.st && q.st <= te)) c += q.c; }); return c; }
 function gyRange(Y){
   if(gyMode() === 'zk'){ var a = zkYearDue(Y - 1), b = zkYearDue(Y); if(a && b) return {lo: a, hi: b, zk: true}; }
-  var cyN = new Date(), cyY = cyN.getFullYear();
-  if(Number(Y) === cyY) return {lo: new Date(cyY - 1, cyN.getMonth(), cyN.getDate()), hi: new Date(cyY, cyN.getMonth(), cyN.getDate(), 23, 59, 59, 999), zk: false, roll: true};   /* 8489: السنة الحالية = سنة كاملة لحد النهارده */
+  /* 8496: السنة الميلادية ثابتة: من ١ يناير لـ ٣١ ديسمبر (٢٠٢٦ = ١/١/٢٠٢٦ → ٣١/١٢/٢٠٢٦، وبعدها ٢٠٢٧ بتبدأ لوحدها بتقييمها وأسعارها) */
   return {lo: new Date(Y, 0, 1), hi: new Date(Y, 11, 31, 23, 59, 59, 999), zk: false};
 }
 /* أقرب قراءة لبداية الفترة ولنهايتها (بحد أقصى ٢٠ يوم بعيد عن الموعد)؛ لو مفيش قراءة قريبة قبل البداية بناخد أول قراءة جوه الفترة */
@@ -9781,8 +9784,8 @@ function gyCompute(Y, src){
       if(q.t > ts && q.t <= te) buys += q.c;
       if(q.t >= lo && q.t <= te){ buysY += q.c; if(q.t <= ts) pre += q.c; }
     });
-    var sl = src ? {a: 0, n: 0} : gySales(ts, te), gross = ve - vs - buys + sl.a, base = vs + buys, zg = rg.zk ? (src ? {zv: Math.round(ve * 0.025), tot: Math.round(ve * 0.025), known: true} : gyZkGold(Y)) : {zv: 0, tot: 0, known: false}, zv = zg.zv, profit = gross - zv;
-    r.m = {est: mEst, ks: m.s, ke: m.e, sb: m.sb, vs: cgInt(vs), ve: cgInt(ve), buys: cgInt(buys), buysY: cgInt(buysY), sells: cgInt(sl.a), sellsN: sl.n, pre: cgInt(m.sb ? 0 : pre), gross: cgInt(gross), grossPct: base > 0 ? gross / base * 100 : null, zv: cgInt(zv), zvAll: cgInt(zg.tot), zkKnown: zg.known, zk: rg.zk, profit: cgInt(profit), pct: base > 0 ? profit / base * 100 : null};
+    var sl = src ? {a: 0, n: 0} : gySales(ts, te), gross = ve - vs - buys + sl.a, base = vs + buys, zg = (rg.zk || gyZkdOn()) ? (src ? {zv: Math.round(ve * 0.025), tot: Math.round(ve * 0.025), known: true} : gyZkGold(Y)) : {zv: 0, tot: 0, known: false}, zv = zg.zv, profit = gross - zv;
+    r.m = {est: mEst, ks: m.s, ke: m.e, sb: m.sb, vs: cgInt(vs), ve: cgInt(ve), buys: cgInt(buys), buysY: cgInt(buysY), sells: cgInt(sl.a), sellsN: sl.n, pre: cgInt(m.sb ? 0 : pre), gross: cgInt(gross), grossPct: base > 0 ? gross / base * 100 : null, zv: cgInt(zv), zvAll: cgInt(zg.tot), zkKnown: zg.known, zk: (rg.zk || gyZkdOn()), profit: cgInt(profit), pct: base > 0 ? profit / base * 100 : null};
   }
   r.est = !!((r.w && r.w.est) || (r.m && r.m.est)); r.roll = !!rg.roll;
   return r;
@@ -9842,6 +9845,7 @@ function glYearRender(){
   var Y = _gyYear, r = gyCompute(Y, src), h = '', ended = r.hi.getTime() < Date.now();
   h += '<div class="gy-demo-row"><button type="button" class="gy-demo' + (dm ? ' on' : '') + '" onclick="gyDemoToggle()">🎲 ' + (dm ? 'أرقام تجريبية شغّالة — اضغط للرجوع لأرقامك' : 'أرقام عشوائية للتجربة') + '</button>' + (dm ? '<button type="button" class="gy-demo" onclick="gyDemoRegen()">🔄 أرقام جديدة</button>' : '') + '</div>';
   h += '<div class="gy-modes"><button type="button" class="gy-mode' + (zk ? ' on' : '') + '" onclick="' + (gyZkOk() ? "gyModeSet('zk')" : "showToast('حدّد موعد الزكاة الأول من صفحة زكاتي', false)") + '">🕌 بمواعيد الزكاة</button><button type="button" class="gy-mode' + (!zk ? ' on' : '') + '" onclick="gyModeSet(\'cal\')">🗓️ السنة الميلادية</button></div>';
+  if(!zk) h += '<div class="gy-modes"><button type="button" class="gy-mode' + (gyZkdOn() ? ' on' : '') + '" onclick="gyZkdSet(' + (gyZkdOn() ? 'false' : 'true') + ')">🕌 خصم زكاة الذهب من الربح: ' + (gyZkdOn() ? 'شغّال ✅' : 'مقفول') + '</button></div>';
   h += '<div class="gy-years">' + years.map(function(y){ return '<button type="button" class="gy-y' + (y === Y ? ' on' : '') + '" onclick="gyPickYear(' + y + ')">' + (zk ? 'زكاة ' : '') + toArabicDigits(y) + '</button>'; }).join('') + '</div>';
   if(zk && r.zk){
     h += '<div class="gy-period"><div><small>من</small> <b>' + zkBoth(r.lo) + '</b></div><div><small>إلى</small> <b>' + zkBoth(r.hi) + '</b>' + (ended ? '' : ' <small>(لسه مخلصتش)</small>') + '</div></div>';
@@ -11264,10 +11268,24 @@ async function glScrapeIsaghaUsd(){
   }
   return null;
 }
+/* 8494: مواقع دولار البنوك (بالأولوية): موقع الأهلي ← موقع بنك مصر ← جدول sarflive ← iSagha */
+var GL_NBE_URL = 'https://www.nbe.com.eg/NBE/E';
+var GL_MISR_URL = 'https://www.banquemisr.com/ar-EG/CAPITAL-MARKETS/Exchange-Rates-and-Currencies';
+var GL_USD_LABELS = ['دولار أمريكي', 'دولار امريكي', 'الدولار الأمريكي', 'الدولار الامريكي', 'USD'];
+async function glScrapeNbe(){
+  const r = glParseUsd(glHtmlText(await glFetchText(GL_NBE_URL)), GL_USD_LABELS);
+  return r ? {id: 'bk-nbe', n: 'البنك الأهلي (موقع البنك)', buy: r.buy, sell: r.sell} : null;
+}
+async function glScrapeMisr(){
+  const r = glParseUsd(glHtmlText(await glFetchText(GL_MISR_URL)), GL_USD_LABELS);
+  return r ? {id: 'bk-misr', n: 'بنك مصر (موقع البنك)', buy: r.buy, sell: r.sell} : null;
+}
+async function glScrapeSarfList(){ return glParseBanks(glHtmlText(await glFetchText(GL_SARF))); }
 async function glScrapeBank(){
-  const out = [];
-  try{ glParseBanks(glHtmlText(await glFetchText(GL_SARF))).forEach(function(x){ out.push(x); }); }catch(e){}
-  if(!out.length){ const is = await glScrapeIsaghaUsd(); if(is) out.push(is); }   // iSagha آخر مصدر: بنروحله بس لو ولا بنك من الأربعة اتقرا
+  const rs = await Promise.all([glScrapeNbe().catch(function(){ return null; }), glScrapeMisr().catch(function(){ return null; }), glScrapeSarfList().catch(function(){ return null; })]);
+  const out = [], put = function(x){ if(x && !out.some(function(o){ return o.id === x.id; })) out.push(x); };
+  put(rs[0]); put(rs[1]); (rs[2] || []).forEach(put);   // الأولوية: موقع البنك نفسه، بعده sarflive
+  if(!out.length){ const is = await glScrapeIsaghaUsd(); if(is) out.push(is); }   // iSagha آخر مصدر
   return out;
 }
 function glMedian(a){ const x = a.slice().sort(function(p, q){ return p - q; }), m = x.length >> 1; return x.length % 2 ? x[m] : (x[m - 1] + x[m]) / 2; }
@@ -11464,11 +11482,16 @@ async function glDiagnose(){
     const pk = glPickXau(ss.filter(function(r){ return r.ok; }));
     L.push(pk ? '⭐ المعتمد للذهب العالمي: ' + pk.src + ' $' + f2(pk.v) : '❌ الذهب العالمي: كل المصادر فشلت');
   }catch(e){ L.push('❌ الذهب العالمي: مش شغال'); }
-  try{
-    const tx = glHtmlText(await glFetchText(GL_SARF)), bk = glParseBanks(tx);
-    L.push(bk.length ? '✅ جدول البنوك (' + toArabicDigits(bk.length) + ' من ٤):\n' + bk.map(function(x){ return '   ' + x.n + ': ' + f2(x.buy) + ' / ' + f2(x.sell); }).join('\n') : '⚠️ الصفحة وصلت لكن ما قدرتش أقرا أسعار البنوك منها');
-    dl = bk.slice();
-  }catch(e){ L.push('❌ صفحة أسعار البنوك ما وصلتش (كل الوسطاء فشلوا)'); }
+  {
+    const srcs = [['موقع البنك الأهلي', glScrapeNbe], ['موقع بنك مصر', glScrapeMisr], ['جدول البنوك sarflive', glScrapeSarfList]];
+    const res = await Promise.all(srcs.map(function(q){ return q[1]().then(function(v){ return {n: q[0], ok: true, v: v}; }).catch(function(){ return {n: q[0], ok: false}; }); }));
+    res.forEach(function(r){
+      const arr = r.ok ? (Array.isArray(r.v) ? r.v : (r.v ? [r.v] : [])) : [];
+      if(!r.ok) L.push('❌ دولار ' + r.n + ': ما وصلش');
+      else if(!arr.length) L.push('⚠️ دولار ' + r.n + ': الصفحة وصلت لكن ما قدرتش أقرا السعر');
+      else { L.push('✅ دولار ' + r.n + ':\n' + arr.map(function(x){ return '   ' + x.n.split(' (')[0] + ': ' + f2(x.buy) + ' / ' + f2(x.sell); }).join('\n')); arr.forEach(function(x){ if(!dl.some(function(o){ return o.id === x.id; })) dl.push(x); }); }
+    });
+  }
   { const is = await glScrapeIsaghaUsd(); L.push(is ? '✅ دولار iSagha (آخر أولوية): ' + f2(is.buy) + ' / ' + f2(is.sell) : '❌ دولار iSagha: مش متاح'); if(is) dl.push(is); }
   { const pk = glPickBank(dl); L.push(pk ? '⭐ دولار البنوك المعتمد: ' + f2(pk.sell) + ' (بيع) · ' + pk.src : '❌ دولار البنوك: كل المصادر فشلت (اكتبه يدوي)'); }
   for(const gs of [['iSagha (المصدر الأول)', glScrapeIsagha], ['eDahab (احتياطي)', glScrapeEdahab]]){
