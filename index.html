@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-22.8497">
+<meta name="app-version" content="2026-11-23.8499">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -209,7 +209,7 @@ function dtx(ts, x){ var d = ''; try{ d = formatDate(ts); }catch(e){} var t = en
 <style id="tap8404">html,body{touch-action:manipulation;}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;500;700;800&family=Almarai:wght@400;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#eef1f6; --bg2:#e6ebf3; --card:#ffffff;
@@ -3552,6 +3552,7 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
     <div class="title"><div class="ar">أموالي</div></div>
     <div class="lat" aria-hidden="true"><span>A</span><span>t</span><span>o</span><span>Z</span></div>
     <div class="tag">كل أموالك من الألف للياء</div>
+    <div class="sig sig-txt">eslam goda</div>
     <div class="bar"><u></u></div>
   </div>
 </div>
@@ -3698,7 +3699,50 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 
 <button class="settings-fab" onclick="openSettings()" title="الإعدادات">⚙️</button>
 
-<h1>💰 أموالي AtoZ</h1>
+<h1>💰 أموالي AtoZ<span class="home-sig sig-txt" aria-hidden="true">eslam goda</span></h1>
+<script>
+/* 8499: التحكم في التوقيع (الاسم والخط واللون والحجم) من الإعدادات */
+var SIG_KEY = 'masrofati_sig_v1', SIG_DEF = {on: true, text: 'eslam goda', font: 'Great Vibes', color: 'gold', size: 100};
+var SIG_FONTS = [['Great Vibes', 'Great Vibes'], ['Dancing Script', 'Dancing Script'], ['Pacifico', 'Pacifico'], ['Allura', 'Allura'], ['Parisienne', 'Parisienne'], ['Kaushan Script', 'Kaushan Script'], ['Aref Ruqaa', 'رقعة'], ['Reem Kufi', 'كوفي'], ['Amiri', 'أميري']];
+var SIG_COLORS = [['gold', 'linear-gradient(135deg,#8a5a00,#ffe08a,#c98a0b)'], ['#5a3600', '#5a3600'], ['#0e8c5c', '#0e8c5c'], ['#c0392b', '#c0392b'], ['#1f6feb', '#1f6feb'], ['#8e44ad', '#8e44ad'], ['#111111', '#111111'], ['#ffffff', '#ffffff']];
+var _sigFonts = {};
+function sigCfg(){ var c = {}, o = null; try{ o = JSON.parse(localStorage.getItem(SIG_KEY) || 'null'); }catch(e){} for(var k in SIG_DEF) c[k] = (o && o[k] !== undefined) ? o[k] : SIG_DEF[k]; c.size = Math.max(60, Math.min(200, Number(c.size) || 100)); return c; }
+function sigLoadFont(name){
+  if(!name || name === 'Great Vibes' || _sigFonts[name]) return; _sigFonts[name] = 1;
+  try{ var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name).replace(/%20/g, '+') + '&display=swap'; document.head.appendChild(l); }catch(e){}
+}
+function sigApply(){
+  var c = sigCfg(), root = document.documentElement, txt = String(c.text || '').trim();
+  root.classList.toggle('sig-off', !c.on || !txt);
+  sigLoadFont(c.font);
+  root.style.setProperty('--sig-font', "'" + c.font + "'"); root.style.setProperty('--sig-scale', String(c.size / 100));
+  var els = document.querySelectorAll('.sig-txt');
+  for(var i = 0; i < els.length; i++){
+    var el = els[i]; el.textContent = txt || SIG_DEF.text;
+    if(c.color === 'gold'){ el.style.removeProperty('background'); el.style.removeProperty('-webkit-text-fill-color'); el.style.removeProperty('color'); }
+    else{ el.style.background = 'none'; el.style.webkitTextFillColor = c.color; el.style.color = c.color; }
+  }
+}
+function sigSave(c){ try{ localStorage.setItem(SIG_KEY, JSON.stringify(c)); }catch(e){} }
+function sigSet(k, v){ var c = sigCfg(); c[k] = v; sigSave(c); sigApply(); if(k === 'font' || k === 'color') sigFill(); }
+function sigSize(d){ var c = sigCfg(); c.size = Math.max(60, Math.min(200, c.size + d)); sigSave(c); sigApply(); var l = document.getElementById('sigSizeLabel'); if(l) l.textContent = c.size + '%'; }
+function sigReset(){ try{ localStorage.removeItem(SIG_KEY); }catch(e){} sigApply(); sigFill(); try{ showToast('رجع التوقيع الأصلي', true); }catch(e){} }
+function sigFill(){
+  var c = sigCfg(), on = document.getElementById('sigOn'); if(!on) return;
+  on.checked = !!c.on; var t = document.getElementById('sigText'); if(t && document.activeElement !== t) t.value = c.text;
+  var fb = document.getElementById('sigFonts'); fb.innerHTML = '';
+  SIG_FONTS.forEach(function(f){ sigLoadFont(f[0]); var b = document.createElement('button'); b.type = 'button'; b.className = 'opt-chip' + (c.font === f[0] ? ' active' : ''); b.style.fontFamily = "'" + f[0] + "',cursive"; b.textContent = f[1]; b.onclick = function(){ sigSet('font', f[0]); }; fb.appendChild(b); });
+  var cb = document.getElementById('sigColors'); cb.innerHTML = '';
+  SIG_COLORS.forEach(function(k){ var b = document.createElement('button'); b.type = 'button'; b.className = 'sig-sw' + (c.color === k[0] ? ' active' : ''); b.style.background = k[1]; b.setAttribute('aria-label', 'لون'); b.onclick = function(){ sigSet('color', k[0]); }; cb.appendChild(b); });
+  var pk = document.createElement('input'); pk.type = 'color'; pk.value = /^#[0-9a-f]{6}$/i.test(c.color) ? c.color : '#b07a10'; pk.style.cssText = 'width:44px;height:36px;border:0;background:none;padding:0;'; pk.title = 'لون مخصّص'; pk.oninput = function(){ var q = sigCfg(); q.color = pk.value; sigSave(q); sigApply(); }; cb.appendChild(pk);
+  var sl = document.getElementById('sigSizeLabel'); if(sl) sl.textContent = c.size + '%';
+}
+sigApply();
+document.addEventListener('DOMContentLoaded', function(){
+  sigApply();
+  try{ var _os = window.openSettings; if(typeof _os === 'function') window.openSettings = function(){ var r = _os.apply(this, arguments); try{ sigFill(); }catch(e){} return r; }; }catch(e){}
+});
+</script>
 <div id="homeClock" class="home-clock"><div class="hc-date" id="hcDate"></div><div class="hc-time" id="hcTime"></div></div>
 <div id="syncStatus" style="text-align:center; font-size:calc(10.5px * var(--fs,1)); color:var(--muted); margin:-12px 0 10px;"></div>
 
@@ -4256,6 +4300,21 @@ svg.zig-live .cm-zl{animation:none !important; stroke-dasharray:none !important;
 .gd-pc .pc-soldmsg{margin:8px 0 2px;padding:8px 12px;border-radius:14px;background:rgba(220,38,38,.10);text-align:center;}
 .gd-pc .pc-soldmsg b{display:block;color:#c0392b;font-weight:900;font-size:calc(15px * var(--fs,1));}
 .gd-pc .pc-soldmsg .pc-date span{margin:0 5px;}
+
+/* 8498: توقيع eslam goda */
+.sig-txt{font-family:var(--sig-font,'Great Vibes'),'Snell Roundhand','Segoe Script','Brush Script MT','Lucida Handwriting',cursive;direction:ltr;font-weight:400;letter-spacing:.5px;white-space:nowrap;
+  background:linear-gradient(120deg,#8a5a00 0%,#e0a21c 35%,#ffe08a 52%,#c98a0b 70%,#7a4a00 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#b07a10;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.55)) drop-shadow(0 2px 3px rgba(120,70,0,.35));}
+h1{position:relative;}
+.sig-off .sig-txt{display:none !important;}
+.sig-prev{display:inline-block;font-size:32px;line-height:1.3;}
+#sigSection .sig-in{width:100%;box-sizing:border-box;margin:6px 0 4px;padding:11px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);color:inherit;font-family:inherit;font-size:calc(15px * var(--fs,1));}
+#sigSection h5{margin:14px 0 6px;font-size:calc(13px * var(--fs,1));color:var(--muted);}
+#sigSection .sig-sw{width:34px;height:34px;border-radius:50%;border:3px solid var(--border);cursor:pointer;padding:0;}
+#sigSection .sig-sw.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);}
+#sigSection .sig-fonts .opt-chip{font-size:calc(17px * var(--fs,1));}
+h1 .home-sig{position:absolute;right:8px;top:50%;margin-top:-21px;width:calc(66px * var(--sig-scale,1));white-space:normal;text-align:center;font-size:calc(24px * var(--sig-scale,1));line-height:calc(21px * var(--sig-scale,1));transform:rotate(-6deg);pointer-events:none;opacity:.95;}
+#aSplash .sig{margin-top:12px;font-size:calc(36px * var(--sig-scale,1));line-height:1.1;opacity:0;animation:aFade .8s 1.3s forwards;background:linear-gradient(120deg,#4a2a00 0%,#7a4a00 45%,#a8690a 60%,#4a2a00 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#5a3600;filter:drop-shadow(0 1px 0 rgba(255,236,170,.8)) drop-shadow(0 2px 2px rgba(90,50,0,.3));}
 </style>
 <div class="modal-overlay" id="xfOverlay">
   <div class="modal-box">
@@ -5477,6 +5536,27 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
         <button type="button" class="opt-chip" data-val="drop" onclick="pickClickSound('drop')">قطرة</button>
       </div>
       <button type="button" class="drive-btn" style="margin:12px 0 0;" data-nosound onclick="playClick(true)">🔊 جرّب الصوت</button>
+    </div>
+
+<div class="settings-section" id="sigSection">
+      <h4>✍️ التوقيع / الاسم</h4>
+      <div class="check-row" style="margin:6px 0 10px;">
+        <input type="checkbox" id="sigOn" data-nosound onchange="sigSet('on', this.checked)">
+        <label for="sigOn" data-nosound style="margin:0;">إظهار التوقيع (في الافتتاحية والصفحة الرئيسية)</label>
+      </div>
+      <input type="text" id="sigText" class="sig-in" maxlength="30" placeholder="اكتب الاسم أو التوقيع" oninput="sigSet('text', this.value)">
+      <h5>الخط <span style="font-weight:400;">(الخطوط الإنجليزي للحروف الإنجليزي، والعربي للاسم العربي)</span></h5>
+      <div class="opt-row sig-fonts" id="sigFonts"></div>
+      <h5>اللون</h5>
+      <div class="opt-row" id="sigColors" style="align-items:center;"></div>
+      <h5>الحجم</h5>
+      <div class="stepper-row">
+        <button type="button" class="stepper-btn" onclick="sigSize(-10)">－</button>
+        <span id="sigSizeLabel">100%</span>
+        <button type="button" class="stepper-btn" onclick="sigSize(10)">＋</button>
+      </div>
+      <div class="font-prev" style="text-align:center;"><span class="sig-prev sig-txt" id="sigPrev"></span></div>
+      <button type="button" class="drive-btn" style="margin:12px 0 0;" onclick="sigReset()">↩️ الرجوع للتوقيع الأصلي</button>
     </div>
 
     <div class="settings-section" id="introSoundSection">
