@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-22.8496">
+<meta name="app-version" content="2026-11-22.8497">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -19379,8 +19379,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var t = L.join('\n'); return t.length > 48000 ? t.slice(0, 48000) + '\n…' : t;
   }
   window.aiCtxPreview = function(){ return buildCtx(); };
-  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى. ممكن بعض البيانات تكون مخفية أو بأسماء عامة (حساب ١، قطعة ٢…) بسبب إعدادات الخصوصية؛ لو سُئلت عن اسم مخفي قول إنه مخفي بإعدادات الحماية، ومتحاولش تخمّنه. عندك في البيانات المرفقة تاريخ كل السنين (سجل شهري لكل سنة، ولقطات رأس المال آخر كل سنة وكل شهر، وسجل يومي لرأس المال والإنفاق وأسعار الذهب)؛ لما حد يسألك عن رقم قديم أو يطلب مقارنة بين الماضي والحاضر، راجع الأقسام دي وجاوب بالأرقام والفرق والنسبة، ومتقولش إنك مش شايف بيانات قديمة قبل ما تراجعها. قسم «مصروفات النهارده» و«مصروفات امبارح» في البيانات هو المرجع لأي سؤال عنهم؛ لو فيه عمليات مكتوبة هناك متقولش إن مفيش مصروفات.';
-  var GTOOLS = [{functionDeclarations: [{name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم المصروف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}]}];
+  var SYS = 'أنت مساعد مصروفات جوه تطبيق «أموالي AtoZ». اتكلم بالمصري، وخلي ردودك قصيرة ومباشرة وبأرقام. اعتمد على بيانات المستخدم المرفقة بس ومتخترعش أرقام؛ لو المعلومة مش موجودة قول كده. لو المستخدم قال إنه صرف مبلغ، أو بعت صورة فاتورة، استخدم أداة add_expense (هي مش بتسجّل مباشرة، بتعرض بطاقة تأكيد للمستخدم) وبعدها قوله بجملة قصيرة يراجع البطاقة. من الفاتورة خد الإجمالي النهائي واسم المحل أو الغرض والتاريخ لو واضح. اختار أقرب مجموعة من قايمة المجموعات المتاحة، ولو مش متأكد سيب group_name فاضي. للتحليل والنصايح: اذكر أرقام فعلية من البيانات (أكبر المجموعات، مقارنة بالشهر اللي قبله) واقترح خطوات عملية قليلة. عندك كمان بيانات التطبيق كله: الأموال ورأس المال (نقدي وحسابات وشهادات ومعاش وفوايد)، والذهب (الأسعار والقطع والربح أو الخسارة)، والزكاة (الوعاء والنسبة والمحسوبة وموعدها)، والتقارير اليومية والشهرية والسنوية، والصرف من الأموال. جاوب منها بأرقامها وقول الحساب في سطر (مثلًا وعاء الزكاة × النسبة). الرقم المعتمد في صفحة الزكاة هو الأصل. إنت للقراءة والتحليل بس: متسجّلش ولا تعدّل أي حاجة في الأموال أو الذهب أو الزكاة، وتسجيل المصروف بأداة add_expense بس. لو المستخدم ذكر أكتر من صنف أو مصروف في رسالة واحدة (قايمة مشتريات) سجّلهم كلهم: استخدم add_expenses وحط كل الأصناف في items (أو استدعِ add_expense مرة لكل صنف)، ومتسجّلش صنف واحد وتسيب الباقي، ولو الرسالة فيها تفاصيل زيادة (كمية أو ملاحظة) خلّيها في اسم الصنف. لو سُئلت عن حكم شرعي دقيق انصح بسؤال جهة فتوى. ممكن بعض البيانات تكون مخفية أو بأسماء عامة (حساب ١، قطعة ٢…) بسبب إعدادات الخصوصية؛ لو سُئلت عن اسم مخفي قول إنه مخفي بإعدادات الحماية، ومتحاولش تخمّنه. عندك في البيانات المرفقة تاريخ كل السنين (سجل شهري لكل سنة، ولقطات رأس المال آخر كل سنة وكل شهر، وسجل يومي لرأس المال والإنفاق وأسعار الذهب)؛ لما حد يسألك عن رقم قديم أو يطلب مقارنة بين الماضي والحاضر، راجع الأقسام دي وجاوب بالأرقام والفرق والنسبة، ومتقولش إنك مش شايف بيانات قديمة قبل ما تراجعها. قسم «مصروفات النهارده» و«مصروفات امبارح» في البيانات هو المرجع لأي سؤال عنهم؛ لو فيه عمليات مكتوبة هناك متقولش إن مفيش مصروفات.';
+  var GTOOLS = [{functionDeclarations: [{name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم المصروف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}, {name: 'add_expenses', description: 'يعرض بطاقة تأكيد لكل صنف لما المستخدم يذكر أكتر من مصروف أو مشترى في رسالة واحدة (قايمة مشتريات). حط كل الأصناف في items، صنف واحد في كل عنصر. المبالغ بالجنيه.', parameters: {type: 'OBJECT', properties: {items: {type: 'ARRAY', description: 'كل الأصناف أو المصروفات', items: {type: 'OBJECT', properties: {name: {type: 'STRING', description: 'اسم الصنف أو المحل'}, amount: {type: 'NUMBER', description: 'المبلغ'}, group_name: {type: 'STRING', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'STRING', description: 'التاريخ YYYY-MM-DD (اختياري)'}}, required: ['name', 'amount']}}}, required: ['items']}}]}];
 
   /* ===== الاتصال بـ Gemini (مجاني) ===== */
   function gNorm(h){ var out = []; h.forEach(function(m){ var l = out[out.length - 1]; if(l && l.role === m.role) l.parts = l.parts.concat(m.parts); else out.push({role: m.role, parts: m.parts.slice()}); }); return out; }
@@ -19388,7 +19388,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   var TMO = 40000;
   var FALLBACKS = ['gemini-flash-lite-latest'];
   var SYS_WEB = ' عندك كمان أداة البحث في جوجل: استخدمها بس للمعلومات الخارجية والحديثة (أخبار، أسعار عالمية، أحكام وقوانين، معلومات عامة)، ومتستخدمهاش لبيانات المستخدم نفسه (دي من البيانات المرفقة). لو جبت معلومة من الإنترنت قول إنها من الإنترنت، واذكر التاريخ لو السعر بيتغير. الاستثناء الوحيد من «متخترعش أرقام» هو المعلومة الخارجية اللي جاية من البحث. لو المستخدم عايز يسجّل مصروف قوله يكتبه بصيغة «صرفت ٢٠٠ كهرباء» عشان تظهر له بطاقة التسجيل.';
-  var P2TOOLS = [{type: 'function', 'function': {name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'object', properties: {name: {type: 'string', description: 'اسم المصروف أو المحل'}, amount: {type: 'number', description: 'المبلغ'}, group_name: {type: 'string', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'string', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}}];
+  var P2TOOLS = [{type: 'function', 'function': {name: 'add_expense', description: 'يعرض على المستخدم بطاقة تأكيد لتسجيل مصروف جديد. المبلغ بالجنيه.', parameters: {type: 'object', properties: {name: {type: 'string', description: 'اسم المصروف أو المحل'}, amount: {type: 'number', description: 'المبلغ'}, group_name: {type: 'string', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'string', description: 'التاريخ YYYY-MM-DD (اختياري، الافتراضي النهاردة)'}}, required: ['name', 'amount']}}}, {type: 'function', 'function': {name: 'add_expenses', description: 'يعرض بطاقة تأكيد لكل صنف لما المستخدم يذكر أكتر من مصروف أو مشترى في رسالة واحدة (قايمة مشتريات). حط كل الأصناف في items، صنف واحد في كل عنصر. المبالغ بالجنيه.', parameters: {type: 'object', properties: {items: {type: 'array', description: 'كل الأصناف أو المصروفات', items: {type: 'object', properties: {name: {type: 'string', description: 'اسم الصنف أو المحل'}, amount: {type: 'number', description: 'المبلغ'}, group_name: {type: 'string', description: 'اسم المجموعة من القايمة المتاحة (اختياري)'}, date: {type: 'string', description: 'التاريخ YYYY-MM-DD (اختياري)'}}, required: ['name', 'amount']}}}, required: ['items']}}}];
 
   /* ===== 8364: النية — تسجيل مصروف (أداة add_expense) ولا سؤال/بحث ===== */
   var EXP_VERB = /(صرفت|دفعت|اشتريت|سجّ?ل|ضيف|حط|خدت|صرفنا|دفعنا|جبت|كلّ?فني)/;
@@ -19398,6 +19398,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     if(!/[0-9٠-٩]/.test(t)) return false;
     if(EXP_VERB.test(t)) return !/(كام|؟|\?)/.test(t);
     if(NOT_EXP.test(t)) return false;
+    if((t.match(/[0-9٠-٩]+/g) || []).length >= 2) return true;   /* 8497: قايمة مشتريات (أكتر من صنف) حتى لو طويلة */
     return t.length <= 60;
   }
 
@@ -19895,7 +19896,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
           hist.push({role: 'model', parts: [{text: out || '[اتعرضت بطاقة تسجيل مصروف على المستخدم]'}]}); mIdx = hist.length - 1;
         }
         pushed = true;
-        calls.forEach(function(fc){ if(fc.name === 'add_expense') expenseCard(fc.args || {}); });
+        runExpenseCalls(calls);
         if(calls.length && !out){ var cb = bubble('a', 'راجع البطاقة وأكّد 👇'); if(!bub) bub = cb; }
         if(bub && bub.dataset.mid){ if(hist[mIdx]) hist[mIdx].b = bub.dataset.mid; if(res.parts && calls.length && hist[mIdx + 1]) hist[mIdx + 1].b = bub.dataset.mid; }
         addMeta({g: res.g, viaNote: res.viaNote, why: res.why, noSearch: res.noSearch, swhy: res.searchWhy, answer: out, idx: mIdx});
@@ -19922,6 +19923,30 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
     var ex = list.find(function(g){ return norm(g.name) === n || norm(g.path) === n; }); if(ex) return ex.id;
     var part = list.find(function(g){ var a = norm(g.name); return a && (a.indexOf(n) > -1 || n.indexOf(a) > -1); }); return part ? part.id : '';
   }
+  /* 8497: بطاقات تأكيد لكل الأصناف (add_expense لكل صنف، أو add_expenses بقايمة) + زر «سجّل الكل» */
+  function runExpenseCalls(calls){
+    var cards = [];
+    (calls || []).forEach(function(fc){
+      var a = fc.args || {};
+      if(fc.name === 'add_expense'){ cards.push(expenseCard(a)); }
+      else if(fc.name === 'add_expenses'){
+        var it = a.items; if(typeof it === 'string'){ try{ it = JSON.parse(it); }catch(e){ it = []; } }
+        (Array.isArray(it) ? it : []).slice(0, 40).forEach(function(x){ if(x && typeof x === 'object') cards.push(expenseCard(x)); });
+      }
+    });
+    cards = cards.filter(Boolean);
+    if(cards.length > 1){
+      var bar = document.createElement('div'); bar.className = 'ai-card';
+      bar.innerHTML = '<div class="ai-row"><button class="ai-ok">✅ سجّل الكل (' + cards.length + ')</button></div>';
+      bar.querySelector('.ai-ok').onclick = function(){
+        var n = 0; cards.forEach(function(c){ var b = c.querySelector('.ai-ok'); if(b && !c.classList.contains('done')){ b.click(); if(c.classList.contains('done')) n++; } });
+        if(n === cards.length){ bar.remove(); } else { toast('اتسجّل ' + n + ' من ' + cards.length + ' — كمّل الباقي (اختار المجموعة أو صحّح الاسم والمبلغ)', false); }
+      };
+      $('aiMsgs').appendChild(bar); endScroll();
+    }
+    return cards;
+  }
+  window.aiRunExpenseCalls = runExpenseCalls;
   function expenseCard(inp){
     var today = dateToInputValue(Date.now()), date = /^\d{4}-\d{2}-\d{2}$/.test(inp.date || '') ? inp.date : today;
     var card = document.createElement('div'); card.className = 'ai-card';
@@ -19949,7 +19974,7 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
       card.classList.add('done'); card.innerHTML = '<h4>✅ اتسجّل: ' + esc(name) + ' — ' + esc(fmt(amt)) + '</h4><div style="opacity:.75;font-size:13.5px;">في «' + esc(f.node.name) + '» — ' + esc(d) + '</div>';
       hist.push({role: 'user', parts: [{text: '[تم تسجيل المصروف: ' + name + ' ' + amt + ' في ' + f.node.name + ']'}]}); toast('اتسجّل المصروف ✅', true);
     };
-    $('aiMsgs').appendChild(card); endScroll();
+    $('aiMsgs').appendChild(card); endScroll(); return card;
   }
 
   /* ===== 8442: تعديل ومسح رسايل المحادثة — اضغط على أي رسالة يظهر ✏️ تعديل / 🗑️ مسح / 📋 نسخ ===== */
