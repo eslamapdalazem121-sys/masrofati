@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-25.8504">
+<meta name="app-version" content="2026-11-25.8505">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -21532,6 +21532,8 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 .vl-fr{overflow-x:auto;flex-wrap:nowrap}.vl-fr .vl-btn{white-space:nowrap}
 .vl-ic.media{background:linear-gradient(145deg,#7fe0ff,#2358c9)}
 .vl-v{position:fixed;inset:0;z-index:200;background:rgba(5,8,16,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}.vl-v img,.vl-v video{max-width:100%;max-height:75vh;border-radius:14px}
+.vl-rk{direction:ltr;font-family:ui-monospace,Menlo,monospace;font-weight:900;font-size:19px;letter-spacing:1.5px;text-align:center;margin:14px 0;padding:16px 8px;border-radius:18px;background:linear-gradient(145deg,#26345a,#0d1424);color:#ffe08a;user-select:all;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 0 #060a14,0 14px 20px -8px rgba(0,0,0,.5)}
+.vl-gen h4{margin:14px 0 4px}
 </style>
 <script>
 /* 8500: خزنتي — خزنة مشفّرة على الجهاز (AES-GCM 256 + PBKDF2 600,000). البيانات محلية بس ومش بتتزامن ولا بتتبعت لأي مكان */
@@ -21544,18 +21546,79 @@ function toast(m){try{showToast(m,true)}catch(e){}}
 function b64(u){var s='';for(var i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)}
 function ub(t){var s=atob(t),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
 function rnd(n){return crypto.getRandomValues(new Uint8Array(n))}
-async function dk(pw,salt,it){var m=await crypto.subtle.importKey('raw',TE.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:it,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function dk(pw,salt,it,ext){var m=await crypto.subtle.importKey('raw',TE.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:it,hash:'SHA-256'},m,{name:'AES-GCM',length:256},!!ext,['encrypt','decrypt'])}
+async function wrapRaw(kek,raw){var iv=rnd(12),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},kek,raw)),r=new Uint8Array(12+ct.length);r.set(iv);r.set(ct,12);return b64(r)}
+async function unwrapRaw(kek,t){var u=ub(t);return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.subarray(0,12)},kek,u.subarray(12)))}
+function impDek(raw){return crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt'])}
+function normRK(t){return String(t).toUpperCase().replace(/[^A-Z0-9]/g,'')}
+async function openRec(rec,pw){try{
+ if(rec.v===2){var kek=await dk(pw,ub(rec.salt),rec.iter),raw=await unwrapRaw(kek,rec.wk),key=await impDek(raw);return{key:key,raw:raw,items:await dec(key,rec.data),rec:rec}}
+ var k=await dk(pw,ub(rec.salt),rec.iter,true),it=await dec(k,rec.data),r2=new Uint8Array(await crypto.subtle.exportKey('raw',k));
+ return{key:await impDek(r2),raw:r2,items:it,mig:true,rec:{v:2,kdf:rec.kdf,iter:rec.iter,salt:rec.salt,wk:await wrapRaw(k,r2),data:rec.data}}
+}catch(e){return null}}
+async function mkRecovery(){var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',u=rnd(25),t='';for(var i=0;i<25;i++)t+=A[u[i]%32];
+ var sl=rnd(16),kr=await dk(t,sl,200000);S.rec.rk={salt:b64(sl),iter:200000,wk:await wrapRaw(kr,S.raw)};S.rec.pts=Date.now();return t.match(/.{5}/g).join('-')}
+async function setPw(pw){var sl=rnd(16),kek=await dk(pw,sl,IT);S.rec.v=2;S.rec.salt=b64(sl);S.rec.iter=IT;S.rec.wk=await wrapRaw(kek,S.raw);S.rec.pts=Date.now();await save()}
+function showRK(t,next){var b=$('vaultBody');b.textContent='';var c=el('div','vl-c',null,b);el('div','vl-big','🆘',c);el('h3',null,'مفتاح الاستعادة',c);
+ el('p','vl-n','ده الطريق الوحيد لاستعادة الخزنة لو نسيت كلمة المرور. اكتبه أو صوّره واحفظه بعيد عن الجهاز. مش هيظهر تاني (تقدر تعمل واحد جديد من الإعدادات).',c);
+ el('div','vl-rk',t,c);var r=el('div','vl-row',null,c);r.style.justifyContent='center';
+ el('button','vl-btn','📋 نسخ',r).onclick=function(){navigator.clipboard.writeText(t).then(function(){toast('اتنسخ')},function(){})};
+ el('button','vl-btn','⬇️ حفظ كملف',r).onclick=function(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['مفتاح استعادة خزنتي\n'+t+'\n'],{type:'text/plain'}));a.download='vault-recovery-key.txt';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800)};
+ var l=el('label','vl-n',null,c),ck=el('input',null,null,l);ck.type='checkbox';l.appendChild(document.createTextNode(' حفظت مفتاح الاستعادة في مكان آمن'));
+ var m=el('div','vl-e',null,c),g=el('button','vl-btn vl-pri','متابعة',c);g.onclick=function(){if(!ck.checked){m.textContent='لازم تأكّد إنك حفظته';return}next()}}
+function recover(rec){var b=$('vaultBody');b.textContent='';var c=el('div','vl-c',null,b);el('div','vl-big','🆘',c);el('h3',null,'استعادة الخزنة',c);
+ if(!rec.rk){el('p','vl-n','الخزنة دي مالهاش مفتاح استعادة (اتعملت بنسخة قديمة). لو عندك نسخة احتياطية استرجعها من شاشة الفتح.',c);el('button','vl-btn','↩️ رجوع',c).onclick=gate;return}
+ el('p','vl-n','اكتب مفتاح الاستعادة اللي حفظته وكلمة مرور رئيسية جديدة.',c);
+ var rk=el('input',null,null,c);rk.placeholder='XXXXX-XXXXX-XXXXX-XXXXX-XXXXX';rk.autocomplete='off';rk.style.cssText='width:100%;box-sizing:border-box;padding:12px;border-radius:14px;direction:ltr;text-align:center;border:1px solid var(--border);background:var(--card);color:var(--text)';
+ var p1=pwf(c,'كلمة المرور الجديدة'),p2=pwf(c,'أكّد كلمة المرور الجديدة'),m=el('div','vl-e',null,c),g=el('button','vl-btn vl-pri','✅ استعادة وتعيين كلمة المرور',c);
+ g.onclick=async function(){if(p1.value.length<10){m.textContent='١٠ حروف على الأقل';return}if(p1.value!==p2.value){m.textContent='كلمتين المرور مش متطابقين';return}
+  m.textContent='بتحقق…';try{var kr=await dk(normRK(rk.value),ub(rec.rk.salt),rec.rk.iter),raw=await unwrapRaw(kr,rec.rk.wk),key=await impDek(raw),it=await dec(key,rec.data);
+   S.key=key;S.raw=raw;S.rec=rec;S.items=it;await setPw(p1.value);toast('اتعيّنت كلمة مرور جديدة');main()}catch(e){m.textContent='مفتاح الاستعادة غلط'}};
+ el('button','vl-btn','↩️ رجوع',c).onclick=gate}
+function setSy(t){S.sy=t;var e=$('vlSync');if(e)e.textContent=t}
+function vcloud(){try{return typeof cloud!=='undefined'&&!!cloud.user&&typeof cloudRequest==='function'&&typeof FS_DOCS!=='undefined'}catch(e){return false}}
+function vurl(n){return FS_DOCS+'users/'+encodeURIComponent(cloud.user.uid)+'/data/'+avCloud(n)}
+async function vget(n){try{return await cloudRequest('GET',vurl(n),null,40000)}catch(e){if(e&&e.code==='doc-missing')return null;throw e}}
+async function vput(list){await cloudRequest('POST','https://firestore.googleapis.com/v1/'+FS_DB+'/documents:commit',{writes:list.map(function(w){return{update:{name:FS_DB+'/documents/users/'+cloud.user.uid+'/data/'+avCloud(w.n),fields:w.fields}}})},60000)}
+async function cloudPullRec(){if(!vcloud())return null;var d=await vget('vault');return d&&d.fields&&d.fields.rec?JSON.parse(d.fields.rec.stringValue):null}
+function vsyncSoon(){clearTimeout(S.syt);if(S.key)S.syt=setTimeout(function(){vsync()},1500)}
+async function vsync(manual,force){
+ if(!S.key||S.bs)return;
+ if(!vcloud()){setSy('☁️ محلي بس — سجّل دخول حسابك من إعدادات التطبيق عشان تتزامن');if(manual)toast('المزامنة محتاجة تسجيل دخول الحساب');return}
+ if(!navigator.onLine){setSy('☁️ مفيش نت — هتتزامن لما يرجع');return}
+ S.bs=1;setSy('☁️ بتتزامن…');
+ try{
+  var d=await vget('vault'),rem=d&&d.fields&&d.fields.rec?JSON.parse(d.fields.rec.stringValue):null,push=!rem||!!force,ch=false;
+  if(rem&&!force){var ri=null;try{ri=await dec(S.key,rem.data)}catch(e){}
+   if(!ri){S.conflict=rem;setSy('⚠️ على الحساب خزنة تانية بمفتاح مختلف — افتح ⚙️ واختار الحل');S.bs=0;return}
+   S.conflict=null;var mp={},rm={};S.items.forEach(function(x){mp[x.id]=x});
+   ri.forEach(function(x){rm[x.id]=x;var l=mp[x.id];if(!l||(l.updated||0)<(x.updated||0)){mp[x.id]=x;ch=true}});
+   S.items.forEach(function(x){var r=rm[x.id];if(!r||(r.updated||0)<(x.updated||0))push=true});
+   if((rem.pts||0)>(S.rec.pts||0)){['salt','iter','wk','rk','pts'].forEach(function(k){S.rec[k]=rem[k]});ch=true}else if((S.rec.pts||0)>(rem.pts||0))push=true;
+   if(ch)S.items=Object.keys(mp).map(function(q){return mp[q]})}
+  if(ch)await save(true);
+  if(push){var js=JSON.stringify(S.rec);if(js.length>900000){setSy('⚠️ الخزنة كبيرة على المزامنة');S.bs=0;return}await vput([{n:'vault',fields:{rec:{stringValue:js},updatedAt:{integerValue:String(Date.now())}}}])}
+  var sf={};try{sf=JSON.parse(localStorage.getItem('masrofati_vault_sf')||'{}')}catch(e){}
+  var fl=[];S.items.forEach(function(x){if(!x.del)(x.files||[]).forEach(function(f){fl.push(f)})});
+  for(var i=0;i<fl.length;i++){var f=fl[i];if(f.size>3e6)continue;var rw=await fraw(f.id);
+   if(rw){if(!sf[f.id]){var s64=b64(new Uint8Array(rw.ct)),n=Math.ceil(s64.length/600000),w=[];for(var j=0;j<n;j++){var fs={d:{stringValue:s64.slice(j*600000,(j+1)*600000)},n:{integerValue:String(n)}};if(j===0)fs.iv={stringValue:b64(rw.iv)};w.push({n:'vf-'+f.id+'-'+j,fields:fs})}await vput(w);sf[f.id]=1}}
+   else{var d0=await vget('vf-'+f.id+'-0');if(d0){var n2=+d0.fields.n.integerValue,s2=d0.fields.d.stringValue;for(var q=1;q<n2;q++){var dq=await vget('vf-'+f.id+'-'+q);s2+=dq.fields.d.stringValue}
+    var db=await idb();await new Promise(function(r,j2){var t=db.transaction('f','readwrite');t.objectStore('f').put({iv:ub(d0.fields.iv.stringValue),ct:ub(s2).buffer},f.id);t.oncomplete=r;t.onerror=function(){j2(t.error)}});sf[f.id]=1}}}
+  try{localStorage.setItem('masrofati_vault_sf',JSON.stringify(sf))}catch(e){}
+  setSy('☁️ متزامن ✅ '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}));if(manual)toast('اتزامنت الخزنة');
+  S.bs=0;if(ch&&S.scr==='main')main()
+ }catch(e){S.bs=0;setSy('⚠️ تعذّرت المزامنة — الخزنة محفوظة على الجهاز')}}
 async function enc(k,o){var iv=rnd(12),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,TE.encode(JSON.stringify(o)))),r=new Uint8Array(12+ct.length);r.set(iv);r.set(ct,12);return b64(r)}
 async function dec(k,t){var u=ub(t);return JSON.parse(TD.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.subarray(0,12)},k,u.subarray(12))))}
 function load(){try{var r=JSON.parse(localStorage.getItem(K));return r&&r.data&&r.salt?r:null}catch(e){return null}}
-async function save(){S.rec.data=await enc(S.key,S.items);localStorage.setItem(K,JSON.stringify(S.rec))}
+async function save(ns){S.rec.data=await enc(S.key,S.items);S.rec.ts=Date.now();localStorage.setItem(K,JSON.stringify(S.rec));if(!ns)vsyncSoon()}
 function pwf(par,ph){var w=el('div','vl-pw',null,par),i=el('input',null,null,w);i.type='password';i.placeholder=ph;i.autocomplete='off';i.spellcheck=false;var b=el('button','vl-eye','👁️',w);b.type='button';b.onclick=function(){i.type=i.type==='password'?'text':'password'};return i}
 function gen(n,sets){var cs=sets.join(''),o,ok;do{o='';var lim=256-256%cs.length;while(o.length<n){var u=rnd(n*2);for(var i=0;i<u.length&&o.length<n;i++)if(u[i]<lim)o+=cs[u[i]%cs.length]}ok=sets.every(function(x){return o.split('').some(function(c){return x.indexOf(c)>-1})})}while(!ok);return o}
 function copy(t){navigator.clipboard.writeText(t).then(function(){toast('اتنسخ — هيتمسح من الحافظة بعد ٣٠ ثانية');clearTimeout(S.clip);S.clip=setTimeout(function(){navigator.clipboard.writeText('').catch(function(){})},30000)},function(){toast('تعذّر النسخ')})}
 function idle(ms){clearTimeout(S.idle);if(S.key)S.idle=setTimeout(lock,ms||120000)}
-function lock(){S.key=null;S.items=[];S.q='';clearTimeout(S.idle);S.urls.forEach(function(u){URL.revokeObjectURL(u)});S.urls=[];document.querySelectorAll('.vl-v').forEach(function(e){e.remove()});if($('vaultOverlay').classList.contains('open'))gate()}
+function lock(){S.key=null;S.raw=null;S.synced=0;clearTimeout(S.syt);S.items=[];S.q='';clearTimeout(S.idle);S.urls.forEach(function(u){URL.revokeObjectURL(u)});S.urls=[];document.querySelectorAll('.vl-v').forEach(function(e){e.remove()});if($('vaultOverlay').classList.contains('open'))gate()}
 function gate(){
- var rec=load(),b=$('vaultBody'),busy=false,fails=0;b.textContent='';var c=el('div','vl-c',null,b);var vi=el('div','vl-big',null,c);try{vi.innerHTML=(vaultIcoSvg(vaultIcoKey(settings))||window.VAULT_ICO).replace(/__U__/g,'vg')}catch(e){vi.textContent='🔐'}
+ S.scr='gate';var rec=load(),b=$('vaultBody'),busy=false,fails=0;b.textContent='';var c=el('div','vl-c',null,b);var vi=el('div','vl-big',null,c);try{vi.innerHTML=(vaultIcoSvg(vaultIcoKey(settings))||window.VAULT_ICO).replace(/__U__/g,'vg')}catch(e){vi.textContent='🔐'}
  el('h3',null,rec?'افتح الخزنة':'إنشاء خزنة جديدة',c);
  el('p','vl-n',rec?'اكتب كلمة المرور الرئيسية.':'بياناتك بتتشفّر على جهازك (AES-256) ومش بتتبعت لأي مكان. كلمة المرور الرئيسية مش بتتخزّن ومالهاش استرجاع: لو نسيتها البيانات بتضيع.',c);
  var p=pwf(c,'كلمة المرور الرئيسية'),p2,ck;
@@ -21564,19 +21627,21 @@ function gate(){
  g.onclick=async function(){
   if(busy)return;busy=true;m.textContent='بتحقق…';
   try{
-   if(rec){var k=await dk(p.value,ub(rec.salt),rec.iter),it;
-    try{it=await dec(k,rec.data)}catch(e){fails++;var w=Math.min(30,Math.pow(2,Math.min(fails,5)-1));m.textContent='كلمة المرور غلط. استنى '+w+' ثانية';p.value='';setTimeout(function(){busy=false;m.textContent=''},w*1000);return}
-    S.key=k;S.rec=rec;S.items=it}
+   if(rec){var o=await openRec(rec,p.value);
+    if(!o){fails++;var w=Math.min(30,Math.pow(2,Math.min(fails,5)-1));m.textContent='كلمة المرور غلط. استنى '+w+' ثانية';p.value='';setTimeout(function(){busy=false;m.textContent=''},w*1000);return}
+    S.key=o.key;S.raw=o.raw;S.rec=o.rec;S.items=o.items;if(o.mig)await save(true)}
    else{if(p.value.length<10){m.textContent='كلمة المرور ١٠ حروف على الأقل';busy=false;return}
     if(p.value!==p2.value){m.textContent='كلمتين المرور مش متطابقين';busy=false;return}
     if(!ck.checked){m.textContent='لازم تأكّد إنك فاهم التنبيه';busy=false;return}
-    var sl=rnd(16);S.key=await dk(p.value,sl,IT);S.rec={v:1,kdf:'PBKDF2-SHA256',iter:IT,salt:b64(sl)};S.items=[];await save()}
-   busy=false;main()
+    var sl=rnd(16),raw=rnd(32),kek=await dk(p.value,sl,IT);S.raw=raw;S.key=await impDek(raw);S.rec={v:2,kdf:'PBKDF2-SHA256',iter:IT,salt:b64(sl),wk:await wrapRaw(kek,raw)};S.items=[];S.rk=await mkRecovery();await save()}
+   busy=false;if(S.rk){var rk0=S.rk;S.rk=null;showRK(rk0,main)}else main()
   }catch(e){m.textContent='حصلت مشكلة';busy=false}
  };
  var f=el('input',null,null,c);f.type='file';f.accept='.json,application/json';f.style.display='none';
  var ib=el('button','vl-btn',rec?'📥 استرجاع من نسخة (اكتب كلمة مرور النسخة فوق)':'📥 استرجاع من نسخة احتياطية (اكتب كلمة مرورها فوق)',c);ib.style.marginTop='14px';ib.onclick=function(){f.click()};
- f.onchange=async function(){try{var r=JSON.parse(await f.files[0].text());if(r.app!=='masrofati-vault'||!r.data)throw 0;var k=await dk(p.value,ub(r.salt),r.iter),it=await dec(k,r.data);if(rec&&!confirm('هتستبدل الخزنة الحالية بالنسخة دي؟'))return;var fo=r.files;delete r.app;delete r.files;localStorage.setItem(K,JSON.stringify(r));S.key=k;S.rec=r;S.items=it;if(fo)await impFiles({files:fo},k);main();toast('اتسترجعت النسخة')}catch(e){m.textContent='الملف أو كلمة مرور النسخة غلط'}f.value=''};
+ f.onchange=async function(){try{var r=JSON.parse(await f.files[0].text());if(r.app!=='masrofati-vault'||!r.data)throw 0;var fo=r.files;delete r.app;delete r.files;var o=await openRec(r,p.value);if(!o)throw 0;if(rec&&!confirm('هتستبدل الخزنة الحالية بالنسخة دي؟'))return;S.key=o.key;S.raw=o.raw;S.rec=o.rec;S.items=o.items;await save(true);if(fo)await impFiles({files:fo},o.key);main();toast('اتسترجعت النسخة')}catch(e){m.textContent='الملف أو كلمة مرور النسخة غلط'}f.value=''};
+ if(rec)el('button','vl-btn','🆘 نسيت كلمة المرور؟ (مفتاح الاستعادة)',c).onclick=function(){recover(rec)};
+ if(!rec)cloudPullRec().then(function(r){if(r){var cb=el('button','vl-btn','☁️ استرجاع خزنتي من حسابي',c);cb.style.marginTop='10px';cb.onclick=function(){localStorage.setItem(K,JSON.stringify(r));gate()}}}).catch(function(){});
  if(rec){var d=el('button','vl-btn vl-red','🗑️ مسح الخزنة نهائيًا',c);d.style.marginTop='10px';d.onclick=function(){if(confirm('هتمسح الخزنة وكل اللي فيها نهائيًا؟')&&prompt('اكتب كلمة «مسح» للتأكيد')==='مسح'){localStorage.removeItem(K);gate()}}}
  setTimeout(function(){try{p.focus()}catch(e){}},100)
 }
@@ -21593,15 +21658,16 @@ async function view(x){var bf=await fget(x.id);if(!bf){toast('الملف مش م
  var m=/^video/.test(x.type)?el('video',null,null,v):/^image/.test(x.type)?el('img',null,null,v):null;
  if(m){m.src=u;if(m.tagName==='VIDEO')m.controls=true}else el('p','vl-n','معاينة غير متاحة — نزّل الملف',v);
  el('button','vl-btn','⬇️ تنزيل',v).onclick=function(){dl(x)}}
+function live(){return S.items.filter(function(x){return !x.del})}
 function weak(p){return !p||p.length<10||!(/[a-z]/.test(p)&&/[A-Z]/.test(p)&&/\d/.test(p))}
 function bad(){var c={},r={};S.items.forEach(function(x){if(x.type==='pw'&&x.pass)c[x.pass]=(c[x.pass]||0)+1});S.items.forEach(function(x){if(x.type==='pw'&&(weak(x.pass)||c[x.pass]>1))r[x.id]=weak(x.pass)?'ضعيفة':'مكرّرة'});return r}
 function main(){
- var b=$('vaultBody');b.textContent='';idle();
+ var b=$('vaultBody');b.textContent='';idle();S.scr='main';if(!S.synced){S.synced=1;vsync()}
  var bd=bad(),pwn=S.items.filter(function(x){return x.type==='pw'}).length,nb=Object.keys(bd).length,sc=pwn?Math.round(100*(pwn-nb)/pwn):100;
  var h=el('div','vl-hero',null,b),t=el('div','vl-top',null,h);el('span','vl-st','🔒 مشفّرة · AES-256',t);var lk=el('button','vl-btn','🔒 قفل',t);lk.onclick=lock;
  var sg=el('div','vl-stats',null,h);
- [['🗂️',S.items.length,'الكل','all'],['🔑',pwn,'كلمات مرور','pw'],['📝',S.items.length-pwn,'ملاحظات ووسائط','note'],['⚠️',nb,'تحتاج مراجعة','rev']].forEach(function(x){var c=el('button','vl-stat'+(S.f===x[3]?' on':''),null,sg);c.type='button';el('span',null,x[0],c);el('b',null,String(x[1]),c);el('small',null,x[2],c);c.onclick=function(){S.f=x[3];main()}});
- var pb=el('div','vl-bar',null,h),pi_=el('i',null,null,pb);pi_.style.width=sc+'%';pi_.style.background=sc>70?'#34d399':sc>40?'#fbbf24':'#f87171';el('div','vl-sm','مستوى أمان كلمات المرور: '+sc+'%',h);
+ [['🗂️',live().length,'الكل','all'],['🔑',pwn,'كلمات مرور','pw'],['📝',live().length-pwn,'ملاحظات ووسائط','note'],['⚠️',nb,'تحتاج مراجعة','rev']].forEach(function(x){var c=el('button','vl-stat'+(S.f===x[3]?' on':''),null,sg);c.type='button';el('span',null,x[0],c);el('b',null,String(x[1]),c);el('small',null,x[2],c);c.onclick=function(){S.f=x[3];main()}});
+ var pb=el('div','vl-bar',null,h),pi_=el('i',null,null,pb);pi_.style.width=sc+'%';pi_.style.background=sc>70?'#34d399':sc>40?'#fbbf24':'#f87171';el('div','vl-sm','مستوى أمان كلمات المرور: '+sc+'%',h);var sy0=el('div','vl-sm',S.sy||'☁️ المزامنة: بتبدأ بعد الفتح',h);sy0.id='vlSync';
  var q=el('input','vl-q',null,b);q.placeholder='🔍 بحث فوري…';q.value=S.q;q.oninput=function(){S.q=q.value;list()};
  var fr=el('div','vl-fr',null,b);
  [['all','الكل'],['fav','⭐ المفضلة']].forEach(function(x){var c=el('button','vl-btn vl-chip'+(S.f===x[0]?' on':''),x[1],fr);c.onclick=function(){S.f=x[0];main()}});
@@ -21610,19 +21676,33 @@ function main(){
  el('button','vl-btn','➕ كلمة مرور',r).onclick=function(){form(null,'pw')};
  el('button','vl-btn','➕ ملاحظة مشفّرة',r).onclick=function(){form(null,'note')};
  el('button','vl-btn','➕ صورة / فيديو / ملف',r).onclick=function(){form(null,'media')};
- var tb=el('button','vl-btn','⚙️ نسخ احتياطي',r),tp=el('div','vl-gen',null,b);tb.onclick=function(){tp.classList.toggle('on')};
+ var tb=el('button','vl-btn','⚙️ الحماية والمزامنة',r),tp=el('div','vl-gen',null,b);tb.onclick=function(){tp.classList.toggle('on')};
+ el('h4',null,'🔑 تغيير كلمة المرور الرئيسية',tp);
+ var c0=pwf(tp,'كلمة المرور الحالية'),c1=pwf(tp,'الجديدة (١٠ حروف+)'),c2=pwf(tp,'أكّد الجديدة'),cm=el('div','vl-e',null,tp);
+ el('button','vl-btn','حفظ كلمة المرور الجديدة',tp).onclick=async function(){
+  if(c1.value.length<10){cm.textContent='١٠ حروف على الأقل';return}if(c1.value!==c2.value){cm.textContent='الجديدتين مش متطابقتين';return}
+  cm.textContent='بتحقق…';var o=await openRec(S.rec,c0.value);if(!o){cm.textContent='كلمة المرور الحالية غلط';return}
+  await setPw(c1.value);c0.value=c1.value=c2.value='';cm.textContent='';toast('اتغيّرت كلمة المرور')};
+ el('h4',null,'🆘 مفتاح الاستعادة',tp);el('p','vl-n',S.rec.rk?'عندك مفتاح استعادة. لو ضاع أو اتسرّب اعمل واحد جديد (القديم بيبطل).':'مفيش مفتاح استعادة — اعمل واحد دلوقتي.',tp);
+ el('button','vl-btn','🔄 إنشاء مفتاح استعادة جديد',tp).onclick=async function(){var t=await mkRecovery();await save();showRK(t,main)};
+ el('h4',null,'☁️ المزامنة (مشفّرة — الحساب مش بيشوف غير بيانات مشفّرة)',tp);
+ el('button','vl-btn','🔄 مزامنة الآن',tp).onclick=function(){vsync(true)};
+ if(S.conflict){el('p','vl-e','⚠️ على الحساب خزنة تانية بمفتاح مختلف.',tp);
+  el('button','vl-btn','⬆️ استبدال خزنة الحساب بخزنتي',tp).onclick=function(){if(confirm('خزنة الحساب هتتبدّل بخزنتك الحالية؟')){S.conflict=null;vsync(true,true)}};
+  el('button','vl-btn vl-red','⬇️ استبدال خزنتي بخزنة الحساب',tp).onclick=function(){if(confirm('خزنتك على الجهاز هتتبدّل بخزنة الحساب (هتحتاج كلمة مرورها)؟')){localStorage.setItem(K,JSON.stringify(S.conflict));S.conflict=null;lock()}}}
+ el('h4',null,'💾 نسخة احتياطية',tp);
  var ex=el('button','vl-btn','📤 تصدير نسخة مشفّرة',tp);ex.onclick=async function(){var o=Object.assign({app:'masrofati-vault'},S.rec),ids=[];S.items.forEach(function(x){(x.files||[]).forEach(function(q){ids.push(q.id)})});
   if(ids.length){var fs={},tot=0;for(var i=0;i<ids.length;i++){var rw=await fraw(ids[i]);if(rw){tot+=rw.ct.byteLength;fs[ids[i]]={iv:b64(rw.iv),ct:b64(new Uint8Array(rw.ct))}}}if(tot<=40e6)o.files=fs;else toast('المرفقات كبيرة — اتصدّرت النسخة من غير مرفقات')}
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='masrofati-vault-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)};
  el('p','vl-n','الاستيراد بيدمج عناصر النسخة مع اللي عندك (الأحدث يكسب). اكتب كلمة مرور النسخة:',tp);
  var ip=pwf(tp,'كلمة مرور النسخة'),f=el('input',null,null,tp);f.type='file';f.accept='.json';f.style.display='none';
  el('button','vl-btn','📥 استيراد نسخة',tp).onclick=function(){f.click()};
- f.onchange=async function(){try{var o=JSON.parse(await f.files[0].text());if(o.app!=='masrofati-vault')throw 0;var kk=await dk(ip.value,ub(o.salt),o.iter),it=await dec(kk,o.data),mp={};S.items.forEach(function(x){mp[x.id]=x});it.forEach(function(x){if(!mp[x.id]||(mp[x.id].updated||0)<(x.updated||0))mp[x.id]=x});S.items=Object.keys(mp).map(function(q){return mp[q]});await impFiles(o,kk);await save();main();toast('اتدمجت النسخة')}catch(e){toast('الملف أو كلمة المرور غلط')}f.value=''}
+ f.onchange=async function(){try{var o=JSON.parse(await f.files[0].text());if(o.app!=='masrofati-vault')throw 0;var oo=await openRec(o,ip.value);if(!oo)throw 0;var kk=oo.key,it=oo.items,mp={};S.items.forEach(function(x){mp[x.id]=x});it.forEach(function(x){if(!mp[x.id]||(mp[x.id].updated||0)<(x.updated||0))mp[x.id]=x});S.items=Object.keys(mp).map(function(q){return mp[q]});await impFiles(o,kk);await save();main();toast('اتدمجت النسخة')}catch(e){toast('الملف أو كلمة المرور غلط')}f.value=''}
 }
 function list(){
  var L=S.L,bd=bad();L.textContent='';var q=S.q.trim().toLowerCase();
- var a=S.items.filter(function(x){return(S.f==='all'||(S.f==='fav'?x.fav:S.f==='rev'?bd[x.id]:S.f==='note'?x.type!=='pw':x.type===S.f))&&(!q||[x.title,x.user,x.url,x.tags].join(' ').toLowerCase().indexOf(q)>-1)}).sort(function(x,y){return(y.fav?1:0)-(x.fav?1:0)||(y.updated||0)-(x.updated||0)});
- if(!a.length){el('div','vl-empty',S.items.length?'مفيش نتايج':'الخزنة فاضية — ضيف أول عنصر',L);return}
+ var a=S.items.filter(function(x){return !x.del&&(S.f==='all'||(S.f==='fav'?x.fav:S.f==='rev'?bd[x.id]:S.f==='note'?x.type!=='pw':x.type===S.f))&&(!q||[x.title,x.user,x.url,x.tags].join(' ').toLowerCase().indexOf(q)>-1)}).sort(function(x,y){return(y.fav?1:0)-(x.fav?1:0)||(y.updated||0)-(x.updated||0)});
+ if(!a.length){el('div','vl-empty',live().length?'مفيش نتايج':'الخزنة فاضية — ضيف أول عنصر',L);return}
  a.forEach(function(x){
   var c=el('div','vl-card',null,L);el('span','vl-ic '+x.type,x.type==='pw'?'🔑':x.type==='media'?'🖼️':'📝',c);
   var t=el('div','t',null,c);el('b',null,x.title,t);el('small',null,(x.type==='pw'?(x.user||'••••••••'):(x.tags||(x.type==='media'?'وسائط مشفّرة':'ملاحظة مشفّرة')))+(x.files&&x.files.length?' · 📎'+x.files.length:''),t);if(bd[x.id])el('em','vl-w','⚠️ كلمة مرور '+bd[x.id],t);t.onclick=function(){form(x,x.type)};
@@ -21631,7 +21711,7 @@ function list(){
  })
 }
 function form(it,type){
- var n=!it;it=it||{id:b64(rnd(9)),type:type,title:'',user:'',pass:'',url:'',note:'',tags:'',fav:false};idle();
+ var n=!it;it=it||{id:b64(rnd(9)),type:type,title:'',user:'',pass:'',url:'',note:'',tags:'',fav:false};idle();S.scr='form';
  var b=$('vaultBody');b.textContent='';var f=el('div','vl-f',null,b),pw=it.type==='pw',F={};
  el('h3',null,(n?'إضافة ':'تعديل ')+(pw?'كلمة مرور':it.type==='media'?'صورة / فيديو / ملف':'ملاحظة مشفّرة'),f);
  function fld(k,lb,o){o=o||{};el('label',null,lb,f);var i=o.ta?el('textarea',null,null,f):el('input',null,null,f);if(o.ta)i.rows=7;else i.type=o.t||'text';i.value=it[k]||'';i.autocomplete='off';i.spellcheck=false;i.autocapitalize='off';F[k]=i;return i}
@@ -21666,7 +21746,7 @@ function form(it,type){
   for(var k in F)it[k]=(k==='pass'||k==='note')?F[k].value:F[k].value.trim();it.updated=Date.now();removed.forEach(fdel);it.files=fl;
   if(n)S.items.push(it);await save();main()};
  el('button','vl-btn','↩️ رجوع',f).onclick=function(){added.forEach(fdel);main()};
- if(!n){var d=el('button','vl-btn vl-red','🗑️ حذف',f);d.onclick=async function(){if(confirm('تحذف العنصر ده؟')){(it.files||[]).forEach(function(q){fdel(q.id)});S.items=S.items.filter(function(x){return x.id!==it.id});await save();main()}}}
+ if(!n){var d=el('button','vl-btn vl-red','🗑️ حذف',f);d.onclick=async function(){if(confirm('تحذف العنصر ده؟')){(it.files||[]).forEach(function(q){fdel(q.id)});S.items=S.items.map(function(x){return x.id===it.id?{id:x.id,del:1,updated:Date.now()}:x});await save();main()}}}
 }
 window.openVault=function(){
  var o=$('vaultOverlay');if(!o)return;if(!(window.crypto&&crypto.subtle)){toast('المتصفح ده مش بيدعم التشفير');return}
@@ -21674,7 +21754,7 @@ window.openVault=function(){
 };
 window.closeVault=function(){lock();$('vaultOverlay').classList.remove('open')};
 ['touchstart','keydown','click'].forEach(function(e){document.addEventListener(e,function(){if(S.key)idle()},true)});
-document.addEventListener('visibilitychange',function(){if(S.key)idle(document.hidden?30000:120000)});
+document.addEventListener('visibilitychange',function(){if(S.key){idle(document.hidden?30000:120000);if(!document.hidden)vsync()}});
 window.VAULT_ICO=ICO;window.VAULT_ICOS=Object.assign({vsafe:ICO},{"vlock": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><path d='M38 52V38a22 22 0 0 1 44 0v14' fill='none' stroke='url(#g__U__)' stroke-width='11' stroke-linecap='round'/><rect x='24' y='50' width='72' height='56' rx='13' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='75' r='8' fill='#4a2f00'/><rect x='56.5' y='78' width='7' height='15' rx='3' fill='#4a2f00'/><path d='M32 58q28-7 56 0' stroke='rgba(255,255,255,.55)' stroke-width='3' fill='none' stroke-linecap='round'/></svg>", "vkey": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><rect x='56' y='42' width='52' height='13' rx='6' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='88' y='55' width='9' height='15' rx='2' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='100' y='55' width='8' height='11' rx='2' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='38' cy='48' r='26' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='38' cy='48' r='10' fill='#3b4760' stroke='#6b4300' stroke-width='2'/><path d='M20 36q12-12 28-6' stroke='rgba(255,255,255,.55)' stroke-width='3' fill='none' stroke-linecap='round'/></svg>", "vshield": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><path d='M60 10L99 25V58C99 83 81 99 60 109C39 99 21 83 21 58V25Z' fill='url(#s__U__)' stroke='#2a3348' stroke-width='2'/><path d='M60 19L91 31V58C91 77 77 90 60 98C43 90 29 77 29 58V31Z' fill='#56637d' stroke='#2a3348'/><path d='M50 58V51a10 10 0 0 1 20 0v7' fill='none' stroke='url(#g__U__)' stroke-width='5' stroke-linecap='round'/><rect x='44' y='57' width='32' height='26' rx='6' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='68' r='4' fill='#4a2f00'/><rect x='58' y='69' width='4' height='9' rx='2' fill='#4a2f00'/></svg>", "vchest": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='b__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#c07a3a'/><stop offset='1' stop-color='#5a3210'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><rect x='16' y='52' width='88' height='50' rx='6' fill='url(#b__U__)' stroke='#3a1f08' stroke-width='2'/><path d='M16 54V42a44 26 0 0 1 88 0v12Z' fill='#c98a4a' stroke='#3a1f08' stroke-width='2'/><rect x='16' y='50' width='88' height='7' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='28' y='30' width='9' height='72' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='83' y='30' width='9' height='72' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='50' y='55' width='20' height='22' rx='4' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='64' r='3.5' fill='#4a2f00'/><rect x='58.5' y='65' width='3' height='7' rx='1.5' fill='#4a2f00'/></svg>", "vdoor": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><circle cx='60' cy='58' r='49' fill='url(#s__U__)' stroke='#2a3348' stroke-width='2'/><circle cx='60' cy='58' r='38' fill='none' stroke='url(#g__U__)' stroke-width='6'/><circle cx='60' cy='58' r='31' fill='#56637d' stroke='#2a3348'/><path d='M60 30V86M32 58H88M40 38L80 78M80 38L40 78' stroke='url(#g__U__)' stroke-width='4' stroke-linecap='round'/><circle cx='60' cy='58' r='11' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='58' r='4' fill='#4a2f00'/><circle cx='22' cy='58' r='3' fill='#2a3348'/><circle cx='98' cy='58' r='3' fill='#2a3348'/><circle cx='60' cy='20' r='3' fill='#2a3348'/></svg>", "vpass": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><rect x='12' y='22' width='96' height='70' rx='11' fill='url(#s__U__)' stroke='#2a3348' stroke-width='2'/><rect x='20' y='32' width='80' height='50' rx='6' fill='#1b2438'/><circle cx='38' cy='56' r='6' fill='url(#g__U__)'/><circle cx='60' cy='56' r='6' fill='url(#g__U__)'/><circle cx='82' cy='56' r='6' fill='url(#g__U__)'/><circle cx='94' cy='88' r='19' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><path d='M87 86v-4a7 7 0 0 1 14 0v4' fill='none' stroke='#4a2f00' stroke-width='3'/><rect x='85' y='86' width='18' height='13' rx='3' fill='#4a2f00'/></svg>"});
 })();
 function vaultIcoSvg(k){
