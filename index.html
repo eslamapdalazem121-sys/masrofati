@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-25.8502">
+<meta name="app-version" content="2026-11-25.8504">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -21505,10 +21505,38 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
 .vl-gen{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px;margin-top:8px;display:none}.vl-gen.on{display:block}.vl-gen label{display:inline-block;margin:6px 10px 0 0;font-weight:600}
 .vl-empty{text-align:center;color:var(--muted);padding:20px}
 </style>
+<style id="vaultStyle3d">
+#vaultOverlay .modal-box{background:radial-gradient(circle at 50% -10%,rgba(224,168,46,.14),transparent 55%),var(--bg);}
+.vl-btn{background:linear-gradient(180deg,var(--card),var(--border));box-shadow:inset 0 1px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.12),0 4px 0 rgba(0,0,0,.18),0 10px 14px -6px rgba(0,0,0,.3);transition:transform .1s,box-shadow .1s}
+.vl-btn:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 rgba(0,0,0,.18),0 3px 6px -3px rgba(0,0,0,.3)}
+.vl-pri{background:linear-gradient(180deg,#4ade9c,#0e8c5c);box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -3px 0 rgba(0,0,0,.2),0 5px 0 #0a6b45,0 12px 16px -6px rgba(14,140,92,.5)}
+.vl-chip.on{background:linear-gradient(180deg,#ffe08a,#d4a017);color:#4a3600}
+.vl-big{perspective:600px}.vl-big svg{width:120px;height:120px;display:block;margin:0 auto;animation:chFloat 3.8s ease-in-out infinite;filter:drop-shadow(0 4px 2px rgba(90,55,0,.45)) drop-shadow(0 14px 12px rgba(0,0,0,.3))}
+.vl-pw input,.vl-q{box-shadow:inset 0 3px 6px rgba(0,0,0,.14)}
+.vl-hero{background:linear-gradient(145deg,#26345a,#0d1424);color:#fff;border-radius:24px;padding:14px;margin:4px 0 12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -4px 0 rgba(0,0,0,.35),0 7px 0 #060a14,0 18px 24px -8px rgba(0,0,0,.5)}
+.vl-hero .vl-st{color:#ffe08a}.vl-hero .vl-btn{color:#1b2438;padding:8px 12px}
+.vl-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.vl-stat{border:0;font:inherit;color:#fff;cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border-radius:16px;padding:9px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 -3px 0 rgba(0,0,0,.3),0 3px 0 rgba(0,0,0,.4);transition:transform .1s}
+.vl-stat:active{transform:translateY(3px)}.vl-stat.on{background:linear-gradient(180deg,#ffe08a,#c98a0b);color:#3a2800}
+.vl-stat b{font-size:20px;font-weight:900}.vl-stat small{font-size:10.5px;opacity:.85}
+.vl-bar{height:8px;border-radius:6px;background:rgba(120,130,150,.25);overflow:hidden;margin:10px 0 4px;box-shadow:inset 0 2px 3px rgba(0,0,0,.3)}.vl-bar i{display:block;height:100%;width:0;border-radius:6px;transition:width .25s}
+.vl-sm{font-size:11.5px;opacity:.85}
+.vl-card{border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 5px 0 rgba(0,0,0,.09),0 14px 18px -10px rgba(0,0,0,.35);transition:transform .12s}
+.vl-card:active{transform:translateY(3px) scale(.99)}
+.vl-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:23px;flex:none;box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(0,0,0,.2),0 3px 0 rgba(0,0,0,.2)}
+.vl-ic.pw{background:linear-gradient(145deg,#ffe08a,#c98a0b)}.vl-ic.note{background:linear-gradient(145deg,#c4a8ff,#7048c8)}
+.vl-w{display:block;font-style:normal;font-size:11px;font-weight:800;color:#c0392b}
+.vl-f{background:var(--card);border-radius:22px;padding:6px 14px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 0 rgba(0,0,0,.09),0 16px 22px -10px rgba(0,0,0,.35)}
+.vl-f .vl-btn{margin:6px 6px 0 0}.vl-f h3{margin:12px 0 0}
+.vl-gen{border-radius:16px;box-shadow:inset 0 3px 6px rgba(0,0,0,.12)}
+.vl-fr{overflow-x:auto;flex-wrap:nowrap}.vl-fr .vl-btn{white-space:nowrap}
+.vl-ic.media{background:linear-gradient(145deg,#7fe0ff,#2358c9)}
+.vl-v{position:fixed;inset:0;z-index:200;background:rgba(5,8,16,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}.vl-v img,.vl-v video{max-width:100%;max-height:75vh;border-radius:14px}
+</style>
 <script>
 /* 8500: خزنتي — خزنة مشفّرة على الجهاز (AES-GCM 256 + PBKDF2 600,000). البيانات محلية بس ومش بتتزامن ولا بتتبعت لأي مكان */
 (function(){
-var K='masrofati_vault_v1',IT=600000,TE=new TextEncoder(),TD=new TextDecoder(),S={key:null,rec:null,items:[],q:'',f:'all',idle:0,clip:0,cfg:{}};
+var K='masrofati_vault_v1',IT=600000,TE=new TextEncoder(),TD=new TextDecoder(),S={key:null,rec:null,items:[],q:'',f:'all',idle:0,clip:0,cfg:{},urls:[]};
 var ICO='<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vb__U__" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa8c0"/><stop offset="1" stop-color="#3b4760"/></linearGradient><radialGradient id="vd__U__" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".6" stop-color="#e0a82e"/><stop offset="1" stop-color="#8a5a00"/></radialGradient></defs><ellipse cx="60" cy="110" rx="38" ry="5" fill="rgba(0,0,0,.28)"/><rect x="16" y="14" width="88" height="90" rx="12" fill="url(#vb__U__)" stroke="#2a3348" stroke-width="2"/><rect x="25" y="23" width="70" height="72" rx="8" fill="#56637d" stroke="#2a3348"/><circle cx="60" cy="59" r="22" fill="url(#vd__U__)" stroke="#6b4300" stroke-width="2"/><circle cx="60" cy="59" r="10" fill="#fff3c4" stroke="#8a5a00" stroke-width="1.5"/><path d="M60 59V46M60 59l11 6M60 59l-11 6" stroke="#6b4300" stroke-width="3" stroke-linecap="round"/><rect x="24" y="100" width="12" height="7" rx="2" fill="#2a3348"/><rect x="84" y="100" width="12" height="7" rx="2" fill="#2a3348"/><path d="M22 20q30-8 60-4" stroke="rgba(255,255,255,.5)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';
 var $=function(i){return document.getElementById(i)};
 function el(t,c,x,p){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;if(p)p.appendChild(e);return e}
@@ -21525,9 +21553,9 @@ function pwf(par,ph){var w=el('div','vl-pw',null,par),i=el('input',null,null,w);
 function gen(n,sets){var cs=sets.join(''),o,ok;do{o='';var lim=256-256%cs.length;while(o.length<n){var u=rnd(n*2);for(var i=0;i<u.length&&o.length<n;i++)if(u[i]<lim)o+=cs[u[i]%cs.length]}ok=sets.every(function(x){return o.split('').some(function(c){return x.indexOf(c)>-1})})}while(!ok);return o}
 function copy(t){navigator.clipboard.writeText(t).then(function(){toast('اتنسخ — هيتمسح من الحافظة بعد ٣٠ ثانية');clearTimeout(S.clip);S.clip=setTimeout(function(){navigator.clipboard.writeText('').catch(function(){})},30000)},function(){toast('تعذّر النسخ')})}
 function idle(ms){clearTimeout(S.idle);if(S.key)S.idle=setTimeout(lock,ms||120000)}
-function lock(){S.key=null;S.items=[];S.q='';clearTimeout(S.idle);if($('vaultOverlay').classList.contains('open'))gate()}
+function lock(){S.key=null;S.items=[];S.q='';clearTimeout(S.idle);S.urls.forEach(function(u){URL.revokeObjectURL(u)});S.urls=[];document.querySelectorAll('.vl-v').forEach(function(e){e.remove()});if($('vaultOverlay').classList.contains('open'))gate()}
 function gate(){
- var rec=load(),b=$('vaultBody'),busy=false,fails=0;b.textContent='';var c=el('div','vl-c',null,b);el('div','vl-big','🔐',c);
+ var rec=load(),b=$('vaultBody'),busy=false,fails=0;b.textContent='';var c=el('div','vl-c',null,b);var vi=el('div','vl-big',null,c);try{vi.innerHTML=(vaultIcoSvg(vaultIcoKey(settings))||window.VAULT_ICO).replace(/__U__/g,'vg')}catch(e){vi.textContent='🔐'}
  el('h3',null,rec?'افتح الخزنة':'إنشاء خزنة جديدة',c);
  el('p','vl-n',rec?'اكتب كلمة المرور الرئيسية.':'بياناتك بتتشفّر على جهازك (AES-256) ومش بتتبعت لأي مكان. كلمة المرور الرئيسية مش بتتخزّن ومالهاش استرجاع: لو نسيتها البيانات بتضيع.',c);
  var p=pwf(c,'كلمة المرور الرئيسية'),p2,ck;
@@ -21548,64 +21576,97 @@ function gate(){
  };
  var f=el('input',null,null,c);f.type='file';f.accept='.json,application/json';f.style.display='none';
  var ib=el('button','vl-btn',rec?'📥 استرجاع من نسخة (اكتب كلمة مرور النسخة فوق)':'📥 استرجاع من نسخة احتياطية (اكتب كلمة مرورها فوق)',c);ib.style.marginTop='14px';ib.onclick=function(){f.click()};
- f.onchange=async function(){try{var r=JSON.parse(await f.files[0].text());if(r.app!=='masrofati-vault'||!r.data)throw 0;var k=await dk(p.value,ub(r.salt),r.iter),it=await dec(k,r.data);if(rec&&!confirm('هتستبدل الخزنة الحالية بالنسخة دي؟'))return;delete r.app;localStorage.setItem(K,JSON.stringify(r));S.key=k;S.rec=r;S.items=it;main();toast('اتسترجعت النسخة')}catch(e){m.textContent='الملف أو كلمة مرور النسخة غلط'}f.value=''};
+ f.onchange=async function(){try{var r=JSON.parse(await f.files[0].text());if(r.app!=='masrofati-vault'||!r.data)throw 0;var k=await dk(p.value,ub(r.salt),r.iter),it=await dec(k,r.data);if(rec&&!confirm('هتستبدل الخزنة الحالية بالنسخة دي؟'))return;var fo=r.files;delete r.app;delete r.files;localStorage.setItem(K,JSON.stringify(r));S.key=k;S.rec=r;S.items=it;if(fo)await impFiles({files:fo},k);main();toast('اتسترجعت النسخة')}catch(e){m.textContent='الملف أو كلمة مرور النسخة غلط'}f.value=''};
  if(rec){var d=el('button','vl-btn vl-red','🗑️ مسح الخزنة نهائيًا',c);d.style.marginTop='10px';d.onclick=function(){if(confirm('هتمسح الخزنة وكل اللي فيها نهائيًا؟')&&prompt('اكتب كلمة «مسح» للتأكيد')==='مسح'){localStorage.removeItem(K);gate()}}}
  setTimeout(function(){try{p.focus()}catch(e){}},100)
 }
+function idb(){return new Promise(function(r,j){var q=indexedDB.open('masrofati_vault_files',1);q.onupgradeneeded=function(){q.result.createObjectStore('f')};q.onsuccess=function(){r(q.result)};q.onerror=function(){j(q.error)}})}
+async function fputBuf(id,buf){var iv=rnd(12),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},S.key,buf),db=await idb();return new Promise(function(r,j){var t=db.transaction('f','readwrite');t.objectStore('f').put({iv:iv,ct:ct},id);t.oncomplete=r;t.onerror=function(){j(t.error)}})}
+async function fput(id,blob){return fputBuf(id,await blob.arrayBuffer())}
+async function fraw(id){var db=await idb();return new Promise(function(r,j){var q=db.transaction('f').objectStore('f').get(id);q.onsuccess=function(){r(q.result)};q.onerror=function(){j(q.error)}})}
+async function fget(id){var o=await fraw(id);return o?crypto.subtle.decrypt({name:'AES-GCM',iv:o.iv},S.key,o.ct):null}
+function fdel(id){idb().then(function(db){db.transaction('f','readwrite').objectStore('f').delete(id)})}
+async function impFiles(o,k){var fs=o.files||{};for(var id in fs){try{var buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:ub(fs[id].iv)},k,ub(fs[id].ct));await fputBuf(id,buf)}catch(e){}}}
+async function dl(x){var bf=await fget(x.id);if(!bf)return;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bf],{type:x.type}));a.download=x.name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}
+async function view(x){var bf=await fget(x.id);if(!bf){toast('الملف مش موجود');return}var u=URL.createObjectURL(new Blob([bf],{type:x.type}));S.urls.push(u);
+ var v=el('div','vl-v',null,$('vaultOverlay'));el('button','vl-btn','✕ إغلاق',v).onclick=function(){v.remove()};
+ var m=/^video/.test(x.type)?el('video',null,null,v):/^image/.test(x.type)?el('img',null,null,v):null;
+ if(m){m.src=u;if(m.tagName==='VIDEO')m.controls=true}else el('p','vl-n','معاينة غير متاحة — نزّل الملف',v);
+ el('button','vl-btn','⬇️ تنزيل',v).onclick=function(){dl(x)}}
+function weak(p){return !p||p.length<10||!(/[a-z]/.test(p)&&/[A-Z]/.test(p)&&/\d/.test(p))}
+function bad(){var c={},r={};S.items.forEach(function(x){if(x.type==='pw'&&x.pass)c[x.pass]=(c[x.pass]||0)+1});S.items.forEach(function(x){if(x.type==='pw'&&(weak(x.pass)||c[x.pass]>1))r[x.id]=weak(x.pass)?'ضعيفة':'مكرّرة'});return r}
 function main(){
  var b=$('vaultBody');b.textContent='';idle();
- var t=el('div','vl-top',null,b);el('span','vl-st','🔒 مشفّرة · AES-256',t);var lk=el('button','vl-btn','🔒 قفل الآن',t);lk.onclick=lock;
+ var bd=bad(),pwn=S.items.filter(function(x){return x.type==='pw'}).length,nb=Object.keys(bd).length,sc=pwn?Math.round(100*(pwn-nb)/pwn):100;
+ var h=el('div','vl-hero',null,b),t=el('div','vl-top',null,h);el('span','vl-st','🔒 مشفّرة · AES-256',t);var lk=el('button','vl-btn','🔒 قفل',t);lk.onclick=lock;
+ var sg=el('div','vl-stats',null,h);
+ [['🗂️',S.items.length,'الكل','all'],['🔑',pwn,'كلمات مرور','pw'],['📝',S.items.length-pwn,'ملاحظات ووسائط','note'],['⚠️',nb,'تحتاج مراجعة','rev']].forEach(function(x){var c=el('button','vl-stat'+(S.f===x[3]?' on':''),null,sg);c.type='button';el('span',null,x[0],c);el('b',null,String(x[1]),c);el('small',null,x[2],c);c.onclick=function(){S.f=x[3];main()}});
+ var pb=el('div','vl-bar',null,h),pi_=el('i',null,null,pb);pi_.style.width=sc+'%';pi_.style.background=sc>70?'#34d399':sc>40?'#fbbf24':'#f87171';el('div','vl-sm','مستوى أمان كلمات المرور: '+sc+'%',h);
  var q=el('input','vl-q',null,b);q.placeholder='🔍 بحث فوري…';q.value=S.q;q.oninput=function(){S.q=q.value;list()};
  var fr=el('div','vl-fr',null,b);
- [['all','الكل'],['fav','⭐ المفضلة'],['pw','🔑 كلمات المرور'],['note','📝 ملاحظات']].forEach(function(x){var c=el('button','vl-btn vl-chip'+(S.f===x[0]?' on':''),x[1],fr);c.onclick=function(){S.f=x[0];main()}});
+ [['all','الكل'],['fav','⭐ المفضلة']].forEach(function(x){var c=el('button','vl-btn vl-chip'+(S.f===x[0]?' on':''),x[1],fr);c.onclick=function(){S.f=x[0];main()}});
  S.L=el('div',null,null,b);list();
  var r=el('div','vl-row',null,b);
  el('button','vl-btn','➕ كلمة مرور',r).onclick=function(){form(null,'pw')};
  el('button','vl-btn','➕ ملاحظة مشفّرة',r).onclick=function(){form(null,'note')};
+ el('button','vl-btn','➕ صورة / فيديو / ملف',r).onclick=function(){form(null,'media')};
  var tb=el('button','vl-btn','⚙️ نسخ احتياطي',r),tp=el('div','vl-gen',null,b);tb.onclick=function(){tp.classList.toggle('on')};
- var ex=el('button','vl-btn','📤 تصدير نسخة مشفّرة',tp);ex.onclick=function(){var o=Object.assign({app:'masrofati-vault'},S.rec),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='masrofati-vault-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)};
+ var ex=el('button','vl-btn','📤 تصدير نسخة مشفّرة',tp);ex.onclick=async function(){var o=Object.assign({app:'masrofati-vault'},S.rec),ids=[];S.items.forEach(function(x){(x.files||[]).forEach(function(q){ids.push(q.id)})});
+  if(ids.length){var fs={},tot=0;for(var i=0;i<ids.length;i++){var rw=await fraw(ids[i]);if(rw){tot+=rw.ct.byteLength;fs[ids[i]]={iv:b64(rw.iv),ct:b64(new Uint8Array(rw.ct))}}}if(tot<=40e6)o.files=fs;else toast('المرفقات كبيرة — اتصدّرت النسخة من غير مرفقات')}
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='masrofati-vault-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)};
  el('p','vl-n','الاستيراد بيدمج عناصر النسخة مع اللي عندك (الأحدث يكسب). اكتب كلمة مرور النسخة:',tp);
  var ip=pwf(tp,'كلمة مرور النسخة'),f=el('input',null,null,tp);f.type='file';f.accept='.json';f.style.display='none';
  el('button','vl-btn','📥 استيراد نسخة',tp).onclick=function(){f.click()};
- f.onchange=async function(){try{var o=JSON.parse(await f.files[0].text());if(o.app!=='masrofati-vault')throw 0;var it=await dec(await dk(ip.value,ub(o.salt),o.iter),o.data),mp={};S.items.forEach(function(x){mp[x.id]=x});it.forEach(function(x){if(!mp[x.id]||(mp[x.id].updated||0)<(x.updated||0))mp[x.id]=x});S.items=Object.keys(mp).map(function(k){return mp[k]});await save();main();toast('اتدمجت النسخة')}catch(e){toast('الملف أو كلمة المرور غلط')}f.value=''}
+ f.onchange=async function(){try{var o=JSON.parse(await f.files[0].text());if(o.app!=='masrofati-vault')throw 0;var kk=await dk(ip.value,ub(o.salt),o.iter),it=await dec(kk,o.data),mp={};S.items.forEach(function(x){mp[x.id]=x});it.forEach(function(x){if(!mp[x.id]||(mp[x.id].updated||0)<(x.updated||0))mp[x.id]=x});S.items=Object.keys(mp).map(function(q){return mp[q]});await impFiles(o,kk);await save();main();toast('اتدمجت النسخة')}catch(e){toast('الملف أو كلمة المرور غلط')}f.value=''}
 }
 function list(){
- var L=S.L;L.textContent='';var q=S.q.trim().toLowerCase();
- var a=S.items.filter(function(x){return(S.f==='all'||(S.f==='fav'?x.fav:x.type===S.f))&&(!q||[x.title,x.user,x.url,x.tags].join(' ').toLowerCase().indexOf(q)>-1)}).sort(function(x,y){return(y.fav?1:0)-(x.fav?1:0)||(y.updated||0)-(x.updated||0)});
+ var L=S.L,bd=bad();L.textContent='';var q=S.q.trim().toLowerCase();
+ var a=S.items.filter(function(x){return(S.f==='all'||(S.f==='fav'?x.fav:S.f==='rev'?bd[x.id]:S.f==='note'?x.type!=='pw':x.type===S.f))&&(!q||[x.title,x.user,x.url,x.tags].join(' ').toLowerCase().indexOf(q)>-1)}).sort(function(x,y){return(y.fav?1:0)-(x.fav?1:0)||(y.updated||0)-(x.updated||0)});
  if(!a.length){el('div','vl-empty',S.items.length?'مفيش نتايج':'الخزنة فاضية — ضيف أول عنصر',L);return}
  a.forEach(function(x){
-  var c=el('div','vl-card',null,L);el('span',null,x.type==='pw'?'🔑':'📝',c);
-  var t=el('div','t',null,c);el('b',null,x.title,t);el('small',null,x.type==='pw'?(x.user||'••••••••'):(x.tags||'ملاحظة مشفّرة'),t);t.onclick=function(){form(x,x.type)};
+  var c=el('div','vl-card',null,L);el('span','vl-ic '+x.type,x.type==='pw'?'🔑':x.type==='media'?'🖼️':'📝',c);
+  var t=el('div','t',null,c);el('b',null,x.title,t);el('small',null,(x.type==='pw'?(x.user||'••••••••'):(x.tags||(x.type==='media'?'وسائط مشفّرة':'ملاحظة مشفّرة')))+(x.files&&x.files.length?' · 📎'+x.files.length:''),t);if(bd[x.id])el('em','vl-w','⚠️ كلمة مرور '+bd[x.id],t);t.onclick=function(){form(x,x.type)};
   el('button',null,x.fav?'⭐':'☆',c).onclick=async function(){x.fav=!x.fav;await save();list()};
-  el('button',null,'📋',c).onclick=function(){copy(x.type==='pw'?x.pass:x.note)}
+  el('button',null,'📋',c).onclick=function(){copy(x.type==='pw'?x.pass:(x.note||x.title))}
  })
 }
 function form(it,type){
  var n=!it;it=it||{id:b64(rnd(9)),type:type,title:'',user:'',pass:'',url:'',note:'',tags:'',fav:false};idle();
  var b=$('vaultBody');b.textContent='';var f=el('div','vl-f',null,b),pw=it.type==='pw',F={};
- el('h3',null,(n?'إضافة ':'تعديل ')+(pw?'كلمة مرور':'ملاحظة مشفّرة'),f);
+ el('h3',null,(n?'إضافة ':'تعديل ')+(pw?'كلمة مرور':it.type==='media'?'صورة / فيديو / ملف':'ملاحظة مشفّرة'),f);
  function fld(k,lb,o){o=o||{};el('label',null,lb,f);var i=o.ta?el('textarea',null,null,f):el('input',null,null,f);if(o.ta)i.rows=7;else i.type=o.t||'text';i.value=it[k]||'';i.autocomplete='off';i.spellcheck=false;i.autocapitalize='off';F[k]=i;return i}
  fld('title',pw?'اسم الخدمة / الموقع':'العنوان');
  if(pw){
   fld('user','اسم المستخدم / البريد');var pi=fld('pass','كلمة المرور',{t:'password'}),r=el('div','vl-row',null,f);
+  var sb=el('div','vl-bar',null,f),si=el('i',null,null,sb);function sbu(){var v=pi.value,n=[/[a-z]/,/[A-Z]/,/\d/,/[^a-zA-Z0-9]/].filter(function(q){return q.test(v)}).length,z=v?Math.min(100,Math.round(Math.min(v.length,16)/16*60+n*10)):0;si.style.width=z+'%';si.style.background=z>70?'#34d399':z>40?'#fbbf24':'#f87171'}pi.oninput=sbu;sbu();
   el('button','vl-btn','👁️ إظهار/إخفاء',r).onclick=function(){pi.type=pi.type==='password'?'text':'password'};
   var gb=el('button','vl-btn','🎲 مولّد كلمات المرور',r),gp=el('div','vl-gen',null,f);gb.onclick=function(){gp.classList.toggle('on')};
   var ln=el('input',null,null,gp);ln.type='range';ln.min=8;ln.max=64;ln.value=20;var lv=el('b',null,'الطول: 20',gp);ln.oninput=function(){lv.textContent='الطول: '+ln.value};
   var SETS={u:'ABCDEFGHJKLMNPQRSTUVWXYZ',l:'abcdefghijkmnopqrstuvwxyz',d:'23456789',s:'!@#$%^&*()-_=+?'},CK={};
   [['u','حروف كبيرة'],['l','حروف صغيرة'],['d','أرقام'],['s','رموز']].forEach(function(x){var lb=el('label',null,null,gp),c=el('input',null,null,lb);c.type='checkbox';c.checked=true;lb.appendChild(document.createTextNode(' '+x[1]));CK[x[0]]=c});
-  el('button','vl-btn vl-pri','✨ توليد واستخدام',gp).onclick=function(){var s=Object.keys(CK).filter(function(k){return CK[k].checked}).map(function(k){return SETS[k]});if(!s.length){toast('اختار نوع حروف');return}pi.value=gen(+ln.value,s);pi.type='text'};
+  el('button','vl-btn vl-pri','✨ توليد واستخدام',gp).onclick=function(){var s=Object.keys(CK).filter(function(k){return CK[k].checked}).map(function(k){return SETS[k]});if(!s.length){toast('اختار نوع حروف');return}pi.value=gen(+ln.value,s);pi.type='text';sbu()};
   fld('url','الرابط');fld('note','ملاحظة',{ta:1})
  }else{
-  var nt=fld('note','النص',{ta:1});if(!n)nt.classList.add('vl-sec');
-  el('button','vl-btn','👁️ إظهار/إخفاء النص',f).onclick=function(){nt.classList.toggle('vl-sec')};
+  var md=it.type==='media',nt=fld('note',md?'الوصف':'النص',{ta:1});if(!n&&!md)nt.classList.add('vl-sec');
+  if(!md)el('button','vl-btn','👁️ إظهار/إخفاء النص',f).onclick=function(){nt.classList.toggle('vl-sec')};
   fld('tags','الوسوم (افصل بينها بفاصلة)')
  }
+ var fl=(it.files||[]).slice(),added=[],removed=[];el('label',null,'📎 المرفقات (صور / فيديو / سكرين شوت / ملفات)',f);
+ var fb=el('div',null,null,f),pk=el('input',null,null,f);pk.type='file';pk.multiple=true;pk.accept='image/*,video/*,.pdf,.txt';pk.style.display='none';
+ el('button','vl-btn','➕ إضافة مرفقات',f).onclick=function(){pk.click()};
+ function fr(){fb.textContent='';fl.forEach(function(x,i){var r=el('div','vl-card',null,fb),im=/^image/.test(x.type),th=el('span','vl-ic media',im?'🖼️':/^video/.test(x.type)?'🎬':'📄',r);
+  if(im)fget(x.id).then(function(bf){if(!bf)return;var u=URL.createObjectURL(new Blob([bf],{type:x.type}));S.urls.push(u);th.textContent='';var g=el('img',null,null,th);g.src=u;g.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px'});
+  var t=el('div','t',null,r);el('b',null,x.name,t);el('small',null,(x.size/1048576).toFixed(1)+' م.ب',t);t.onclick=function(){view(x)};
+  el('button',null,'⬇️',r).onclick=function(){dl(x)};
+  el('button',null,'🗑️',r).onclick=function(){fl.splice(i,1);if(added.indexOf(x.id)>-1)fdel(x.id);else removed.push(x.id);fr()}})}
+ pk.onchange=async function(){for(var i=0;i<pk.files.length;i++){var q=pk.files[i];if(q.size>60e6){toast('«'+q.name+'» أكبر من ٦٠ م.ب');continue}try{var id=b64(rnd(9)).replace(/[+\/=]/g,'x');await fput(id,q);fl.push({id:id,name:q.name,type:q.type||'application/octet-stream',size:q.size});added.push(id)}catch(e){toast('تعذّر حفظ «'+q.name+'»')}}pk.value='';fr()};
+ fr();
  var m=el('div','vl-e',null,f),sv=el('button','vl-btn vl-pri','💾 حفظ',f);
  sv.onclick=async function(){if(!F.title.value.trim()){m.textContent='اكتب العنوان';return}
-  for(var k in F)it[k]=(k==='pass'||k==='note')?F[k].value:F[k].value.trim();it.updated=Date.now();
+  for(var k in F)it[k]=(k==='pass'||k==='note')?F[k].value:F[k].value.trim();it.updated=Date.now();removed.forEach(fdel);it.files=fl;
   if(n)S.items.push(it);await save();main()};
- el('button','vl-btn','↩️ رجوع',f).onclick=main;
- if(!n){var d=el('button','vl-btn vl-red','🗑️ حذف',f);d.onclick=async function(){if(confirm('تحذف العنصر ده؟')){S.items=S.items.filter(function(x){return x.id!==it.id});await save();main()}}}
+ el('button','vl-btn','↩️ رجوع',f).onclick=function(){added.forEach(fdel);main()};
+ if(!n){var d=el('button','vl-btn vl-red','🗑️ حذف',f);d.onclick=async function(){if(confirm('تحذف العنصر ده؟')){(it.files||[]).forEach(function(q){fdel(q.id)});S.items=S.items.filter(function(x){return x.id!==it.id});await save();main()}}}
 }
 window.openVault=function(){
  var o=$('vaultOverlay');if(!o)return;if(!(window.crypto&&crypto.subtle)){toast('المتصفح ده مش بيدعم التشفير');return}
