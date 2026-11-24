@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-23.8499">
+<meta name="app-version" content="2026-11-25.8502">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -3907,6 +3907,12 @@ document.addEventListener('DOMContentLoaded', function(){
       <span class="ch-lbl">عملي</span>
     </button>
   </div>
+  <div class="cap-hero-wrap" id="vaultHeroWrap">
+    <button type="button" class="cap-hero" id="vaultHeroBtn" onclick="openVault()" data-hold-ok aria-label="خزنتي">
+      <span class="ch-stage"><span class="ch-ico" id="vaultHeroIco"></span></span>
+      <span class="ch-lbl">خزنتي</span>
+    </button>
+  </div>
 </div>
 
 <style id="wkStyle">
@@ -4030,6 +4036,14 @@ document.addEventListener('DOMContentLoaded', function(){
     <button type="button" class="fs-close" onclick="closeWkHero()" aria-label="رجوع">✕</button>
     <div class="ch-ptitle">🧰 عملي</div>
     <div id="wkHost"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="vaultOverlay">
+  <div class="modal-box ch-page">
+    <button type="button" class="fs-close" onclick="closeVault()" aria-label="رجوع">✕</button>
+    <div class="ch-ptitle">🔐 خزنتي</div>
+    <div id="vaultBody"></div>
   </div>
 </div>
 
@@ -5378,6 +5392,13 @@ window.addEventListener('load', function(){ setTimeout(function(){ try{ if(setti
       <div class="vol-val" id="wkIcoSizeLabel">100%</div>
       <div class="ch-prev" id="wkIcoPrev"></div>
       </div></details>
+<details class="ico-grp"><summary>🔐 خزنتي — الأيقونة والحجم</summary><div class="ico-body">
+<div class="opt-row" id="optVaultIcon" data-nosound><button type="button" class="opt-chip" data-val="vsafe" onclick="nfSet('vaultIcon','vsafe')">🔐 خزنة ذهبية</button><button type="button" class="opt-chip" data-val="vlock" onclick="nfSet('vaultIcon','vlock')">🔒 قفل ذهبي</button><button type="button" class="opt-chip" data-val="vkey" onclick="nfSet('vaultIcon','vkey')">🗝️ مفتاح ذهبي</button><button type="button" class="opt-chip" data-val="vshield" onclick="nfSet('vaultIcon','vshield')">🛡️ درع حماية</button><button type="button" class="opt-chip" data-val="vchest" onclick="nfSet('vaultIcon','vchest')">🧰 صندوق كنز</button><button type="button" class="opt-chip" data-val="vdoor" onclick="nfSet('vaultIcon','vdoor')">🏦 باب خزنة</button><button type="button" class="opt-chip" data-val="vpass" onclick="nfSet('vaultIcon','vpass')">••• كلمة سر</button><button type="button" class="opt-chip" data-val="n4safe" onclick="nfSet('vaultIcon','n4safe')">🗄️ خزنة 4D</button><button type="button" class="opt-chip" data-val="bank" onclick="nfSet('vaultIcon','bank')">🏦 مبنى البنك</button><button type="button" class="opt-chip" data-val="bag" onclick="nfSet('vaultIcon','bag')">💰 كيس نقود</button><button type="button" class="opt-chip" data-val="wallet" onclick="nfSet('vaultIcon','wallet')">👛 محفظة</button><button type="button" class="opt-chip" data-val="briefcase" onclick="nfSet('vaultIcon','briefcase')">💼 حقيبة</button></div>
+<div class="nf-sub" style="margin-top:14px;">📏 حجم الأيقونة <small>(خزنتي بس)</small></div>
+<div class="vol-row" data-nosound><span class="vol-end">صغيرة</span><input type="range" id="vaultIcoSize" min="60" max="180" step="5" value="100" oninput="vaultIcoSizeInput()"><span class="vol-end">كبيرة</span></div>
+<div class="vol-val" id="vaultIcoSizeLabel">100%</div>
+<div class="ch-prev" id="vaultIcoPrev"></div>
+</div></details>
       </div></details>
       <div class="nf-sub" style="margin-top:14px;">اضغط على أي أيقونة ضغطة طويلة في الصفحة الأولى وحرّكها لأي مكان بين الأيقونات (فوق وتحت ويمين وشمال حسب الترتيب اللي اخترته)</div>
     </div>
@@ -6202,7 +6223,7 @@ function ensureFont(name){
   add('https://fonts.googleapis.com/css2?family=' + fam + ':wght@400;700&display=swap', 'https://fonts.googleapis.com/css2?family=' + fam + '&display=swap');
 }
 let settings = {
-  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, msCardBox:false, clk24:false, clkSec:true, clkMini:'right', clkHome:true, yiIcon:'growth', yiIconSize:100, wkIcon:'briefcase', wkIconSize:100, homeCols:1,
+  digits:'ar', notify:false, nf:{}, nfTone:'chime', nfVol:80, nfVibe:true, nfLead:2, theme:'auto', accent:'green', font:'Tajawal', fontScale:1, brightness:0, depth:'strong', clickOn:true, clickVol:85, clickType:'click', introOn:true, introVol:80, introSound:'coins', capIcon:'bag', capIconSize:100, capCardBox:false, moneyIcon:'cash', goldIcon:'pound', csIconSize:100, cmIcon:'cash', cmIconSize:100, cmCardStyle:'violet', capSubBox:false, capSubStyle:'glass', zakIcon:'mosque', zakIconSize:100, msIcon:'cash', msIconSize:100, msCardBox:false, clk24:false, clkSec:true, clkMini:'right', clkHome:true, yiIcon:'growth', yiIconSize:100, wkIcon:'briefcase', wkIconSize:100, vaultIcon:'vsafe', vaultIconSize:100, homeCols:1,
   colors: Object.assign({}, DEFAULT_CARD_COLORS, {months: DEFAULT_CARD_COLORS.months.slice()})
 };
 let _draftSettings = null;
@@ -6266,6 +6287,7 @@ function applySettings(s){
   try{ msIcoApply(s); }catch(e){}
   try{ yiIcoApply(s); }catch(e){}
   try{ wkIcoApply(s); }catch(e){}
+  try{ vaultIcoApply(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
   const root = document.documentElement;
   const newMode = s.digits === 'en' ? 'en' : 'ar';
@@ -6364,6 +6386,7 @@ function refreshSettingsUI(s){
   try{ clkRender(s); }catch(e){}
   try{ yiIcoRender(s); }catch(e){}
   try{ wkIcoRender(s); }catch(e){}
+  try{ vaultIcoRender(s); }catch(e){}
   try{ fabSettingsUI(s); }catch(e){}
   try{ homeColsApply(s); }catch(e){}
   ['theme','accent','font','depth','digits','clickType','introSound'].forEach(key=>{
@@ -16247,7 +16270,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 <script>
 /* نقل بطاقات الصفحة الأولى */
 (function(){
-  var KEY = 'masrofati_home_order_v1', IDS = ['yiHeroWrap','yrGI','zakHeroWrap','yrZM','capHeroWrap','yrCap','msHeroWrap','yrMS','wkHeroWrap'];
+  var KEY = 'masrofati_home_order_v1', IDS = ['yiHeroWrap','yrGI','zakHeroWrap','yrZM','capHeroWrap','yrCap','msHeroWrap','yrMS','wkHeroWrap', 'vaultHeroWrap'];
   function host(){ return document.getElementById('homeExtras'); }
   function currentOrder(){ var h = host(); if(!h) return IDS.slice(); return Array.prototype.slice.call(h.children).map(function(c){ return c.id; }).filter(function(id){ return IDS.indexOf(id) > -1; }); }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(currentOrder())); }catch(e){} }
@@ -16308,7 +16331,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 /* نقل العناصر بالضغط المطوّل والسحب في كل الصفحات (الرئيسية والداخلية) + خيار القفل من الإعدادات */
 (function(){
   var KEYM = 'masrofati_move_v1', HINT = 'masrofati_home_hint_v1', HOLD = 380, TOL = 9;
-  var IDS = ['yiHeroWrap', 'yrGI', 'zakHeroWrap', 'yrZM', 'capHeroWrap', 'yrCap', 'msHeroWrap', 'yrMS', 'wkHeroWrap'];
+  var IDS = ['yiHeroWrap', 'yrGI', 'zakHeroWrap', 'yrZM', 'capHeroWrap', 'yrCap', 'msHeroWrap', 'yrMS', 'wkHeroWrap', 'vaultHeroWrap'];
   /* 8428: ترتيب أيقونات وبطاقات صفحة الزكاة */
   var ZK_BOX = {zmRowBox: 'zmrow', zmDuoBox: 'zmduo'}, ZK_KEY = {zmrow: 'zmRowOrder', zmduo: 'zmDuoOrder'};
   function gridKind(k){ return k === 'cmokind' || k === 'cmodest' || k === 'zmrow' || k === 'zmduo'; }
@@ -18353,9 +18376,10 @@ try{ wkIcoApply(settings); }catch(e){}
     {key:'donIcon',   n:'التبرعات والصدقات', d:'heart',  f:function(k){ return zakIcoSvg(k); }},
     {key:'msIcon',    n:'المصروفات الشهرية', d:'cash',   f:function(k){ return msIcoSvg(k); }},
     {key:'yiIcon',    n:'التقارير',          d:'growth', f:function(k){ return yiIcoSvg(k); }},
-    {key:'wkIcon',    n:'عملي',              d:'briefcase', f:function(k){ return (typeof wkIcoSvg === 'function') ? wkIcoSvg(k) : ''; }}
+    {key:'wkIcon',    n:'عملي',              d:'briefcase', f:function(k){ return (typeof wkIcoSvg === 'function') ? wkIcoSvg(k) : ''; }},
+    {key:'vaultIcon', n:'خزنتي',             d:'vsafe', f:function(k){ return (typeof vaultIcoSvg === 'function') ? vaultIcoSvg(k) : ''; }}
   ];
-  var ALL = [['wklaptop','لابتوب شغل'],['wktools','عدّة شغل'],['wkhelmet','خوذة عمل'],['bag','كيس نقود'],['bank','مبنى البنك'],['coins','مجموعة نقود'],['btc','بيتكوين'],['cash','فلوس'],['wallet','محفظة'],['pound','جنيه ذهب'],['bar','سبيكة ذهب'],['piggy','حصالة'],['envelope','ظرف الراتب'],['briefcase','حقيبة عمل'],['growth','نمو الدخل'],['tree','شجرة الدخل'],['calendar','تقويم شهري'],['cart','عربة مصاريف'],['receipt','فاتورة'],['mosque','جامع ذهبي'],['moon','هلال ونجمة'],['lantern','فانوس'],['heart','قلب الصدقة'],['quran','مصحف'],
+  var ALL = [['vsafe','خزنة ذهبية'],['vlock','قفل ذهبي'],['vkey','مفتاح ذهبي'],['vshield','درع حماية'],['vchest','صندوق كنز'],['vdoor','باب خزنة'],['vpass','كلمة سر'],['wklaptop','لابتوب شغل'],['wktools','عدّة شغل'],['wkhelmet','خوذة عمل'],['bag','كيس نقود'],['bank','مبنى البنك'],['coins','مجموعة نقود'],['btc','بيتكوين'],['cash','فلوس'],['wallet','محفظة'],['pound','جنيه ذهب'],['bar','سبيكة ذهب'],['piggy','حصالة'],['envelope','ظرف الراتب'],['briefcase','حقيبة عمل'],['growth','نمو الدخل'],['tree','شجرة الدخل'],['calendar','تقويم شهري'],['cart','عربة مصاريف'],['receipt','فاتورة'],['mosque','جامع ذهبي'],['moon','هلال ونجمة'],['lantern','فانوس'],['heart','قلب الصدقة'],['quran','مصحف'],
     ['n4safe','خزنة 4D'],['n4wallet','محفظة 4D'],['n4cash','فلوس 4D'],['n4coin','عملة ذهبية 4D'],['n4goldbar','سبيكة 4D'],['n4piggy','حصالة 4D'],['n4bag','شنطة تسوق 4D'],['n4cart','عربة 4D'],['n4receipt','فاتورة 4D'],['n4calendar','تقويم 4D'],['n4target','هدف 4D'],['n4tree','شجرة فلوس 4D'],['n4medal','ميدالية 4D'],['n4crescent','هلال 4D'],['n4lantern','فانوس 4D'],['n4heart','قلب 4D'],['n4gift','هدية 4D'],['n4mosque','مسجد 4D']];
   var _open = null, _uc = 0;
   function cur(s){ return s || (typeof _draftSettings !== 'undefined' && _draftSettings) || settings; }
@@ -21457,6 +21481,156 @@ body.priv-blur > *:not(#privShield):not(#privReveal){filter:blur(11px); pointer-
   setInterval(function(){ try{ if(document.visibilityState === 'visible') { if(navigator.onLine && typeof goldLiveRefresh === 'function') goldLiveRefresh(false); pxCheck(); } }catch(e){} }, 30 * 1000);
   setTimeout(function(){ try{ if(navigator.onLine && typeof goldLiveRefresh === 'function') goldLiveRefresh(false); }catch(e){} }, 3500);
 })();
+</script>
+<style id="vaultStyle">
+#vaultOverlay{align-items:stretch !important;justify-content:stretch !important;background:var(--bg);backdrop-filter:none;z-index:94;}
+#vaultOverlay .modal-box{width:100%;max-width:none;height:100%;max-height:none;border-radius:0;overflow-y:auto;position:relative;box-sizing:border-box;padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px));}
+#vaultOverlay .ch-ptitle{text-align:center;font-weight:900;font-size:calc(20px * var(--fs,1));margin:6px 0 10px;}
+#vaultBody{max-width:560px;margin:0 auto;}
+.vl-c{max-width:380px;margin:20px auto;text-align:center}.vl-big{font-size:60px}.vl-n{color:var(--muted);font-size:13px;line-height:1.8}
+.vl-pw{position:relative;margin:10px 0}
+.vl-pw input,.vl-q,.vl-f input:not([type=checkbox]):not([type=range]),.vl-f textarea{width:100%;box-sizing:border-box;padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit}
+.vl-eye{position:absolute;left:6px;top:50%;transform:translateY(-50%);border:0;background:none;font-size:18px;cursor:pointer}
+.vl-btn{border:0;border-radius:14px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer;background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.vl-pri{background:linear-gradient(180deg,#34d399,#0e8c5c);color:#fff;width:100%;margin-top:8px}
+.vl-red{color:var(--expense)}
+.vl-e{color:var(--expense);min-height:20px;font-size:13px;margin:6px 0}
+.vl-top,.vl-row,.vl-fr{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}.vl-top{justify-content:space-between}
+.vl-st{font-weight:800;font-size:13px;color:var(--accent-dark)}
+.vl-chip.on{background:var(--accent-dark);color:#fff}
+.vl-card{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px 12px;margin:8px 0;box-shadow:var(--shadow)}
+.vl-card .t{flex:1;min-width:0;cursor:pointer}.vl-card b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.vl-card small{color:var(--muted)}
+.vl-card button{border:0;background:none;font-size:19px;cursor:pointer;padding:4px}
+.vl-f label{display:block;font-weight:800;font-size:13px;margin:12px 0 4px}.vl-sec{-webkit-text-security:disc}
+.vl-gen{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px;margin-top:8px;display:none}.vl-gen.on{display:block}.vl-gen label{display:inline-block;margin:6px 10px 0 0;font-weight:600}
+.vl-empty{text-align:center;color:var(--muted);padding:20px}
+</style>
+<script>
+/* 8500: خزنتي — خزنة مشفّرة على الجهاز (AES-GCM 256 + PBKDF2 600,000). البيانات محلية بس ومش بتتزامن ولا بتتبعت لأي مكان */
+(function(){
+var K='masrofati_vault_v1',IT=600000,TE=new TextEncoder(),TD=new TextDecoder(),S={key:null,rec:null,items:[],q:'',f:'all',idle:0,clip:0,cfg:{}};
+var ICO='<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vb__U__" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa8c0"/><stop offset="1" stop-color="#3b4760"/></linearGradient><radialGradient id="vd__U__" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".6" stop-color="#e0a82e"/><stop offset="1" stop-color="#8a5a00"/></radialGradient></defs><ellipse cx="60" cy="110" rx="38" ry="5" fill="rgba(0,0,0,.28)"/><rect x="16" y="14" width="88" height="90" rx="12" fill="url(#vb__U__)" stroke="#2a3348" stroke-width="2"/><rect x="25" y="23" width="70" height="72" rx="8" fill="#56637d" stroke="#2a3348"/><circle cx="60" cy="59" r="22" fill="url(#vd__U__)" stroke="#6b4300" stroke-width="2"/><circle cx="60" cy="59" r="10" fill="#fff3c4" stroke="#8a5a00" stroke-width="1.5"/><path d="M60 59V46M60 59l11 6M60 59l-11 6" stroke="#6b4300" stroke-width="3" stroke-linecap="round"/><rect x="24" y="100" width="12" height="7" rx="2" fill="#2a3348"/><rect x="84" y="100" width="12" height="7" rx="2" fill="#2a3348"/><path d="M22 20q30-8 60-4" stroke="rgba(255,255,255,.5)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';
+var $=function(i){return document.getElementById(i)};
+function el(t,c,x,p){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;if(p)p.appendChild(e);return e}
+function toast(m){try{showToast(m,true)}catch(e){}}
+function b64(u){var s='';for(var i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)}
+function ub(t){var s=atob(t),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+function rnd(n){return crypto.getRandomValues(new Uint8Array(n))}
+async function dk(pw,salt,it){var m=await crypto.subtle.importKey('raw',TE.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:it,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function enc(k,o){var iv=rnd(12),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,TE.encode(JSON.stringify(o)))),r=new Uint8Array(12+ct.length);r.set(iv);r.set(ct,12);return b64(r)}
+async function dec(k,t){var u=ub(t);return JSON.parse(TD.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.subarray(0,12)},k,u.subarray(12))))}
+function load(){try{var r=JSON.parse(localStorage.getItem(K));return r&&r.data&&r.salt?r:null}catch(e){return null}}
+async function save(){S.rec.data=await enc(S.key,S.items);localStorage.setItem(K,JSON.stringify(S.rec))}
+function pwf(par,ph){var w=el('div','vl-pw',null,par),i=el('input',null,null,w);i.type='password';i.placeholder=ph;i.autocomplete='off';i.spellcheck=false;var b=el('button','vl-eye','👁️',w);b.type='button';b.onclick=function(){i.type=i.type==='password'?'text':'password'};return i}
+function gen(n,sets){var cs=sets.join(''),o,ok;do{o='';var lim=256-256%cs.length;while(o.length<n){var u=rnd(n*2);for(var i=0;i<u.length&&o.length<n;i++)if(u[i]<lim)o+=cs[u[i]%cs.length]}ok=sets.every(function(x){return o.split('').some(function(c){return x.indexOf(c)>-1})})}while(!ok);return o}
+function copy(t){navigator.clipboard.writeText(t).then(function(){toast('اتنسخ — هيتمسح من الحافظة بعد ٣٠ ثانية');clearTimeout(S.clip);S.clip=setTimeout(function(){navigator.clipboard.writeText('').catch(function(){})},30000)},function(){toast('تعذّر النسخ')})}
+function idle(ms){clearTimeout(S.idle);if(S.key)S.idle=setTimeout(lock,ms||120000)}
+function lock(){S.key=null;S.items=[];S.q='';clearTimeout(S.idle);if($('vaultOverlay').classList.contains('open'))gate()}
+function gate(){
+ var rec=load(),b=$('vaultBody'),busy=false,fails=0;b.textContent='';var c=el('div','vl-c',null,b);el('div','vl-big','🔐',c);
+ el('h3',null,rec?'افتح الخزنة':'إنشاء خزنة جديدة',c);
+ el('p','vl-n',rec?'اكتب كلمة المرور الرئيسية.':'بياناتك بتتشفّر على جهازك (AES-256) ومش بتتبعت لأي مكان. كلمة المرور الرئيسية مش بتتخزّن ومالهاش استرجاع: لو نسيتها البيانات بتضيع.',c);
+ var p=pwf(c,'كلمة المرور الرئيسية'),p2,ck;
+ if(!rec){p2=pwf(c,'أكّد كلمة المرور');var l=el('label','vl-n',null,c);ck=el('input',null,null,l);ck.type='checkbox';l.appendChild(document.createTextNode(' فاهم إن نسيان كلمة المرور معناه ضياع البيانات'))}
+ var m=el('div','vl-e',null,c),g=el('button','vl-btn vl-pri',rec?'🔓 فتح':'✅ إنشاء الخزنة',c);
+ g.onclick=async function(){
+  if(busy)return;busy=true;m.textContent='بتحقق…';
+  try{
+   if(rec){var k=await dk(p.value,ub(rec.salt),rec.iter),it;
+    try{it=await dec(k,rec.data)}catch(e){fails++;var w=Math.min(30,Math.pow(2,Math.min(fails,5)-1));m.textContent='كلمة المرور غلط. استنى '+w+' ثانية';p.value='';setTimeout(function(){busy=false;m.textContent=''},w*1000);return}
+    S.key=k;S.rec=rec;S.items=it}
+   else{if(p.value.length<10){m.textContent='كلمة المرور ١٠ حروف على الأقل';busy=false;return}
+    if(p.value!==p2.value){m.textContent='كلمتين المرور مش متطابقين';busy=false;return}
+    if(!ck.checked){m.textContent='لازم تأكّد إنك فاهم التنبيه';busy=false;return}
+    var sl=rnd(16);S.key=await dk(p.value,sl,IT);S.rec={v:1,kdf:'PBKDF2-SHA256',iter:IT,salt:b64(sl)};S.items=[];await save()}
+   busy=false;main()
+  }catch(e){m.textContent='حصلت مشكلة';busy=false}
+ };
+ var f=el('input',null,null,c);f.type='file';f.accept='.json,application/json';f.style.display='none';
+ var ib=el('button','vl-btn',rec?'📥 استرجاع من نسخة (اكتب كلمة مرور النسخة فوق)':'📥 استرجاع من نسخة احتياطية (اكتب كلمة مرورها فوق)',c);ib.style.marginTop='14px';ib.onclick=function(){f.click()};
+ f.onchange=async function(){try{var r=JSON.parse(await f.files[0].text());if(r.app!=='masrofati-vault'||!r.data)throw 0;var k=await dk(p.value,ub(r.salt),r.iter),it=await dec(k,r.data);if(rec&&!confirm('هتستبدل الخزنة الحالية بالنسخة دي؟'))return;delete r.app;localStorage.setItem(K,JSON.stringify(r));S.key=k;S.rec=r;S.items=it;main();toast('اتسترجعت النسخة')}catch(e){m.textContent='الملف أو كلمة مرور النسخة غلط'}f.value=''};
+ if(rec){var d=el('button','vl-btn vl-red','🗑️ مسح الخزنة نهائيًا',c);d.style.marginTop='10px';d.onclick=function(){if(confirm('هتمسح الخزنة وكل اللي فيها نهائيًا؟')&&prompt('اكتب كلمة «مسح» للتأكيد')==='مسح'){localStorage.removeItem(K);gate()}}}
+ setTimeout(function(){try{p.focus()}catch(e){}},100)
+}
+function main(){
+ var b=$('vaultBody');b.textContent='';idle();
+ var t=el('div','vl-top',null,b);el('span','vl-st','🔒 مشفّرة · AES-256',t);var lk=el('button','vl-btn','🔒 قفل الآن',t);lk.onclick=lock;
+ var q=el('input','vl-q',null,b);q.placeholder='🔍 بحث فوري…';q.value=S.q;q.oninput=function(){S.q=q.value;list()};
+ var fr=el('div','vl-fr',null,b);
+ [['all','الكل'],['fav','⭐ المفضلة'],['pw','🔑 كلمات المرور'],['note','📝 ملاحظات']].forEach(function(x){var c=el('button','vl-btn vl-chip'+(S.f===x[0]?' on':''),x[1],fr);c.onclick=function(){S.f=x[0];main()}});
+ S.L=el('div',null,null,b);list();
+ var r=el('div','vl-row',null,b);
+ el('button','vl-btn','➕ كلمة مرور',r).onclick=function(){form(null,'pw')};
+ el('button','vl-btn','➕ ملاحظة مشفّرة',r).onclick=function(){form(null,'note')};
+ var tb=el('button','vl-btn','⚙️ نسخ احتياطي',r),tp=el('div','vl-gen',null,b);tb.onclick=function(){tp.classList.toggle('on')};
+ var ex=el('button','vl-btn','📤 تصدير نسخة مشفّرة',tp);ex.onclick=function(){var o=Object.assign({app:'masrofati-vault'},S.rec),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='masrofati-vault-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)};
+ el('p','vl-n','الاستيراد بيدمج عناصر النسخة مع اللي عندك (الأحدث يكسب). اكتب كلمة مرور النسخة:',tp);
+ var ip=pwf(tp,'كلمة مرور النسخة'),f=el('input',null,null,tp);f.type='file';f.accept='.json';f.style.display='none';
+ el('button','vl-btn','📥 استيراد نسخة',tp).onclick=function(){f.click()};
+ f.onchange=async function(){try{var o=JSON.parse(await f.files[0].text());if(o.app!=='masrofati-vault')throw 0;var it=await dec(await dk(ip.value,ub(o.salt),o.iter),o.data),mp={};S.items.forEach(function(x){mp[x.id]=x});it.forEach(function(x){if(!mp[x.id]||(mp[x.id].updated||0)<(x.updated||0))mp[x.id]=x});S.items=Object.keys(mp).map(function(k){return mp[k]});await save();main();toast('اتدمجت النسخة')}catch(e){toast('الملف أو كلمة المرور غلط')}f.value=''}
+}
+function list(){
+ var L=S.L;L.textContent='';var q=S.q.trim().toLowerCase();
+ var a=S.items.filter(function(x){return(S.f==='all'||(S.f==='fav'?x.fav:x.type===S.f))&&(!q||[x.title,x.user,x.url,x.tags].join(' ').toLowerCase().indexOf(q)>-1)}).sort(function(x,y){return(y.fav?1:0)-(x.fav?1:0)||(y.updated||0)-(x.updated||0)});
+ if(!a.length){el('div','vl-empty',S.items.length?'مفيش نتايج':'الخزنة فاضية — ضيف أول عنصر',L);return}
+ a.forEach(function(x){
+  var c=el('div','vl-card',null,L);el('span',null,x.type==='pw'?'🔑':'📝',c);
+  var t=el('div','t',null,c);el('b',null,x.title,t);el('small',null,x.type==='pw'?(x.user||'••••••••'):(x.tags||'ملاحظة مشفّرة'),t);t.onclick=function(){form(x,x.type)};
+  el('button',null,x.fav?'⭐':'☆',c).onclick=async function(){x.fav=!x.fav;await save();list()};
+  el('button',null,'📋',c).onclick=function(){copy(x.type==='pw'?x.pass:x.note)}
+ })
+}
+function form(it,type){
+ var n=!it;it=it||{id:b64(rnd(9)),type:type,title:'',user:'',pass:'',url:'',note:'',tags:'',fav:false};idle();
+ var b=$('vaultBody');b.textContent='';var f=el('div','vl-f',null,b),pw=it.type==='pw',F={};
+ el('h3',null,(n?'إضافة ':'تعديل ')+(pw?'كلمة مرور':'ملاحظة مشفّرة'),f);
+ function fld(k,lb,o){o=o||{};el('label',null,lb,f);var i=o.ta?el('textarea',null,null,f):el('input',null,null,f);if(o.ta)i.rows=7;else i.type=o.t||'text';i.value=it[k]||'';i.autocomplete='off';i.spellcheck=false;i.autocapitalize='off';F[k]=i;return i}
+ fld('title',pw?'اسم الخدمة / الموقع':'العنوان');
+ if(pw){
+  fld('user','اسم المستخدم / البريد');var pi=fld('pass','كلمة المرور',{t:'password'}),r=el('div','vl-row',null,f);
+  el('button','vl-btn','👁️ إظهار/إخفاء',r).onclick=function(){pi.type=pi.type==='password'?'text':'password'};
+  var gb=el('button','vl-btn','🎲 مولّد كلمات المرور',r),gp=el('div','vl-gen',null,f);gb.onclick=function(){gp.classList.toggle('on')};
+  var ln=el('input',null,null,gp);ln.type='range';ln.min=8;ln.max=64;ln.value=20;var lv=el('b',null,'الطول: 20',gp);ln.oninput=function(){lv.textContent='الطول: '+ln.value};
+  var SETS={u:'ABCDEFGHJKLMNPQRSTUVWXYZ',l:'abcdefghijkmnopqrstuvwxyz',d:'23456789',s:'!@#$%^&*()-_=+?'},CK={};
+  [['u','حروف كبيرة'],['l','حروف صغيرة'],['d','أرقام'],['s','رموز']].forEach(function(x){var lb=el('label',null,null,gp),c=el('input',null,null,lb);c.type='checkbox';c.checked=true;lb.appendChild(document.createTextNode(' '+x[1]));CK[x[0]]=c});
+  el('button','vl-btn vl-pri','✨ توليد واستخدام',gp).onclick=function(){var s=Object.keys(CK).filter(function(k){return CK[k].checked}).map(function(k){return SETS[k]});if(!s.length){toast('اختار نوع حروف');return}pi.value=gen(+ln.value,s);pi.type='text'};
+  fld('url','الرابط');fld('note','ملاحظة',{ta:1})
+ }else{
+  var nt=fld('note','النص',{ta:1});if(!n)nt.classList.add('vl-sec');
+  el('button','vl-btn','👁️ إظهار/إخفاء النص',f).onclick=function(){nt.classList.toggle('vl-sec')};
+  fld('tags','الوسوم (افصل بينها بفاصلة)')
+ }
+ var m=el('div','vl-e',null,f),sv=el('button','vl-btn vl-pri','💾 حفظ',f);
+ sv.onclick=async function(){if(!F.title.value.trim()){m.textContent='اكتب العنوان';return}
+  for(var k in F)it[k]=(k==='pass'||k==='note')?F[k].value:F[k].value.trim();it.updated=Date.now();
+  if(n)S.items.push(it);await save();main()};
+ el('button','vl-btn','↩️ رجوع',f).onclick=main;
+ if(!n){var d=el('button','vl-btn vl-red','🗑️ حذف',f);d.onclick=async function(){if(confirm('تحذف العنصر ده؟')){S.items=S.items.filter(function(x){return x.id!==it.id});await save();main()}}}
+}
+window.openVault=function(){
+ var o=$('vaultOverlay');if(!o)return;if(!(window.crypto&&crypto.subtle)){toast('المتصفح ده مش بيدعم التشفير');return}
+ o.classList.add('open');gate()
+};
+window.closeVault=function(){lock();$('vaultOverlay').classList.remove('open')};
+['touchstart','keydown','click'].forEach(function(e){document.addEventListener(e,function(){if(S.key)idle()},true)});
+document.addEventListener('visibilitychange',function(){if(S.key)idle(document.hidden?30000:120000)});
+window.VAULT_ICO=ICO;window.VAULT_ICOS=Object.assign({vsafe:ICO},{"vlock": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><path d='M38 52V38a22 22 0 0 1 44 0v14' fill='none' stroke='url(#g__U__)' stroke-width='11' stroke-linecap='round'/><rect x='24' y='50' width='72' height='56' rx='13' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='75' r='8' fill='#4a2f00'/><rect x='56.5' y='78' width='7' height='15' rx='3' fill='#4a2f00'/><path d='M32 58q28-7 56 0' stroke='rgba(255,255,255,.55)' stroke-width='3' fill='none' stroke-linecap='round'/></svg>", "vkey": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><rect x='56' y='42' width='52' height='13' rx='6' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='88' y='55' width='9' height='15' rx='2' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='100' y='55' width='8' height='11' rx='2' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='38' cy='48' r='26' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='38' cy='48' r='10' fill='#3b4760' stroke='#6b4300' stroke-width='2'/><path d='M20 36q12-12 28-6' stroke='rgba(255,255,255,.55)' stroke-width='3' fill='none' stroke-linecap='round'/></svg>", "vshield": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><path d='M60 10L99 25V58C99 83 81 99 60 109C39 99 21 83 21 58V25Z' fill='url(#s__U__)' stroke='#2a3348' stroke-width='2'/><path d='M60 19L91 31V58C91 77 77 90 60 98C43 90 29 77 29 58V31Z' fill='#56637d' stroke='#2a3348'/><path d='M50 58V51a10 10 0 0 1 20 0v7' fill='none' stroke='url(#g__U__)' stroke-width='5' stroke-linecap='round'/><rect x='44' y='57' width='32' height='26' rx='6' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='68' r='4' fill='#4a2f00'/><rect x='58' y='69' width='4' height='9' rx='2' fill='#4a2f00'/></svg>", "vchest": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='b__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#c07a3a'/><stop offset='1' stop-color='#5a3210'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><rect x='16' y='52' width='88' height='50' rx='6' fill='url(#b__U__)' stroke='#3a1f08' stroke-width='2'/><path d='M16 54V42a44 26 0 0 1 88 0v12Z' fill='#c98a4a' stroke='#3a1f08' stroke-width='2'/><rect x='16' y='50' width='88' height='7' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='28' y='30' width='9' height='72' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='83' y='30' width='9' height='72' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><rect x='50' y='55' width='20' height='22' rx='4' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='64' r='3.5' fill='#4a2f00'/><rect x='58.5' y='65' width='3' height='7' rx='1.5' fill='#4a2f00'/></svg>", "vdoor": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><circle cx='60' cy='58' r='49' fill='url(#s__U__)' stroke='#2a3348' stroke-width='2'/><circle cx='60' cy='58' r='38' fill='none' stroke='url(#g__U__)' stroke-width='6'/><circle cx='60' cy='58' r='31' fill='#56637d' stroke='#2a3348'/><path d='M60 30V86M32 58H88M40 38L80 78M80 38L40 78' stroke='url(#g__U__)' stroke-width='4' stroke-linecap='round'/><circle cx='60' cy='58' r='11' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><circle cx='60' cy='58' r='4' fill='#4a2f00'/><circle cx='22' cy='58' r='3' fill='#2a3348'/><circle cx='98' cy='58' r='3' fill='#2a3348'/><circle cx='60' cy='20' r='3' fill='#2a3348'/></svg>", "vpass": "<svg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='g__U__' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe9a3'/><stop offset='.55' stop-color='#e0a82e'/><stop offset='1' stop-color='#8a5a00'/></linearGradient><linearGradient id='s__U__' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#9aa8c0'/><stop offset='1' stop-color='#3b4760'/></linearGradient></defs><ellipse cx='60' cy='111' rx='36' ry='5' fill='rgba(0,0,0,.28)'/><rect x='12' y='22' width='96' height='70' rx='11' fill='url(#s__U__)' stroke='#2a3348' stroke-width='2'/><rect x='20' y='32' width='80' height='50' rx='6' fill='#1b2438'/><circle cx='38' cy='56' r='6' fill='url(#g__U__)'/><circle cx='60' cy='56' r='6' fill='url(#g__U__)'/><circle cx='82' cy='56' r='6' fill='url(#g__U__)'/><circle cx='94' cy='88' r='19' fill='url(#g__U__)' stroke='#6b4300' stroke-width='2'/><path d='M87 86v-4a7 7 0 0 1 14 0v4' fill='none' stroke='#4a2f00' stroke-width='3'/><rect x='85' y='86' width='18' height='13' rx='3' fill='#4a2f00'/></svg>"});
+})();
+function vaultIcoSvg(k){
+ if(window.VAULT_ICOS&&window.VAULT_ICOS[k])return window.VAULT_ICOS[k];var L=[];
+ try{L.push(CAPICO_SVG)}catch(e){}try{L.push(YIICO_SVG)}catch(e){}try{L.push(MSICO_SVG)}catch(e){}try{L.push(ZAKICO_SVG)}catch(e){}try{L.push(CAPSUB_SVG)}catch(e){}try{L.push(WKICO_SVG)}catch(e){}
+ for(var i=0;i<L.length;i++)if(L[i]&&typeof L[i][k]==='string')return L[i][k];return undefined}
+function vaultIcoKey(s){var k=s&&s.vaultIcon;return vaultIcoSvg(k)?k:'vsafe'}
+function vaultIcoApply(s){s=s||settings;var k=vaultIcoKey(s),sc=Math.min(180,Math.max(60,Number(s&&s.vaultIconSize)||100))/100,e=document.getElementById('vaultHeroIco');
+ if(e&&e.getAttribute('data-k')!==k){e.innerHTML=vaultIcoSvg(k).replace(/__U__/g,'vh');e.setAttribute('data-k',k)}
+ var w=document.getElementById('vaultHeroWrap');if(w)w.style.setProperty('--ch-sc',String(sc))}
+function vaultIcoRender(s){s=s||settings;vaultIcoApply(s);var k=vaultIcoKey(s),sz=Math.min(180,Math.max(60,Math.round(Number(s.vaultIconSize)||100)));
+ var r=document.getElementById('optVaultIcon');if(r)Array.prototype.forEach.call(r.children,function(c){c.classList.toggle('active',c.getAttribute('data-val')===k)});
+ var sl=document.getElementById('vaultIcoSize');if(sl&&Number(sl.value)!==sz)sl.value=sz;
+ var lb=document.getElementById('vaultIcoSizeLabel');if(lb)lb.textContent=(typeof toArabicDigits==='function'?toArabicDigits(sz):sz)+'٪';
+ var pv=document.getElementById('vaultIcoPrev');if(pv&&pv.getAttribute('data-k')!==k){pv.innerHTML=vaultIcoSvg(k).replace(/__U__/g,'vp');pv.setAttribute('data-k',k)}}
+function vaultIcoSizeInput(){previewSetting('vaultIconSize',Number(document.getElementById('vaultIcoSize').value)||100)}
+try{vaultIcoRender(settings)}catch(e){}
 </script>
 </body>
 </html>
