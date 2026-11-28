@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-25.8505">
+<meta name="app-version" content="2026-11-28.8506">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -4231,7 +4231,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="cmo-card cmo-split" data-id="cmo:form">
     <h4 class="cmo-sec-ttl">الصرف من</h4>
     <div class="cmo-sec" id="cmoFromCard">
-    <div class="field"><label>اختر البند (وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail()"></select></div>
+    <div class="field"><label>اختر البند (وجنبه المتاح)</label><select id="cmoItem" onchange="cmoAvail();cmoViaRender()"></select></div>
     <div class="hint" id="cmoAvail" style="white-space:pre-line;"></div>
     <div class="field"><label>المبلغ</label><input type="number" id="cmoAmt" placeholder="0" inputmode="decimal" step="any" oninput="cmoTotals()"></div>
     <div class="field"><label>📅 تاريخ الصرف</label><input type="date" id="cmoDate" onchange="cmoGenRender()"></div>
@@ -4240,7 +4240,16 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="cmo-arrow" aria-hidden="true"><span class="cmo-arr-ico">⬇</span><span class="cmo-arr-lbl">الصرف إلى</span></div>
     <div class="cmo-sec" id="cmoToCard">
     <div class="gi-dest" id="cmoDest" style="margin:6px 0 10px;"><button type="button" data-id="income" data-hold-ok="1" class="active" onclick="cmoSetDest('income')"><i class="cmo-di">💰</i><span class="cmo-dl">المصروف المنزلي</span></button><button type="button" data-id="zakat" data-hold-ok="1" onclick="cmoSetDest('zakat')"><i class="cmo-di">🕌</i><span class="cmo-dl">زكاتي</span></button><button type="button" data-id="other" data-hold-ok="1" onclick="cmoSetDest('other')"><i class="cmo-di">📦</i><span class="cmo-dl">أخرى</span></button><button type="button" data-id="gen" data-hold-ok="1" onclick="cmoSetDest('gen')"><i class="cmo-di">💵</i><span class="cmo-dl">الدخل العام الشهري</span></button><button type="button" data-id="charity" data-hold-ok="1" onclick="cmoSetDest('charity')"><i class="cmo-di">🎁</i><span class="cmo-dl">صدقات</span></button></div>
-    <div class="field" id="cmoGenRow" style="display:none;"><div class="cmo-sub cmo-flow" id="cmoSub"><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg1)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام</span></button><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg2)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المنزلي</span></button><div id="cmoStlRow" class="cmo-flow-in"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg3)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">المصروفات</span></button><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStgRow" class="cmo-flow-in" style="display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div></div><div class="hint" id="cmoGenHint"></div></div>
+    <style>
+#cmoViaRow{display:none; margin:0 0 10px;}
+#cmoViaRow .cmo-via-t{font-weight:800; margin:0 6px 6px; font-size:calc(13px * var(--fs,1)); color:var(--muted);}
+#cmoViaRow .cmo-via-b{display:flex; gap:8px;}
+#cmoViaRow button{flex:1; border:0; cursor:pointer; font-family:inherit; font-weight:900; line-height:1.5; padding:11px 8px; border-radius:14px; font-size:calc(14px * var(--fs,1)); color:inherit; background:rgba(128,128,128,.16); box-shadow:0 3px 0 rgba(0,0,0,.12);}
+#cmoViaRow button.active{color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); background:linear-gradient(180deg,#4be8ae,#0d9a69); box-shadow:0 3px 0 #0a7a54;}
+#cmoViaRow button:active{transform:translateY(2px);}
+</style>
+<div id="cmoViaRow"><div class="cmo-via-t">🏦 طريقة الوصول للمصروف المنزلي</div><div class="cmo-via-b"><button type="button" class="active" data-via="0" onclick="cmoViaSet(0)">🏠 مباشر للمصروف المنزلي</button><button type="button" data-via="1" onclick="cmoViaSet(1)">💵 عبر المنصرف من الدخل العام إلى المصروف المنزلي</button></div></div>
+<div class="field" id="cmoGenRow" style="display:none;"><div class="cmo-sub cmo-flow" id="cmoSub"><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg1)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-green" onclick="cmoSetSub('gi')"><span class="cmo-sph"><i>💼</i></span><span class="cmo-lb">الدخل العام</span></button><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg2)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-orange active" onclick="cmoSetSub('home')"><span class="cmo-sph"><i>🏠</i></span><span class="cmo-lb">المنزلي</span></button><div id="cmoStlRow" class="cmo-flow-in"><label id="cmoStlLbl" style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يستقر (سيبه فاضي = المبلغ كامل)</label><input type="number" id="cmoSettle" placeholder="المبلغ كامل" inputmode="decimal" step="any"></div><div class="cmo-fa" aria-hidden="true"><svg viewBox="0 0 40 50" width="34" height="44"><defs><linearGradient id="cmoAg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4be8ae"/><stop offset="1" stop-color="#0d9a69"/></linearGradient></defs><path d="M15 2h10v22h10L20 47 5 24h10z" fill="url(#cmoAg3)" stroke="#0a7a54" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 5h3v19h-3z" fill="rgba(255,255,255,.45)"/></svg></div><button type="button" class="cmo-ic sp-blue" onclick="cmoSetSub('grp')"><span class="cmo-sph"><i>📁</i></span><span class="cmo-lb">المصروفات</span></button><select id="cmoGrp" style="display:none;" onchange="cmoGrpPick(this.value)"></select><div id="cmoStgRow" class="cmo-flow-in" style="display:none;"><label style="display:block;margin:0 6px 7px;font-weight:800;">المبلغ اللي يروح للمجموعة (سيبه فاضي = كل المبلغ المحوّل للمصروف المنزلي)</label><input type="number" id="cmoSettle2" placeholder="كل المحوّل" inputmode="decimal" step="any"></div></div><div class="hint" id="cmoGenHint"></div></div>
     <div class="field" id="cmoZkRow" style="display:none;"><label>🕌 الزكاة دي لأنهي سنة؟</label><select id="cmoZkYear" onchange="cmoZkPick(this.value)"></select><div class="hint" id="cmoZkHint"></div></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeCmOut()">إغلاق</button><button class="btn-save" id="cmoSaveBtn" onclick="cmOutSave()">💸 صرف</button></div>
     </div>
@@ -10602,10 +10611,10 @@ function cmoAvailOf(kind, x){
 }
 function cmoEditItemId(){ if(!_cmoEditId) return ''; const o = (data.moneyOut || []).find(r=> r.id === _cmoEditId); return o ? o.itemId : ''; }
 function cmoItems(kind){ return capRaw().filter(x=> capCatOf(x) === 'money' && (kind === 'bank' ? (x.isCert !== true || x.id === cmoEditItemId()) : true) && (kind === 'int' ? (capSubOf(x) === 'bank' && (bankMonthly(x) > 0 || (bankAnnualPay(x) && Number(x.rate) > 0) || (Array.isArray(x.chg) && x.chg.length > 0))) : capSubOf(x) === kind)); }
-function openCmOut(){ _cmoEditId = null; _cmoSub = 'home'; _cmoGrp = ''; try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'all'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); applyCmoOrder(); document.getElementById('cmOutOverlay').classList.add('open'); }
+function openCmOut(){ _cmoEditId = null; _cmoViaMode = false; _cmoSub = 'home'; _cmoGrp = ''; try{ document.getElementById('cmoSettle').value = ''; document.getElementById('cmoSettle2').value = ''; }catch(e){} document.getElementById('cmoDate').value = cmoToday(); _cmoKind = 'all'; _cmoDest = 'income'; _cmoZkYear = ''; document.getElementById('cmoAmt').value = ''; document.getElementById('cmoNote').value = ''; cmoRender(); applyCmoOrder(); document.getElementById('cmOutOverlay').classList.add('open'); }
 function closeCmOut(){ _cmoEditId = null; document.getElementById('cmOutOverlay').classList.remove('open'); }
 function cmoSetKind(k){ if(_cmoEditId){ showToast('النوع مينفعش يتغيّر وإنت بتعدّل — احذف الصرف واعمله من جديد', false); return; } _cmoKind = k; cmoRender(); }
-function cmoSetDest(d){ _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach(b=> b.classList.toggle('active', b.dataset.id === _cmoDest)); cmoGenRender(); }
+function cmoSetDest(d){ if(!_cmoViaKeep) _cmoViaMode = false; _cmoDest = d; if(d !== 'zakat') _cmoZkYear = ''; cmoZkRender(); [...document.querySelectorAll('#cmoDest button')].forEach(b=> b.classList.toggle('active', b.dataset.id === _cmoDest)); cmoGenRender(); }
 // ===== الدخل العام الشهري: يدخل الدخل العام الأول وبعدها يستقر في المصروف المنزلي أو في مجموعة من مجموعاته =====
 const CMO_SEP = '\u001f';
 function cmoDateYM(){ const v = (document.getElementById('cmoDate') || {}).value || cmoToday(); return {y: Number(v.slice(0, 4)), m: Number(v.slice(5, 7)) - 1}; }
@@ -10628,8 +10637,20 @@ function cmoDestLbl(r){
 }
 function cmoSetSub(k){ _cmoSub = k; cmoGenRender(); }
 function cmoGrpPick(v){ _cmoGrp = v || ''; }
+// 8506: اختيار بسيط (مباشر / عبر الدخل العام) لما الصرف من حساب بنكي للمصروف المنزلي
+function cmoViaRender(){
+  const r = document.getElementById('cmoViaRow'); if(!r) return;
+  const sv = (document.getElementById('cmoItem') || {}).value, en = (sv && sv !== '__all__') ? cmoSelEntry() : null;
+  const bank = en ? en.k === 'bank' : _cmoKind === 'bank', via = _cmoDest === 'gen' && _cmoViaMode;
+  r.style.display = (_cmoDest === 'income' || via) ? 'block' : 'none';
+  if(via) [...document.querySelectorAll('#cmoDest button')].forEach(b=> b.classList.toggle('active', b.dataset.id === 'income'));
+  [...r.querySelectorAll('button')].forEach(b=> b.classList.toggle('active', (b.dataset.via === '1') === via));
+}
+var _cmoViaMode = false, _cmoViaKeep = false;
+function cmoViaSet(v){ _cmoViaKeep = true; _cmoViaMode = !!v; try{ if(v){ _cmoSub = 'home'; cmoSetDest('gen'); } else cmoSetDest('income'); } finally { _cmoViaKeep = false; } }
 function cmoGenRender(){
   const row = document.getElementById('cmoGenRow'); if(!row) return;
+  try{ cmoViaRender(); }catch(e){}
   row.style.display = _cmoDest === 'gen' ? '' : 'none';
   if(_cmoDest !== 'gen') return;
   { const ix = ['gi','home','grp'].indexOf(_cmoSub); [...document.querySelectorAll('#cmoSub button')].forEach((b,i)=>{ b.classList.toggle('active', i === ix); b.classList.toggle('chain', i < ix); }); }
