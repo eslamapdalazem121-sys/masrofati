@@ -149,7 +149,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>أموالي AtoZ</title>
 <meta name="theme-color" content="#0a1f2e">
-<meta name="app-version" content="2026-11-28.8506">
+<meta name="app-version" content="2026-11-28.8507">
 <script>
 /* 8393: توقيت العمليات — كل id بيتعمل بـ uid() أوله وقت الإنشاء بالـ base36، فنقدر نطلّع وقت أي عملية (حتى القديمة) من غير ما نغيّر بياناتك */
 function entryTs(x){
@@ -10651,7 +10651,7 @@ function cmoViaSet(v){ _cmoViaKeep = true; _cmoViaMode = !!v; try{ if(v){ _cmoSu
 function cmoGenRender(){
   const row = document.getElementById('cmoGenRow'); if(!row) return;
   try{ cmoViaRender(); }catch(e){}
-  row.style.display = _cmoDest === 'gen' ? '' : 'none';
+  row.style.display = (_cmoDest === 'gen' && !_cmoViaMode) ? '' : 'none';   /* 8506: «عبر المنصرف من الدخل العام» من غير لوحة السهم/الدخل العام */
   if(_cmoDest !== 'gen') return;
   { const ix = ['gi','home','grp'].indexOf(_cmoSub); [...document.querySelectorAll('#cmoSub button')].forEach((b,i)=>{ b.classList.toggle('active', i === ix); b.classList.toggle('chain', i < ix); }); }
   const sel = document.getElementById('cmoGrp'), h = document.getElementById('cmoGenHint'), d = cmoDateYM(), mn = MONTHS[d.m];
@@ -10781,7 +10781,7 @@ function cmoApply(x, amt, note, dateStr, keepId, stlArg, stgArg){
   if(gen && rec.gi){ stl = amt; rec.stl = amt; if(_cmoSub === 'grp'){ stg = stgOf(amt); rec.stg = stg; } }   // فوايد غير متضافة/معاش: المبلغ أصلًا في الدخل العام فبيتصرف كله للوجهة
   if(gen && !rec.gi){   // مال من النقدي/البنك/الفوايد المتضافة: يدخل الدخل العام الشهري كمصدر، وبعدها كله أو جزء منه يستقر في الوجهة المختارة
     const gr = giRecAt(t.y, t.m), nm = x.name + (note ? ' · ' + note : '');
-    gr.src.push({id: id + 's', name: nm, amount: amt, counted: true, date: opsMs(date)});
+    if(_cmoViaMode) rec.via = true; else gr.src.push({id: id + 's', name: nm, amount: amt, counted: true, date: opsMs(date)});   /* 8506: «عبر المنصرف من الدخل العام» = منصرف بس من غير دخل داخل → عجز في المتبقي */
     if(stl > 0) gr.out.push({id: id, dest: effD, amount: stl, note: nm, counted: true, date: date});
     rec.gs = true;
   }
@@ -10815,7 +10815,7 @@ function cmoUndo(rec){   // يرجّع أثر الصرف كله (الرصيد + 
 function cmOutEdit(id){
   const rec = (data.moneyOut || []).find(r=> r.id === id); if(!rec) return;
   if(capIsPast() && rec.zkY === undefined){ showToast('سنة ' + toArabicDigits(currentYear) + ' للرجوع فقط 🔒 — التعديل من السنة الحالية', false); return; }
-  _cmoEditId = id; _cmoKind = rec.kind; _cmoDest = rec.dest; _cmoSub = rec.sub || 'home'; _cmoGrp = rec.grp || ''; _cmoZkYear = rec.zkY ? String(rec.zkY) : '';
+  _cmoEditId = id; _cmoKind = rec.kind; _cmoDest = rec.dest; _cmoSub = rec.sub || 'home'; _cmoViaMode = !!rec.via; _cmoGrp = rec.grp || ''; _cmoZkYear = rec.zkY ? String(rec.zkY) : '';
   cmoRender();
   const sel = document.getElementById('cmoItem'); if([...sel.options].some(o=> o.value === rec.itemId)) sel.value = rec.itemId; cmoAvail(); cmoTotals();
   document.getElementById('cmoAmt').value = rec.amount; document.getElementById('cmoNote').value = rec.note || ''; document.getElementById('cmoDate').value = rec.date || cmoToday(); cmoGenRender(); { const sv = document.getElementById('cmoSettle'); if(sv) sv.value = (rec.stl > 0 && rec.stl < rec.amount) ? rec.stl : ''; const sg = document.getElementById('cmoSettle2'); if(sg) sg.value = (rec.stg > 0 && rec.stg < rec.stl) ? rec.stg : ''; }
